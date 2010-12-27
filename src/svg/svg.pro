@@ -1,3 +1,5 @@
+load(qt_module)
+
 TARGET     = QtSvg
 QPRO_PWD   = $$PWD
 QT         = core gui
@@ -8,8 +10,7 @@ solaris-cc*:QMAKE_CXXFLAGS_RELEASE -= -O2
 
 unix|win32-g++*:QMAKE_PKGCONFIG_REQUIRES = QtCore QtGui
 
-include(../qbase.pri)
-
+include($$QT_SOURCE_TREE/src/qbase.pri)
 
 HEADERS += \
 	qsvggraphics_p.h        \
@@ -38,8 +39,8 @@ SOURCES += \
         qgraphicssvgitem.cpp    \
         qsvggenerator.cpp
 
-INCLUDEPATH += ../3rdparty/harfbuzz/src
+INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/harfbuzz/src
 
 symbian:TARGET.UID3=0x2001B2E2
 
-include(../3rdparty/zlib_dependency.pri)
+include($$QT_SOURCE_TREE/src/3rdparty/zlib_dependency.pri)

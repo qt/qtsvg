@@ -1,12 +1,14 @@
+load(qt_module)
+
 TARGET  = qsvgicon
-include(../../qpluginbase.pri)
+include($$QT_SOURCE_TREE/src/plugins/qpluginbase.pri)
 
 HEADERS += qsvgiconengine.h
 SOURCES += main.cpp \
            qsvgiconengine.cpp
 QT += xml svg
 
-QTDIR_build:DESTDIR  = $$QT_BUILD_TREE/plugins/iconengines
+DESTDIR  = $$QT_BUILD_TREE/plugins/iconengines
 target.path += $$[QT_INSTALL_PLUGINS]/iconengines
 INSTALLS += target
 

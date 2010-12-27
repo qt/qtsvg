@@ -1,12 +1,14 @@
+load(qt_module)
+
 TARGET  = qsvg
-include(../../qpluginbase.pri)
+include($$QT_SOURCE_TREE/src/plugins/qpluginbase.pri)
 
 HEADERS += qsvgiohandler.h
 SOURCES += main.cpp \
            qsvgiohandler.cpp
 QT += xml svg
 
-QTDIR_build:DESTDIR = $$QT_BUILD_TREE/plugins/imageformats
+DESTDIR = $$QT_BUILD_TREE/plugins/imageformats
 target.path += $$[QT_INSTALL_PLUGINS]/imageformats
 INSTALLS += target
 
