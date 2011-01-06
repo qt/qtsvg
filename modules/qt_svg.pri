@@ -4,6 +4,7 @@ QT_SVG_MINOR_VERSION = $$QT_MINOR_VERSION
 QT_SVG_PATCH_VERSION = $$QT_PATCH_VERSION
 
 QT.svg.name = QtSvg
+QT.svg.bins = $$QT_MODULE_BIN_BASE
 QT.svg.includes = $$QT_MODULE_INCLUDE_BASE $$QT_MODULE_INCLUDE_BASE/QtSvg
 QT.svg.private_includes = $$QT_MODULE_INCLUDE_BASE/QtSvg/private
 QT.svg.sources = $$QT_MODULE_BASE/src/svg
