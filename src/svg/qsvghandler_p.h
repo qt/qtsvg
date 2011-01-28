@@ -61,7 +61,7 @@
 #include "QtCore/qstack.h"
 #include "qsvgstyle_p.h"
 #include "private/qcssparser_p.h"
-#include "private/qsvggraphics_p.h"
+#include "qsvggraphics_p.h"
 
 QT_BEGIN_NAMESPACE
 
