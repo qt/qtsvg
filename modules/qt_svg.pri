@@ -9,6 +9,7 @@ QT.svg.includes = $$QT_MODULE_INCLUDE_BASE $$QT_MODULE_INCLUDE_BASE/QtSvg
 QT.svg.private_includes = $$QT_MODULE_INCLUDE_BASE/QtSvg/private
 QT.svg.sources = $$QT_MODULE_BASE/src/svg
 QT.svg.libs = $$QT_MODULE_LIB_BASE
+QT.svg.plugins = $$QT_MODULE_PLUGIN_BASE
 QT.svg.imports = $$QT_MODULE_IMPORT_BASE
 QT.svg.depends = core gui
 QT.svg.DEFINES = QT_SVG_LIB
