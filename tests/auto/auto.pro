@@ -4,3 +4,4 @@ SUBDIRS=\
            qsvggenerator \
            qsvgrenderer \
 
+!cross_compile:                             SUBDIRS += host.pro
