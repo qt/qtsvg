@@ -3,6 +3,10 @@ load(qt_module)
 TARGET     = QtSvg
 QPRO_PWD   = $$PWD
 QT         = core gui
+
+CONFIG += module
+MODULE_PRI = ../../modules/qt_svg.pri
+
 DEFINES   += QT_BUILD_SVG_LIB
 DEFINES   += QT_NO_USING_NAMESPACE
 win32-msvc*|win32-icc:QMAKE_LFLAGS += /BASE:0x66000000
