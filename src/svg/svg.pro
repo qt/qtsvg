@@ -2,7 +2,7 @@ load(qt_module)
 
 TARGET     = QtSvg
 QPRO_PWD   = $$PWD
-QT         = core gui
+QT         = core-private gui-private
 
 CONFIG += module
 MODULE_PRI = ../../modules/qt_svg.pri
