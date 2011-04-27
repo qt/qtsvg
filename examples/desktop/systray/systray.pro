@@ -10,7 +10,7 @@ sources.files = $$SOURCES $$HEADERS $$RESOURCES $$FORMS systray.pro resources im
 sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/desktop/systray
 INSTALLS += target sources
 
-symbian: include($$QT_SOURCE_TREE/examples/symbianpkgrules.pri)
+symbian: CONFIG += qt_example
 
 wince* {
 	CONFIG(debug, release|debug) {

@@ -58,7 +58,7 @@ wince*{
 
 symbian {
     load(data_caging_paths)
-    include($$QT_SOURCE_TREE/demos/symbianpkgrules.pri)
+    CONFIG += qt_demo
     RSS_RULES = # Clear RSS_RULES, otherwise fluidlauncher will get put into QtDemos folder
 
     TARGET.UID3 = 0xA000A641

@@ -16,7 +16,7 @@ sources.path = $$[QT_INSTALL_DEMOS]/qtsvg/embedded/desktopservices
 
 symbian {
     TARGET.UID3 = 0xA000C611
-    include($$QT_SOURCE_TREE/demos/symbianpkgrules.pri)
+    CONFIG += qt_demo
     ICON = ./resources/heart.svg
     music.path = /data/sounds/
     image.path = /data/images/

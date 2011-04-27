@@ -20,5 +20,5 @@ sources.files = $$SOURCES $$HEADERS $$RESOURCES *.pro *.png *.svg
 sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/opengl/framebufferobject
 INSTALLS += target sources
 
-symbian: include($$QT_SOURCE_TREE/examples/symbianpkgrules.pri)
+symbian: CONFIG += qt_example
 
