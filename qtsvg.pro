@@ -14,7 +14,8 @@ module_qtsvg_demos.depends = module_qtsvg_src
 module_qtsvg_tests.subdir = tests
 module_qtsvg_tests.target = module-qtsvg-tests
 module_qtsvg_tests.depends = module_qtsvg_src
-module_qtsvg_tests.CONFIG = no_default_target no_default_install
+module_qtsvg_tests.CONFIG = no_default_install
+!contains(QT_BUILD_PARTS,tests):module_qtsvg_tests.CONFIG += no_default_target
 
 SUBDIRS += module_qtsvg_src \
            module_qtsvg_examples \
