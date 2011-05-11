@@ -16,6 +16,8 @@ unix|win32-g++*:QMAKE_PKGCONFIG_REQUIRES = QtCore QtGui
 
 include($$QT_SOURCE_TREE/src/qbase.pri)
 
+HEADERS += qtsvgversion.h
+
 HEADERS += \
 	qsvggraphics_p.h        \
 	qsvghandler_p.h         \
