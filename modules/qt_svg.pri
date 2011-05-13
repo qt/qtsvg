@@ -1,6 +1,6 @@
-QT.svg.VERSION = 4.8.0
-QT.svg.MAJOR_VERSION = 4
-QT.svg.MINOR_VERSION = 8
+QT.svg.VERSION = 5.0.0
+QT.svg.MAJOR_VERSION = 5
+QT.svg.MINOR_VERSION = 0
 QT.svg.PATCH_VERSION = 0
 
 QT.svg.name = QtSvg
