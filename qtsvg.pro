@@ -1,7 +1,5 @@
 TEMPLATE = subdirs
 
-message($$QT_BUILD_PARTS)
-
 module_qtsvg_src.subdir = src
 module_qtsvg_src.target = module-qtsvg-src
 
