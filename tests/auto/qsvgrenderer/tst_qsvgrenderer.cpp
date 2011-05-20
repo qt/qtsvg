@@ -426,7 +426,7 @@ static bool diffIsSmallEnough(double diff, double norm)
     return diff <= 1e-12 * norm;
 }
 
-static bool diffIsSmallEnough(float diff, float norm)
+static inline bool diffIsSmallEnough(float diff, float norm)
 {
     return diff <= 1e-5 * norm;
 }
@@ -625,7 +625,7 @@ void tst_QSvgRenderer::gradientRefs()
             "</defs>"
         "</svg>"
     };
-    for (int i = 0 ; i < sizeof(svgs) / sizeof(svgs[0]) ; ++i)
+    for (size_t i = 0 ; i < sizeof(svgs) / sizeof(svgs[0]) ; ++i)
     {
         QByteArray data = svgs[i];
         QSvgRenderer renderer(data);
