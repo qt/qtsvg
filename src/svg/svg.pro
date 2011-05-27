@@ -49,4 +49,10 @@ INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/harfbuzz/src
 
 symbian:TARGET.UID3=0x2001B2E2
 
-include($$QT_SOURCE_TREE/src/3rdparty/zlib_dependency.pri)
+contains(QT_CONFIG, system-zlib) {
+    symbian:                 LIBS_PRIVATE += -llibz
+    else:if(unix|win32-g++*):LIBS_PRIVATE += -lz
+    else:                    LIBS += zdll.lib
+} else {
+    error("Using non system zlib is currently unsupported")
+}
