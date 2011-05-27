@@ -8,7 +8,7 @@ SOURCES += main.cpp \
            qsvgiohandler.cpp
 QT += xml svg
 
-DESTDIR = $$QT_BUILD_TREE/plugins/imageformats
+DESTDIR = $$QT.svg.plugins/imageformats
 target.path += $$[QT_INSTALL_PLUGINS]/imageformats
 INSTALLS += target
 
