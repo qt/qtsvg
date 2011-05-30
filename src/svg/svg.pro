@@ -14,7 +14,7 @@ solaris-cc*:QMAKE_CXXFLAGS_RELEASE -= -O2
 
 unix|win32-g++*:QMAKE_PKGCONFIG_REQUIRES = QtCore QtGui
 
-include($$QT_SOURCE_TREE/src/qbase.pri)
+load(qt_module_config)
 
 HEADERS += qtsvgversion.h
 

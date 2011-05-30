@@ -1,7 +1,7 @@
 load(qt_module)
 
 TARGET  = qsvg
-include($$QT_SOURCE_TREE/src/plugins/qpluginbase.pri)
+load(qt_plugin)
 
 HEADERS += qsvgiohandler.h
 SOURCES += main.cpp \

@@ -1,7 +1,7 @@
 load(qt_module)
 
 TARGET  = qsvgicon
-include($$QT_SOURCE_TREE/src/plugins/qpluginbase.pri)
+load(qt_plugin)
 
 HEADERS += qsvgiconengine.h
 SOURCES += main.cpp \
