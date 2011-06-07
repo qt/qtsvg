@@ -15,9 +15,9 @@ INSTALLS += target sources
 
 symbian {
     TARGET.UID3 = 0xA000C614
-    include($$QT_SOURCE_TREE/examples/symbianpkgrules.pri)
+    CONFIG += qt_example
 }
-maemo5: include($$QT_SOURCE_TREE/examples/maemo5pkgrules.pri)
+maemo5: CONFIG += qt_example
 symbian: warning(This example does not work on Symbian platform)
 maemo5: warning(This example does not work on Maemo platform)
 simulator: warning(This example does not work on Simulator platform)
