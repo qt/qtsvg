@@ -54,5 +54,5 @@ contains(QT_CONFIG, system-zlib) {
     else:if(unix|win32-g++*):LIBS_PRIVATE += -lz
     else:                    LIBS += zdll.lib
 } else {
-    error("Using non system zlib is currently unsupported")
+    include(../3rdparty/zlib.pri)
 }
