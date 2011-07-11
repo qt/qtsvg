@@ -26,8 +26,8 @@
 ****************************************************************************/
 
 /*!
-    \example demos/embedded/weatherinfo
-    \title Weather Info Demonstration
+    \example embedded/desktopservices
+    \title Embedded Desktop Services
 
-    \image weatherinfo-demo.png
+    \image embeddeddesktopservices-demo.png
 */

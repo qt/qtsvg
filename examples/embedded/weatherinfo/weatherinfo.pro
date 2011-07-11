@@ -10,7 +10,7 @@ symbian {
     TARGET.CAPABILITY = NetworkServices
 }
 
-target.path = $$[QT_INSTALL_DEMOS]/qtsvg/embedded/weatherinfo
+target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/embedded/weatherinfo
 sources.files = $$SOURCES $$HEADERS $$RESOURCES $$FORMS *.pro
-sources.path = $$[QT_INSTALL_DEMOS]/qtsvg/embedded/weatherinfo
+sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/embedded/weatherinfo
 INSTALLS += target sources

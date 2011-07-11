@@ -26,8 +26,8 @@
 ****************************************************************************/
 
 /*!
-    \example demos/embedded/embeddedsvgviewer
-    \title Embedded SVG Viewer Demonstration
+    \example embedded/weatherinfo
+    \title Weather Info
 
-    \image embeddedsvgviewer-demo.png
+    \image weatherinfo-demo.png
 */

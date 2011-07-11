@@ -26,8 +26,8 @@
 ****************************************************************************/
 
 /*!
-    \example demos/embedded/desktopservices
-    \title Embedded Desktop Services Demonstration
+    \example embedded/fluidlauncher
+    \title Fluid Launcher
 
-    \image embeddeddesktopservices-demo.png
+    \image fluidlauncher-demo.png
 */

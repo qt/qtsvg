@@ -26,8 +26,8 @@
 ****************************************************************************/
 
 /*!
-    \example demos/embedded/fluidlauncher
-    \title Fluid Launcher Demonstration
+    \example embedded/embeddedsvgviewer
+    \title Embedded SVG Viewer
 
-    \image fluidlauncher-demo.png
+    \image embeddedsvgviewer-demo.png
 */

@@ -10,9 +10,9 @@ RESOURCES += desktopservices.qrc
 music.files = data/*.mp3 data/*.wav
 image.files = data/*.png
 
-target.path = $$[QT_INSTALL_DEMOS]/qtsvg/embedded/desktopservices
+target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/embedded/desktopservices
 sources.files = $$SOURCES $$HEADERS $$RESOURCES *.pro
-sources.path = $$[QT_INSTALL_DEMOS]/qtsvg/embedded/desktopservices
+sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/embedded/desktopservices
 
 symbian {
     TARGET.UID3 = 0xA000C611
