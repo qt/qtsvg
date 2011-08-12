@@ -53,7 +53,7 @@
 // We mean it.
 //
 
-#include "QtXml/qxmlstream.h"
+#include "QtCore/qxmlstream.h"
 
 #ifndef QT_NO_SVG
 
