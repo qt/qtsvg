@@ -42,7 +42,7 @@
 #ifndef FLUID_LAUNCHER_H
 #define FLUID_LAUNCHER_H
 
-#include <QtGui>
+#include <QtWidgets>
 #include <QTimer>
 #include <QStringRef>
 

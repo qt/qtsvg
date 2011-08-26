@@ -42,7 +42,7 @@
 #ifndef QSVGWIDGET_H
 #define QSVGWIDGET_H
 
-#include <QtGui/qwidget.h>
+#include <QtWidgets/qwidget.h>
 
 #ifndef QT_NO_SVGWIDGET
 

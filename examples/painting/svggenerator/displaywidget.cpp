@@ -38,7 +38,7 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+#include <QtWidgets>
 #include "displaywidget.h"
 
 DisplayWidget::DisplayWidget(QWidget *parent)

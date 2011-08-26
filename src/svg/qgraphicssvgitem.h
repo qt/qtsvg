@@ -41,7 +41,7 @@
 #ifndef QGRAPHICSSVGITEM_H
 #define QGRAPHICSSVGITEM_H
 
-#include <QtGui/qgraphicsitem.h>
+#include <QtWidgets/qgraphicsitem.h>
 
 #ifndef QT_NO_GRAPHICSSVGITEM
 
