@@ -19,3 +19,4 @@ maemo5: CONFIG += qt_example
 filesToDeploy.files = files/*.svg
 filesToDeploy.path = files
 DEPLOYMENT += filesToDeploy
+QT+=widgets

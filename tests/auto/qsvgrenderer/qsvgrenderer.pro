@@ -21,3 +21,4 @@ wince*|symbian {
 !symbian: {
     DEFINES += SRCDIR=\\\"$$PWD/\\\"
 }
+QT+=widgets

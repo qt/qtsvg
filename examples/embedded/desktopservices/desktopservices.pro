@@ -30,3 +30,4 @@ wince*{
 }
 
 INSTALLS += target sources
+QT+=widgets

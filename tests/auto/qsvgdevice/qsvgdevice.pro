@@ -4,3 +4,4 @@ QT += xml
 
 
 
+QT+=widgets
