@@ -38,7 +38,7 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+#include <QtWidgets>
 #include <QtSvg>
 #include "mimedata.h"
 #include "sourcewidget.h"

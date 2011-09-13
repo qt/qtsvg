@@ -6,7 +6,7 @@ load(qt_plugin)
 HEADERS += qsvgiconengine.h
 SOURCES += main.cpp \
            qsvgiconengine.cpp
-QT += xml svg
+QT += xml svg widgets
 
 DESTDIR  = $$QT.svg.plugins/iconengines
 target.path += $$[QT_INSTALL_PLUGINS]/iconengines

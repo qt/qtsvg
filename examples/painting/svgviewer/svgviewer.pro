@@ -31,3 +31,4 @@ symbian: {
 }
 maemo5: CONFIG += qt_example
 
+QT+=widgets

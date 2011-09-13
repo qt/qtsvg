@@ -40,7 +40,7 @@
 
 #include "mainwindow.h"
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "svgview.h"
 

@@ -261,3 +261,4 @@ symbian {
 
     TARGET.EPOCHEAPSIZE = 100000 20000000
 }
+QT+=widgets
