@@ -1062,7 +1062,7 @@ void QSvgPaintEngine::drawTextItem(const QPointF &pt, const QTextItem &textItem)
                   "x=\"" << pt.x() << "\" y=\"" << pt.y() << "\" ";
     qfontToSvg(textItem.font());
     *d->stream << " >"
-               << Qt::escape(s)
+               << s.toHtmlEscaped()
                << "</text>"
                << endl;
 }
