@@ -1,5 +1,6 @@
-load(qttest_p4)
+TARGET = tst_headersclean
+CONFIG += testcase
 SOURCES  += tst_headersclean.cpp
-QT = core
+QT = core testlib
 
 contains(QT_CONFIG,svg): QT += svg

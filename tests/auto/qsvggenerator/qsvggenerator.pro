@@ -1,9 +1,6 @@
-############################################################
-# Project file for autotest for file qsvggenerator.h
-############################################################
-
-load(qttest_p4)
-QT += svg xml
+TARGET = tst_qsvggenerator
+CONFIG += testcase
+QT += svg xml testlib widgets
 
 SOURCES += tst_qsvggenerator.cpp
 
@@ -18,4 +15,3 @@ wince* {
 } else:!symbian {
     DEFINES += SRCDIR=\\\"$$PWD/\\\"
 }
-QT+=widgets

@@ -1,7 +1,4 @@
-load(qttest_p4)
+TARGET = tst_qsvgdevice
+CONFIG += testcase
 SOURCES  += tst_qsvgdevice.cpp
-QT += xml
-
-
-
-QT+=widgets
+QT += xml testlib widgets

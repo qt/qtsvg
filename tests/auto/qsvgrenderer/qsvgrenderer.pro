@@ -1,9 +1,6 @@
-############################################################
-# Project file for autotest for file qsvgrenderer.h
-############################################################
-
-load(qttest_p4)
-QT += svg
+TARGET = tst_qsvgrenderer
+CONFIG += testcase
+QT += svg testlib widgets
 
 SOURCES += tst_qsvgrenderer.cpp
 RESOURCES += resources.qrc
@@ -21,4 +18,3 @@ wince*|symbian {
 !symbian: {
     DEFINES += SRCDIR=\\\"$$PWD/\\\"
 }
-QT+=widgets
