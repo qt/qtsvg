@@ -378,12 +378,12 @@ void tst_QSvgDevice::boundingRect()
 
 void tst_QSvgDevice::play()
 {
-    QSKIP("This test needs some redoing, this is just a temp measure until I work it out", SkipAll);
+    QSKIP("This test needs some redoing, this is just a temp measure until I work it out");
 }
 
 void tst_QSvgDevice::boundingRect()
 {
-    QSKIP("This test needs some redoing, this is just a temp measure until I work it out", SkipAll);
+    QSKIP("This test needs some redoing, this is just a temp measure until I work it out");
 }
 
 #endif
