@@ -175,8 +175,10 @@ private:
 
     void request(const QString &location) {
         QUrl url("http://www.google.com/ig/api");
-        url.addEncodedQueryItem("hl", "en");
-        url.addEncodedQueryItem("weather", QUrl::toPercentEncoding(location));
+        QUrlQuery query;
+        query.addQueryItem("hl", "en");
+        query.addQueryItem("weather", location);
+        url.setQuery(query);
 
         m_manager.get(QNetworkRequest(url));
 
