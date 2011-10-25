@@ -66,7 +66,7 @@ ContentTab::~ContentTab()
 }
 
 // NEW PUBLIC METHODS
-void ContentTab::init(const QDesktopServices::StandardLocation &location,
+void ContentTab::init(const QStandardPaths::StandardLocation &location,
                       const QString &filter,
                       const QString &icon)
 {
@@ -83,9 +83,9 @@ void ContentTab::init(const QDesktopServices::StandardLocation &location,
 }
 
 // NEW PROTECTED METHODS
-void ContentTab::setContentDir(const QDesktopServices::StandardLocation &location)
+void ContentTab::setContentDir(const QStandardPaths::StandardLocation &location)
 {
-    m_ContentDir.setPath(QDesktopServices::storageLocation(location));
+    m_ContentDir.setPath(QStandardPaths::writableLocation(location));
 }
 
 void ContentTab::setIcon(const QString &icon)

@@ -49,6 +49,7 @@
 #include <QFileInfo>
 #include <QListWidget>
 #include <QDesktopServices>
+#include <QStandardPaths>
 
 // INTERNAL INCLUDES
 
@@ -73,12 +74,12 @@ public:         // Constructors & Destructors
     virtual ~ContentTab();
 
 public:         // New Methods
-    virtual void init(const QDesktopServices::StandardLocation &location,
+    virtual void init(const QStandardPaths::StandardLocation &location,
                       const QString &filter,
                       const QString &icon);
 
 protected:      // New Methods
-    virtual void setContentDir(const QDesktopServices::StandardLocation &location);
+    virtual void setContentDir(const QStandardPaths::StandardLocation &location);
     virtual void setIcon(const QString &icon);
     virtual void populateListWidget();
     virtual QString itemName(const QFileInfo &item);

@@ -42,7 +42,7 @@
 // EXTERNAL INCLUDES
 #include <QTabWidget>
 #include <QVBoxLayout>
-#include <QDesktopServices>
+#include <QStandardPaths>
 
 // INTERNAL INCLUDES
 #include "linktab.h"
@@ -59,14 +59,14 @@ DesktopWidget::DesktopWidget(QWidget *parent) : QWidget(parent)
 
     // Images
     ContentTab* imageTab = new ContentTab(tabWidget);
-    imageTab->init(QDesktopServices::PicturesLocation,
+    imageTab->init(QStandardPaths::PicturesLocation,
                    "*.png;*.jpg;*.jpeg;*.bmp;*.gif",
                    ":/resources/photo.png");
     tabWidget->addTab(imageTab, tr("Images"));
 
     // Music
     ContentTab* musicTab = new ContentTab(tabWidget);
-    musicTab->init(QDesktopServices::MusicLocation,
+    musicTab->init(QStandardPaths::MusicLocation,
                    "*.wav;*.mp3;*.mp4",
                    ":/resources/music.png");
     tabWidget->addTab(musicTab, tr("Music"));
@@ -74,7 +74,7 @@ DesktopWidget::DesktopWidget(QWidget *parent) : QWidget(parent)
     // Links
     LinkTab* othersTab = new LinkTab(tabWidget);;
     // Given icon file will be overridden by LinkTab
-    othersTab->init(QDesktopServices::PicturesLocation, "", "");
+    othersTab->init(QStandardPaths::PicturesLocation, "", "");
     tabWidget->addTab(othersTab, tr("Links"));
 
     // Layout
