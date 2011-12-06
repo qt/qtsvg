@@ -54,11 +54,6 @@
 #include <qdrawutil.h>
 #include <qpaintdevice.h>
 
-
-
-//TESTED_CLASS=
-//TESTED_FILES= xml/qsvgdevice.cpp
-
 class tst_QSvgDevice : public QObject
 {
     Q_OBJECT

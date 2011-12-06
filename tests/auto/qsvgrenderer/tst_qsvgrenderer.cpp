@@ -55,9 +55,6 @@
 #define SRCDIR
 #endif
 
-//TESTED_CLASS=
-//TESTED_FILES=
-
 class tst_QSvgRenderer : public QObject
 {
 Q_OBJECT

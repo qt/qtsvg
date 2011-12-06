@@ -44,8 +44,6 @@
 #include <QFile>
 #include <QSvgRenderer>
 
-//TESTED_FILES=
-
 class tst_QSvgRenderer : public QObject
 {
     Q_OBJECT

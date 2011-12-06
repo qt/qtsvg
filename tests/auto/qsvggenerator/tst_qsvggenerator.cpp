@@ -52,9 +52,6 @@
 #include <qsvggenerator.h>
 #include <qsvgrenderer.h>
 
-//TESTED_CLASS=
-//TESTED_FILES=
-
 #ifdef Q_OS_SYMBIAN
 #define SRCDIR ""
 #endif
