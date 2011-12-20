@@ -69,7 +69,7 @@ QUrl LinkTab::itemUrl(QListWidgetItem *item)
     if (m_WebItem == item) {
         return QUrl(tr("http://qt.nokia.com"));
     } else if (m_MailToItem == item) {
-        return QUrl(tr("mailto:qts60-feedback@trolltech.com?subject=QtS60 feedback&body=Hello"));
+        return QUrl(tr("mailto:qt-info@nokia.com?subject=Qt feedback&body=Hello"));
     } else {
         // We should never endup here
         Q_ASSERT(false);
