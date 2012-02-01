@@ -98,7 +98,7 @@ QSvgIconEngine::QSvgIconEngine()
 }
 
 QSvgIconEngine::QSvgIconEngine(const QSvgIconEngine &other)
-    : QIconEngineV2(other), d(new QSvgIconEnginePrivate)
+    : QIconEngine(other), d(new QSvgIconEnginePrivate)
 {
     d->svgFiles = other.d->svgFiles;
     if (other.d->svgBuffers)
@@ -240,7 +240,7 @@ QString QSvgIconEngine::key() const
     return QLatin1String("svg");
 }
 
-QIconEngineV2 *QSvgIconEngine::clone() const
+QIconEngine *QSvgIconEngine::clone() const
 {
     return new QSvgIconEngine(*this);
 }

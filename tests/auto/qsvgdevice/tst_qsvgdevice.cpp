@@ -75,6 +75,7 @@ tst_QSvgDevice::tst_QSvgDevice()
 
 void tst_QSvgDevice::play_data()
 {
+    QTest::addColumn<QString>("tag name");
     // we only use the tag name
     QTest::newRow( "lines" );
     QTest::newRow( "font" );

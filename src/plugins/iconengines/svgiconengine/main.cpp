@@ -52,11 +52,11 @@
 
 QT_BEGIN_NAMESPACE
 
-class QSvgIconPlugin : public QIconEnginePluginV2
+class QSvgIconPlugin : public QIconEnginePlugin
 {
 public:
     QStringList keys() const;
-    QIconEngineV2 *create(const QString &filename = QString());
+    QIconEngine *create(const QString &filename = QString());
 };
 
 QStringList QSvgIconPlugin::keys() const
@@ -68,7 +68,7 @@ QStringList QSvgIconPlugin::keys() const
     return keys;
 }
 
-QIconEngineV2 *QSvgIconPlugin::create(const QString &file)
+QIconEngine *QSvgIconPlugin::create(const QString &file)
 {
     QSvgIconEngine *engine = new QSvgIconEngine;
     if (!file.isNull())
