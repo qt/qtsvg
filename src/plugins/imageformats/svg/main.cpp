@@ -54,6 +54,9 @@ QT_BEGIN_NAMESPACE
 
 class QSvgPlugin : public QImageIOPlugin
 {
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "svg.json")
+
 public:
     QStringList keys() const;
     Capabilities capabilities(QIODevice *device, const QByteArray &format) const;
@@ -86,9 +89,8 @@ QImageIOHandler *QSvgPlugin::create(QIODevice *device, const QByteArray &format)
     return hand;
 }
 
-Q_EXPORT_STATIC_PLUGIN(QSvgPlugin)
-Q_EXPORT_PLUGIN2(qsvg, QSvgPlugin)
-
 QT_END_NAMESPACE
+
+#include "main.moc"
 
 #endif // !QT_NO_IMAGEFORMATPLUGIN

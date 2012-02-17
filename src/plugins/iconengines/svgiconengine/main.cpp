@@ -54,6 +54,9 @@ QT_BEGIN_NAMESPACE
 
 class QSvgIconPlugin : public QIconEnginePlugin
 {
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QIconEngineFactoryInterface" FILE "qsvgiconengine.json")
+
 public:
     QStringList keys() const;
     QIconEngine *create(const QString &filename = QString());
@@ -76,9 +79,8 @@ QIconEngine *QSvgIconPlugin::create(const QString &file)
     return engine;
 }
 
-Q_EXPORT_STATIC_PLUGIN(QSvgIconPlugin)
-Q_EXPORT_PLUGIN2(qsvgicon, QSvgIconPlugin)
-
 QT_END_NAMESPACE
+
+#include "main.moc"
 
 #endif // !QT_NO_IMAGEFORMATPLUGIN
