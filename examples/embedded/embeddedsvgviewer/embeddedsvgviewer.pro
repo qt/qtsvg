@@ -1,7 +1,6 @@
 TEMPLATE = app
-QT += svg
+QT += widgets svg
 
-# Input
 HEADERS += embeddedsvgviewer.h
 SOURCES += embeddedsvgviewer.cpp main.cpp
 RESOURCES += embeddedsvgviewer.qrc
@@ -19,4 +18,3 @@ symbian {
     TARGET.UID3 = 0xA000A640
     CONFIG += qt_demo
 }
-QT+=widgets

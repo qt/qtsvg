@@ -1,6 +1,4 @@
-TEMPLATE = app
-TARGET =
-INCLUDEPATH += .
+QT+=widgets
 
 HEADERS += desktopwidget.h contenttab.h linktab.h
 SOURCES += desktopwidget.cpp contenttab.cpp linktab.cpp main.cpp
@@ -30,4 +28,3 @@ wince*{
 }
 
 INSTALLS += target sources
-QT+=widgets

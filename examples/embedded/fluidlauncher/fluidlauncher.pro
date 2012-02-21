@@ -1,10 +1,7 @@
-TEMPLATE = app
-TARGET =
-DEPENDPATH += .
-INCLUDEPATH += .
+QT += widgets
+
 VERSION = $$QT_VERSION
 
-# Input
 HEADERS += \
            demoapplication.h \
            fluidlauncher.h \
@@ -261,4 +258,3 @@ symbian {
 
     TARGET.EPOCHEAPSIZE = 100000 20000000
 }
-QT+=widgets
