@@ -11,5 +11,5 @@ QT.svg.sources = $$QT_MODULE_BASE/src/svg
 QT.svg.libs = $$QT_MODULE_LIB_BASE
 QT.svg.plugins = $$QT_MODULE_PLUGIN_BASE
 QT.svg.imports = $$QT_MODULE_IMPORT_BASE
-QT.svg.depends = core gui
+QT.svg.depends = core gui widgets
 QT.svg.DEFINES = QT_SVG_LIB
