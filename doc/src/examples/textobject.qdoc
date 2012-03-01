@@ -51,19 +51,19 @@
     following steps:
 
     \list
-        \o Implement the text object.
-        \o Register the text object with the layout of the text
+        \li Implement the text object.
+        \li Register the text object with the layout of the text
            document.
-        \o Set the text object on a QTextCharFormat.
-        \o Insert a QChar::ObjectReplacementCharacter with that
+        \li Set the text object on a QTextCharFormat.
+        \li Insert a QChar::ObjectReplacementCharacter with that
            text char format into the document.
     \endlist
 
     The example consists of the following classes:
 
     \list
-        \o \c{SvgTextObject} implements the text object.
-        \o \c{Window} shows a QTextEdit into which SVG images can be
+        \li \c{SvgTextObject} implements the text object.
+        \li \c{Window} shows a QTextEdit into which SVG images can be
            inserted.
     \endlist
 

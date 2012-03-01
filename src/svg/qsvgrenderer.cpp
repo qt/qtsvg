@@ -86,13 +86,13 @@ QT_BEGIN_NAMESPACE
     functions and properties:
 
     \list
-    \o The animated() function indicates whether a drawing contains animation information.
+    \li The animated() function indicates whether a drawing contains animation information.
     \omit
-    \o The animationDuration() function provides the duration in milliseconds of the
+    \li The animationDuration() function provides the duration in milliseconds of the
        animation, without taking any looping into account.
-    \o The \l currentFrame property contains the current frame of the animation.
+    \li The \l currentFrame property contains the current frame of the animation.
     \endomit
-    \o The \l framesPerSecond property contains the rate at which the animation plays.
+    \li The \l framesPerSecond property contains the rate at which the animation plays.
     \endlist
 
     Finally, the QSvgRenderer class provides the repaintNeeded() signal which is emitted
