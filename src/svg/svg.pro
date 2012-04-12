@@ -1,22 +1,14 @@
-load(qt_module)
+load(qt_build_config)
 
 TARGET     = QtSvg
-QPRO_PWD   = $$PWD
 QT         = core-private gui-private
 !contains(QT_CONFIG, no-widgets): QT += widgets-private
 
-CONFIG += module
-
-DEFINES   += QT_BUILD_SVG_LIB
 DEFINES   += QT_NO_USING_NAMESPACE
 win32-msvc*|win32-icc:QMAKE_LFLAGS += /BASE:0x66000000
 solaris-cc*:QMAKE_CXXFLAGS_RELEASE -= -O2
 
-unix|win32-g++*:QMAKE_PKGCONFIG_REQUIRES = QtCore QtGui
-
 load(qt_module_config)
-
-HEADERS += qtsvgversion.h
 
 HEADERS += \
 	qsvggraphics_p.h        \
@@ -44,8 +36,6 @@ SOURCES += \
     qsvgwidget.cpp          \
     qgraphicssvgitem.cpp    \
     qsvggenerator.cpp
-
-INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/harfbuzz/src
 
 symbian:TARGET.UID3=0x2001B2E2
 
