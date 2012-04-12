@@ -3,10 +3,9 @@ load(qt_module)
 TARGET     = QtSvg
 QPRO_PWD   = $$PWD
 QT         = core-private gui-private
-!contains(QT_CONFIG, no-widgets): QT += widgets widgets-private
+!contains(QT_CONFIG, no-widgets): QT += widgets-private
 
 CONFIG += module
-MODULE_PRI = ../../modules/qt_svg.pri
 
 DEFINES   += QT_BUILD_SVG_LIB
 DEFINES   += QT_NO_USING_NAMESPACE
