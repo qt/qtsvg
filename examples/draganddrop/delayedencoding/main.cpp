@@ -45,11 +45,7 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     SourceWidget window;
-#ifdef Q_OS_SYMBIAN
-    window.showMaximized();
-#else
     window.show();
-#endif
     return app.exec();
 }
 

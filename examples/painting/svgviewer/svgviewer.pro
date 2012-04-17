@@ -22,13 +22,4 @@ wince*: {
      DEPLOYMENT += addFiles
 }
 
-symbian: {
-     TARGET.UID3 = 0xA000A64E
-     CONFIG += qt_example
-     addFiles.files = files\\*.svg
-     addFiles.path = .
-     DEPLOYMENT += addFiles
-}
-maemo5: CONFIG += qt_example
-
 QT+=widgets

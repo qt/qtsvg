@@ -89,9 +89,6 @@ public:
             QAction *action = new QAction(cities[i], this);
             connect(action, SIGNAL(triggered()), SLOT(chooseCity()));
             addAction(action);
-#if defined(Q_OS_SYMBIAN)
-            menuBar()->addAction(action);
-#endif
         }
         setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -492,12 +489,8 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     WeatherInfo w;
-#if defined(Q_OS_SYMBIAN)
-    w.showMaximized();
-#else
     w.resize(520, 288);
     w.show();
-#endif
 
     return app.exec();
 }

@@ -245,8 +245,7 @@ void Cloud::stateChanged(QNetworkSession::State state)
     else
         finalOpacity = 1.0;
 
-#if !defined(Q_WS_MAEMO_5) && !defined(Q_WS_MAEMO_6) && \
-    !defined(Q_OS_SYMBIAN) && !defined(Q_OS_WINCE)
+#if !defined(Q_OS_WINCE)
     QString tooltip;
 
     if (configuration.name().isEmpty())
