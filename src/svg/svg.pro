@@ -24,12 +24,12 @@ HEADERS += \
 	qsvgnode_p.h            \
 	qsvgstructure_p.h       \
 	qsvgstyle_p.h           \
-        qsvgfont_p.h            \
+    qsvgfont_p.h            \
 	qsvgtinydocument_p.h    \
 	qsvgrenderer.h          \
-        qsvgwidget.h            \
-        qgraphicssvgitem.h      \
-        qsvggenerator.h
+    qsvgwidget.h            \
+    qgraphicssvgitem.h      \
+    qsvggenerator.h
 
 
 SOURCES += \
@@ -38,12 +38,12 @@ SOURCES += \
 	qsvgnode.cpp            \
 	qsvgstructure.cpp       \  
 	qsvgstyle.cpp           \
-        qsvgfont.cpp            \
+    qsvgfont.cpp            \
 	qsvgtinydocument.cpp    \
 	qsvgrenderer.cpp        \
-        qsvgwidget.cpp          \
-        qgraphicssvgitem.cpp    \
-        qsvggenerator.cpp
+    qsvgwidget.cpp          \
+    qgraphicssvgitem.cpp    \
+    qsvggenerator.cpp
 
 INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/harfbuzz/src
 
