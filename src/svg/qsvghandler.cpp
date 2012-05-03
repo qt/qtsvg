@@ -2699,7 +2699,7 @@ static QSvgNode *createImageNode(QSvgNode *parent,
         if (idx != -1) {
             idx += 7;
             QString dataStr = filename.mid(idx);
-            QByteArray data = QByteArray::fromBase64(dataStr.toAscii());
+            QByteArray data = QByteArray::fromBase64(dataStr.toLatin1());
             image = QImage::fromData(data);
         } else {
             qDebug()<<"QSvgHandler::createImageNode: Unrecognized inline image format!";
