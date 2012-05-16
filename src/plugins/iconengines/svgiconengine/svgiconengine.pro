@@ -7,7 +7,7 @@ HEADERS += qsvgiconengine.h
 SOURCES += main.cpp \
            qsvgiconengine.cpp
 OTHER_FILES += qsvgiconengine.json
-QT += xml svg widgets
+QT += xml svg gui
 
 DESTDIR  = $$QT.svg.plugins/iconengines
 target.path += $$[QT_INSTALL_PLUGINS]/iconengines

@@ -42,7 +42,7 @@
 #ifndef QSVGICONENGINE_H
 #define QSVGICONENGINE_H
 
-#include <QtWidgets/qiconengine.h>
+#include <QtGui/qiconengine.h>
 #include <QtCore/qshareddata.h>
 
 #ifndef QT_NO_SVG
