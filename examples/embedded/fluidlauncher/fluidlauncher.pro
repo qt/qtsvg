@@ -30,15 +30,17 @@ wince*{
         BUILD_DIR = debug
     }
 
+    baseex = $$shadowed($$QT.qtbase.sources/../../examples)
+    svgex = $$shadowed($$QT.qtsvg.sources/../../examples)
     executables.files = \
-        $$QT_BUILD_TREE/qtsvg/examples/embedded/embeddedsvgviewer/$${BUILD_DIR}/embeddedsvgviewer.exe \
-        $$QT_BUILD_TREE/qtbase/examples/embedded/styleexample/$${BUILD_DIR}/styleexample.exe \
-        $$QT_BUILD_TREE/qtbase/examples/painting/deform/$${BUILD_DIR}/deform.exe \
-        $$QT_BUILD_TREE/qtbase/examples/painting/pathstroke/$${BUILD_DIR}/pathstroke.exe \
-        $$QT_BUILD_TREE/qtbase/examples/graphicsview/elasticnodes/$${BUILD_DIR}/elasticnodes.exe \
-        $$QT_BUILD_TREE/qtbase/examples/widgets/wiggly/$${BUILD_DIR}/wiggly.exe \
-        $$QT_BUILD_TREE/qtbase/examples/painting/concentriccircles/$${BUILD_DIR}/concentriccircles.exe \
-        $$QT_BUILD_TREE/qtbase/examples/draganddrop/$${BUILD_DIR}/fridgemagnets.exe
+        $$svgex/embedded/embeddedsvgviewer/$${BUILD_DIR}/embeddedsvgviewer.exe \
+        $$baseex/embedded/styleexample/$${BUILD_DIR}/styleexample.exe \
+        $$baseex/painting/deform/$${BUILD_DIR}/deform.exe \
+        $$baseex/painting/pathstroke/$${BUILD_DIR}/pathstroke.exe \
+        $$baseex/graphicsview/elasticnodes/$${BUILD_DIR}/elasticnodes.exe \
+        $$baseex/widgets/wiggly/$${BUILD_DIR}/wiggly.exe \
+        $$baseex/painting/concentriccircles/$${BUILD_DIR}/concentriccircles.exe \
+        $$baseex/draganddrop/$${BUILD_DIR}/fridgemagnets.exe
 
     executables.path = .
 
