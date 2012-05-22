@@ -41,7 +41,7 @@
 
 #include "qsvgwidget.h"
 
-#ifndef QT_NO_SVGWIDGET
+#ifndef QT_NO_WIDGETS
 
 #include "qsvgrenderer.h"
 
@@ -170,4 +170,4 @@ void QSvgWidget::load(const QByteArray &contents)
 
 QT_END_NAMESPACE
 
-#endif // QT_NO_SVGWIDGET
+#endif // QT_NO_WIDGETS

@@ -51,8 +51,6 @@
 #include "qsvgnode_p.h"
 #include "qsvgfont_p.h"
 
-#include "qapplication.h"
-#include "qwidget.h"
 #include "qpen.h"
 #include "qpainterpath.h"
 #include "qbrush.h"

@@ -41,9 +41,11 @@
 #ifndef QGRAPHICSSVGITEM_H
 #define QGRAPHICSSVGITEM_H
 
-#include <QtWidgets/qgraphicsitem.h>
+#include <QtCore/qglobal.h>
 
-#ifndef QT_NO_GRAPHICSSVGITEM
+#ifndef QT_NO_WIDGETS
+
+#include <QtWidgets/qgraphicsitem.h>
 
 QT_BEGIN_HEADER
 
@@ -96,5 +98,6 @@ QT_END_NAMESPACE
 
 QT_END_HEADER
 
-#endif // QT_NO_GRAPHICSSVGITEM
+#endif // QT_NO_WIDGETS
+
 #endif // QGRAPHICSSVGITEM_H

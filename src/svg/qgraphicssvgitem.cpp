@@ -40,7 +40,7 @@
 ****************************************************************************/
 #include "qgraphicssvgitem.h"
 
-#ifndef QT_NO_GRAPHICSSVGITEM
+#ifndef QT_NO_WIDGETS
 
 #include "qpainter.h"
 #include "qstyleoption.h"
@@ -388,4 +388,4 @@ QT_END_NAMESPACE
 
 #include "moc_qgraphicssvgitem.cpp"
 
-#endif // QT_NO_GRAPHICSSVGITEM
+#endif // QT_NO_WIDGETS

@@ -42,9 +42,11 @@
 #ifndef QSVGWIDGET_H
 #define QSVGWIDGET_H
 
-#include <QtWidgets/qwidget.h>
+#include <QtCore/qglobal.h>
 
-#ifndef QT_NO_SVGWIDGET
+#ifndef QT_NO_WIDGETS
+
+#include <QtWidgets/qwidget.h>
 
 QT_BEGIN_HEADER
 
@@ -80,5 +82,6 @@ QT_END_NAMESPACE
 
 QT_END_HEADER
 
-#endif // QT_NO_SVGWIDGET
+#endif // QT_NO_WIDGETS
+
 #endif // QSVGWIDGET_H
