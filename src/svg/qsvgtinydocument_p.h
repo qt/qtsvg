@@ -54,6 +54,7 @@
 //
 
 #include "qsvgstructure_p.h"
+#include "qtsvgglobal.h"
 
 #ifndef QT_NO_SVG
 

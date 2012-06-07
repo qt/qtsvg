@@ -50,6 +50,7 @@
 #include <QtCore/qiodevice.h>
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/qscopedpointer.h>
+#include <QtSvg/qtsvgglobal.h>
 
 QT_BEGIN_HEADER
 

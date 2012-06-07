@@ -48,6 +48,8 @@
 
 #include <QtWidgets/qwidget.h>
 
+#include <QtSvg/qtsvgglobal.h>
+
 QT_BEGIN_HEADER
 
 QT_BEGIN_NAMESPACE

@@ -50,6 +50,7 @@
 #include <QtCore/qsize.h>
 #include <QtCore/qrect.h>
 #include <QtCore/qxmlstream.h>
+#include <QtSvg/qtsvgglobal.h>
 
 QT_BEGIN_HEADER
 

@@ -21,7 +21,8 @@ HEADERS += \
 	qsvgrenderer.h          \
     qsvgwidget.h            \
     qgraphicssvgitem.h      \
-    qsvggenerator.h
+    qsvggenerator.h \
+    qtsvgglobal.h
 
 
 SOURCES += \

@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Nokia Corporation and/or its subsidiary(-ies).
+** Copyright (C) 2012 Intel Corporation.
 ** Contact: http://www.qt-project.org/
 **
-** This file is part of the QtSvg module of the Qt Toolkit.
+** This file is part of the QtCore module of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** GNU Lesser General Public License Usage
@@ -38,68 +38,30 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef QGRAPHICSSVGITEM_H
-#define QGRAPHICSSVGITEM_H
+
+#ifndef QTSVGGLOBAL_H
+#define QTSVGGLOBAL_H
 
 #include <QtCore/qglobal.h>
-
-#ifndef QT_NO_WIDGETS
-
-#include <QtWidgets/qgraphicsitem.h>
-
-#include <QtSvg/qtsvgglobal.h>
 
 QT_BEGIN_HEADER
 
 QT_BEGIN_NAMESPACE
 
-
-class QSvgRenderer;
-class QGraphicsSvgItemPrivate;
-
-class Q_SVG_EXPORT QGraphicsSvgItem : public QGraphicsObject
-{
-    Q_OBJECT
-    Q_INTERFACES(QGraphicsItem)
-    Q_PROPERTY(QString elementId READ elementId WRITE setElementId)
-    Q_PROPERTY(QSize maximumCacheSize READ maximumCacheSize WRITE setMaximumCacheSize)
-
-public:
-    QGraphicsSvgItem(QGraphicsItem *parentItem=0);
-    QGraphicsSvgItem(const QString &fileName, QGraphicsItem *parentItem=0);
-
-    void setSharedRenderer(QSvgRenderer *renderer);
-    QSvgRenderer *renderer() const;
-
-    void setElementId(const QString &id);
-    QString elementId() const;
-
-    void setCachingEnabled(bool);
-    bool isCachingEnabled() const;
-
-    void setMaximumCacheSize(const QSize &size);
-    QSize maximumCacheSize() const;
-
-    virtual QRectF boundingRect() const;
-
-    virtual void paint(QPainter *painter,
-                       const QStyleOptionGraphicsItem *option,
-                       QWidget *widget=0);
-
-    enum { Type = 13 };
-    virtual int type() const;
-
-private:
-    Q_DISABLE_COPY(QGraphicsSvgItem)
-    Q_DECLARE_PRIVATE_D(QGraphicsItem::d_ptr.data(), QGraphicsSvgItem)
-
-    Q_PRIVATE_SLOT(d_func(), void _q_repaintItem())
-};
+#ifndef Q_SVG_EXPORT
+#  ifndef QT_STATIC
+#    if defined(QT_BUILD_SVG_LIB)
+#      define Q_SVG_EXPORT Q_DECL_EXPORT
+#    else
+#      define Q_SVG_EXPORT Q_DECL_IMPORT
+#    endif
+#  else
+#    define Q_SVG_EXPORT
+#  endif
+#endif
 
 QT_END_NAMESPACE
 
 QT_END_HEADER
 
-#endif // QT_NO_WIDGETS
-
-#endif // QGRAPHICSSVGITEM_H
+#endif
