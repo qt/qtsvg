@@ -83,7 +83,6 @@ void tst_QIcon_Svg::svgActualSize()
     QCOMPARE(icon.actualSize(QSize(16, 16)), QSize(16, 16));
     QCOMPARE(icon.pixmap(QSize(16, 16)).size(), QSize(16, 16));
 
-    QEXPECT_FAIL("", "QTBUG-24139 - Test fails due to possible change in IconEngine", Abort);
     QCOMPARE(icon.actualSize(QSize(16, 14)), QSize(16, 2));
     QCOMPARE(icon.pixmap(QSize(16, 14)).size(), QSize(16, 2));
 }
@@ -116,7 +115,6 @@ void tst_QIcon_Svg::svg()
 
     QIcon icon3(prefix + "trash.svg");
     icon3.addFile(prefix + "heart.svg");
-    QEXPECT_FAIL("", "QTBUG-24139 - Test fails due to possible change in IconEngine", Abort);
     QVERIFY(icon3.pixmap(57).toImage() == icon1.pixmap(57).toImage());
 
     QIcon icon4(prefix + "heart.svg");
@@ -140,7 +138,6 @@ void tst_QIcon_Svg::availableSizes()
         QIcon icon(prefix + "heart.svg");
         QList<QSize> availableSizes = icon.availableSizes();
         qDebug() << availableSizes;
-        QEXPECT_FAIL("", "QTBUG-24139 - Test fails due to possible change in IconEngine", Abort);
         QVERIFY(availableSizes.isEmpty());
     }
 
