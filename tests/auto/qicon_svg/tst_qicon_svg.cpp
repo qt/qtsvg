@@ -126,7 +126,7 @@ void tst_QIcon_Svg::svg()
     QVERIFY(icon4.pixmap(pm.size(), QIcon::Active).toImage() == pmIcon.pixmap(pm.size(), QIcon::Active).toImage());
 
 #ifndef QT_NO_COMPRESS
-    QIcon icon5("heart.svgz");
+    QIcon icon5(prefix + "heart.svgz");
     QVERIFY(!icon5.pixmap(32).isNull());
 #endif
 }
