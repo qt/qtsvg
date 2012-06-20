@@ -72,11 +72,15 @@ class QColor;
 class QSvgStyleSelector;
 class QXmlStreamReader;
 
+#ifndef QT_NO_CSSPARSER
+
 struct QSvgCssAttribute
 {
     QXmlStreamStringRef name;
     QXmlStreamStringRef value;
 };
+
+#endif
 
 class QSvgHandler
 {
@@ -115,15 +119,19 @@ public:
     void popColor();
     QColor currentColor() const;
 
+#ifndef QT_NO_CSSPARSER
     void setInStyle(bool b);
     bool inStyle() const;
 
     QSvgStyleSelector *selector() const;
+#endif
 
     void setAnimPeriod(int start, int end);
     int animationDuration() const;
 
+#ifndef QT_NO_CSSPARSER
     void parseCSStoXMLAttrs(QString css, QVector<QSvgCssAttribute> *attributes);
+#endif
 
     inline QPen defaultPen() const
     { return m_defaultPen; }
@@ -163,14 +171,14 @@ private:
     QStack<QColor> m_colorStack;
     QStack<int>    m_colorTagCount;
 
-    bool m_inStyle;
-
-    QSvgStyleSelector *m_selector;
-
     int m_animEnd;
 
     QXmlStreamReader *const xml;
+#ifndef QT_NO_CSSPARSER
+    bool m_inStyle;
+    QSvgStyleSelector *m_selector;
     QCss::Parser m_cssParser;
+#endif
     void parse();
     void resolveGradients(QSvgNode *node);
 

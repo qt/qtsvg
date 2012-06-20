@@ -190,11 +190,14 @@ struct QSvgAttributes
     QStringRef stopColor;
     QStringRef stopOpacity;
 
+#ifndef QT_NO_CSSPARSER
     QVector<QSvgCssAttribute> m_cssAttributes;
+#endif
 };
 
 QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHandler *handler)
 {
+#ifndef QT_NO_CSSPARSER
     QStringRef style = xmlAttributes.value(QLatin1String("style"));
     if (!style.isEmpty()) {
         handler->parseCSStoXMLAttrs(style.toString(), &m_cssAttributes);
@@ -292,6 +295,7 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
            }
         }
     }
+#endif // QT_NO_CSSPARSER
 
     for (int i = 0; i < xmlAttributes.count(); ++i) {
         const QXmlStreamAttribute &attribute = xmlAttributes.at(i);
@@ -419,6 +423,8 @@ static const char * QSvgStyleSelector_nodeString[] = {
     "use",
     "video"
 };
+
+#ifndef QT_NO_CSSPARSER
 
 class QSvgStyleSelector : public QCss::StyleSelector
 {
@@ -549,6 +555,8 @@ public:
         Q_UNUSED(node);
     }
 };
+
+#endif // QT_NO_CSSPARSER
 
 // '0' is 0x30 and '9' is 0x39
 static inline bool isDigit(ushort ch)
@@ -1871,6 +1879,8 @@ static bool parseStyle(QSvgNode *node,
                        const QSvgAttributes &attributes,
                        QSvgHandler *);
 
+#ifndef QT_NO_CSSPARSER
+
 static void parseCSStoXMLAttrs(const QVector<QCss::Declaration> &declarations,
                                QXmlStreamAttributes &attributes)
 {
@@ -2002,6 +2012,8 @@ static void cssStyleLookup(QSvgNode *node,
     parseCSStoXMLAttrs(decls, attributes);
     parseStyle(node, attributes, handler);
 }
+
+#endif // QT_NO_CSSPARSER
 
 static inline QStringList stringToList(const QString &str)
 {
@@ -3059,11 +3071,13 @@ static bool parseStopNode(QSvgStyleProperty *parent,
     anim.setNodeId(nodeIdStr);
     anim.setXmlClass(xmlClassStr);
 
+    QXmlStreamAttributes xmlAttr = attributes;
+
+#ifndef QT_NO_CSSPARSER
     QCss::StyleSelector::NodePtr cssNode;
     cssNode.ptr = &anim;
     QVector<QCss::Declaration> decls = handler->selector()->declarationsForNode(cssNode);
 
-    QXmlStreamAttributes xmlAttr = attributes;
     for (int i = 0; i < decls.count(); ++i) {
         const QCss::Declaration &decl = decls.at(i);
 
@@ -3079,6 +3093,9 @@ static bool parseStopNode(QSvgStyleProperty *parent,
         }
         xmlAttr.append(QString(), decl.d->property, valueStr);
     }
+
+#endif
+
     QSvgAttributes attrs(xmlAttr, handler);
 
     QSvgGradientStyle *style =
@@ -3128,12 +3145,17 @@ static bool parseStyleNode(QSvgNode *parent,
                            QSvgHandler *handler)
 {
     Q_UNUSED(parent);
+#ifdef QT_NO_CSSPARSER
+    Q_UNUSED(attributes)
+    Q_UNUSED(handler)
+#else
     QString type = attributes.value(QLatin1String("type")).toString();
     type = type.toLower();
 
     if (type == QLatin1String("text/css")) {
         handler->setInStyle(true);
     }
+#endif
 
     return true;
 }
@@ -3540,8 +3562,10 @@ void QSvgHandler::init()
 void QSvgHandler::parse()
 {
     xml->setNamespaceProcessing(false);
+#ifndef QT_NO_CSSPARSER
     m_selector = new QSvgStyleSelector;
     m_inStyle = false;
+#endif
     bool done = false;
     while (!xml->atEnd() && !done) {
         switch (xml->readNext()) {
@@ -3630,7 +3654,9 @@ bool QSvgHandler::startElement(const QString &localName,
             }
         }
         parseCoreNode(node, attributes);
+#ifndef QT_NO_CSSPARSER
         cssStyleLookup(node, this, m_selector);
+#endif
         parseStyle(node, attributes, this);
     } else if (FactoryMethod method = findGraphicsFactory(localName)) {
         //rendering element
@@ -3667,7 +3693,9 @@ bool QSvgHandler::startElement(const QString &localName,
 
             if (node) {
                 parseCoreNode(node, attributes);
+#ifndef QT_NO_CSSPARSER
                 cssStyleLookup(node, this, m_selector);
+#endif
                 parseStyle(node, attributes, this);
                 if (node->type() == QSvgNode::TEXT || node->type() == QSvgNode::TEXTAREA) {
                     static_cast<QSvgText *>(node)->setWhitespaceMode(m_whitespaceMode.top());
@@ -3723,8 +3751,12 @@ bool QSvgHandler::endElement(const QStringRef &localName)
         return true;
     }
 
+#ifdef QT_NO_CSSPARSER
+    Q_UNUSED(localName)
+#else
     if (m_inStyle && localName == QLatin1String("style"))
         m_inStyle = false;
+#endif
 
     if (node == Graphics)
         m_nodes.pop();
@@ -3774,13 +3806,16 @@ void QSvgHandler::resolveGradients(QSvgNode *node)
 
 bool QSvgHandler::characters(const QStringRef &str)
 {
+#ifndef QT_NO_CSSPARSER
     if (m_inStyle) {
         QString css = str.toString();
         QCss::StyleSheet sheet;
         QCss::Parser(css).parse(&sheet);
         m_selector->styleSheets.append(sheet);
         return true;
-    } else if (m_skipNodes.isEmpty() || m_skipNodes.top() == Unknown || m_nodes.isEmpty())
+    }
+#endif
+    if (m_skipNodes.isEmpty() || m_skipNodes.top() == Unknown || m_nodes.isEmpty())
         return true;
 
     if (m_nodes.top()->type() == QSvgNode::TEXT || m_nodes.top()->type() == QSvgNode::TEXTAREA) {
@@ -3839,6 +3874,8 @@ QColor QSvgHandler::currentColor() const
         return QColor(0, 0, 0);
 }
 
+#ifndef QT_NO_CSSPARSER
+
 void QSvgHandler::setInStyle(bool b)
 {
     m_inStyle = b;
@@ -3854,8 +3891,14 @@ QSvgStyleSelector * QSvgHandler::selector() const
     return m_selector;
 }
 
+#endif // QT_NO_CSSPARSER
+
 bool QSvgHandler::processingInstruction(const QString &target, const QString &data)
 {
+#ifdef QT_NO_CSSPARSER
+    Q_UNUSED(target)
+    Q_UNUSED(data)
+#else
     if (target == QLatin1String("xml-stylesheet")) {
         QRegExp rx(QLatin1String("type=\\\"(.+)\\\""));
         rx.setMinimal(true);
@@ -3892,6 +3935,7 @@ bool QSvgHandler::processingInstruction(const QString &target, const QString &da
 
         }
     }
+#endif
 
     return true;
 }
@@ -3909,8 +3953,10 @@ int QSvgHandler::animationDuration() const
 
 QSvgHandler::~QSvgHandler()
 {
+#ifndef QT_NO_CSSPARSER
     delete m_selector;
     m_selector = 0;
+#endif
 
     if(m_ownsReader)
         delete xml;
