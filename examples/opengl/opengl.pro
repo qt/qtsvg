@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS +=  framebufferobject
+!contains(QT_CONFIG, no-widgets): SUBDIRS += framebufferobject
 QT+=widgets

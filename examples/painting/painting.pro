@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS +=  svgviewer svggenerator
+!contains(QT_CONFIG, no-widgets): SUBDIRS += svgviewer svggenerator
 QT+=widgets
