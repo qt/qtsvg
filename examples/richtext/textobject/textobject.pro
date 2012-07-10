@@ -10,7 +10,7 @@ RESOURCES       = resources.qrc
 
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/richtext/textobject
-sources.files = $$SOURCES $$HEADERS *.pro
+sources.files = $$SOURCES $$HEADERS *.pro $$RESOURCES files
 sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/richtext/textobject
 INSTALLS += target sources
 

@@ -9,8 +9,12 @@ RESOURCES = icons.qrc
 
 TARGET = bearercloud
 
-QT = core gui network svg
+QT = core gui widgets network svg
 
 CONFIG += console
 
-QT+=widgets
+# install
+target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/network/bearercloud
+sources.files = $$SOURCES $$HEADERS *.pro $$RESOURCES *.svg
+sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/network/bearercloud
+INSTALLS += target sources
