@@ -5,5 +5,6 @@ TEMPLATE=subdirs
         qsvggenerator \
         qsvgrenderer \
         qicon_svg \
+        cmake
 }
 !cross_compile: SUBDIRS += host.pro
