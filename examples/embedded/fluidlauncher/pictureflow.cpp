@@ -77,10 +77,6 @@
 #include <QWidget>
 #include <QTime>
 
-#ifdef Q_WS_QWS
-#include <QScreen>
-#endif
-
 #include <QDebug>
 
 static const int captionFontSize =
@@ -1122,11 +1118,6 @@ PictureFlow::PictureFlow(QWidget* parent): QWidget(parent)
   setAttribute(Qt::WA_StaticContents, true);
   setAttribute(Qt::WA_OpaquePaintEvent, true);
   setAttribute(Qt::WA_NoSystemBackground, true);
-
-#ifdef Q_WS_QWS
-  if (QScreen::instance()->pixelFormat() != QImage::Format_Invalid)
-    setAttribute(Qt::WA_PaintOnScreen, true);
-#endif
 }
 
 PictureFlow::~PictureFlow()
