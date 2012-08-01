@@ -7,3 +7,4 @@ RESOURCES += qsvgrenderer.qrc
 
 QT += svg testlib
 
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
