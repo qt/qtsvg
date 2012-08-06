@@ -38,6 +38,15 @@ SOURCES += \
     qgraphicssvgitem.cpp    \
     qsvggenerator.cpp
 
+wince*: {
+    SOURCES += \
+        qsvgfunctions_wince.cpp
+    HEADERS += \
+        qsvgfunctions_wince.h
+}
+
+INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/harfbuzz/src
+
 symbian:TARGET.UID3=0x2001B2E2
 
 contains(QT_CONFIG, system-zlib) {
