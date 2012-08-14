@@ -86,6 +86,7 @@ void Window::insertTextObject()
 void Window::setupTextObject()
 {
     QObject *svgInterface = new SvgTextObject;
+    svgInterface->setParent(this);
     textEdit->document()->documentLayout()->registerHandler(SvgTextFormat, svgInterface);
 }
 //![3]
