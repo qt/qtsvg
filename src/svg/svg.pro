@@ -1,5 +1,3 @@
-load(qt_build_config)
-
 TARGET     = QtSvg
 QT         = core-private gui-private
 !contains(QT_CONFIG, no-widgets): QT += widgets-private

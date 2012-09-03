@@ -1,5 +1,3 @@
-load(qt_build_config)
-
 TARGET  = qsvgicon
 load(qt_plugin)
 
