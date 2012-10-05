@@ -55,6 +55,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
     \class QSvgRenderer
+    \inmodule QtSvg
     \ingroup painting
 
     \brief The QSvgRenderer class is used to draw the contents of SVG files onto paint devices.
@@ -98,7 +99,7 @@ QT_BEGIN_NAMESPACE
     Finally, the QSvgRenderer class provides the repaintNeeded() signal which is emitted
     whenever the rendering of the document needs to be updated.
 
-    \sa QSvgWidget, {QtSvg Module}, {SVG Viewer Example}, QPicture
+    \sa QSvgWidget, {Qt Svg C++ Classes}, {SVG Viewer Example}, QPicture
 */
 
 class QSvgRendererPrivate : public QObjectPrivate

@@ -100,6 +100,7 @@ public:
 
 /*!
     \class QGraphicsSvgItem
+    \inmodule QtSvg
     \ingroup graphicsview-api
     \brief The QGraphicsSvgItem class is a QGraphicsItem that can be used to render
            the contents of SVG files.
@@ -122,7 +123,7 @@ public:
     elements. For example the following code renders only jokers from a SVG file
     containing a whole card deck:
 
-    \snippet doc/src/snippets/code/src_svg_qgraphicssvgitem.cpp 0
+    \snippet src_svg_qgraphicssvgitem.cpp 0
 
     Size of the item can be set via the \l{QRectF::setSize()}
     {setSize()} method of the \l{QGraphicsSvgItem::boundingRect()}
@@ -133,7 +134,7 @@ public:
     mode to speedup the display of items. Caching can be disabled by passing
     QGraphicsItem::NoCache to the QGraphicsItem::setCacheMode() method.
 
-    \sa QSvgWidget, {QtSvg Module}, QGraphicsItem, QGraphicsView
+    \sa QSvgWidget, {Qt Svg C++ Classes}, QGraphicsItem, QGraphicsView
 */
 
 /*!

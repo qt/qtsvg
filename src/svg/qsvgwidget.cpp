@@ -52,6 +52,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
     \class QSvgWidget
+    \inmodule QtSvg
     \ingroup painting
 
     \brief The QSvgWidget class provides a widget that is used to display the contents of
@@ -76,7 +77,7 @@ QT_BEGIN_NAMESPACE
     displays. If no data has been loaded, the widget provides the default QWidget size hint.
     Subclass this class and reimplement sizeHint() if you need to customize this behavior.
 
-    \sa QSvgRenderer, {QtSvg Module}, QPicture
+    \sa QSvgRenderer, {Qt Svg C++ Classes}, QPicture
 */
 
 class QSvgWidgetPrivate : public QWidgetPrivate

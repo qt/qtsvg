@@ -26,7 +26,7 @@
 ****************************************************************************/
 
 /*!
-    \example painting/svgviewer
+    \example svgviewer
     \title SVG Viewer Example
 
     The SVG Viewer example shows how to add SVG viewing support to applications.

@@ -26,7 +26,7 @@
 ****************************************************************************/
 
 /*!
-    \example painting/svggenerator
+    \example svggenerator
     \title SVG Generator Example
 
     The SVG Generator example shows how to add SVG file export to applications.
@@ -56,7 +56,7 @@
     elements chosen by the user. These are defined using \c Shape and
     \c Background enums that are included within the class definition:
 
-    \snippet examples/painting/svggenerator/displaywidget.h DisplayWidget class definition
+    \snippet svggenerator/displaywidget.h DisplayWidget class definition
 
     Much of this class is used to configure the appearance of the drawing. The
     \c paintEvent() and \c paint() functions are most relevant to the purpose
@@ -67,7 +67,7 @@
     We reimplement the QWidget::paintEvent() function to display the drawing
     on screen:
 
-    \snippet examples/painting/svggenerator/displaywidget.cpp paint event
+    \snippet svggenerator/displaywidget.cpp paint event
 
     Here, we only construct a QPainter object, begin painting on the device
     and set a render hint for improved output quality before calling the
@@ -79,25 +79,25 @@
     and on a QSvgGenerator object. We show how the painting is performed to
     demonstrate that there is nothing device-specific about the process:
 
-    \snippet examples/painting/svggenerator/displaywidget.cpp paint function
+    \snippet svggenerator/displaywidget.cpp paint function
 
     \section1 The Window Class
 
     The \c Window class represents the example's window, containing the user
     interface, which has been created using Qt Designer:
 
-    \snippet examples/painting/svggenerator/window.h Window class definition
+    \snippet svggenerator/window.h Window class definition
 
     As with the \c DisplayWidget class, we concentrate on the parts of the code
     which are concerned with painting and SVG generation. In the \c Window
-    class, the \c saveSvg() function is called whenever the \gui{Save As...}
+    class, the \c saveSvg() function is called whenever the \b{Save As...}
     button is clicked; this connection was defined in the \c{window.ui} file
     using Qt Designer.
 
     The start of the \c saveSvg() function performs the task of showing a file
     dialog so that the user can specify a SVG file to save the drawing to.
     
-    \snippet examples/painting/svggenerator/window.cpp save SVG
+    \snippet svggenerator/window.cpp save SVG
 
     In the rest of the function, we set up the generator and configure it to
     generate output with the appropriate dimensions and write to the
