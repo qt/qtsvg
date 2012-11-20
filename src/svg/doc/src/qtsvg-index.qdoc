@@ -35,6 +35,26 @@
     for rendering and displaying SVG drawings in widgets and on other
     paint devices.
 
+    \section1 Getting Started
+
+    Qt SVG provides classes for rendering SVG files. To include the definitions
+    of the module's classes, use the following directive:
+
+    \snippet doc_src_qtsvg.cpp 0
+
+    To link against the module, add this line to your \l qmake \c
+    .pro file:
+
+    \snippet doc_src_qtsvg.pro 1
+
+    \section1 Articles
+    \list
+    \li \l{Rendering SVG Files} contains information about how to
+    render SVG files
+    \li \l{Qt SVG License Information}{License Information}
+    \endlist
+
+    \section1 References
     \list
         \li \l{Qt Svg C++ Classes}
     \endlist
@@ -46,4 +66,3 @@
         \li \l{SVG Viewer Example}
     \endlist
 */
-
