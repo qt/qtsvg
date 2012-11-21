@@ -4,4 +4,7 @@ TEMPLATE = subdirs
 
 QT+=widgets
 
-
+# install
+sources.files = svg.pro
+sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/svg
+INSTALLS += sources

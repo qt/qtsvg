@@ -10,7 +10,7 @@ SOURCES     = main.cpp \
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/draganddrop/delayedencoding
 sources.files = $$SOURCES $$HEADERS *.pro $$RESOURCES images
-sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/itemviews/delayedencoding
+sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/draganddrop/delayedencoding
 INSTALLS += target sources
 
 simulator: warning(This example does not work on Simulator platform)

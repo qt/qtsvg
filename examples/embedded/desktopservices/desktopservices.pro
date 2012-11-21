@@ -9,7 +9,7 @@ music.files = data/*.mp3 data/*.wav
 image.files = data/*.png
 
 target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/embedded/desktopservices
-sources.files = $$SOURCES $$HEADERS $$RESOURCES *.pro
+sources.files = $$SOURCES $$HEADERS $$RESOURCES *.pro resources data
 sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/embedded/desktopservices
 
 wince*{
