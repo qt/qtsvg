@@ -46,11 +46,8 @@ wince*: {
 
 INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/harfbuzz/src
 
-symbian:TARGET.UID3=0x2001B2E2
-
 contains(QT_CONFIG, system-zlib) {
-    symbian:                 LIBS_PRIVATE += -llibz
-    else:if(unix|win32-g++*):LIBS_PRIVATE += -lz
+    if(unix|win32-g++*):     LIBS_PRIVATE += -lz
     else:                    LIBS += zdll.lib
 } else {
     include(../3rdparty/zlib.pri)
