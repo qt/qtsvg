@@ -28,10 +28,12 @@ wince*{
         BUILD_DIR = debug
     }
 
-    baseex = $$shadowed($$QT.qtbase.sources/../../examples)
-    svgex = $$shadowed($$QT.qtsvg.sources/../../examples)
+    requires(!isEmpty(_QMAKE_SUPER_CACHE_))
+    base = $$dirname(_QMAKE_SUPER_CACHE_)
+    baseex = $$base/qtbase/examples
+    svgex = $$base/qtsvg/examples
     executables.files = \
-        $$svgex/embedded/embeddedsvgviewer/$${BUILD_DIR}/embeddedsvgviewer.exe \
+        $$svgex/svg/embedded/embeddedsvgviewer/$${BUILD_DIR}/embeddedsvgviewer.exe \
         $$baseex/embedded/styleexample/$${BUILD_DIR}/styleexample.exe \
         $$baseex/painting/deform/$${BUILD_DIR}/deform.exe \
         $$baseex/painting/pathstroke/$${BUILD_DIR}/pathstroke.exe \
