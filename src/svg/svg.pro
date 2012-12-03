@@ -44,8 +44,6 @@ wince*: {
         qsvgfunctions_wince.h
 }
 
-INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/harfbuzz/src
-
 contains(QT_CONFIG, system-zlib) {
     if(unix|win32-g++*):     LIBS_PRIVATE += -lz
     else:                    LIBS += zdll.lib
