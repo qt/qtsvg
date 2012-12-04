@@ -11,10 +11,8 @@ contains(QT_CONFIG, opengl): QT += opengl
 CONFIG += console
 
 # install
-target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/svg/svgviewer
-sources.files = $$SOURCES $$HEADERS $$RESOURCES svgviewer.pro files
-sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/svg/svgviewer
-INSTALLS += target sources
+target.path = $$[QT_INSTALL_EXAMPLES]/svg/svgviewer
+INSTALLS += target
 
 wince*: {
      addFiles.files = files\\*.svg

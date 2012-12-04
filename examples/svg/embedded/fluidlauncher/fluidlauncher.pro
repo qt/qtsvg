@@ -15,11 +15,10 @@ SOURCES += \
            pictureflow.cpp \
            slideshow.cpp
 
+EXAMPLE_FILES += config.xml screenshots slides
 
-target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/embedded/fluidlauncher
-sources.files = $$SOURCES $$HEADERS $$RESOURCES *.pro *.html config.xml screenshots slides
-sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/embedded/fluidlauncher
-INSTALLS += target sources
+target.path = $$[QT_INSTALL_EXAMPLES]/svg/embedded/fluidlauncher
+INSTALLS += target
 
 wince*{
     QT += svg

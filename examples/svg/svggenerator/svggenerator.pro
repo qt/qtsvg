@@ -11,9 +11,7 @@ QT += svg
 INCLUDEPATH += $$PWD
 
 # install
-target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/svg/svggenerator
-sources.files = $$SOURCES $$HEADERS $$RESOURCES forms doc resources svggenerator.pro
-sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/svg/svggenerator
-INSTALLS += target sources
+target.path = $$[QT_INSTALL_EXAMPLES]/svg/svggenerator
+INSTALLS += target
 
 QT+=widgets

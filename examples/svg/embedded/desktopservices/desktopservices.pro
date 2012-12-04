@@ -5,12 +5,12 @@ SOURCES += desktopwidget.cpp contenttab.cpp linktab.cpp main.cpp
 
 RESOURCES += desktopservices.qrc
 
+EXAMPLE_FILES += data
+
 music.files = data/*.mp3 data/*.wav
 image.files = data/*.png
 
-target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/embedded/desktopservices
-sources.files = $$SOURCES $$HEADERS $$RESOURCES *.pro resources data
-sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/embedded/desktopservices
+target.path = $$[QT_INSTALL_EXAMPLES]/svg/embedded/desktopservices
 
 wince*{
     music.path = "\\My Documents\\My Music"
@@ -18,4 +18,4 @@ wince*{
     DEPLOYMENT += music image
 }
 
-INSTALLS += target sources
+INSTALLS += target

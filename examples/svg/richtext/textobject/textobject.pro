@@ -9,10 +9,8 @@ QT += svg
 RESOURCES       = resources.qrc
 
 # install
-target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/richtext/textobject
-sources.files = $$SOURCES $$HEADERS *.pro $$RESOURCES files
-sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/richtext/textobject
-INSTALLS += target sources
+target.path = $$[QT_INSTALL_EXAMPLES]/svg/richtext/textobject
+INSTALLS += target
 
 filesToDeploy.files = files/*.svg
 filesToDeploy.path = files

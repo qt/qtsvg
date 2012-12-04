@@ -14,7 +14,5 @@ QT = core gui widgets network svg
 CONFIG += console
 
 # install
-target.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/network/bearercloud
-sources.files = $$SOURCES $$HEADERS *.pro $$RESOURCES *.svg
-sources.path = $$[QT_INSTALL_EXAMPLES]/qtsvg/network/bearercloud
-INSTALLS += target sources
+target.path = $$[QT_INSTALL_EXAMPLES]/svg/network/bearercloud
+INSTALLS += target
