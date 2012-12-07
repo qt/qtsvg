@@ -25,7 +25,8 @@ qhp.QtSvg.subprojects.classes.sortPages = true
 
 depends += qtcore \
            qtwidgets \
-           qtgui
+           qtgui \
+           qtdesigner
 
 tagfile                 = ../../../doc/qtsvg/qtsvg.tags
 
