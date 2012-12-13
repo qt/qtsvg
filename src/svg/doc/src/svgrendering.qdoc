@@ -52,7 +52,7 @@
     can read more about SVG at \l{About SVG}.
 
     Qt supports the \l{SVG 1.2 Tiny Static Features}{static features} of
-    \l{SVG 1.2 Tiny}. ECMA scripts and DOM manipulation are currently not
+    \l{http://www.w3.org/TR/SVGMobile12}{SVG 1.2 Tiny}. ECMA scripts and DOM manipulation are currently not
     supported.
 
     SVG drawings can be rendered onto any QPaintDevice subclass. This
