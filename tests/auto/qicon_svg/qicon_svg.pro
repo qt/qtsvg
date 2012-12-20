@@ -1,7 +1,7 @@
 CONFIG += testcase
 TARGET = tst_qicon_svg
 
-QT += widgets testlib gui-private
+QT += testlib gui-private
 SOURCES += tst_qicon_svg.cpp
 RESOURCES = tst_qicon_svg.qrc
 
