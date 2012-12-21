@@ -1,6 +1,6 @@
 TARGET     = QtSvg
 QT         = core-private gui-private
-!contains(QT_CONFIG, no-widgets): QT += widgets-private
+qtHaveModule(widgets): QT += widgets-private
 
 DEFINES   += QT_NO_USING_NAMESPACE
 win32-msvc*|win32-icc:QMAKE_LFLAGS += /BASE:0x66000000

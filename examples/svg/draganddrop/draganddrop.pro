@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
-!contains(QT_CONFIG, no-widgets): SUBDIRS += delayedencoding
+qtHaveModule(widgets): SUBDIRS += delayedencoding
 QT+=widgets

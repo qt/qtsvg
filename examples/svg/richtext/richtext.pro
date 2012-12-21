@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
-!contains(QT_CONFIG, no-widgets): SUBDIRS += textobject
+qtHaveModule(widgets): SUBDIRS += textobject
 QT+=widgets

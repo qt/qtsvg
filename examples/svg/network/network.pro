@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
-!contains(QT_CONFIG, no-widgets): SUBDIRS += bearercloud
+qtHaveModule(widgets): SUBDIRS += bearercloud
 QT+=widgets
