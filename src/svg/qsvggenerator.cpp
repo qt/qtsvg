@@ -175,7 +175,7 @@ public:
     void drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode);
     void drawTextItem(const QPointF &pt, const QTextItem &item);
     void drawImage(const QRectF &r, const QImage &pm, const QRectF &sr,
-                   Qt::ImageConversionFlag = Qt::AutoColor);
+                   Qt::ImageConversionFlags flags = Qt::AutoColor);
 
     QPaintEngine::Type type() const { return QPaintEngine::SVG; }
 
@@ -907,7 +907,7 @@ void QSvgPaintEngine::drawPixmap(const QRectF &r, const QPixmap &pm,
 
 void QSvgPaintEngine::drawImage(const QRectF &r, const QImage &image,
                                 const QRectF &sr,
-                                Qt::ImageConversionFlag flags)
+                                Qt::ImageConversionFlags flags)
 {
     //Q_D(QSvgPaintEngine);
 
