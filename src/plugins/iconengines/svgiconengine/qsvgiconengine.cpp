@@ -180,11 +180,13 @@ QPixmap QSvgIconEngine::pixmap(const QSize &size, QIcon::Mode mode,
     renderer.render(&p);
     p.end();
     pm = QPixmap::fromImage(img);
-    QStyleOption opt(0);
-    opt.palette = QApplication::palette();
-    QPixmap generated = QApplication::style()->generatedIconPixmap(mode, pm, &opt);
-    if (!generated.isNull())
-        pm = generated;
+    if (qobject_cast<QApplication *>(QCoreApplication::instance())) {
+        QStyleOption opt(0);
+        opt.palette = QGuiApplication::palette();
+        QPixmap generated = QApplication::style()->generatedIconPixmap(mode, pm, &opt);
+        if (!generated.isNull())
+            pm = generated;
+    }
 
     if (!pm.isNull())
         QPixmapCache::insert(pmckey, pm);

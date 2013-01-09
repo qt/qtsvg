@@ -4,7 +4,7 @@ include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
 project                 = QtSvg
 description             = Qt SVG Reference Documentation
 url                     = http://qt-project.org/doc/qtsvg
-version                 = 5.0.0
+version                 = 5.0.1
 
 qhp.projects            = QtSvg
 
@@ -14,9 +14,9 @@ qhp.QtSvg.virtualFolder       = qtsvg
 qhp.QtSvg.indexTitle          = Qt SVG
 qhp.QtSvg.indexRoot           =
 
-qhp.QtSvg.filterAttributes    = qtsvg 5.0.0 qtrefdoc
-qhp.QtSvg.customFilters.Qt.name = QtSvg 5.0.0
-qhp.QtSvg.customFilters.Qt.filterAttributes = qtsvg 5.0.0
+qhp.QtSvg.filterAttributes    = qtsvg 5.0.1 qtrefdoc
+qhp.QtSvg.customFilters.Qt.name = QtSvg 5.0.1
+qhp.QtSvg.customFilters.Qt.filterAttributes = qtsvg 5.0.1
 qhp.QtSvg.subprojects         = classes
 qhp.QtSvg.subprojects.classes.title = C++ Classes
 qhp.QtSvg.subprojects.classes.indexTitle = Qt SVG C++ Classes

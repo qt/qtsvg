@@ -4,7 +4,7 @@ SOURCES         = main.cpp \
                   svgtextobject.cpp \
                   window.cpp
 
-QT += svg
+QT += widgets svg
 
 RESOURCES       = resources.qrc
 
@@ -15,4 +15,3 @@ INSTALLS += target
 filesToDeploy.files = files/*.svg
 filesToDeploy.path = files
 DEPLOYMENT += filesToDeploy
-QT+=widgets

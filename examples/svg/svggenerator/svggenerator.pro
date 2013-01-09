@@ -6,12 +6,10 @@ SOURCES   = displaywidget.cpp \
             main.cpp \
             window.cpp
 
-QT += svg
+QT += widgets svg
 
 INCLUDEPATH += $$PWD
 
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/svg/svggenerator
 INSTALLS += target
-
-QT+=widgets
