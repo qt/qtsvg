@@ -4,7 +4,7 @@ QT += svg xml testlib widgets gui-private
 
 SOURCES += tst_qsvggenerator.cpp
 
-wince*|symbian {
+wince* {
     addFiles.files = referenceSvgs
     addFiles.path = .
     DEPLOYMENT += addFiles
@@ -12,7 +12,7 @@ wince*|symbian {
 
 wince* {
     DEFINES += SRCDIR=\\\"\\\"
-} else:!symbian {
+} else {
     DEFINES += SRCDIR=\\\"$$PWD/\\\"
 }
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0

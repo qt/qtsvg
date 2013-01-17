@@ -5,7 +5,7 @@ QT += svg testlib widgets gui-private
 SOURCES += tst_qsvgrenderer.cpp
 RESOURCES += resources.qrc
 
-wince*|symbian {
+wince* {
    addFiles.files = *.svg *.svgz
    addFiles.path = .
 
@@ -15,7 +15,5 @@ wince*|symbian {
    }
 }
 
-!symbian: {
-    DEFINES += SRCDIR=\\\"$$PWD/\\\"
-}
+DEFINES += SRCDIR=\\\"$$PWD/\\\"
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0

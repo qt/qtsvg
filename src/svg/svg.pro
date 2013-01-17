@@ -1,6 +1,6 @@
 TARGET     = QtSvg
 QT         = core-private gui-private
-!contains(QT_CONFIG, no-widgets): QT += widgets-private
+qtHaveModule(widgets): QT += widgets-private
 
 DEFINES   += QT_NO_USING_NAMESPACE
 win32-msvc*|win32-icc:QMAKE_LFLAGS += /BASE:0x66000000
@@ -44,14 +44,9 @@ wince*: {
         qsvgfunctions_wince.h
 }
 
-INCLUDEPATH += $$QT_SOURCE_TREE/src/3rdparty/harfbuzz/src
-
-symbian:TARGET.UID3=0x2001B2E2
-
 contains(QT_CONFIG, system-zlib) {
-    symbian:                 LIBS_PRIVATE += -llibz
-    else:if(unix|win32-g++*):LIBS_PRIVATE += -lz
+    if(unix|win32-g++*):     LIBS_PRIVATE += -lz
     else:                    LIBS += zdll.lib
 } else {
-    include(../3rdparty/zlib.pri)
+    INCLUDEPATH += $$[QT_INSTALL_HEADERS/get]/QtZlib
 }

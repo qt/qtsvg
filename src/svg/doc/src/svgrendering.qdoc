@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
-** This file is part of the documentation of the Qt Svg Module.
+** This file is part of the documentation of the Qt SVG Module.
 **
 ** $QT_BEGIN_LICENSE:FDL$
 ** Commercial License Usage
@@ -52,7 +52,7 @@
     can read more about SVG at \l{About SVG}.
 
     Qt supports the \l{SVG 1.2 Tiny Static Features}{static features} of
-    \l{SVG 1.2 Tiny}. ECMA scripts and DOM manipulation are currently not
+    \l{http://www.w3.org/TR/SVGMobile12}{SVG 1.2 Tiny}. ECMA scripts and DOM manipulation are currently not
     supported.
 
     SVG drawings can be rendered onto any QPaintDevice subclass. This
