@@ -134,7 +134,7 @@ public:
     mode to speedup the display of items. Caching can be disabled by passing
     QGraphicsItem::NoCache to the QGraphicsItem::setCacheMode() method.
 
-    \sa QSvgWidget, {Qt Svg C++ Classes}, QGraphicsItem, QGraphicsView
+    \sa QSvgWidget, {Qt SVG C++ Classes}, QGraphicsItem, QGraphicsView
 */
 
 /*!

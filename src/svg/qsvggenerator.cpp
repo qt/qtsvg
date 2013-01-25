@@ -94,7 +94,7 @@ public:
         outputDevice = 0;
         resolution = 72;
 
-        attributes.document_title = QLatin1String("Qt Svg Document");
+        attributes.document_title = QLatin1String("Qt SVG Document");
         attributes.document_description = QLatin1String("Generated with Qt");
         attributes.font_family = QLatin1String("serif");
         attributes.font_size = QLatin1String("10pt");
@@ -540,7 +540,7 @@ public:
     The \l{SVG Generator Example} shows how the same painting commands can be used
     for painting a widget and writing an SVG file.
 
-    \sa QSvgRenderer, QSvgWidget, {Qt Svg C++ Classes}
+    \sa QSvgRenderer, QSvgWidget, {Qt SVG C++ Classes}
 */
 
 /*!

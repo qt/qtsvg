@@ -42,5 +42,5 @@
     a QImage. This allows testing of drawing accuracy and performance for both the 
     native, raster, and OpenGL paint engines.
 
-    See the QtSvg module documentation for more information about SVG and Qt's SVG classes.
+    See the Qt SVG module documentation for more information about SVG and Qt's SVG classes.
 */
