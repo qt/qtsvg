@@ -41,7 +41,7 @@ wince*: {
     SOURCES += \
         qsvgfunctions_wince.cpp
     HEADERS += \
-        qsvgfunctions_wince.h
+        qsvgfunctions_wince_p.h
 }
 
 contains(QT_CONFIG, system-zlib) {
