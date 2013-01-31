@@ -9,7 +9,7 @@ version                 = 5.0.1
 qhp.projects            = QtSvg
 
 qhp.QtSvg.file                = qtsvg.qhp
-qhp.QtSvg.namespace           = org.qt-project.qtsvg.500
+qhp.QtSvg.namespace           = org.qt-project.qtsvg.501
 qhp.QtSvg.virtualFolder       = qtsvg
 qhp.QtSvg.indexTitle          = Qt SVG
 qhp.QtSvg.indexRoot           =
