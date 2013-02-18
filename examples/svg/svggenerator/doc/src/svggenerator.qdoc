@@ -117,6 +117,6 @@
     application, and can be used to show the contents of SVG files created
     by this example.
 
-    See the QtSvg module documentation for more information about SVG and Qt's
+    See the Qt SVG module documentation for more information about SVG and Qt's
     SVG classes.
 */
