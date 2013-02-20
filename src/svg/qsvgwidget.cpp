@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
-** This file is part of the QtSvg module of the Qt Toolkit.
+** This file is part of the Qt SVG module of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -77,7 +77,7 @@ QT_BEGIN_NAMESPACE
     displays. If no data has been loaded, the widget provides the default QWidget size hint.
     Subclass this class and reimplement sizeHint() if you need to customize this behavior.
 
-    \sa QSvgRenderer, {Qt Svg C++ Classes}, QPicture
+    \sa QSvgRenderer, {Qt SVG C++ Classes}, QPicture
 */
 
 class QSvgWidgetPrivate : public QWidgetPrivate

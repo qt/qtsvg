@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
 CONFIG += ordered
-!isEmpty(QT.gui.name): SUBDIRS += svg plugins
+qtHaveModule(gui): SUBDIRS += svg plugins

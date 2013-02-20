@@ -6,7 +6,7 @@ SOURCES       = main.cpp \
                 svgview.cpp
 QT           += widgets svg xml
 
-contains(QT_CONFIG, opengl): QT += opengl
+qtHaveModule(opengl): QT += opengl
 
 CONFIG += console
 

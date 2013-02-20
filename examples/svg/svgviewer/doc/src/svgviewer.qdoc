@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the documentation of the Qt Toolkit.
@@ -42,5 +42,5 @@
     a QImage. This allows testing of drawing accuracy and performance for both the 
     native, raster, and OpenGL paint engines.
 
-    See the QtSvg module documentation for more information about SVG and Qt's SVG classes.
+    See the Qt SVG module documentation for more information about SVG and Qt's SVG classes.
 */

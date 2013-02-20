@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
-** This file is part of the QtSvg module of the Qt Toolkit.
+** This file is part of the Qt SVG module of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -99,7 +99,7 @@ QT_BEGIN_NAMESPACE
     Finally, the QSvgRenderer class provides the repaintNeeded() signal which is emitted
     whenever the rendering of the document needs to be updated.
 
-    \sa QSvgWidget, {Qt Svg C++ Classes}, {SVG Viewer Example}, QPicture
+    \sa QSvgWidget, {Qt SVG C++ Classes}, {SVG Viewer Example}, QPicture
 */
 
 class QSvgRendererPrivate : public QObjectPrivate
