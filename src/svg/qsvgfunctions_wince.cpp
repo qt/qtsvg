@@ -47,7 +47,7 @@
 #include <altcecrt.h>
 
 #include "qplatformdefs.h"
-#include "qfunctions_wince.h"
+#include "qfunctions_wince_p.h"
 #include "qstring.h"
 #include "qbytearray.h"
 #include "qhash.h"
