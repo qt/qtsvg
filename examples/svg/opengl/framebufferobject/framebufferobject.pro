@@ -1,3 +1,5 @@
+contains(QT_CONFIG, opengles2):error("This example is written for OpenGL 1.x")
+
 QT += widgets opengl svg
 
 HEADERS += glwidget.h
