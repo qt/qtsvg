@@ -25,7 +25,8 @@ qhp.QtSvg.subprojects.classes.sortPages = true
 depends += qtcore \
            qtwidgets \
            qtgui \
-           qtdesigner
+           qtdesigner \
+           qtdoc
 
 tagfile                 = ../../../doc/qtsvg/qtsvg.tags
 
@@ -40,3 +41,6 @@ exampledirs += ../../../examples/svg \
 
 
 imagedirs   += images
+
+navigation.landingpage = "Qt SVG"
+navigation.cppclassespage = "Qt SVG C++ Classes"
