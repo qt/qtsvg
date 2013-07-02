@@ -5,6 +5,9 @@ qtHaveModule(widgets) {
         qsvggenerator \
         qsvgrenderer \
         qicon_svg \
-        cmake
+        cmake \
+        installed_cmake
+
+    installed_cmake.depends = cmake
 }
 !cross_compile: SUBDIRS += host.pro
