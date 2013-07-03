@@ -207,7 +207,9 @@ void FluidLauncher::populatePictureFlow()
     pictureFlowWidget->setSlideCount(demoList.count());
 
     for (int i=demoList.count()-1; i>=0; --i) {
-        pictureFlowWidget->setSlide(i, *(demoList[i]->getImage()));
+        const QImage image = demoList[i]->getImage();
+        if (!image.isNull())
+            pictureFlowWidget->setSlide(i, image);
         pictureFlowWidget->setSlideCaption(i, demoList[i]->getCaption());
     }
 
