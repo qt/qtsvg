@@ -75,9 +75,9 @@ void DemoApplication::launch()
     process.start(executablePath, arguments);
 }
 
-QImage* DemoApplication::getImage()
+QImage DemoApplication::getImage() const
 {
-    return new QImage(imagePath);
+    return imagePath.isEmpty() ? QImage() : QImage(imagePath);
 }
 
 QString DemoApplication::getCaption()

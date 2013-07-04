@@ -54,7 +54,7 @@ class DemoApplication : public QObject
 public:
     DemoApplication(QString executableName, QString caption, QString imageName, QStringList args);
     void launch();
-    QImage* getImage();
+    QImage getImage() const;
     QString getCaption();
 
 public slots:
