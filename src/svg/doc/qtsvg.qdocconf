@@ -39,6 +39,7 @@ sourcedirs  += .. \
 exampledirs += ../../../examples/svg \
                snippets/
 
+examplesinstallpath = svg
 
 imagedirs   += images
 
