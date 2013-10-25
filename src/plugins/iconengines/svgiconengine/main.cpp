@@ -42,7 +42,7 @@
 #include <qiconengineplugin.h>
 #include <qstringlist.h>
 
-#if !defined(QT_NO_IMAGEFORMATPLUGIN) && !defined(QT_NO_SVG)
+#if !defined(QT_NO_IMAGEFORMATPLUGIN)
 
 #include "qsvgiconengine.h"
 

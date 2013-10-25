@@ -54,9 +54,6 @@
 //
 
 #include "QtGui/qpainter.h"
-
-#ifndef QT_NO_SVG
-
 #include "QtGui/qpen.h"
 #include "QtGui/qbrush.h"
 #include "QtGui/qmatrix.h"
@@ -822,5 +819,4 @@ public:
 
 QT_END_NAMESPACE
 
-#endif // QT_NO_SVG
 #endif // QSVGSTYLE_P_H

@@ -42,8 +42,6 @@
 #include "qsvgnode_p.h"
 #include "qsvgtinydocument_p.h"
 
-#ifndef QT_NO_SVG
-
 #include "qdebug.h"
 #include "qstack.h"
 
@@ -341,5 +339,3 @@ qreal QSvgNode::strokeWidth(QPainter *p)
 }
 
 QT_END_NAMESPACE
-
-#endif // QT_NO_SVG

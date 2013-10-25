@@ -41,8 +41,6 @@
 
 #include "qsvgfont_p.h"
 
-#ifndef QT_NO_SVG
-
 #include "qpainter.h"
 #include "qpen.h"
 #include "qdebug.h"
@@ -138,5 +136,3 @@ void QSvgFont::setUnitsPerEm(qreal upem)
 }
 
 QT_END_NAMESPACE
-
-#endif // QT_NO_SVG

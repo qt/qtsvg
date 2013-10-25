@@ -41,8 +41,6 @@
 
 #include "qsvggraphics_p.h"
 
-#ifndef QT_NO_SVG
-
 #include "qsvgfont_p.h"
 
 #include "qpainter.h"
@@ -611,5 +609,3 @@ QRectF QSvgLine::bounds(QPainter *p, QSvgExtraStates &) const
 }
 
 QT_END_NAMESPACE
-
-#endif // QT_NO_SVG
