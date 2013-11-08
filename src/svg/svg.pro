@@ -53,3 +53,9 @@ contains(QT_CONFIG, system-zlib) {
     else: \
         INCLUDEPATH += $$[QT_INSTALL_HEADERS/src]/QtZlib
 }
+
+ANDROID_LIB_DEPENDENCIES = \
+    lib/libQt5Xml.so
+
+ANDROID_BUNDLED_FILES += \
+    lib/libQt5Xml.so

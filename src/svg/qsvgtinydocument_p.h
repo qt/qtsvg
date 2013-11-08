@@ -56,8 +56,6 @@
 #include "qsvgstructure_p.h"
 #include "qtsvgglobal.h"
 
-#ifndef QT_NO_SVG
-
 #include "QtCore/qrect.h"
 #include "QtCore/qlist.h"
 #include "QtCore/qhash.h"
@@ -197,5 +195,4 @@ inline int QSvgTinyDocument::animationDuration() const
 
 QT_END_NAMESPACE
 
-#endif // QT_NO_SVG
 #endif // QSVGTINYDOCUMENT_P_H

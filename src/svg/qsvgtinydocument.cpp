@@ -41,8 +41,6 @@
 
 #include "qsvgtinydocument_p.h"
 
-#ifndef QT_NO_SVG
-
 #include "qsvghandler_p.h"
 #include "qsvgfont_p.h"
 
@@ -488,5 +486,3 @@ void QSvgTinyDocument::setFramesPerSecond(int num)
 }
 
 QT_END_NAMESPACE
-
-#endif // QT_NO_SVG

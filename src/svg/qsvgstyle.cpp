@@ -41,8 +41,6 @@
 
 #include "qsvgstyle_p.h"
 
-#ifndef QT_NO_SVG
-
 #include "qsvgfont_p.h"
 #include "qsvggraphics_p.h"
 #include "qsvgnode_p.h"
@@ -955,5 +953,3 @@ void QSvgGradientStyle::resolveStops()
 }
 
 QT_END_NAMESPACE
-
-#endif // QT_NO_SVG

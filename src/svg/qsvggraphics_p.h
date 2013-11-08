@@ -55,8 +55,6 @@
 
 #include "qsvgnode_p.h"
 
-#ifndef QT_NO_SVG
-
 #include "QtGui/qpainterpath.h"
 #include "QtGui/qimage.h"
 #include "QtGui/qtextlayout.h"
@@ -258,5 +256,4 @@ public:
 
 QT_END_NAMESPACE
 
-#endif // QT_NO_SVG
 #endif // QSVGGRAPHICS_P_H
