@@ -87,11 +87,6 @@ public:
 
 QAtomicInt QSvgIconEnginePrivate::lastSerialNum;
 
-static inline int pmKey(const QSize &size, QIcon::Mode mode, QIcon::State state)
-{
-    return ((((((size.width()<<11)|size.height())<<11)|mode)<<4)|state);
-}
-
 QSvgIconEngine::QSvgIconEngine()
     : d(new QSvgIconEnginePrivate)
 {
