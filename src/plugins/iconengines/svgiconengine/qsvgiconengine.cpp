@@ -169,6 +169,9 @@ QPixmap QSvgIconEngine::pixmap(const QSize &size, QIcon::Mode mode,
     if (!actualSize.isNull())
         actualSize.scale(size, Qt::KeepAspectRatio);
 
+    if (actualSize.isEmpty())
+        return QPixmap();
+
     QImage img(actualSize, QImage::Format_ARGB32_Premultiplied);
     img.fill(0x00000000);
     QPainter p(&img);
