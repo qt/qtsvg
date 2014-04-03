@@ -1,6 +1,7 @@
 TARGET  = qsvgicon
 
 PLUGIN_TYPE = iconengines
+PLUGIN_EXTENDS = -
 PLUGIN_CLASS_NAME = QSvgIconPlugin
 load(qt_plugin)
 

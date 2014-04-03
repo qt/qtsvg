@@ -1,6 +1,7 @@
 TARGET  = qsvg
 
 PLUGIN_TYPE = imageformats
+PLUGIN_EXTENDS = -
 PLUGIN_CLASS_NAME = QSvgPlugin
 load(qt_plugin)
 
