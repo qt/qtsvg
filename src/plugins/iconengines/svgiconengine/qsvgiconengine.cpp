@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2014 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -46,12 +46,10 @@
 #include "qpixmap.h"
 #include "qsvgrenderer.h"
 #include "qpixmapcache.h"
-#include "qstyle.h"
-#include "qapplication.h"
-#include "qstyleoption.h"
 #include "qfileinfo.h"
 #include <QAtomicInt>
 #include "qdebug.h"
+#include <private/qguiapplication_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -178,10 +176,8 @@ QPixmap QSvgIconEngine::pixmap(const QSize &size, QIcon::Mode mode,
     renderer.render(&p);
     p.end();
     pm = QPixmap::fromImage(img);
-    if (qobject_cast<QApplication *>(QCoreApplication::instance())) {
-        QStyleOption opt(0);
-        opt.palette = QGuiApplication::palette();
-        QPixmap generated = QApplication::style()->generatedIconPixmap(mode, pm, &opt);
+    if (qobject_cast<QGuiApplication *>(QCoreApplication::instance())) {
+        const QPixmap generated = QGuiApplicationPrivate::instance()->applyQIconStyleHelper(mode, pm);
         if (!generated.isNull())
             pm = generated;
     }

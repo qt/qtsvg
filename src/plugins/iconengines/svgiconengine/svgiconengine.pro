@@ -9,4 +9,4 @@ HEADERS += qsvgiconengine.h
 SOURCES += main.cpp \
            qsvgiconengine.cpp
 OTHER_FILES += qsvgiconengine.json
-QT += xml svg gui
+QT += svg core-private gui-private
