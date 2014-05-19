@@ -4,7 +4,7 @@ RESOURCES     = svgviewer.qrc
 SOURCES       = main.cpp \
                 mainwindow.cpp \
                 svgview.cpp
-QT           += widgets svg xml
+QT           += widgets svg
 
 qtHaveModule(opengl): QT += opengl
 
