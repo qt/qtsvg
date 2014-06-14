@@ -44,6 +44,11 @@
 #include <QtNetwork>
 #include <QtSvg>
 
+#define GET_DATA_ATTR(val) xml.attributes().value(val).toString()
+#define GET_DATETIME(val) QDateTime::fromString(val, "yyyy-MM-ddThh:mm:ss")
+#define FORMAT_TEMPERATURE(val) val + QChar(176) + "C"
+#define TEXTCOLOR palette().color(QPalette::WindowText)
+
 class WeatherInfo: public QMainWindow
 {
     Q_OBJECT
@@ -56,6 +61,8 @@ private:
     QGraphicsRectItem *m_statusItem;
     QGraphicsTextItem *m_temperatureItem;
     QGraphicsTextItem *m_conditionItem;
+    QGraphicsTextItem *m_cityItem;
+    QGraphicsTextItem *m_copyright;
     QGraphicsSvgItem *m_iconItem;
     QList<QGraphicsRectItem*> m_forecastItems;
     QList<QGraphicsTextItem*> m_dayItems;
@@ -82,9 +89,9 @@ public:
         QStringList cities;
         cities << "Oslo";
         cities << "Berlin";
-        cities << "Brisbane";
+        cities << "Moscow";
         cities << "Helsinki";
-        cities << "San Diego";
+        cities << "Santa Clara";
         for (int i = 0; i < cities.count(); ++i) {
             QAction *action = new QAction(cities[i], this);
             connect(action, SIGNAL(triggered()), SLOT(chooseCity()));
@@ -100,15 +107,26 @@ public:
 
 private slots:
     void delayedInit() {
-        request("Oslo");
+        request("http://www.yr.no/place/Norge/Oslo/Oslo/Oslo/varsel.xml");
     }
 
 private slots:
 
     void chooseCity() {
         QAction *action = qobject_cast<QAction*>(sender());
-        if (action)
-            request(action->text());
+        if (action) {
+            if (action->text() == "Oslo") {
+                request("http://www.yr.no/place/Norge/Oslo/Oslo/Oslo/varsel.xml");
+            } else if (action->text() == "Berlin") {
+                request("http://www.yr.no/place/Germany/Berlin/Berlin/varsel.xml");
+            } else if (action->text() == "Moscow") {
+                request("http://www.yr.no/place/Russia/Moscow/Moscow/varsel.xml");
+            } else if (action->text() == "Helsinki") {
+                request("http://www.yr.no/place/Finland/Southern_Finland/Helsinki/varsel.xml");
+            } else if (action->text() == "Santa Clara") {
+                request("http://www.yr.no/place/United_States/California/Santa_Clara/varsel.xml");
+            }
+        }
     }
 
     void handleNetworkData(QNetworkReply *networkReply) {
@@ -145,17 +163,23 @@ private slots:
 private:
 
     void setupScene() {
-
-        QColor textColor = palette().color(QPalette::WindowText);
         QFont textFont = font();
         textFont.setBold(true);
-        textFont.setPointSize(textFont.pointSize() * 2);
+        textFont.setPointSize(static_cast<int>(textFont.pointSize() * 1.5));
 
         m_temperatureItem = m_scene.addText(QString(), textFont);
-        m_temperatureItem->setDefaultTextColor(textColor);
+        m_temperatureItem->setDefaultTextColor(TEXTCOLOR);
 
         m_conditionItem = m_scene.addText(QString(), textFont);
-        m_conditionItem->setDefaultTextColor(textColor);
+        m_conditionItem->setDefaultTextColor(TEXTCOLOR);
+
+        m_cityItem = m_scene.addText(QString(), textFont);
+        m_cityItem->setDefaultTextColor(TEXTCOLOR);
+
+        m_copyright = m_scene.addText(QString());
+        m_copyright->setDefaultTextColor(TEXTCOLOR);
+        m_copyright->setOpenExternalLinks(true);
+        m_copyright->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
         m_iconItem = new QGraphicsSvgItem;
         m_scene.addItem(m_iconItem);
@@ -166,6 +190,7 @@ private:
         m_temperatureItem->setParentItem(m_statusItem);
         m_conditionItem->setParentItem(m_statusItem);
         m_iconItem->setParentItem(m_statusItem);
+        m_copyright->setParentItem(m_statusItem);
 
         connect(&m_timeLine, SIGNAL(frameChanged(int)), SLOT(animate(int)));
         m_timeLine.setDuration(1100);
@@ -174,12 +199,7 @@ private:
     }
 
     void request(const QString &location) {
-        QUrl url("http://www.google.com/ig/api");
-        QUrlQuery query;
-        query.addQueryItem("hl", "en");
-        query.addQueryItem("weather", location);
-        url.setQuery(query);
-
+        QUrl url(location);
         m_manager.get(QNetworkRequest(url));
 
         city = QString();
@@ -188,63 +208,44 @@ private:
 
     QString extractIcon(const QString &data) {
         if (m_icons.isEmpty()) {
-            m_icons["mostly_cloudy"]    = "weather-few-clouds";
-            m_icons["cloudy"]           = "weather-overcast";
-            m_icons["mostly_sunny"]     = "weather-sunny-very-few-clouds";
-            m_icons["partly_cloudy"]    = "weather-sunny-very-few-clouds";
-            m_icons["sunny"]            = "weather-sunny";
-            m_icons["flurries"]         = "weather-snow";
-            m_icons["fog"]              = "weather-fog";
-            m_icons["haze"]             = "weather-haze";
-            m_icons["icy"]              = "weather-icy";
-            m_icons["sleet"]            = "weather-sleet";
-            m_icons["chance_of_sleet"]  = "weather-sleet";
-            m_icons["snow"]             = "weather-snow";
-            m_icons["chance_of_snow"]   = "weather-snow";
-            m_icons["mist"]             = "weather-showers";
-            m_icons["rain"]             = "weather-showers";
-            m_icons["chance_of_rain"]   = "weather-showers";
-            m_icons["storm"]            = "weather-storm";
-            m_icons["chance_of_storm"]  = "weather-storm";
-            m_icons["thunderstorm"]     = "weather-thundershower";
-            m_icons["chance_of_tstorm"] = "weather-thundershower";
+            m_icons["Partly cloudy"]    = "weather-few-clouds";
+            m_icons["Cloudy"]           = "weather-overcast";
+            m_icons["Fair"]             = "weather-sunny-very-few-clouds";
+            m_icons["Sun"]              = "weather-sunny";
+            m_icons["Sun/clear sky"]    = "weather-sunny";
+            m_icons["Clear sky"]    = "weather-sunny";
+            m_icons["Snow showers"]     = "weather-snow";
+            m_icons["Snow"]             = "weather-snow";
+            m_icons["Fog"]              = "weather-fog";
+            m_icons["Sleet"]            = "weather-sleet";
+            m_icons["Sleet showers"]    = "weather-sleet";
+            m_icons["Rain showers"]     = "weather-showers";
+            m_icons["Rain"]             = "weather-showers";
+            m_icons["Heavy rain"]       = "weather-showers";
+            m_icons["Rain showers with thunder"]  = "weather-thundershower";
+            m_icons["Rain and thunder"]           = "weather-thundershower";
+            m_icons["Sleet and thunder"]          = "weather-thundershower";
+            m_icons["Heavy rain and thunder"]     = "weather-thundershower";
+            m_icons["Snow and thunder"]           = "weather-thundershower";
+            m_icons["Sleet showers and thunder"]  = "weather-thundershower";
+            m_icons["Snow showers and thunder"]   = "weather-thundershower";
         }
-        QRegExp regex("([\\w]+).gif$");
-        if (regex.indexIn(data) != -1) {
-            QString i = regex.cap();
-            i = i.left(i.length() - 4);
-            QString name = m_icons.value(i);
-            if (!name.isEmpty()) {
-                name.prepend(":/icons/");
-                name.append(".svg");
-                return name;
-            }
+        QString name = m_icons.value(data);
+        if (!name.isEmpty()) {
+            name.prepend(":/icons/");
+            name.append(".svg");
+            return name;
         }
         return QString();
     }
 
-    static QString toCelcius(QString t, QString unit) {
-        bool ok = false;
-        int degree = t.toInt(&ok);
-        if (!ok)
-            return QString();
-        if (unit != "SI")
-            degree = ((degree - 32) * 5 + 8)/ 9;
-        return QString::number(degree) + QChar(176);
-    }
-
-
-#define GET_DATA_ATTR xml.attributes().value("data").toString()
-
     void digest(const QString &data) {
-
-        QColor textColor = palette().color(QPalette::WindowText);
-        QString unitSystem;
-
         delete m_iconItem;
         m_iconItem = new QGraphicsSvgItem();
         m_scene.addItem(m_iconItem);
         m_iconItem->setParentItem(m_statusItem);
+        m_conditionItem->setPlainText(QString());
+
         qDeleteAll(m_dayItems);
         qDeleteAll(m_conditionItems);
         qDeleteAll(m_rangeItems);
@@ -255,101 +256,180 @@ private:
         m_forecastItems.clear();
 
         QXmlStreamReader xml(data);
+
+        bool foundCurrentForecast = false;
         while (!xml.atEnd()) {
             xml.readNext();
             if (xml.tokenType() == QXmlStreamReader::StartElement) {
-                if (xml.name() == "city") {
-                    city = GET_DATA_ATTR;
-                    setWindowTitle(city);
-                }
-                if (xml.name() == "unit_system")
-                    unitSystem = xml.attributes().value("data").toString();
-                // Parse current weather conditions
-                if (xml.name() == "current_conditions") {
+                if (xml.name() == "location") {
                     while (!xml.atEnd()) {
                         xml.readNext();
-                        if (xml.name() == "current_conditions")
-                            break;
                         if (xml.tokenType() == QXmlStreamReader::StartElement) {
-                            if (xml.name() == "condition") {
-                                m_conditionItem->setPlainText(GET_DATA_ATTR);
-                            }
-                            if (xml.name() == "icon") {
-                                QString name = extractIcon(GET_DATA_ATTR);
-                                if (!name.isEmpty()) {
-                                    delete m_iconItem;
-                                    m_iconItem = new QGraphicsSvgItem(name);
-                                    m_scene.addItem(m_iconItem);
-                                    m_iconItem->setParentItem(m_statusItem);
-                                }
-                            }
-                            if (xml.name() == "temp_c") {
-                                QString s = GET_DATA_ATTR + QChar(176);
-                                m_temperatureItem->setPlainText(s);
+                            if (xml.name() == "name") {
+                                city = xml.readElementText();
+                                m_cityItem->setPlainText(city);
+                                setWindowTitle(city);
+                                xml.skipCurrentElement();
+                                break;
                             }
                         }
                     }
-                }
-                // Parse and collect the forecast conditions
-                if (xml.name() == "forecast_conditions") {
-                    QGraphicsTextItem *dayItem  = 0;
-                    QGraphicsSvgItem *statusItem = 0;
-                    QString lowT, highT;
+                } else if (xml.name() == "credit") {
                     while (!xml.atEnd()) {
                         xml.readNext();
-                        if (xml.name() == "forecast_conditions") {
-                            if (dayItem && statusItem &&
-                                !lowT.isEmpty() && !highT.isEmpty()) {
-                                m_dayItems << dayItem;
-                                m_conditionItems << statusItem;
-                                QString txt = highT + '/' + lowT;
-                                QGraphicsTextItem* rangeItem;
-                                rangeItem = m_scene.addText(txt);
-                                rangeItem->setDefaultTextColor(textColor);
-                                m_rangeItems << rangeItem;
-                                QGraphicsRectItem *box;
-                                box = m_scene.addRect(0, 0, 10, 10);
-                                box->setPen(Qt::NoPen);
-                                box->setBrush(Qt::NoBrush);
-                                m_forecastItems << box;
-                                dayItem->setParentItem(box);
-                                statusItem->setParentItem(box);
-                                rangeItem->setParentItem(box);
-                            } else {
-                                delete dayItem;
-                                delete statusItem;
-                            }
-                            break;
-                        }
                         if (xml.tokenType() == QXmlStreamReader::StartElement) {
-                            if (xml.name() == "day_of_week") {
-                                QString s = GET_DATA_ATTR;
-                                dayItem = m_scene.addText(s.left(3));
-                                dayItem->setDefaultTextColor(textColor);
+                            if (xml.name() == "link") {
+                                m_copyright->setHtml(QString("<td align=\"center\">%1 <a href=\"%2\">(source)</a></td>").arg(GET_DATA_ATTR("text")).arg(GET_DATA_ATTR("url")));
+                                xml.skipCurrentElement();
+                                break;
                             }
-                            if (xml.name() == "icon") {
-                                QString name = extractIcon(GET_DATA_ATTR);
-                                if (!name.isEmpty()) {
-                                    statusItem = new QGraphicsSvgItem(name);
-                                    m_scene.addItem(statusItem);
-                                }
-                            }
-                            if (xml.name() == "low")
-                                lowT = toCelcius(GET_DATA_ATTR, unitSystem);
-                            if (xml.name() == "high")
-                                highT = toCelcius(GET_DATA_ATTR, unitSystem);
                         }
                     }
-                }
+                } else if (xml.name() == "tabular") {
+                    while (!xml.atEnd()) {
+                        xml.readNext();
+                        if (xml.tokenType() == QXmlStreamReader::StartElement) {
+                            if (xml.name() == "time") {
+                                if (!foundCurrentForecast) {
+                                    QString temperature;
+                                    QString symbol;
+                                    getSymbolTemp(xml, symbol, temperature);
+                                    if (!symbol.isEmpty()) {
+                                        delete m_iconItem;
+                                        m_iconItem = new QGraphicsSvgItem(symbol);
+                                        m_scene.addItem(m_iconItem);
+                                        m_iconItem->setParentItem(m_statusItem);
+                                    }
+                                    QString s = FORMAT_TEMPERATURE(temperature);
+                                    m_temperatureItem->setPlainText(s);
+                                    foundCurrentForecast = true;
+                                } else {
+                                    createNewDay(xml);
+                                }
 
+                            }
+                        }
+                    }
+                } else if (xml.name() != "weatherdata" && xml.name() != "forecast" && xml.name() != "credit"){
+                    xml.skipCurrentElement();
+                }
             }
         }
+
+
+
+
 
         m_timeLine.stop();
         layoutItems();
         animate(0);
         m_timeLine.start();
     }
+
+    void createNewDay(QXmlStreamReader &xml) {
+        QGraphicsTextItem *dayItem  = 0;
+        QString lowT;
+        QString highT;
+        QString period = GET_DATA_ATTR("period");
+        QString datetime;
+        if (period == "0")
+            datetime = GET_DATA_ATTR("to");
+        else
+            datetime = GET_DATA_ATTR("from");
+        QString temperature;
+        QString symbol;
+        getSymbolTemp(xml, symbol, temperature);
+        lowT = highT = temperature;
+        QDateTime date = GET_DATETIME(datetime);
+        dayItem = m_scene.addText(date.date().toString("ddd"));
+        dayItem->setDefaultTextColor(TEXTCOLOR);
+
+        // check for other info same day
+        bool saved = false;
+        while (!xml.atEnd()) {
+            xml.readNext();
+            if (xml.tokenType() == QXmlStreamReader::StartElement) {
+                if (xml.name() == "time") {
+                    QString period = GET_DATA_ATTR("period");
+                    // save data if new day starts
+                    if (period == "0") {
+                        saveDayItem(dayItem, lowT, highT, symbol);
+                        createNewDay(xml);
+                        saved = true;
+                    } else {
+                        updateDay(xml, lowT, highT, symbol, period == "2");
+                    }
+                }
+            }
+        }
+        if (!saved)// last Item
+            saveDayItem(dayItem, lowT, highT, symbol);
+    }
+
+    void updateDay(QXmlStreamReader &xml, QString &lowT, QString &highT, QString &symbolToShow, bool updateSymbol) {
+        QString temperature;
+        QString symbol;
+        getSymbolTemp(xml, symbol, temperature);
+        if (lowT.toFloat() > temperature.toFloat())
+            lowT = temperature;
+        if (highT.toFloat() < temperature.toFloat())
+            highT = temperature;
+        if (updateSymbol)
+            symbolToShow = symbol;
+    }
+
+    void saveDayItem(QGraphicsTextItem *dayItem, QString lowT, QString highT, QString symbolToShow) {
+        QGraphicsSvgItem *statusItem = 0;
+        if (!symbolToShow.isEmpty()) {
+            statusItem = new QGraphicsSvgItem(symbolToShow);
+            m_scene.addItem(statusItem);
+        }
+        if (m_dayItems.count() < 4 && dayItem && statusItem &&  // Show 4 days
+                !lowT.isEmpty() && !highT.isEmpty()) {
+            m_dayItems << dayItem;
+            m_conditionItems << statusItem;
+            QString txt = FORMAT_TEMPERATURE(lowT) + '/' + FORMAT_TEMPERATURE(highT);
+            QGraphicsTextItem* rangeItem;
+            rangeItem = m_scene.addText(txt);
+            rangeItem->setDefaultTextColor(TEXTCOLOR);
+            m_rangeItems << rangeItem;
+            QGraphicsRectItem *box;
+            box = m_scene.addRect(0, 0, 10, 10);
+            box->setPen(Qt::NoPen);
+            box->setBrush(Qt::NoBrush);
+            m_forecastItems << box;
+            dayItem->setParentItem(box);
+            statusItem->setParentItem(box);
+            rangeItem->setParentItem(box);
+        } else {
+            delete dayItem;
+            delete statusItem;
+        }
+    }
+
+    void getSymbolTemp(QXmlStreamReader &xml, QString &symbol, QString &temp) {
+        bool foundIcon = false;
+        bool foundTemp = false;
+        while (!xml.atEnd()) {
+            xml.readNext();
+            if (xml.tokenType() == QXmlStreamReader::StartElement) {
+                if (xml.name() == "symbol") {
+                    QString condition = GET_DATA_ATTR("name");
+                    symbol = extractIcon(condition);
+                    if (m_conditionItem->toPlainText().isEmpty())
+                        m_conditionItem->setPlainText(condition);
+                    foundIcon = true;
+                }
+                if (xml.name() == "temperature") {
+                    temp = GET_DATA_ATTR("value");
+                    foundTemp = true;
+                }
+                if (foundIcon && foundTemp)
+                    break;
+            }
+        }
+    }
+
 
     void layoutItems() {
         m_scene.setSceneRect(0, 0, width() - 1, height() - 1);
@@ -361,30 +441,36 @@ private:
     }
 
     void layoutItemsLandscape() {
-        m_statusItem->setRect(0, 0, width() / 2 - 1, height() - 1);
+        qreal statusItemWidth = width() / 2 - 1;
+        m_statusItem->setRect(0, 0, statusItemWidth, height() - 1);
+
+        m_temperatureItem->setPos(10, 2);
+        qreal wtemp = m_temperatureItem->boundingRect().width();
+        qreal h1 = m_conditionItem->boundingRect().height();
+        m_conditionItem->setPos(wtemp + 20, 2);
+
+        m_copyright->setTextWidth(statusItemWidth);
+
+        qreal wcity = m_cityItem->boundingRect().width();
+        m_cityItem->setPos(statusItemWidth - wcity - 1, 2);;
+
+        qreal h2 = m_copyright->boundingRect().height();
+        m_copyright->setPos(0, height() - h2);
 
         if (!m_iconItem->boundingRect().isEmpty()) {
-            qreal dim = qMin(width() * 0.6, height() * 0.8);
-            qreal pad = (height()  - dim) / 2;
-            qreal sw = dim / m_iconItem->boundingRect().width();
-            qreal sh = dim / m_iconItem->boundingRect().height();
+            qreal sizeLeft = qMin(statusItemWidth, height() - h2 - h1 - 10);
+            qreal sw = sizeLeft / m_iconItem->boundingRect().width();
+            qreal sh = sizeLeft / m_iconItem->boundingRect().height();
             m_iconItem->setTransform(QTransform().scale(sw, sh));
-            m_iconItem->setPos(1, pad);
+            m_iconItem->setPos(statusItemWidth/2 - sizeLeft/2, h1 + 5);
         }
-
-        m_temperatureItem->setPos(2, 2);
-        qreal h = m_conditionItem->boundingRect().height();
-        m_conditionItem->setPos(10, height() - h);
 
         if (m_dayItems.count()) {
             qreal left = width() * 0.6;
-            qreal h = height() / m_dayItems.count();
-            QFont textFont = font();
-            textFont.setPixelSize(static_cast<int>(h * 0.3));
             qreal statusWidth = 0;
             qreal rangeWidth = 0;
+            qreal h = height() / m_dayItems.count();
             for (int i = 0; i < m_dayItems.count(); ++i) {
-                m_dayItems[i]->setFont(textFont);
                 QRectF brect = m_dayItems[i]->boundingRect();
                 statusWidth = qMax(statusWidth, brect.width());
                 brect = m_rangeItems[i]->boundingRect();
@@ -416,23 +502,22 @@ private:
     }
 
     void layoutItemsPortrait() {
+        qreal statusItemWidth = width() - 1;
+        m_statusItem->setRect(0, 0, statusItemWidth, height() / 2 - 1);
 
-        m_statusItem->setRect(0, 0, width() - 1, height() / 2 - 1);
+        m_temperatureItem->setPos(10, 2);
+        qreal wtemp = m_temperatureItem->boundingRect().width();
+        qreal h1 = m_conditionItem->boundingRect().height();
+        m_conditionItem->setPos(wtemp + 20, 2);
 
-        if (!m_iconItem->boundingRect().isEmpty()) {
-            qreal dim = qMin(width() * 0.8, height() * 0.4);
-            qreal ofsy = (height() / 2  - dim) / 2;
-            qreal ofsx = (width() - dim) / 3;
-            qreal sw = dim / m_iconItem->boundingRect().width();
-            qreal sh = dim / m_iconItem->boundingRect().height();
-            m_iconItem->setTransform(QTransform().scale(sw, sh));
-            m_iconItem->setPos(ofsx, ofsy);
-        }
+        m_copyright->setTextWidth(statusItemWidth);
 
-        m_temperatureItem->setPos(2, 2);
-        qreal ch = m_conditionItem->boundingRect().height();
-        qreal cw = m_conditionItem->boundingRect().width();
-        m_conditionItem->setPos(width() - cw , height() / 2 - ch - 20);
+        qreal wcity = m_cityItem->boundingRect().width();
+        m_cityItem->setPos(statusItemWidth - wcity - 1, 2);;
+
+        m_copyright->setTextWidth(statusItemWidth);
+        qreal h2 = m_copyright->boundingRect().height();
+        m_copyright->setPos(0, height() - h2);
 
         if (m_dayItems.count()) {
             qreal top = height() * 0.5;
@@ -451,6 +536,14 @@ private:
 
             qreal boxh = statusHeight + rangeHeight + dim;
             qreal pad = (height() - top - boxh) / 2;
+
+            if (!m_iconItem->boundingRect().isEmpty()) {
+                qreal sizeLeft = qMin(statusItemWidth - 10, height() - top - 10);
+                qreal sw = sizeLeft / m_iconItem->boundingRect().width();
+                qreal sh = sizeLeft / m_iconItem->boundingRect().height();
+                m_iconItem->setTransform(QTransform().scale(sw, sh));
+                m_iconItem->setPos(statusItemWidth/2 - sizeLeft/2, h1 + 5);
+            }
 
             for (int i = 0; i < m_dayItems.count(); ++i) {
                 qreal base = w * i;

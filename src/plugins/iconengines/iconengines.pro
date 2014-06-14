@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
 
-qtHaveModule(widgets): SUBDIRS += svgiconengine
+SUBDIRS += svgiconengine
