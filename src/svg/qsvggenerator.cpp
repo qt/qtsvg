@@ -1045,6 +1045,8 @@ void QSvgPaintEngine::drawTextItem(const QPointF &pt, const QTextItem &textItem)
         return;
 
     const QTextItemInt &ti = static_cast<const QTextItemInt &>(textItem);
+    if (ti.chars == 0)
+        QPaintEngine::drawTextItem(pt, ti); // Draw as path
     QString s = QString::fromRawData(ti.chars, ti.num_chars);
 
     *d->stream << "<text "
