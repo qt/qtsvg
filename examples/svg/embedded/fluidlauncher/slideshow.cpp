@@ -98,8 +98,14 @@ void SlideShow::addImageDir(QString dirName)
 {
     QDir dir(dirName);
 
+    // lookup in directories
     QStringList fileNames = dir.entryList(QDir::Files | QDir::Readable, QDir::Name);
+    for (int i=0; i<fileNames.count(); i++)
+        d->imagePaths << dir.absoluteFilePath(fileNames[i]);
 
+    // lookup in qrc
+    dir = QDir(QString(":/fluidlauncher/" + dirName));
+    fileNames = dir.entryList(QDir::Files | QDir::Readable, QDir::Name);
     for (int i=0; i<fileNames.count(); i++)
         d->imagePaths << dir.absoluteFilePath(fileNames[i]);
 }

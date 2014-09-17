@@ -72,7 +72,7 @@ FluidLauncher::FluidLauncher(QStringList* args)
     if ( (configIndex != -1) && (configIndex != args->count()-1) )
         success = loadConfig(args->at(configIndex+1));
     else
-        success = loadConfig("config.xml");
+        success = loadConfig(":/fluidlauncher/config.xml");
 
     if (success) {
       populatePictureFlow();
