@@ -48,6 +48,11 @@ DemoApplication::DemoApplication(QString executableName, QString caption, QStrin
     else
         executablePath = QDir::cleanPath(QDir::currentPath() + QLatin1Char('/') + executableName);
   
+#ifdef WIN32
+    if (!executablePath.endsWith(QLatin1String(".exe")))
+        executablePath.append(QLatin1String(".exe"));
+#endif
+
     arguments = args;
 
     process.setProcessChannelMode(QProcess::ForwardedChannels);
@@ -69,7 +74,17 @@ void DemoApplication::launch()
 
 QImage DemoApplication::getImage() const
 {
-    return imagePath.isEmpty() ? QImage() : QImage(imagePath);
+    if (imagePath.isEmpty())
+        return QImage();
+
+    // in local dir?
+    QImage result(imagePath);
+    if (!result.isNull())
+        return result;
+
+    // provided by qrc
+    result = QImage(QString(":/fluidlauncher/%1").arg(imagePath));
+    return result;
 }
 
 QString DemoApplication::getCaption()

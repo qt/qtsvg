@@ -15,7 +15,7 @@ SOURCES += \
            pictureflow.cpp \
            slideshow.cpp
 
-EXAMPLE_FILES += config.xml screenshots slides
+RESOURCES = fluidlauncher.qrc
 
 target.path = $$[QT_INSTALL_EXAMPLES]/svg/embedded/fluidlauncher
 INSTALLS += target
