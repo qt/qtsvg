@@ -165,6 +165,7 @@ public:
     void drawPath(const QPainterPath &path);
     void drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF &sr);
     void drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode);
+    void drawRects(const QRectF *rects, int rectCount) Q_DECL_OVERRIDE;
     void drawTextItem(const QPointF &pt, const QTextItem &item);
     void drawImage(const QRectF &r, const QImage &pm, const QRectF &sr,
                    Qt::ImageConversionFlags flags = Qt::AutoColor);
@@ -1035,6 +1036,21 @@ void QSvgPaintEngine::drawPolygon(const QPointF *points, int pointCount,
     } else {
         path.closeSubpath();
         drawPath(path);
+    }
+}
+
+void QSvgPaintEngine::drawRects(const QRectF *rects, int rectCount)
+{
+    Q_D(QSvgPaintEngine);
+
+    for (int i=0; i < rectCount; ++i) {
+        const QRectF &rect = rects[i];
+        *d->stream << "<rect";
+        if (state->pen().isCosmetic())
+            *d->stream << " vector-effect=\"non-scaling-stroke\"";
+        *d->stream << " x=\"" << rect.x() << "\" y=\"" << rect.y()
+                   << "\" width=\"" << rect.width() << "\" height=\"" << rect.height()
+                   << "\"/>" << endl;
     }
 }
 
