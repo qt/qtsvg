@@ -162,6 +162,7 @@ public:
     void updateState(const QPaintEngineState &state);
     void popGroup();
 
+    void drawEllipse(const QRectF &r) Q_DECL_OVERRIDE;
     void drawPath(const QPainterPath &path);
     void drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF &sr);
     void drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode);
@@ -967,6 +968,23 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
     *d->stream << '>' << endl;
 
     d->afterFirstUpdate = true;
+}
+
+void QSvgPaintEngine::drawEllipse(const QRectF &r)
+{
+    Q_D(QSvgPaintEngine);
+
+    const bool isCircle = r.width() == r.height();
+    *d->stream << '<' << (isCircle ? "circle" : "ellipse");
+    if (state->pen().isCosmetic())
+        *d->stream << " vector-effect=\"non-scaling-stroke\"";
+    const QPointF c = r.center();
+    *d->stream << " cx=\"" << c.x() << "\" cy=\"" << c.y();
+    if (isCircle)
+        *d->stream << "\" r=\"" << r.width() / qreal(2.0);
+    else
+        *d->stream << "\" rx=\"" << r.width() / qreal(2.0) << "\" ry=\"" << r.height() / qreal(2.0);
+    *d->stream << "\"/>" << endl;
 }
 
 void QSvgPaintEngine::drawPath(const QPainterPath &p)
