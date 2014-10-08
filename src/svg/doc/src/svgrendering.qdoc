@@ -40,7 +40,7 @@
 
     \snippet doc_src_qtsvg.pro 1
 
-    \section1 Rendering SVG files
+    \section1 Rendering SVG Files
 
     Scalable Vector Graphics (SVG) is a language for describing two-dimensional
     graphics and graphical applications in XML. SVG 1.1 is a W3C Recommendation
