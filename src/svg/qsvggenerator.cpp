@@ -392,6 +392,7 @@ public:
             qWarning("Unhandled cap style");
         }
         switch (spen.joinStyle()) {
+        case Qt::SvgMiterJoin:
         case Qt::MiterJoin:
             stream() << "stroke-linejoin=\"miter\" "
                         "stroke-miterlimit=\""<<spen.miterLimit()<<"\" ";
@@ -401,10 +402,6 @@ public:
             break;
         case Qt::RoundJoin:
             stream() << "stroke-linejoin=\"round\" ";
-            break;
-        case Qt::SvgMiterJoin:
-            stream() << "stroke-linejoin=\"miter\" "
-                        "stroke-miterlimit=\""<<spen.miterLimit()<<"\" ";
             break;
         default:
             qWarning("Unhandled join style");
