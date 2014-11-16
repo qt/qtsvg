@@ -31,8 +31,8 @@
 **
 ****************************************************************************/
 
-#ifndef QSVGFONT_P_H
-#define QSVGFONT_P_H
+#ifndef QTSVGGLOBAL_P_H
+#define QTSVGGLOBAL_P_H
 
 //
 //  W A R N I N G
@@ -45,48 +45,8 @@
 // We mean it.
 //
 
-#include "qpainterpath.h"
-#include "qhash.h"
-#include "qstring.h"
-#include "qsvgstyle_p.h"
-#include "qtsvgglobal_p.h"
+#include "qtsvgglobal.h"
 
-QT_BEGIN_NAMESPACE
+#define Q_SVG_PRIVATE_EXPORT Q_SVG_EXPORT
 
-class Q_SVG_PRIVATE_EXPORT QSvgGlyph
-{
-public:
-    QSvgGlyph(QChar unicode, const QPainterPath &path, qreal horizAdvX);
-    QSvgGlyph() : m_unicode(0), m_horizAdvX(0) {}
-
-    QChar m_unicode;
-    QPainterPath m_path;
-    qreal m_horizAdvX;
-};
-
-
-class Q_SVG_PRIVATE_EXPORT QSvgFont : public QSvgRefCounted
-{
-public:
-    QSvgFont(qreal horizAdvX);
-
-    void setFamilyName(const QString &name);
-    QString familyName() const;
-
-    void setUnitsPerEm(qreal upem);
-
-    void addGlyph(QChar unicode, const QPainterPath &path, qreal horizAdvX = -1);
-
-    void draw(QPainter *p, const QPointF &point, const QString &str, qreal pixelSize, Qt::Alignment alignment) const;
-public:
-    QString m_familyName;
-    qreal m_unitsPerEm;
-    qreal m_ascent;
-    qreal m_descent;
-    qreal m_horizAdvX;
-    QHash<QChar, QSvgGlyph> m_glyphs;
-};
-
-QT_END_NAMESPACE
-
-#endif // QSVGFONT_P_H
+#endif // QTSVGGLOBAL_P_H

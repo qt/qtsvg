@@ -46,6 +46,7 @@
 //
 
 #include "qsvgnode_p.h"
+#include "qtsvgglobal_p.h"
 
 #include "QtCore/qlist.h"
 #include "QtCore/qhash.h"
@@ -57,7 +58,7 @@ class QSvgNode;
 class QPainter;
 class QSvgDefs;
 
-class QSvgStructureNode : public QSvgNode
+class Q_SVG_PRIVATE_EXPORT QSvgStructureNode : public QSvgNode
 {
 public:
     QSvgStructureNode(QSvgNode *parent);
@@ -73,7 +74,7 @@ protected:
     QList<QSvgStructureNode*> m_linkedScopes;
 };
 
-class QSvgG : public QSvgStructureNode
+class Q_SVG_PRIVATE_EXPORT QSvgG : public QSvgStructureNode
 {
 public:
     QSvgG(QSvgNode *parent);
@@ -81,7 +82,7 @@ public:
     Type type() const;
 };
 
-class QSvgDefs : public QSvgStructureNode
+class Q_SVG_PRIVATE_EXPORT QSvgDefs : public QSvgStructureNode
 {
 public:
     QSvgDefs(QSvgNode *parent);
@@ -89,7 +90,7 @@ public:
     Type type() const;
 };
 
-class QSvgSwitch : public QSvgStructureNode
+class Q_SVG_PRIVATE_EXPORT QSvgSwitch : public QSvgStructureNode
 {
 public:
     QSvgSwitch(QSvgNode *parent);

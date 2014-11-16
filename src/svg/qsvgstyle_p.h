@@ -52,6 +52,7 @@
 #include "QtGui/qcolor.h"
 #include "QtGui/qfont.h"
 #include <qdebug.h>
+#include "qtsvgglobal_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -107,7 +108,7 @@ private:
     T *t;
 };
 
-class QSvgRefCounted
+class Q_SVG_PRIVATE_EXPORT QSvgRefCounted
 {
 public:
     QSvgRefCounted() { _ref = 0; }
@@ -127,7 +128,7 @@ private:
     int _ref;
 };
 
-struct QSvgExtraStates
+struct Q_SVG_PRIVATE_EXPORT QSvgExtraStates
 {
     QSvgExtraStates();
 
@@ -141,7 +142,7 @@ struct QSvgExtraStates
     bool vectorEffect; // true if pen is cosmetic
 };
 
-class QSvgStyleProperty : public QSvgRefCounted
+class Q_SVG_PRIVATE_EXPORT QSvgStyleProperty : public QSvgRefCounted
 {
 public:
     enum Type
@@ -166,7 +167,7 @@ public:
     virtual Type type() const=0;
 };
 
-class QSvgFillStyleProperty : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgFillStyleProperty : public QSvgStyleProperty
 {
 public:
     virtual QBrush brush(QPainter *p, QSvgExtraStates &states) = 0;
@@ -174,7 +175,7 @@ public:
     virtual void revert(QPainter *p, QSvgExtraStates &states);
 };
 
-class QSvgQualityStyle : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgQualityStyle : public QSvgStyleProperty
 {
 public:
     QSvgQualityStyle(int color);
@@ -206,7 +207,7 @@ private:
 
 
 
-class QSvgOpacityStyle : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgOpacityStyle : public QSvgStyleProperty
 {
 public:
     QSvgOpacityStyle(qreal opacity);
@@ -218,7 +219,7 @@ private:
     qreal m_oldOpacity;
 };
 
-class QSvgFillStyle : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgFillStyle : public QSvgStyleProperty
 {
 public:
     QSvgFillStyle();
@@ -291,7 +292,7 @@ private:
     uint m_fillSet : 1;
 };
 
-class QSvgViewportFillStyle : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgViewportFillStyle : public QSvgStyleProperty
 {
 public:
     QSvgViewportFillStyle(const QBrush &brush);
@@ -311,7 +312,7 @@ private:
     QBrush m_oldFill;
 };
 
-class QSvgFontStyle : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgFontStyle : public QSvgStyleProperty
 {
 public:
     static const int LIGHTER = -1;
@@ -395,7 +396,7 @@ private:
     uint m_textAnchorSet : 1;
 };
 
-class QSvgStrokeStyle : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgStrokeStyle : public QSvgStyleProperty
 {
 public:
     QSvgStrokeStyle();
@@ -535,7 +536,7 @@ private:
     uint m_vectorEffectSet : 1;
 };
 
-class QSvgSolidColorStyle : public QSvgFillStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgSolidColorStyle : public QSvgFillStyleProperty
 {
 public:
     QSvgSolidColorStyle(const QColor &color);
@@ -560,7 +561,7 @@ private:
     QPen   m_oldStroke;
 };
 
-class QSvgGradientStyle : public QSvgFillStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgGradientStyle : public QSvgFillStyleProperty
 {
 public:
     QSvgGradientStyle(QGradient *grad);
@@ -602,7 +603,7 @@ private:
     bool m_gradientStopsSet;
 };
 
-class QSvgTransformStyle : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgTransformStyle : public QSvgStyleProperty
 {
 public:
     QSvgTransformStyle(const QTransform &transform);
@@ -621,7 +622,7 @@ private:
 };
 
 
-class QSvgAnimateTransform : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgAnimateTransform : public QSvgStyleProperty
 {
 public:
     enum TransformType
@@ -694,7 +695,7 @@ private:
 };
 
 
-class QSvgAnimateColor : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgAnimateColor : public QSvgStyleProperty
 {
 public:
     QSvgAnimateColor(int startMs, int endMs, int by = 0);
@@ -717,7 +718,7 @@ private:
 };
 
 
-class QSvgCompOpStyle : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgCompOpStyle : public QSvgStyleProperty
 {
 public:
     QSvgCompOpStyle(QPainter::CompositionMode mode);
@@ -737,7 +738,7 @@ private:
 };
 
 
-class QSvgStyle
+class Q_SVG_PRIVATE_EXPORT QSvgStyle
 {
 public:
     QSvgStyle()

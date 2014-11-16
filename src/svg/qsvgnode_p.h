@@ -46,6 +46,7 @@
 //
 
 #include "qsvgstyle_p.h"
+#include "qtsvgglobal_p.h"
 
 #include "QtCore/qstring.h"
 #include "QtCore/qhash.h"
@@ -55,7 +56,7 @@ QT_BEGIN_NAMESPACE
 class QPainter;
 class QSvgTinyDocument;
 
-class QSvgNode
+class Q_SVG_PRIVATE_EXPORT QSvgNode
 {
 public:
     enum Type
