@@ -51,6 +51,7 @@
 #include "qsvgstyle_p.h"
 #include "private/qcssparser_p.h"
 #include "qsvggraphics_p.h"
+#include "qtsvgglobal_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -71,7 +72,7 @@ struct QSvgCssAttribute
 
 #endif
 
-class QSvgHandler
+class Q_SVG_PRIVATE_EXPORT QSvgHandler
 {
 public:
     enum LengthType {
