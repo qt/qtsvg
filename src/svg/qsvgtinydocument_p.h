@@ -46,7 +46,7 @@
 //
 
 #include "qsvgstructure_p.h"
-#include "qtsvgglobal.h"
+#include "qtsvgglobal_p.h"
 
 #include "QtCore/qrect.h"
 #include "QtCore/qlist.h"
@@ -62,7 +62,7 @@ class QPainter;
 class QByteArray;
 class QSvgFont;
 
-class Q_SVG_EXPORT QSvgTinyDocument : public QSvgStructureNode
+class Q_SVG_PRIVATE_EXPORT QSvgTinyDocument : public QSvgStructureNode
 {
 public:
     static QSvgTinyDocument * load(const QString &file);
