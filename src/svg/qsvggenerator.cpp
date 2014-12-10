@@ -791,6 +791,8 @@ int QSvgGenerator::metric(QPaintDevice::PaintDeviceMetric metric) const
         return d->engine->resolution();
     case QPaintDevice::PdmPhysicalDpiY:
         return d->engine->resolution();
+    case QPaintDevice::PdmDevicePixelRatio:
+        return 1;
     default:
         qWarning("QSvgGenerator::metric(), unhandled metric %d\n", metric);
         break;
