@@ -35,7 +35,7 @@
 
 #include <QtCore/qglobal.h>
 
-#ifndef QT_NO_WIDGETS
+#if !defined(QT_NO_GRAPHICSVIEW) && !defined(QT_NO_WIDGETS)
 
 #include <QtWidgets/qgraphicsitem.h>
 
@@ -88,6 +88,6 @@ private:
 
 QT_END_NAMESPACE
 
-#endif // QT_NO_WIDGETS
+#endif // QT_NO_GRAPHICSVIEW or QT_NO_WIDGETS
 
 #endif // QGRAPHICSSVGITEM_H

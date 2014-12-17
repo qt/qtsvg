@@ -32,7 +32,7 @@
 ****************************************************************************/
 #include "qgraphicssvgitem.h"
 
-#ifndef QT_NO_WIDGETS
+#if !defined(QT_NO_GRAPHICSVIEW) && !defined(QT_NO_WIDGETS)
 
 #include "qpainter.h"
 #include "qstyleoption.h"
