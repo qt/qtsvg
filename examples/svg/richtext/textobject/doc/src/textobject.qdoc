@@ -71,7 +71,7 @@
 
     Let's take a look at the header file of \c {SvgTextObject}:
 
-    \snippet examples/richtext/textobject/svgtextobject.h 0
+    \snippet richtext/textobject/svgtextobject.h 0
 
     A text object is a QObject that implements QTextObjectInterface.
     Note that the first class inherited must be QObject, and that
@@ -92,7 +92,7 @@
     We start of by taking a look at the
     \l{QTextObjectInterface::}{intrinsicSize()} function:
 
-    \snippet examples/richtext/textobject/svgtextobject.cpp 0
+    \snippet richtext/textobject/svgtextobject.cpp 0
 
     \c intrinsicSize() is called by the layout to calculate the size
     of the text object. Notice that we have drawn the SVG image on a
@@ -100,7 +100,7 @@
     example would lag seriously for large images if we drew them
     with a QSvgRenderer each time.
 
-    \snippet examples/richtext/textobject/svgtextobject.cpp 1
+    \snippet richtext/textobject/svgtextobject.cpp 1
 
     In \c drawObject(), we paint the SVG image using the QPainter
     provided by the layout.
@@ -110,7 +110,7 @@
     The \c Window class is a self-contained window that has a
     QTextEdit in which SVG images can be inserted.
 
-    \snippet examples/richtext/textobject/window.h 0
+    \snippet richtext/textobject/window.h 0
 
     The \c insertTextObject() slot inserts an SVG image at the current
     cursor position, while \c setupTextObject() creates and registers
@@ -126,7 +126,7 @@
     to our text object, starting with the \c setupTextObject()
     function.
     
-    \snippet examples/richtext/textobject/window.cpp 3
+    \snippet richtext/textobject/window.cpp 3
 
     \c {SvgTextFormat}'s value is the number of our object type. It is
     used to identify object types by the document layout. 
@@ -137,12 +137,12 @@
 
     Let's move on to the \c insertTextObject() function:
 
-    \snippet examples/richtext/textobject/window.cpp 1
+    \snippet richtext/textobject/window.cpp 1
 
     First, the \c .svg file is opened and its contents are read
     into the \c svgData array. 
 
-    \snippet examples/richtext/textobject/window.cpp 2
+    \snippet richtext/textobject/window.cpp 2
 
     To speed things up, we buffer the SVG image in a QImage.  We use
     \l{QTextFormat::}{setProperty()} to store the QImage in the in the
