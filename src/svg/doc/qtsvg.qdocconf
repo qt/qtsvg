@@ -25,7 +25,8 @@ depends += qtcore \
            qtwidgets \
            qtgui \
            qtdesigner \
-           qtdoc
+           qtdoc \
+           qmake
 
 tagfile                 = ../../../doc/qtsvg/qtsvg.tags
 
