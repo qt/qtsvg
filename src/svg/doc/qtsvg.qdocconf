@@ -33,7 +33,7 @@ headerdirs  += .. \
                 ../../plugins/svg
 
 sourcedirs  += .. \
-                ../../plugins/svg
+               ../../plugins/svg
 
 exampledirs += ../../../examples/svg \
                snippets/
