@@ -2684,8 +2684,16 @@ static QSvgNode *createImageNode(QSvgNode *parent,
     qreal nheight = parseLength(height, type, handler);
     nheight = convertToPixels(nheight, false, type);
 
-
     filename = filename.trimmed();
+    if (filename.isEmpty()) {
+        qWarning() << "QSvgHandler: Image filename is empty";
+        return 0;
+    }
+    if (nwidth <= 0 || nheight <= 0) {
+        qWarning() << "QSvgHandler: Width or height for" << filename << "image was not greater than 0";
+        return 0;
+    }
+
     QImage image;
     if (filename.startsWith(QLatin1String("data"))) {
         int idx = filename.lastIndexOf(QLatin1String("base64,"));
