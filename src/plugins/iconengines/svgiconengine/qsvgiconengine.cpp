@@ -220,7 +220,10 @@ void QSvgIconEngine::addFile(const QString &fileName, const QSize &,
 void QSvgIconEngine::paint(QPainter *painter, const QRect &rect,
                            QIcon::Mode mode, QIcon::State state)
 {
-    painter->drawPixmap(rect, pixmap(rect.size(), mode, state));
+    QSize pixmapSize = rect.size();
+    if (painter->device())
+        pixmapSize *= painter->device()->devicePixelRatio();
+    painter->drawPixmap(rect, pixmap(pixmapSize, mode, state));
 }
 
 QString QSvgIconEngine::key() const
