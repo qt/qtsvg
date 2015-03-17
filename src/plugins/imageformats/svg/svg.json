@@ -1,3 +1,4 @@
 {
-    "Keys": [ "svg", "svgz" ]
+    "Keys": [ "svg", "svgz" ],
+    "MimeTypes": [ "image/svg+xml" ]
 }
