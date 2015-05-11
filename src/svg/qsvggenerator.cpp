@@ -156,22 +156,22 @@ public:
     {
     }
 
-    bool begin(QPaintDevice *device);
-    bool end();
+    bool begin(QPaintDevice *device) Q_DECL_OVERRIDE;
+    bool end() Q_DECL_OVERRIDE;
 
-    void updateState(const QPaintEngineState &state);
+    void updateState(const QPaintEngineState &state) Q_DECL_OVERRIDE;
     void popGroup();
 
     void drawEllipse(const QRectF &r) Q_DECL_OVERRIDE;
-    void drawPath(const QPainterPath &path);
-    void drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF &sr);
-    void drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode);
+    void drawPath(const QPainterPath &path) Q_DECL_OVERRIDE;
+    void drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF &sr) Q_DECL_OVERRIDE;
+    void drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode) Q_DECL_OVERRIDE;
     void drawRects(const QRectF *rects, int rectCount) Q_DECL_OVERRIDE;
-    void drawTextItem(const QPointF &pt, const QTextItem &item);
+    void drawTextItem(const QPointF &pt, const QTextItem &item) Q_DECL_OVERRIDE;
     void drawImage(const QRectF &r, const QImage &pm, const QRectF &sr,
-                   Qt::ImageConversionFlags flags = Qt::AutoColor);
+                   Qt::ImageConversionFlags flags = Qt::AutoColor) Q_DECL_OVERRIDE;
 
-    QPaintEngine::Type type() const { return QPaintEngine::SVG; }
+    QPaintEngine::Type type() const Q_DECL_OVERRIDE { return QPaintEngine::SVG; }
 
     QSize size() const { return d_func()->size; }
     void setSize(const QSize &size) {
