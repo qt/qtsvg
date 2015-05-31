@@ -311,9 +311,8 @@ void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
     bool appendSpace = false;
     QVector<QString> paragraphs;
     QStack<QTextCharFormat> formats;
-    QVector<QList<QTextLayout::FormatRange> > formatRanges;
+    QVector<QVector<QTextLayout::FormatRange> > formatRanges(1);
     paragraphs.push_back(QString());
-    formatRanges.push_back(QList<QTextLayout::FormatRange>());
 
     for (int i = 0; i < m_tspans.size(); ++i) {
         if (m_tspans[i] == LINEBREAK) {
@@ -332,7 +331,7 @@ void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
                 }
                 appendSpace = false;
                 paragraphs.push_back(QString());
-                formatRanges.push_back(QList<QTextLayout::FormatRange>());
+                formatRanges.resize(formatRanges.size() + 1);
             }
         } else {
             WhitespaceMode mode = m_tspans[i]->whitespaceMode();
@@ -394,7 +393,7 @@ void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
             QTextOption op = tl.textOption();
             op.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
             tl.setTextOption(op);
-            tl.setAdditionalFormats(formatRanges[i]);
+            tl.setFormats(formatRanges[i]);
             tl.beginLayout();
 
             forever {
