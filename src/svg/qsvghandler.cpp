@@ -2282,10 +2282,12 @@ static bool parseAnimateColorNode(QSvgNode *parent,
         QColor startColor, endColor;
         resolveColor(fromStr, startColor, handler);
         resolveColor(toStr, endColor, handler);
+        colors.reserve(2);
         colors.append(startColor);
         colors.append(endColor);
     } else {
         QStringList str = valuesStr.split(QLatin1Char(';'));
+        colors.reserve(str.count());
         QStringList::const_iterator itr;
         for (itr = str.constBegin(); itr != str.constEnd(); ++itr) {
             QColor color;
