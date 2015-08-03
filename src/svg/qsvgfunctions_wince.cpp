@@ -36,7 +36,9 @@
 #include <winbase.h>
 #include <kfuncs.h>
 #include <stdio.h>
+#if _WIN32_WCE < 0x800
 #include <altcecrt.h>
+#endif
 
 #include "qplatformdefs.h"
 #include "qsvgfunctions_wince_p.h"
@@ -51,6 +53,7 @@ extern "C" {
 #endif
 
 // File I/O ---------------------------------------------------------
+#if _WIN32_WCE < 0x800
 int errno = 0;
 
 int qt_wince_open(const char *filename, int oflag, int pmode)
@@ -116,6 +119,7 @@ int qt_wince__close(int handle)
         return 0;
     return fclose((FILE*)handle);
 }
+#endif
 
 #ifdef __cplusplus
 } // extern "C"
