@@ -39,7 +39,7 @@ sourcedirs  += .. \
 exampledirs += ../../../examples/svg \
                snippets/
 
-examplesinstallpath = svg
+examplesinstallpath = qtsvg/svg
 
 imagedirs   += images
 
