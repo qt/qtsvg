@@ -410,6 +410,7 @@ static const char * QSvgStyleSelector_nodeString[] = {
     "rect",
     "text",
     "textarea",
+    "tspan",
     "use",
     "video"
 };
