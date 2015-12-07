@@ -201,8 +201,9 @@ void QSvgIconEngine::addFile(const QString &fileName, const QSize &,
         if (abs.endsWith(QLatin1String(".svg"), Qt::CaseInsensitive)
 #ifndef QT_NO_COMPRESS
                 || abs.endsWith(QLatin1String(".svgz"), Qt::CaseInsensitive)
-                || abs.endsWith(QLatin1String(".svg.gz"), Qt::CaseInsensitive))
+                || abs.endsWith(QLatin1String(".svg.gz"), Qt::CaseInsensitive)
 #endif
+            )
         {
             QSvgRenderer renderer(abs);
             if (renderer.isValid()) {
