@@ -249,8 +249,8 @@ bool QSvgIconEngine::read(QDataStream &in)
         in >> fileNames >> isCompressed >> *d->svgBuffers;
 #ifndef QT_NO_COMPRESS
         if (!isCompressed) {
-            foreach(int key, d->svgBuffers->keys())
-                d->svgBuffers->insert(key, qCompress(d->svgBuffers->value(key)));
+            for (auto it = d->svgBuffers->begin(), end = d->svgBuffers->end(); it != end; ++it)
+                it.value() = qCompress(it.value());
         }
 #else
         if (isCompressed) {
@@ -306,15 +306,15 @@ bool QSvgIconEngine::write(QDataStream &out) const
         QHash<int, QByteArray> svgBuffers;
         if (d->svgBuffers)
             svgBuffers = *d->svgBuffers;
-        foreach(int key, d->svgFiles.keys()) {
+        for (auto it = d->svgFiles.cbegin(), end = d->svgFiles.cend(); it != end; ++it) {
             QByteArray buf;
-            QFile f(d->svgFiles.value(key));
+            QFile f(it.value());
             if (f.open(QIODevice::ReadOnly))
                 buf = f.readAll();
 #ifndef QT_NO_COMPRESS
             buf = qCompress(buf);
 #endif
-            svgBuffers.insert(key, buf);
+            svgBuffers.insert(it.key(), buf);
         }
         out << d->svgFiles << isCompressed << svgBuffers;
         if (d->addedPixmaps)
