@@ -65,12 +65,12 @@ static void translate_color(const QColor &color, QString *color_string,
     *opacity_string = QString::number(color.alphaF());
 }
 
-static void translate_dashPattern(QVector<qreal> pattern, const qreal& width, QString *pattern_string)
+static void translate_dashPattern(const QVector<qreal> &pattern, const qreal& width, QString *pattern_string)
 {
     Q_ASSERT(pattern_string);
 
     // Note that SVG operates in absolute lengths, whereas Qt uses a length/width ratio.
-    foreach (qreal entry, pattern)
+    for (qreal entry : pattern)
         *pattern_string += QString::fromLatin1("%1,").arg(entry * width);
 
     pattern_string->chop(1);
@@ -278,7 +278,7 @@ public:
             }
         }
 
-        foreach(QGradientStop stop, stops) {
+        for (QGradientStop stop : qAsConst(stops)) {
             QString color =
                 QString::fromLatin1("#%1%2%3")
                 .arg(stop.second.red(), 2, 16, QLatin1Char('0'))

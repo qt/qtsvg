@@ -350,7 +350,7 @@ void QSvgSwitch::init()
 QRectF QSvgStructureNode::bounds(QPainter *p, QSvgExtraStates &states) const
 {
     QRectF bounds;
-    foreach(QSvgNode *node, m_renderers)
+    for (QSvgNode *node : qAsConst(m_renderers))
         bounds |= node->transformedBounds(p, states);
     return bounds;
 }
