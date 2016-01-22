@@ -1,2 +1,5 @@
 TEMPLATE = subdirs
-SUBDIRS +=  iconengines imageformats
+
+load(qfeatures)
+!contains(QT_DISABLED_FEATURES, imageformatplugin): SUBDIRS += imageformats
+SUBDIRS += iconengines

@@ -40,8 +40,6 @@
 #include <qiconengineplugin.h>
 #include <qstringlist.h>
 
-#if !defined(QT_NO_IMAGEFORMATPLUGIN)
-
 #include "qsvgiconengine.h"
 
 #include <qiodevice.h>
@@ -80,5 +78,3 @@ QIconEngine *QSvgIconPlugin::create(const QString &file)
 QT_END_NAMESPACE
 
 #include "main.moc"
-
-#endif // !QT_NO_IMAGEFORMATPLUGIN
