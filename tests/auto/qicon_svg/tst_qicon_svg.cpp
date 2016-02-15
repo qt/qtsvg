@@ -55,6 +55,7 @@ void tst_QIcon_Svg::initTestCase()
         QFAIL("Can't find images directory!");
     if (!QImageReader::supportedImageFormats().contains("svg"))
         QFAIL("SVG support is not available");
+    QCOMPARE(QImageReader::imageFormat(prefix + "triangle.svg"), QByteArray("svg"));
 }
 
 void tst_QIcon_Svg::svgActualSize()
