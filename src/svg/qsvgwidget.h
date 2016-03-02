@@ -53,8 +53,8 @@ class Q_SVG_EXPORT QSvgWidget : public QWidget
 {
     Q_OBJECT
 public:
-    QSvgWidget(QWidget *parent=0);
-    QSvgWidget(const QString &file, QWidget *parent=0);
+    QSvgWidget(QWidget *parent = Q_NULLPTR);
+    QSvgWidget(const QString &file, QWidget *parent = Q_NULLPTR);
     ~QSvgWidget();
 
     QSvgRenderer *renderer() const;
