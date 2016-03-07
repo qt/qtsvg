@@ -7,7 +7,6 @@ win32-msvc*|win32-icc:QMAKE_LFLAGS += /BASE:0x66000000
 solaris-cc*:QMAKE_CXXFLAGS_RELEASE -= -O2
 
 QMAKE_DOCS = $$PWD/doc/qtsvg.qdocconf
-load(qt_module)
 
 HEADERS += \
     qsvggraphics_p.h        \
@@ -53,3 +52,5 @@ contains(QT_CONFIG, system-zlib) {
 } else {
     QT_PRIVATE += zlib-private
 }
+
+load(qt_module)
