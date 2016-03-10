@@ -55,11 +55,6 @@ protected:
     void resizeEvent(QResizeEvent *) {
         fitInView(sceneRect(), Qt::KeepAspectRatio);
     }
-#ifdef Q_OS_WINCE
-    void hideEvent(QHideEvent *) {
-        qApp->quit();
-    }
-#endif
 };
 
 CloudView::CloudView(QGraphicsScene *scene)
@@ -67,9 +62,6 @@ CloudView::CloudView(QGraphicsScene *scene)
 {
     setRenderHints(QPainter::TextAntialiasing | QPainter::Antialiasing |
                    QPainter::SmoothPixmapTransform);
-#if defined (Q_OS_WINCE)
-    setWindowState(Qt::WindowMaximized);
-#endif
 }
 
 #include "main.moc"

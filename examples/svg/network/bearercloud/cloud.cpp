@@ -245,7 +245,6 @@ void Cloud::stateChanged(QNetworkSession::State state)
     else
         finalOpacity = 1.0;
 
-#if !defined(Q_OS_WINCE)
     QString tooltip;
 
     if (configuration.name().isEmpty())
@@ -303,9 +302,6 @@ void Cloud::stateChanged(QNetworkSession::State state)
     tooltip += tr("<br>Sent data: %1 bytes").arg(session->bytesWritten());
 
     setToolTip(tooltip);
-#else
-    Q_UNUSED(state);
-#endif
 }
 //! [2]
 

@@ -11,11 +11,4 @@ music.files = data/*.mp3 data/*.wav
 image.files = data/*.png
 
 target.path = $$[QT_INSTALL_EXAMPLES]/svg/embedded/desktopservices
-
-wince*{
-    music.path = "\\My Documents\\My Music"
-    image.path = "\\My Documents\\My Pictures"
-    DEPLOYMENT += music image
-}
-
 INSTALLS += target

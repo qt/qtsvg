@@ -37,13 +37,6 @@ SOURCES += \
     qgraphicssvgitem.cpp    \
     qsvggenerator.cpp
 
-wince*: {
-    SOURCES += \
-        qsvgfunctions_wince.cpp
-    HEADERS += \
-        qsvgfunctions_wince_p.h
-}
-
 contains(QT_CONFIG, system-zlib) {
     if(unix|mingw):          LIBS_PRIVATE += -lz
     else {
