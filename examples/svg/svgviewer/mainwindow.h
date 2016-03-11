@@ -60,9 +60,11 @@ class MainWindow : public QMainWindow
 public:
     MainWindow();
 
+    bool loadFile(const QString &path);
+
 public slots:
-    void openFile(const QString &path = QString());
-    void setRenderer(QAction *action);
+    void openFile();
+    void setRenderer(int renderMode);
 
 private:
     QAction *m_nativeAction;
