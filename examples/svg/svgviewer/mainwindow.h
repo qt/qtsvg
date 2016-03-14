@@ -64,6 +64,7 @@ public:
 
 public slots:
     void openFile();
+    void exportImage();
     void setRenderer(int renderMode);
 
 private:

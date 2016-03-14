@@ -39,18 +39,35 @@
 ****************************************************************************/
 
 #include "mainwindow.h"
+#include "exportdialog.h"
 
 #include <QtWidgets>
+#include <QSvgRenderer>
 
 #include "svgview.h"
+
+static inline QString picturesLocation()
+{
+    return QStandardPaths::standardLocations(QStandardPaths::PicturesLocation).value(0, QDir::currentPath());
+}
 
 MainWindow::MainWindow()
     : QMainWindow()
     , m_view(new SvgView)
 {
+    QToolBar *toolBar = new QToolBar(this);
+    addToolBar(Qt::TopToolBarArea, toolBar);
+
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    QAction *openAction = fileMenu->addAction(tr("&Open..."), this, &MainWindow::openFile);
+    const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":/qt-project.org/styles/commonstyle/images/standardbutton-open-32.png"));
+    QAction *openAction = fileMenu->addAction(openIcon, tr("&Open..."), this, &MainWindow::openFile);
     openAction->setShortcut(QKeySequence::Open);
+    toolBar->addAction(openAction);
+    const QIcon exportIcon = QIcon::fromTheme("document-save", QIcon(":/qt-project.org/styles/commonstyle/images/standardbutton-save-32.png"));
+    QAction *exportAction = fileMenu->addAction(exportIcon, tr("&Export..."), this, &MainWindow::exportImage);
+    exportAction->setToolTip(tr("Export Image"));
+    exportAction->setShortcut(Qt::CTRL + Qt::Key_E);
+    toolBar->addAction(exportAction);
     QAction *quitAction = fileMenu->addAction(tr("E&xit"), qApp, QCoreApplication::quit);
     quitAction->setShortcuts(QKeySequence::Quit);
 
@@ -116,7 +133,7 @@ void MainWindow::openFile()
     fileDialog.setMimeTypeFilters(QStringList() << "image/svg+xml" << "image/svg+xml-compressed");
     fileDialog.setWindowTitle(tr("Open SVG File"));
     if (m_currentPath.isEmpty())
-        fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::PicturesLocation).value(0, QDir::currentPath()));
+        fileDialog.setDirectory(picturesLocation());
 
     while (fileDialog.exec() == QDialog::Accepted && !loadFile(fileDialog.selectedFiles().constFirst()))
         ;
@@ -126,7 +143,7 @@ bool MainWindow::loadFile(const QString &fileName)
 {
     if (!QFileInfo::exists(fileName) || !m_view->openFile(fileName)) {
         QMessageBox::critical(this, tr("Open SVG File"),
-                              QString("Could not open file '%1'.").arg(QDir::toNativeSeparators(fileName)));
+                              tr("Could not open file '%1'.").arg(QDir::toNativeSeparators(fileName)));
         return false;
     }
 
@@ -153,4 +170,44 @@ void MainWindow::setRenderer(int renderMode)
 
     m_highQualityAntialiasingAction->setEnabled(renderMode == SvgView::OpenGL);
     m_view->setRenderer(static_cast<SvgView::RendererType>(renderMode));
+}
+
+void MainWindow::exportImage()
+{
+    ExportDialog exportDialog(this);
+    exportDialog.setExportSize(m_view->svgSize());
+    QString fileName;
+    if (m_currentPath.isEmpty()) {
+        fileName = picturesLocation() + QLatin1String("/export.png");
+    } else {
+        const QFileInfo fi(m_currentPath);
+        fileName = fi.absolutePath() + QLatin1Char('/') + fi.baseName() + QLatin1String(".png");
+    }
+    exportDialog.setExportFileName(fileName);
+
+    while (true) {
+        if (exportDialog.exec() != QDialog::Accepted)
+            break;
+
+        const QSize imageSize = exportDialog.exportSize();
+        QImage image(imageSize, QImage::Format_ARGB32);
+        image.fill(Qt::transparent);
+        QPainter painter;
+        painter.begin(&image);
+        m_view->renderer()->render(&painter, QRectF(QPointF(), QSizeF(imageSize)));
+        painter.end();
+
+        const QString fileName = exportDialog.exportFileName();
+        if (image.save(fileName)) {
+
+            const QString message = tr("Exported %1, %2x%3, %4 bytes")
+                .arg(QDir::toNativeSeparators(fileName)).arg(imageSize.width()).arg(imageSize.height())
+                .arg(QFileInfo(fileName).size());
+            statusBar()->showMessage(message);
+            break;
+        } else {
+            QMessageBox::critical(this, tr("Export Image"),
+                                  tr("Could not write file '%1'.").arg(QDir::toNativeSeparators(fileName)));
+        }
+    }
 }

@@ -194,3 +194,9 @@ void SvgView::wheelEvent(QWheelEvent *event)
     event->accept();
 }
 
+QSvgRenderer *SvgView::renderer() const
+{
+    if (m_svgItem)
+        return m_svgItem->renderer();
+    return nullptr;
+}
