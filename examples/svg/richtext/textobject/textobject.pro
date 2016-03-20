@@ -12,6 +12,8 @@ RESOURCES       = resources.qrc
 target.path = $$[QT_INSTALL_EXAMPLES]/svg/richtext/textobject
 INSTALLS += target
 
-filesToDeploy.files = files/*.svg
-filesToDeploy.path = files
-DEPLOYMENT += filesToDeploy
+wince*{
+    filesToDeploy.files = files/*.svg
+    filesToDeploy.path = files
+    DEPLOYMENT += filesToDeploy
+}
