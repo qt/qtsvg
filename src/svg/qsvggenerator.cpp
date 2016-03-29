@@ -324,8 +324,6 @@ public:
 
     void qpenToSvg(const QPen &spen)
     {
-        QString width;
-
         d_func()->pen = spen;
 
         switch (spen.style()) {
