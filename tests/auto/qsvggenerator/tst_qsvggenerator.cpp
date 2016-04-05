@@ -39,10 +39,6 @@
 #include <qsvggenerator.h>
 #include <qsvgrenderer.h>
 
-#ifdef Q_OS_SYMBIAN
-#define SRCDIR ""
-#endif
-
 class tst_QSvgGenerator : public QObject
 {
 Q_OBJECT
