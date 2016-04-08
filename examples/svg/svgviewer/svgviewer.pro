@@ -1,9 +1,11 @@
 HEADERS       = mainwindow.h \
-                svgview.h
+                svgview.h \
+                exportdialog.h
 RESOURCES     = svgviewer.qrc
 SOURCES       = main.cpp \
                 mainwindow.cpp \
-                svgview.cpp
+                svgview.cpp \
+                exportdialog.cpp
 QT           += widgets svg
 
 qtHaveModule(opengl): QT += opengl

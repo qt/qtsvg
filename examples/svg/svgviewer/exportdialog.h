@@ -38,50 +38,43 @@
 **
 ****************************************************************************/
 
-#ifndef SVGVIEW_H
-#define SVGVIEW_H
+#ifndef EXPORTDIALOG_H
+#define EXPORTDIALOG_H
 
-#include <QGraphicsView>
+#include <QDialog>
 
-QT_BEGIN_NAMESPACE
-class QGraphicsSvgItem;
-class QSvgRenderer;
-class QWheelEvent;
-class QPaintEvent;
-QT_END_NAMESPACE
+QT_FORWARD_DECLARE_CLASS(QLineEdit)
+QT_FORWARD_DECLARE_CLASS(QSpinBox)
 
-class SvgView : public QGraphicsView
+class ExportDialog : public QDialog
 {
     Q_OBJECT
-
 public:
-    enum RendererType { Native, OpenGL, Image };
+    explicit ExportDialog(QWidget *parent = 0);
 
-    explicit SvgView(QWidget *parent = nullptr);
+    QSize exportSize() const;
+    void setExportSize(const QSize &);
 
-    bool openFile(const QString &fileName);
-    void setRenderer(RendererType type = Native);
-    void drawBackground(QPainter *p, const QRectF &rect) override;
+    QString exportFileName() const;
+    void setExportFileName(const QString &);
 
-    QSize svgSize() const;
-    QSvgRenderer *renderer() const;
+    void accept() override;
 
-public slots:
-    void setHighQualityAntialiasing(bool highQualityAntialiasing);
-    void setViewBackground(bool enable);
-    void setViewOutline(bool enable);
-
-protected:
-    void wheelEvent(QWheelEvent *event) override;
-    void paintEvent(QPaintEvent *event) override;
+private slots:
+    void browse();
+    void resetExportSize();
+    void exportWidthChanged(int width);
+    void exportHeightChanged(int height);
 
 private:
-    RendererType m_renderer;
+    void setExportWidthBlocked(int width);
+    void setExportHeightBlocked(int height);
 
-    QGraphicsSvgItem *m_svgItem;
-    QGraphicsRectItem *m_backgroundItem;
-    QGraphicsRectItem *m_outlineItem;
-
-    QImage m_image;
+    QLineEdit *m_fileNameLineEdit;
+    QSpinBox *m_widthSpinBox;
+    QSpinBox *m_heightSpinBox;
+    QSize m_defaultSize;
+    qreal m_aspectRatio;
 };
-#endif // SVGVIEW_H
+
+#endif // EXPORTDIALOG_H

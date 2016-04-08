@@ -39,56 +39,73 @@
 ****************************************************************************/
 
 #include "mainwindow.h"
+#include "exportdialog.h"
 
 #include <QtWidgets>
+#include <QSvgRenderer>
 
 #include "svgview.h"
+
+static inline QString picturesLocation()
+{
+    return QStandardPaths::standardLocations(QStandardPaths::PicturesLocation).value(0, QDir::currentPath());
+}
 
 MainWindow::MainWindow()
     : QMainWindow()
     , m_view(new SvgView)
 {
-    QMenu *fileMenu = new QMenu(tr("&File"), this);
-    QAction *openAction = fileMenu->addAction(tr("&Open..."));
-    openAction->setShortcut(QKeySequence(tr("Ctrl+O")));
-    QAction *quitAction = fileMenu->addAction(tr("E&xit"));
+    QToolBar *toolBar = new QToolBar(this);
+    addToolBar(Qt::TopToolBarArea, toolBar);
+
+    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
+    const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":/qt-project.org/styles/commonstyle/images/standardbutton-open-32.png"));
+    QAction *openAction = fileMenu->addAction(openIcon, tr("&Open..."), this, &MainWindow::openFile);
+    openAction->setShortcut(QKeySequence::Open);
+    toolBar->addAction(openAction);
+    const QIcon exportIcon = QIcon::fromTheme("document-save", QIcon(":/qt-project.org/styles/commonstyle/images/standardbutton-save-32.png"));
+    QAction *exportAction = fileMenu->addAction(exportIcon, tr("&Export..."), this, &MainWindow::exportImage);
+    exportAction->setToolTip(tr("Export Image"));
+    exportAction->setShortcut(Qt::CTRL + Qt::Key_E);
+    toolBar->addAction(exportAction);
+    QAction *quitAction = fileMenu->addAction(tr("E&xit"), qApp, QCoreApplication::quit);
     quitAction->setShortcuts(QKeySequence::Quit);
 
-    menuBar()->addMenu(fileMenu);
-
-    QMenu *viewMenu = new QMenu(tr("&View"), this);
+    QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
     m_backgroundAction = viewMenu->addAction(tr("&Background"));
     m_backgroundAction->setEnabled(false);
     m_backgroundAction->setCheckable(true);
     m_backgroundAction->setChecked(false);
-    connect(m_backgroundAction, SIGNAL(toggled(bool)), m_view, SLOT(setViewBackground(bool)));
+    connect(m_backgroundAction, &QAction::toggled, m_view, &SvgView::setViewBackground);
 
     m_outlineAction = viewMenu->addAction(tr("&Outline"));
     m_outlineAction->setEnabled(false);
     m_outlineAction->setCheckable(true);
     m_outlineAction->setChecked(true);
-    connect(m_outlineAction, SIGNAL(toggled(bool)), m_view, SLOT(setViewOutline(bool)));
+    connect(m_outlineAction, &QAction::toggled, m_view, &SvgView::setViewOutline);
 
-    menuBar()->addMenu(viewMenu);
-
-    QMenu *rendererMenu = new QMenu(tr("&Renderer"), this);
+    QMenu *rendererMenu = menuBar()->addMenu(tr("&Renderer"));
     m_nativeAction = rendererMenu->addAction(tr("&Native"));
     m_nativeAction->setCheckable(true);
     m_nativeAction->setChecked(true);
+    m_nativeAction->setData(int(SvgView::Native));
 #ifndef QT_NO_OPENGL
     m_glAction = rendererMenu->addAction(tr("&OpenGL"));
     m_glAction->setCheckable(true);
+    m_glAction->setData(int(SvgView::OpenGL));
 #endif
     m_imageAction = rendererMenu->addAction(tr("&Image"));
     m_imageAction->setCheckable(true);
+    m_imageAction->setData(int(SvgView::Image));
 
-#ifndef QT_NO_OPENGL
     rendererMenu->addSeparator();
     m_highQualityAntialiasingAction = rendererMenu->addAction(tr("&High Quality Antialiasing"));
     m_highQualityAntialiasingAction->setEnabled(false);
     m_highQualityAntialiasingAction->setCheckable(true);
     m_highQualityAntialiasingAction->setChecked(false);
-    connect(m_highQualityAntialiasingAction, SIGNAL(toggled(bool)), m_view, SLOT(setHighQualityAntialiasing(bool)));
+    connect(m_highQualityAntialiasingAction, &QAction::toggled, m_view, &SvgView::setHighQualityAntialiasing);
+#ifdef QT_NO_OPENGL
+    m_highQualityAntialiasingAction->setVisible(false);
 #endif
 
     QActionGroup *rendererGroup = new QActionGroup(this);
@@ -100,64 +117,97 @@ MainWindow::MainWindow()
 
     menuBar()->addMenu(rendererMenu);
 
-    connect(openAction, SIGNAL(triggered()), this, SLOT(openFile()));
-    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
-    connect(rendererGroup, SIGNAL(triggered(QAction*)),
-            this, SLOT(setRenderer(QAction*)));
+    connect(rendererGroup, &QActionGroup::triggered,
+            [this] (QAction *a) { setRenderer(a->data().toInt()); });
+
+    QMenu *help = menuBar()->addMenu(tr("&Help"));
+    help->addAction(tr("About Qt"), qApp, &QApplication::aboutQt);
 
     setCentralWidget(m_view);
-    setWindowTitle(tr("SVG Viewer"));
 }
 
-void MainWindow::openFile(const QString &path)
+void MainWindow::openFile()
 {
+    QFileDialog fileDialog(this);
+    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    fileDialog.setMimeTypeFilters(QStringList() << "image/svg+xml" << "image/svg+xml-compressed");
+    fileDialog.setWindowTitle(tr("Open SVG File"));
+    if (m_currentPath.isEmpty())
+        fileDialog.setDirectory(picturesLocation());
+
+    while (fileDialog.exec() == QDialog::Accepted && !loadFile(fileDialog.selectedFiles().constFirst()))
+        ;
+}
+
+bool MainWindow::loadFile(const QString &fileName)
+{
+    if (!QFileInfo::exists(fileName) || !m_view->openFile(fileName)) {
+        QMessageBox::critical(this, tr("Open SVG File"),
+                              tr("Could not open file '%1'.").arg(QDir::toNativeSeparators(fileName)));
+        return false;
+    }
+
+    if (!fileName.startsWith(":/")) {
+        m_currentPath = fileName;
+        setWindowFilePath(fileName);
+        const QSize size = m_view->svgSize();
+        const QString message =
+            tr("Opened %1, %2x%3").arg(QFileInfo(fileName).fileName()).arg(size.width()).arg(size.width());
+        statusBar()->showMessage(message);
+    }
+
+    m_outlineAction->setEnabled(true);
+    m_backgroundAction->setEnabled(true);
+
+    const QSize availableSize = QApplication::desktop()->availableGeometry(this).size();
+    resize(m_view->sizeHint().expandedTo(availableSize / 4) + QSize(80, 80 + menuBar()->height()));
+
+    return true;
+}
+
+void MainWindow::setRenderer(int renderMode)
+{
+
+    m_highQualityAntialiasingAction->setEnabled(renderMode == SvgView::OpenGL);
+    m_view->setRenderer(static_cast<SvgView::RendererType>(renderMode));
+}
+
+void MainWindow::exportImage()
+{
+    ExportDialog exportDialog(this);
+    exportDialog.setExportSize(m_view->svgSize());
     QString fileName;
-    if (path.isNull())
-        fileName = QFileDialog::getOpenFileName(this, tr("Open SVG File"),
-                m_currentPath, "SVG files (*.svg *.svgz *.svg.gz)");
-    else
-        fileName = path;
-
-    if (!fileName.isEmpty()) {
-        QFile file(fileName);
-        if (!file.exists()) {
-            QMessageBox::critical(this, tr("Open SVG File"),
-                           QString("Could not open file '%1'.").arg(fileName));
-
-            m_outlineAction->setEnabled(false);
-            m_backgroundAction->setEnabled(false);
-            return;
-        }
-
-        m_view->openFile(file);
-
-        if (!fileName.startsWith(":/")) {
-            m_currentPath = fileName;
-            setWindowTitle(tr("%1 - SVGViewer").arg(m_currentPath));
-        }
-
-        m_outlineAction->setEnabled(true);
-        m_backgroundAction->setEnabled(true);
-
-        resize(m_view->sizeHint() + QSize(80, 80 + menuBar()->height()));
+    if (m_currentPath.isEmpty()) {
+        fileName = picturesLocation() + QLatin1String("/export.png");
+    } else {
+        const QFileInfo fi(m_currentPath);
+        fileName = fi.absolutePath() + QLatin1Char('/') + fi.baseName() + QLatin1String(".png");
     }
-}
+    exportDialog.setExportFileName(fileName);
 
-void MainWindow::setRenderer(QAction *action)
-{
-#ifndef QT_NO_OPENGL
-    m_highQualityAntialiasingAction->setEnabled(false);
-#endif
+    while (true) {
+        if (exportDialog.exec() != QDialog::Accepted)
+            break;
 
-    if (action == m_nativeAction)
-        m_view->setRenderer(SvgView::Native);
-#ifndef QT_NO_OPENGL
-    else if (action == m_glAction) {
-        m_highQualityAntialiasingAction->setEnabled(true);
-        m_view->setRenderer(SvgView::OpenGL);
-    }
-#endif
-    else if (action == m_imageAction) {
-        m_view->setRenderer(SvgView::Image);
+        const QSize imageSize = exportDialog.exportSize();
+        QImage image(imageSize, QImage::Format_ARGB32);
+        image.fill(Qt::transparent);
+        QPainter painter;
+        painter.begin(&image);
+        m_view->renderer()->render(&painter, QRectF(QPointF(), QSizeF(imageSize)));
+        painter.end();
+
+        const QString fileName = exportDialog.exportFileName();
+        if (image.save(fileName)) {
+
+            const QString message = tr("Exported %1, %2x%3, %4 bytes")
+                .arg(QDir::toNativeSeparators(fileName)).arg(imageSize.width()).arg(imageSize.height())
+                .arg(QFileInfo(fileName).size());
+            statusBar()->showMessage(message);
+            break;
+        } else {
+            QMessageBox::critical(this, tr("Export Image"),
+                                  tr("Could not write file '%1'.").arg(QDir::toNativeSeparators(fileName)));
+        }
     }
 }

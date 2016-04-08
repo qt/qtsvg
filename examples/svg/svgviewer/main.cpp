@@ -39,7 +39,9 @@
 ****************************************************************************/
 
 #include <QApplication>
-#include <QString>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
+#include <QStringList>
 #ifndef QT_NO_OPENGL
 #include <QGLFormat>
 #endif
@@ -51,12 +53,21 @@ int main(int argc, char **argv)
     Q_INIT_RESOURCE(svgviewer);
 
     QApplication app(argc, argv);
+    QCoreApplication::setApplicationName("SVG Viewer");
+    QGuiApplication::setApplicationDisplayName(QCoreApplication::applicationName());
+    QCoreApplication::setOrganizationName("QtProject");
+    QCoreApplication::setApplicationVersion(QT_VERSION_STR);
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Qt SVG Viewer");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("file", "The file to open.");
+    parser.process(app);
 
     MainWindow window;
-    if (argc == 2)
-        window.openFile(argv[1]);
-    else
-        window.openFile(":/files/bubbles.svg");
+    if (!window.loadFile(parser.positionalArguments().value(0, QLatin1String(":/files/bubbles.svg"))))
+        return -1;
     window.show();
     return app.exec();
 }

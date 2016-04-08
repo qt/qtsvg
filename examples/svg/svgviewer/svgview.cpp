@@ -39,7 +39,8 @@
 ****************************************************************************/
 #include "svgview.h"
 
-#include <QFile>
+#include <QSvgRenderer>
+
 #include <QWheelEvent>
 #include <QMouseEvent>
 #include <QGraphicsRectItem>
@@ -54,9 +55,9 @@
 SvgView::SvgView(QWidget *parent)
     : QGraphicsView(parent)
     , m_renderer(Native)
-    , m_svgItem(0)
-    , m_backgroundItem(0)
-    , m_outlineItem(0)
+    , m_svgItem(nullptr)
+    , m_backgroundItem(nullptr)
+    , m_outlineItem(nullptr)
 {
     setScene(new QGraphicsScene(this));
     setTransformationAnchor(AnchorUnderMouse);
@@ -83,20 +84,26 @@ void SvgView::drawBackground(QPainter *p, const QRectF &)
     p->restore();
 }
 
-void SvgView::openFile(const QFile &file)
+QSize SvgView::svgSize() const
 {
-    if (!file.exists())
-        return;
+    return m_svgItem ? m_svgItem->boundingRect().size().toSize() : QSize();
+}
 
+bool SvgView::openFile(const QString &fileName)
+{
     QGraphicsScene *s = scene();
 
-    bool drawBackground = (m_backgroundItem ? m_backgroundItem->isVisible() : false);
-    bool drawOutline = (m_outlineItem ? m_outlineItem->isVisible() : true);
+    const bool drawBackground = (m_backgroundItem ? m_backgroundItem->isVisible() : false);
+    const bool drawOutline = (m_outlineItem ? m_outlineItem->isVisible() : true);
+
+    QScopedPointer<QGraphicsSvgItem> svgItem(new QGraphicsSvgItem(fileName));
+    if (!svgItem->renderer()->isValid())
+        return false;
 
     s->clear();
     resetTransform();
 
-    m_svgItem = new QGraphicsSvgItem(file.fileName());
+    m_svgItem = svgItem.take();
     m_svgItem->setFlags(QGraphicsItem::ItemClipsToShape);
     m_svgItem->setCacheMode(QGraphicsItem::NoCache);
     m_svgItem->setZValue(0);
@@ -120,6 +127,7 @@ void SvgView::openFile(const QFile &file)
     s->addItem(m_outlineItem);
 
     s->setSceneRect(m_outlineItem->boundingRect().adjusted(-10, -10, 10, 10));
+    return true;
 }
 
 void SvgView::setRenderer(RendererType type)
@@ -186,3 +194,9 @@ void SvgView::wheelEvent(QWheelEvent *event)
     event->accept();
 }
 
+QSvgRenderer *SvgView::renderer() const
+{
+    if (m_svgItem)
+        return m_svgItem->renderer();
+    return nullptr;
+}
