@@ -116,10 +116,13 @@ QSize QSvgIconEngine::actualSize(const QSize &size, QIcon::Mode mode,
 void QSvgIconEnginePrivate::loadDataForModeAndState(QSvgRenderer *renderer, QIcon::Mode mode, QIcon::State state)
 {
     QByteArray buf;
+    const QIcon::State oppositeState = state == QIcon::Off ? QIcon::On : QIcon::Off;
     if (svgBuffers) {
         buf = svgBuffers->value(hashKey(mode, state));
         if (buf.isEmpty())
-            buf = svgBuffers->value(hashKey(QIcon::Normal, QIcon::Off));
+            buf = svgBuffers->value(hashKey(QIcon::Normal, state));
+        if (buf.isEmpty())
+            buf = svgBuffers->value(hashKey(QIcon::Normal, oppositeState));
     }
     if (!buf.isEmpty()) {
 #ifndef QT_NO_COMPRESS
@@ -129,7 +132,9 @@ void QSvgIconEnginePrivate::loadDataForModeAndState(QSvgRenderer *renderer, QIco
     } else {
         QString svgFile = svgFiles.value(hashKey(mode, state));
         if (svgFile.isEmpty())
-            svgFile = svgFiles.value(hashKey(QIcon::Normal, QIcon::Off));
+            svgFile = svgFiles.value(hashKey(QIcon::Normal, state));
+        if (svgFile.isEmpty())
+            svgFile = svgFiles.value(hashKey(QIcon::Normal, oppositeState));
         if (!svgFile.isEmpty())
             renderer->load(svgFile);
     }
