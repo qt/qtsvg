@@ -680,7 +680,7 @@ public:
 protected:
     void resolveMatrix(const QSvgNode *node);
 private:
-    qreal m_from, m_to;
+    qreal m_from;
     qreal m_totalRunningTime;
     TransformType m_type;
     Additive m_additive;
@@ -706,7 +706,7 @@ public:
     virtual void revert(QPainter *p, QSvgExtraStates &states);
     virtual Type type() const;
 private:
-    qreal m_from, m_to;
+    qreal m_from;
     qreal m_totalRunningTime;
     QList<QColor> m_colors;
     QBrush m_oldBrush;
