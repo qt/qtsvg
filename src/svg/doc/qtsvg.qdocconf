@@ -31,15 +31,17 @@ depends += qtcore \
 tagfile                 = ../../../doc/qtsvg/qtsvg.tags
 
 headerdirs  += .. \
-                ../../plugins/svg
+                ../../plugins/imageformats \
+                ../../plugins/iconengines
 
 sourcedirs  += .. \
-               ../../plugins/svg
+               ../../plugins/imageformats \
+               ../../plugins/iconengines
 
 exampledirs += ../../../examples/svg \
                snippets/
 
-examplesinstallpath = qtsvg/svg
+examplesinstallpath = svg
 
 imagedirs   += images
 
