@@ -635,10 +635,16 @@ void QSvgStyle::revert(QPainter *p, QSvgExtraStates &states)
 
 QSvgAnimateTransform::QSvgAnimateTransform(int startMs, int endMs, int byMs )
     : QSvgStyleProperty(),
-      m_from(startMs), m_to(endMs),
-      m_type(Empty), m_additive(Replace), m_count(0), m_finished(false), m_transformApplied(false)
+      m_from(startMs),
+      m_totalRunningTime(endMs - startMs),
+      m_type(Empty),
+      m_additive(Replace),
+      m_count(0),
+      m_finished(false),
+      m_freeze(false),
+      m_repeatCount(-1.),
+      m_transformApplied(false)
 {
-    m_totalRunningTime = m_to - m_from;
     Q_UNUSED(byMs);
 }
 
@@ -807,10 +813,13 @@ void QSvgAnimateTransform::setRepeatCount(qreal repeatCount)
 
 QSvgAnimateColor::QSvgAnimateColor(int startMs, int endMs, int byMs)
     : QSvgStyleProperty(),
-      m_from(startMs), m_to(endMs),
-      m_finished(false)
+      m_from(startMs),
+      m_totalRunningTime(endMs - startMs),
+      m_fill(false),
+      m_finished(false),
+      m_freeze(false),
+      m_repeatCount(-1.)
 {
-    m_totalRunningTime = m_to - m_from;
     Q_UNUSED(byMs);
 }
 
