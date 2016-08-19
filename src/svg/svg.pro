@@ -36,14 +36,9 @@ SOURCES += \
     qgraphicssvgitem.cpp    \
     qsvggenerator.cpp
 
-contains(QT_CONFIG, system-zlib) {
-    if(unix|mingw):          LIBS_PRIVATE += -lz
-    else {
-        isEmpty(ZLIB_LIBS): LIBS += zdll.lib
-        else: LIBS += $$ZLIB_LIBS
-    }
-} else {
+qtConfig(system-zlib): \
+    QMAKE_USE_PRIVATE += zlib
+else: \
     QT_PRIVATE += zlib-private
-}
 
 load(qt_module)
