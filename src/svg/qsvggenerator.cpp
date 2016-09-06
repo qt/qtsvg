@@ -284,7 +284,7 @@ public:
             }
         }
 
-        for (QGradientStop stop : qAsConst(stops)) {
+        for (const QGradientStop &stop : qAsConst(stops)) {
             QString color =
                 QString::fromLatin1("#%1%2%3")
                 .arg(stop.second.red(), 2, 16, QLatin1Char('0'))

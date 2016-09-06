@@ -104,10 +104,9 @@ void ContentTab::setIcon(const QString &icon)
 
 void ContentTab::populateListWidget()
 {
-    QFileInfoList fileList = m_ContentDir.entryInfoList(QDir::Files, QDir::Time);
-    foreach(QFileInfo item, fileList) {
+    const QFileInfoList fileList = m_ContentDir.entryInfoList(QDir::Files, QDir::Time);
+    for (const QFileInfo &item : fileList)
         new QListWidgetItem(m_Icon, itemName(item), this);
-    }
 }
 
 QString ContentTab::itemName(const QFileInfo &item)

@@ -195,7 +195,8 @@ void ExportDialog::browse()
     if (!fileName.isEmpty())
         fileDialog.setDirectory(QFileInfo(fileName).absolutePath());
     QStringList mimeTypes;
-    foreach (const QByteArray &mimeType, QImageWriter::supportedMimeTypes())
+    const auto supportedMimeTypes = QImageWriter::supportedMimeTypes();
+    for (const QByteArray &mimeType : supportedMimeTypes)
         mimeTypes.append(QLatin1String(mimeType));
     fileDialog.setMimeTypeFilters(mimeTypes);
     const int pngIndex = mimeTypes.indexOf("image/png");

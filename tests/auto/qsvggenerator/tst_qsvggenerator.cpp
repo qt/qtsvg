@@ -99,10 +99,14 @@ static void compareWithoutFontInfo(const QByteArray &source, const QByteArray &r
     QDomDocument referenceDoc;
     referenceDoc.setContent(reference);
 
-    QList<QString> fontAttributes;
-    fontAttributes << "font-family" << "font-size" << "font-weight" << "font-style";
+    const QString fontAttributes[] = {
+        "font-family",
+        "font-size",
+        "font-weight",
+        "font-style",
+    };
 
-    foreach (QString attribute, fontAttributes) {
+    for (const QString &attribute : fontAttributes) {
         removeAttribute(sourceDoc, attribute);
         removeAttribute(referenceDoc, attribute);
     }
