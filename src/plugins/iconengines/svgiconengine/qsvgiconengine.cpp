@@ -61,7 +61,7 @@ public:
     QString pmcKey(const QSize &size, QIcon::Mode mode, QIcon::State state)
         { return QLatin1String("$qt_svgicon_")
                  + QString::number(serialNum, 16).append(QLatin1Char('_'))
-                 + QString::number((((((size.width()<<11)|size.height())<<11)|mode)<<4)|state, 16); }
+                 + QString::number((((((qint64(size.width()) << 11) | size.height()) << 11) | mode) << 4) | state, 16); }
 
     void stepSerialNum()
         { serialNum = lastSerialNum.fetchAndAddRelaxed(1); }
