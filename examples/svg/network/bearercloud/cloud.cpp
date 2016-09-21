@@ -108,7 +108,8 @@ void Cloud::calculateForces()
     qreal xvel = 0;
     qreal yvel = 0;
     QLineF orbitForce;
-    foreach (QGraphicsItem *item, scene()->items()) {
+    const auto graphicsItems = scene()->items();
+    for (QGraphicsItem *item : graphicsItems) {
         // other clouds
         Cloud *cloud = qgraphicsitem_cast<Cloud *>(item);
         if (!cloud && item->data(0) != QLatin1String("This Device"))

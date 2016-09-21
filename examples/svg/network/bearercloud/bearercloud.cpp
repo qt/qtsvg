@@ -113,17 +113,19 @@ void BearerCloud::cloudMoved()
 
 void BearerCloud::timerEvent(QTimerEvent *)
 {
-    QList<Cloud *> clouds;
-    foreach (QGraphicsItem *item, items()) {
+    std::vector<Cloud *> clouds;
+    const auto graphicsItems = items();
+    clouds.reserve(graphicsItems.size());
+    for (QGraphicsItem *item : graphicsItems) {
         if (Cloud *cloud = qgraphicsitem_cast<Cloud *>(item))
-            clouds << cloud;
+            clouds.push_back(cloud);
     }
 
-    foreach (Cloud *cloud, clouds)
+    for (Cloud *cloud : clouds)
         cloud->calculateForces();
 
     bool cloudsMoved = false;
-    foreach (Cloud *cloud, clouds)
+    for (Cloud *cloud : clouds)
         cloudsMoved |= cloud->advance();
 
     if (!cloudsMoved) {
@@ -158,8 +160,13 @@ void BearerCloud::configurationAdded(const QNetworkConfiguration &config)
 //! [3]
 void BearerCloud::configurationRemoved(const QNetworkConfiguration &config)
 {
-    foreach (const QNetworkConfiguration::StateFlags &state, configStates.uniqueKeys())
-        configStates.remove(state, config.identifier());
+    const auto id = config.identifier();
+    for (auto it = configStates.begin(), end = configStates.end(); it != end; /* erasing */) {
+        if (it.value() == id)
+            it = configStates.erase(it);
+        else
+            ++it;
+    }
 
     Cloud *item = configurations.take(config.identifier());
 
@@ -173,10 +180,15 @@ void BearerCloud::configurationRemoved(const QNetworkConfiguration &config)
 //! [4]
 void BearerCloud::configurationChanged(const QNetworkConfiguration &config)
 {
-    foreach (const QNetworkConfiguration::StateFlags &state, configStates.uniqueKeys())
-        configStates.remove(state, config.identifier());
+    const auto id = config.identifier();
+    for (auto it = configStates.begin(), end = configStates.end(); it != end; /* erasing */) {
+        if (it.value() == id)
+            it = configStates.erase(it);
+        else
+            ++it;
+    }
 
-    configStates.insert(config.state(), config.identifier());
+    configStates.insert(config.state(), id);
 
     cloudMoved();
 }
@@ -185,10 +197,9 @@ void BearerCloud::configurationChanged(const QNetworkConfiguration &config)
 //! [1]
 void BearerCloud::updateConfigurations()
 {
-    QList<QNetworkConfiguration> allConfigurations = manager.allConfigurations();
-
-    while (!allConfigurations.isEmpty())
-        configurationAdded(allConfigurations.takeFirst());
+    const auto allConfigurations = manager.allConfigurations();
+    for (const QNetworkConfiguration &config : allConfigurations)
+        configurationAdded(config);
 
     cloudMoved();
 }

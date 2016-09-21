@@ -45,6 +45,8 @@
 #include "qsvgrenderer.h"
 #include "qpixmapcache.h"
 #include "qfileinfo.h"
+#include <qmimedatabase.h>
+#include <qmimetype.h>
 #include <QAtomicInt>
 #include "qdebug.h"
 #include <private/qguiapplication_p.h>
@@ -67,7 +69,7 @@ public:
     QString pmcKey(const QSize &size, QIcon::Mode mode, QIcon::State state)
         { return QLatin1String("$qt_svgicon_")
                  + QString::number(serialNum, 16).append(QLatin1Char('_'))
-                 + QString::number((((((size.width()<<11)|size.height())<<11)|mode)<<4)|state, 16); }
+                 + QString::number((((((qint64(size.width()) << 11) | size.height()) << 11) | mode) << 4) | state, 16); }
 
     void stepSerialNum()
         { serialNum = lastSerialNum.fetchAndAddRelaxed(1); }
@@ -201,31 +203,49 @@ void QSvgIconEngine::addPixmap(const QPixmap &pixmap, QIcon::Mode mode,
     d->addedPixmaps->insert(d->hashKey(mode, state), pixmap);
 }
 
+enum FileType { OtherFile, SvgFile, CompressedSvgFile };
+
+static FileType fileType(const QFileInfo &fi)
+{
+    const QString &abs = fi.absoluteFilePath();
+    if (abs.endsWith(QLatin1String(".svg"), Qt::CaseInsensitive))
+        return SvgFile;
+    if (abs.endsWith(QLatin1String(".svgz"), Qt::CaseInsensitive)
+        || abs.endsWith(QLatin1String(".svg.gz"), Qt::CaseInsensitive)) {
+        return CompressedSvgFile;
+    }
+#ifndef QT_NO_MIMETYPE
+    const QString &mimeTypeName = QMimeDatabase().mimeTypeForFile(fi).name();
+    if (mimeTypeName == QLatin1String("image/svg+xml"))
+        return SvgFile;
+    if (mimeTypeName == QLatin1String("image/svg+xml-compressed"))
+        return CompressedSvgFile;
+#endif // !QT_NO_MIMETYPE
+    return OtherFile;
+}
 
 void QSvgIconEngine::addFile(const QString &fileName, const QSize &,
                              QIcon::Mode mode, QIcon::State state)
 {
     if (!fileName.isEmpty()) {
-        QString abs = fileName;
-        if (fileName.at(0) != QLatin1Char(':'))
-            abs = QFileInfo(fileName).absoluteFilePath();
-        if (abs.endsWith(QLatin1String(".svg"), Qt::CaseInsensitive)
+         const QFileInfo fi(fileName);
+         const QString abs = fi.absoluteFilePath();
+         const FileType type = fileType(fi);
 #ifndef QT_NO_COMPRESS
-                || abs.endsWith(QLatin1String(".svgz"), Qt::CaseInsensitive)
-                || abs.endsWith(QLatin1String(".svg.gz"), Qt::CaseInsensitive)
+         if (type == SvgFile || type == CompressedSvgFile) {
+#else
+         if (type == SvgFile) {
 #endif
-            )
-        {
-            QSvgRenderer renderer(abs);
-            if (renderer.isValid()) {
-                d->stepSerialNum();
-                d->svgFiles.insert(d->hashKey(mode, state), abs);
-            }
-        } else {
-            QPixmap pm(abs);
-            if (!pm.isNull())
-                addPixmap(pm, mode, state);
-        }
+             QSvgRenderer renderer(abs);
+             if (renderer.isValid()) {
+                 d->stepSerialNum();
+                 d->svgFiles.insert(d->hashKey(mode, state), abs);
+             }
+         } else if (type == OtherFile) {
+             QPixmap pm(abs);
+             if (!pm.isNull())
+                 addPixmap(pm, mode, state);
+         }
     }
 }
 
