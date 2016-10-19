@@ -47,7 +47,11 @@ QT_BEGIN_NAMESPACE
 class QSvgPlugin : public QImageIOPlugin
 {
     Q_OBJECT
+#ifndef QT_NO_COMPRESS
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "svg.json")
+#else
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "svg-nocompress.json")
+#endif
 
 public:
     QStringList keys() const;
