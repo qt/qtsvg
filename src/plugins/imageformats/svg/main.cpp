@@ -62,7 +62,11 @@ QStringList QSvgPlugin::keys() const
 
 QImageIOPlugin::Capabilities QSvgPlugin::capabilities(QIODevice *device, const QByteArray &format) const
 {
+#ifndef QT_NO_COMPRESS
     if (format == "svg" || format == "svgz")
+#else
+    if (format == "svg")
+#endif
         return Capabilities(CanRead);
     if (!format.isEmpty())
         return 0;
