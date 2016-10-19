@@ -55,7 +55,7 @@ class QSvgIconPlugin : public QIconEnginePlugin
 
 public:
     QStringList keys() const;
-    QIconEngine *create(const QString &filename = QString());
+    QIconEngine *create(const QString &filename = QString()) override;
 };
 
 QStringList QSvgIconPlugin::keys() const
