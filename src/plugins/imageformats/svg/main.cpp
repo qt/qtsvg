@@ -56,15 +56,9 @@ class QSvgPlugin : public QImageIOPlugin
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "svg.json")
 
 public:
-    QStringList keys() const;
     Capabilities capabilities(QIODevice *device, const QByteArray &format) const override;
     QImageIOHandler *create(QIODevice *device, const QByteArray &format = QByteArray()) const override;
 };
-
-QStringList QSvgPlugin::keys() const
-{
-    return QStringList() << QLatin1String("svg") << QLatin1String("svgz");
-}
 
 QImageIOPlugin::Capabilities QSvgPlugin::capabilities(QIODevice *device, const QByteArray &format) const
 {

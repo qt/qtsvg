@@ -54,18 +54,8 @@ class QSvgIconPlugin : public QIconEnginePlugin
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QIconEngineFactoryInterface" FILE "qsvgiconengine.json")
 
 public:
-    QStringList keys() const;
     QIconEngine *create(const QString &filename = QString()) override;
 };
-
-QStringList QSvgIconPlugin::keys() const
-{
-    QStringList keys(QLatin1String("svg"));
-#ifndef QT_NO_COMPRESS
-    keys << QLatin1String("svgz") << QLatin1String("svg.gz");
-#endif
-    return keys;
-}
 
 QIconEngine *QSvgIconPlugin::create(const QString &file)
 {
