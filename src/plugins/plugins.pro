@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
 
-load(qfeatures)
-!contains(QT_DISABLED_FEATURES, imageformatplugin): SUBDIRS += imageformats
+QT_FOR_CONFIG += gui
+qtConfig(imageformatplugin): SUBDIRS += imageformats
 SUBDIRS += iconengines
