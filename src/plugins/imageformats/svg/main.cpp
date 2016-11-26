@@ -53,22 +53,24 @@ QT_BEGIN_NAMESPACE
 class QSvgPlugin : public QImageIOPlugin
 {
     Q_OBJECT
+#ifndef QT_NO_COMPRESS
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "svg.json")
+#else
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QImageIOHandlerFactoryInterface" FILE "svg-nocompress.json")
+#endif
 
 public:
-    QStringList keys() const;
-    Capabilities capabilities(QIODevice *device, const QByteArray &format) const;
-    QImageIOHandler *create(QIODevice *device, const QByteArray &format = QByteArray()) const;
+    Capabilities capabilities(QIODevice *device, const QByteArray &format) const override;
+    QImageIOHandler *create(QIODevice *device, const QByteArray &format = QByteArray()) const override;
 };
-
-QStringList QSvgPlugin::keys() const
-{
-    return QStringList() << QLatin1String("svg") << QLatin1String("svgz");
-}
 
 QImageIOPlugin::Capabilities QSvgPlugin::capabilities(QIODevice *device, const QByteArray &format) const
 {
+#ifndef QT_NO_COMPRESS
     if (format == "svg" || format == "svgz")
+#else
+    if (format == "svg")
+#endif
         return Capabilities(CanRead);
     if (!format.isEmpty())
         return 0;

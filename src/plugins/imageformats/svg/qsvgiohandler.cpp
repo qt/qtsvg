@@ -88,8 +88,10 @@ bool QSvgIOHandlerPrivate::load(QIODevice *device)
         const QByteArray &ba = buf->data();
         res = r.load(QByteArray::fromRawData(ba.constData() + buf->pos(), ba.size() - buf->pos()));
         buf->seek(ba.size());
+#ifndef QT_NO_COMPRESS
     } else if (q->format() == "svgz") {
         res = r.load(device->readAll());
+#endif
     } else {
         xmlReader.setDevice(device);
         res = r.load(&xmlReader);
@@ -125,10 +127,13 @@ bool QSvgIOHandler::canRead() const
         return true;        // Will happen if we have been asked for the size
 
     QByteArray buf = device()->peek(8);
+#ifndef QT_NO_COMPRESS
     if (buf.startsWith("\x1f\x8b")) {
         setFormat("svgz");
         return true;
-    } else if (buf.contains("<?xml") || buf.contains("<svg") || buf.contains("<!--")) {
+    } else
+#endif
+    if (buf.contains("<?xml") || buf.contains("<svg") || buf.contains("<!--")) {
         setFormat("svg");
         return true;
     }
@@ -257,7 +262,11 @@ bool QSvgIOHandler::supportsOption(ImageOption option) const
 bool QSvgIOHandler::canRead(QIODevice *device)
 {
     QByteArray buf = device->peek(8);
-    return buf.startsWith("\x1f\x8b") || buf.contains("<?xml") || buf.contains("<svg") || buf.contains("<!--");
+    return
+#ifndef QT_NO_COMPRESS
+            buf.startsWith("\x1f\x8b") ||
+#endif
+            buf.contains("<?xml") || buf.contains("<svg") || buf.contains("<!--");
 }
 
 QT_END_NAMESPACE
