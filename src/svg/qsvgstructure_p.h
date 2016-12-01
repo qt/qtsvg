@@ -71,7 +71,7 @@ public:
     ~QSvgStructureNode();
     QSvgNode *scopeNode(const QString &id) const;
     void addChild(QSvgNode *child, const QString &id);
-    virtual QRectF bounds(QPainter *p, QSvgExtraStates &states) const;
+    QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
     QSvgNode *previousSiblingNode(QSvgNode *n) const;
     QList<QSvgNode*> renderers() const { return m_renderers; }
 protected:
@@ -84,24 +84,24 @@ class Q_SVG_PRIVATE_EXPORT QSvgG : public QSvgStructureNode
 {
 public:
     QSvgG(QSvgNode *parent);
-    virtual void draw(QPainter *p, QSvgExtraStates &states);
-    Type type() const;
+    void draw(QPainter *p, QSvgExtraStates &states) override;
+    Type type() const override;
 };
 
 class Q_SVG_PRIVATE_EXPORT QSvgDefs : public QSvgStructureNode
 {
 public:
     QSvgDefs(QSvgNode *parent);
-    virtual void draw(QPainter *p, QSvgExtraStates &states);
-    Type type() const;
+    void draw(QPainter *p, QSvgExtraStates &states) override;
+    Type type() const override;
 };
 
 class Q_SVG_PRIVATE_EXPORT QSvgSwitch : public QSvgStructureNode
 {
 public:
     QSvgSwitch(QSvgNode *parent);
-    virtual void draw(QPainter *p, QSvgExtraStates &states);
-    Type type() const;
+    void draw(QPainter *p, QSvgExtraStates &states) override;
+    Type type() const override;
 private:
     void init();
 private:
