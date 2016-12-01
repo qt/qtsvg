@@ -60,9 +60,9 @@ class SvgTextObject : public QObject, public QTextObjectInterface
 
 public:        
     QSizeF intrinsicSize(QTextDocument *doc, int posInDocument,
-                         const QTextFormat &format);
+                         const QTextFormat &format) override;
     void drawObject(QPainter *painter, const QRectF &rect, QTextDocument *doc,
-                    int posInDocument, const QTextFormat &format);
+                    int posInDocument, const QTextFormat &format) override;
 };
 //![0]
 

@@ -64,10 +64,10 @@ class EmbeddedSvgViewer : public QWidget
     Q_OBJECT
 public:
     EmbeddedSvgViewer(const QString& filePath);
-    virtual void paintEvent(QPaintEvent *event);
-    void mouseMoveEvent ( QMouseEvent * event );
-    void mousePressEvent ( QMouseEvent * event );
-    void resizeEvent ( QResizeEvent * event );
+    void paintEvent(QPaintEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 public slots:
     void setZoom(int); // 100 <= newZoom < 0

@@ -54,12 +54,12 @@ public:
     void saveGLState();
     void restoreGLState();
 
-    void paintEvent(QPaintEvent *);
-    void mousePressEvent(QMouseEvent *);
-    void mouseDoubleClickEvent(QMouseEvent *);
-    void mouseMoveEvent(QMouseEvent *);
-    void timerEvent(QTimerEvent *);
-    void wheelEvent(QWheelEvent *);
+    void paintEvent(QPaintEvent *) override;
+    void mousePressEvent(QMouseEvent *) override;
+    void mouseDoubleClickEvent(QMouseEvent *) override;
+    void mouseMoveEvent(QMouseEvent *) override;
+    void timerEvent(QTimerEvent *) override;
+    void wheelEvent(QWheelEvent *) override;
 
 public slots:
     void animate(qreal);

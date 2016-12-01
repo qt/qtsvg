@@ -58,7 +58,7 @@ public:
 
     void cloudMoved();
 
-    void timerEvent(QTimerEvent *event);
+    void timerEvent(QTimerEvent *event) override;
 
 private Q_SLOTS:
     void configurationAdded(const QNetworkConfiguration &config);

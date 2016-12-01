@@ -52,7 +52,7 @@ public:
     ~CloudView() { }
 
 protected:
-    void resizeEvent(QResizeEvent *) {
+    void resizeEvent(QResizeEvent *) override {
         fitInView(sceneRect(), Qt::KeepAspectRatio);
     }
 };

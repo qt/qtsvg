@@ -59,7 +59,7 @@ public:
     ~Cloud();
 
     enum { Type = UserType + 1 };
-    int type() const { return Type; }
+    int type() const override { return Type; }
 
     void setFinalScale(qreal factor);
     void setDeleteAfterAnimation(bool deleteAfter);
@@ -67,14 +67,14 @@ public:
     void calculateForces();
 
     bool advance();
-    QRectF boundingRect() const;
-    void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
+    QRectF boundingRect() const override;
+    void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *) override;
 
     static qreal getRadiusForState(QNetworkConfiguration::StateFlags state);
 
 protected:
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
 private Q_SLOTS:
     void stateChanged(QNetworkSession::State state);
