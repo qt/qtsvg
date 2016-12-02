@@ -47,11 +47,23 @@
 
     \snippet doc_src_qtsvg.pro 1
 
+    \section1 Licenses and Attributions
+
+    Qt SVG is available under commercial licenses from \l{The Qt Company}.
+    In addition, it is available under the
+    \l{GNU Lesser General Public License, version 3}, or
+    the \l{GNU General Public License, version 2}.
+    See \l{Qt Licensing} for further details.
+
+    Furthermore Qt SVG contains third party
+    code under following permissive licenses:
+
+    \generatelist{groupsbymodule attributions-qtsvg}
+
     \section1 Articles
     \list
     \li \l{Rendering SVG Files} contains information about how to
     render SVG files
-    \li \l{Qt SVG License Information}{License Information}
     \endlist
 
     \section1 References
