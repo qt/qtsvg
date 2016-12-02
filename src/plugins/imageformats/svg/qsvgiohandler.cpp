@@ -98,7 +98,7 @@ bool QSvgIOHandlerPrivate::load(QIODevice *device)
     }
 
     if (res) {
-        defaultSize = QSize(r.viewBox().width(), r.viewBox().height());
+        defaultSize = r.defaultSize();
         loaded = true;
     }
 
