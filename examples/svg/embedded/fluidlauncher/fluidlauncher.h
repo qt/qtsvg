@@ -75,7 +75,7 @@ public slots:
     void demoFinished();
 
 protected:
-    void changeEvent(QEvent *event);
+    void changeEvent(QEvent *event) override;
 
 private:
     PictureFlow* pictureFlowWidget;

@@ -95,7 +95,7 @@ protected:      // New Methods
     virtual QUrl itemUrl(QListWidgetItem *item);
     virtual void handleErrorInOpen(QListWidgetItem *item);
 protected:
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
 
 public slots:   // New Slots
     virtual void openItem(QListWidgetItem *item);

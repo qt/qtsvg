@@ -579,7 +579,7 @@ private:
     }
 
 
-    void resizeEvent(QResizeEvent *event) {
+    void resizeEvent(QResizeEvent *event) override {
         Q_UNUSED(event);
         layoutItems();
     }

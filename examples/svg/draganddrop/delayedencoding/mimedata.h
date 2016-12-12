@@ -50,13 +50,13 @@ class MimeData : public QMimeData
 
 public:
     MimeData();
-    QStringList formats() const;
+    QStringList formats() const override;
 
 signals:
     void dataRequested(const QString &mimeType) const;
 
 protected:
-    QVariant retrieveData(const QString &mimetype, QVariant::Type type) const;
+    QVariant retrieveData(const QString &mimetype, QVariant::Type type) const override;
 };
 //![0]
 

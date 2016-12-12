@@ -78,9 +78,9 @@ public:     // Constructors & Destructors
     ~LinkTab();
 
 protected:  // Derived Methods
-    virtual void populateListWidget();
-    virtual QUrl itemUrl(QListWidgetItem *item);
-    virtual void handleErrorInOpen(QListWidgetItem *item);
+    void populateListWidget() override;
+    QUrl itemUrl(QListWidgetItem *item) override;
+    void handleErrorInOpen(QListWidgetItem *item) override;
 
 private:    // Used variables
     QListWidgetItem *m_WebItem;
