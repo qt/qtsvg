@@ -43,6 +43,7 @@
 
 #include "qsvgrenderer.h"
 
+#include "qstyleoption.h"
 #include "qpainter.h"
 #include "private/qwidget_p.h"
 
@@ -145,7 +146,10 @@ QSize QSvgWidget::sizeHint() const
 void QSvgWidget::paintEvent(QPaintEvent *)
 {
     Q_D(QSvgWidget);
+    QStyleOption opt;
+    opt.init(this);
     QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
     d->renderer->render(&p);
 }
 
