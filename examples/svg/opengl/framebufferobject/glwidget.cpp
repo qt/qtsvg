@@ -39,9 +39,8 @@
 ****************************************************************************/
 
 #include <QtGui/QImage>
+#include <qmath.h>
 #include "glwidget.h"
-
-#include <math.h>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -285,8 +284,6 @@ void GLWidget::restoreGLState()
     glPopAttrib();
 }
 
-#define PI 3.14159
-
 void GLWidget::timerEvent(QTimerEvent *)
 {
     if (QApplication::mouseButtons() != 0)
@@ -299,31 +296,26 @@ void GLWidget::timerEvent(QTimerEvent *)
     else if (!scale_in && scale < .5f)
         scale_in = true;
 
-    scale = scale_in ? scale + scale*0.01f : scale-scale*0.01f;
+    scale *= scale_in ? 1.01f : 0.99f;
     rot_z += 0.3f;
     rot_x += 0.1f;
 
-    int dx, dy; // disturbance point
-    float s, v, W, t;
-    int i, j;
     static float wt[128][128];
     const int width = logo.width();
+    const int dx = width >> 1, dy = dx; // disturbance point
+    const float W = .3f;
+    const float v = -4; // wave speed
     const int AMP = 5;
 
-    dx = dy = width >> 1;
-
-    W = .3f;
-    v = -4; // wave speed
-
-    for (i = 0; i < width; ++i) {
-	for ( j = 0; j < width; ++j) {
-	    s = sqrt((double) ((j - dx) * (j - dx) + (i - dy) * (i - dy)));
-	    wt[i][j] += 0.1f;
-	    t = s / v;
+    for (int i = 0; i < width; ++i) {
+        for (int j = 0; j < width; ++j) {
+            const float s = hypot(j - dx, i - dy);
+            wt[i][j] += 0.1f;
+            const double raw = AMP * sin(2 * M_PI * W * (wt[i][j] + s / v));
             if (s != 0)
-                wave[i*width + j] = AMP * sin(2 * PI * W * (wt[i][j] + t)) / (0.2*(s + 2));
+                wave[i * width + j] = raw / (0.2 * (s + 2));
             else
-                wave[i*width + j] = AMP * sin(2 * PI * W * (wt[i][j] + t));
-	}
+                wave[i * width + j] = raw;
+        }
     }
 }
