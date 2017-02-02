@@ -65,6 +65,8 @@
 
 QT_BEGIN_NAMESPACE
 
+Q_LOGGING_CATEGORY(lcSvgHandler, "qt.svg")
+
 static const char *qt_inherit_text = "inherit";
 #define QT_INHERIT QLatin1String(qt_inherit_text)
 
@@ -2692,11 +2694,11 @@ static QSvgNode *createImageNode(QSvgNode *parent,
 
     filename = filename.trimmed();
     if (filename.isEmpty()) {
-        qWarning() << "QSvgHandler: Image filename is empty";
+        qCWarning(lcSvgHandler) << "QSvgHandler: Image filename is empty";
         return 0;
     }
     if (nwidth <= 0 || nheight <= 0) {
-        qWarning() << "QSvgHandler: Width or height for" << filename << "image was not greater than 0";
+        qCWarning(lcSvgHandler) << "QSvgHandler: Width or height for" << filename << "image was not greater than 0";
         return 0;
     }
 
@@ -2709,7 +2711,7 @@ static QSvgNode *createImageNode(QSvgNode *parent,
             QByteArray data = QByteArray::fromBase64(dataStr.toLatin1());
             image = QImage::fromData(data);
         } else {
-            qDebug()<<"QSvgHandler::createImageNode: Unrecognized inline image format!";
+            qCDebug(lcSvgHandler) << "QSvgHandler::createImageNode: Unrecognized inline image format!";
         }
     } else
         image = QImage(filename);
@@ -3166,7 +3168,7 @@ static QSvgNode *createSvgNode(QSvgNode *parent,
     QString baseProfile = attributes.value(QLatin1String("baseProfile")).toString();
 #if 0
     if (baseProfile.isEmpty() && baseProfile != QLatin1String("tiny")) {
-        qWarning("Profile is %s while we only support tiny!",
+        qCWarning(lcSvgHandler, "Profile is %s while we only support tiny!",
                  qPrintable(baseProfile));
     }
 #endif
@@ -3332,7 +3334,7 @@ static QSvgNode *createUseNode(QSvgNode *parent,
         }
     }
 
-    qWarning("link %s hasn't been detected!", qPrintable(linkId));
+    qCWarning(lcSvgHandler, "link %s hasn't been detected!", qPrintable(linkId));
     return 0;
 }
 
@@ -3619,8 +3621,9 @@ bool QSvgHandler::startElement(const QString &localName,
     } else if (xmlSpace == QLatin1String("default")) {
         m_whitespaceMode.push(QSvgText::Default);
     } else {
-        qWarning() << QString::fromLatin1("\"%1\" is an invalid value for attribute xml:space. "
-                                          "Valid values are \"preserve\" and \"default\".").arg(xmlSpace.toString());
+        qCWarning(lcSvgHandler).noquote()
+            << QString::fromLatin1("\"%1\" is an invalid value for attribute xml:space. "
+                                   "Valid values are \"preserve\" and \"default\".").arg(xmlSpace.toString());
         m_whitespaceMode.push(QSvgText::Default);
     }
 
@@ -3676,13 +3679,13 @@ bool QSvgHandler::startElement(const QString &localName,
                 if (node->type() == QSvgNode::TSPAN) {
                     static_cast<QSvgText *>(m_nodes.top())->addTspan(static_cast<QSvgTspan *>(node));
                 } else {
-                    qWarning("\'text\' or \'textArea\' element contains invalid element type.");
+                    qCWarning(lcSvgHandler, "\'text\' or \'textArea\' element contains invalid element type.");
                     delete node;
                     node = 0;
                 }
                 break;
             default:
-                qWarning("Could not add child element to parent element because the types are incorrect.");
+                qCWarning(lcSvgHandler, "Could not add child element to parent element because the types are incorrect.");
                 delete node;
                 node = 0;
                 break;
@@ -3704,7 +3707,7 @@ bool QSvgHandler::startElement(const QString &localName,
     } else if (ParseMethod method = findUtilFactory(localName)) {
         Q_ASSERT(!m_nodes.isEmpty());
         if (!method(m_nodes.top(), attributes, this)) {
-            qWarning("Problem parsing %s", qPrintable(localName));
+            qCWarning(lcSvgHandler, "Problem parsing %s", qPrintable(localName));
         }
     } else if (StyleFactoryMethod method = findStyleFactoryMethod(localName)) {
         QSvgStyleProperty *prop = method(m_nodes.top(), attributes, this);
@@ -3712,16 +3715,16 @@ bool QSvgHandler::startElement(const QString &localName,
             m_style = prop;
             m_nodes.top()->appendStyleProperty(prop, someId(attributes));
         } else {
-            qWarning("Could not parse node: %s", qPrintable(localName));
+            qCWarning(lcSvgHandler, "Could not parse node: %s", qPrintable(localName));
         }
     } else if (StyleParseMethod method = findStyleUtilFactoryMethod(localName)) {
         if (m_style) {
             if (!method(m_style, attributes, this)) {
-                qWarning("Problem parsing %s", qPrintable(localName));
+                qCWarning(lcSvgHandler, "Problem parsing %s", qPrintable(localName));
             }
         }
     } else {
-        //qWarning()<<"Skipping unknown element!"<<namespaceURI<<"::"<<localName;
+        //qCWarning(lcSvgHandler) <<"Skipping unknown element!"<<namespaceURI<<"::"<<localName;
         m_skipNodes.push(Unknown);
         return true;
     }
@@ -3780,7 +3783,7 @@ void QSvgHandler::resolveGradients(QSvgNode *node)
             if (style) {
                 fill->setFillStyle(style);
             } else {
-                qWarning("Could not resolve property : %s", qPrintable(id));
+                qCWarning(lcSvgHandler, "Could not resolve property : %s", qPrintable(id));
                 fill->setBrush(Qt::NoBrush);
             }
         }
@@ -3792,7 +3795,7 @@ void QSvgHandler::resolveGradients(QSvgNode *node)
             if (style) {
                 stroke->setStyle(style);
             } else {
-                qWarning("Could not resolve property : %s", qPrintable(id));
+                qCWarning(lcSvgHandler, "Could not resolve property : %s", qPrintable(id));
                 stroke->setStroke(Qt::NoBrush);
             }
         }
