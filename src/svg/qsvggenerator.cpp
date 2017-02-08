@@ -1062,7 +1062,7 @@ void QSvgPaintEngine::drawRects(const QRectF *rects, int rectCount)
     Q_D(QSvgPaintEngine);
 
     for (int i=0; i < rectCount; ++i) {
-        const QRectF &rect = rects[i];
+        const QRectF &rect = rects[i].normalized();
         *d->stream << "<rect";
         if (state->pen().isCosmetic())
             *d->stream << " vector-effect=\"non-scaling-stroke\"";
