@@ -282,7 +282,7 @@ public:
                 << QLatin1String("fx=\"") <<grad->focalPoint().x() << QLatin1String("\" ")
                 << QLatin1String("fy=\"") <<grad->focalPoint().y() << QLatin1String("\" ");
         }
-        str << QLatin1String("xml:id=\"") <<d_func()->generateGradientName()<< QLatin1String("\">\n");
+        str << QLatin1String("id=\"") <<d_func()->generateGradientName()<< QLatin1String("\">\n");
         saveGradientStops(str, g);
         str << QLatin1String("</radialGradient>") << endl;
     }
