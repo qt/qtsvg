@@ -322,6 +322,8 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
            }
         }
     }
+#else
+    Q_UNUSED(handler);
 #endif // QT_NO_CSSPARSER
 
     for (int i = 0; i < xmlAttributes.count(); ++i) {
@@ -430,6 +432,8 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
 
 }
 
+#ifndef QT_NO_CSSPARSER
+
 static const char * QSvgStyleSelector_nodeString[] = {
     "svg",
     "g",
@@ -451,8 +455,6 @@ static const char * QSvgStyleSelector_nodeString[] = {
     "use",
     "video"
 };
-
-#ifndef QT_NO_CSSPARSER
 
 class QSvgStyleSelector : public QCss::StyleSelector
 {
