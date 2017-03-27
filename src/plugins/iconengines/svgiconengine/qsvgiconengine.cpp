@@ -375,6 +375,14 @@ bool QSvgIconEngine::write(QDataStream &out) const
     return true;
 }
 
+void QSvgIconEngine::virtual_hook(int id, void *data)
+{
+    if (id == QIconEngine::IsNullHook) {
+        *reinterpret_cast<bool*>(data) = d->svgFiles.isEmpty() && !d->addedPixmaps;
+    }
+    QIconEngine::virtual_hook(id, data);
+}
+
 QT_END_NAMESPACE
 
 #endif // QT_NO_SVGRENDERER

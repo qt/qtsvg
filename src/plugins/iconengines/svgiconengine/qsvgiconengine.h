@@ -70,6 +70,7 @@ public:
     bool read(QDataStream &in) override;
     bool write(QDataStream &out) const override;
 
+    void virtual_hook(int id, void *data) override;
 private:
     QSharedDataPointer<QSvgIconEnginePrivate> d;
 };
