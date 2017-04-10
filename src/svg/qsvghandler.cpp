@@ -1912,13 +1912,12 @@ static void parseCSStoXMLAttrs(const QVector<QCss::Declaration> &declarations,
             continue;
         QCss::Value val = decl.d->values.first();
         QString valueStr;
-        if (decl.d->values.count() != 1) {
-            for (int i=0; i<decl.d->values.count(); ++i) {
-                const QString &value = decl.d->values[i].toString();
-                if (value.isEmpty())
+        const int valCount = decl.d->values.count();
+        if (valCount != 1) {
+            for (int i = 0; i < valCount; ++i) {
+                valueStr += decl.d->values[i].toString();
+                if (i + 1 < valCount)
                     valueStr += QLatin1Char(',');
-                else
-                    valueStr += value;
             }
         } else {
             valueStr = val.toString();
