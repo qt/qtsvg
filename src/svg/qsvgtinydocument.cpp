@@ -104,7 +104,7 @@ QByteArray qt_inflateGZipDataFrom(QIODevice *device)
 
     // Adding 16 to the window size gives us gzip decoding
     if (inflateInit2(&zlibStream, MAX_WBITS + 16) != Z_OK) {
-        qWarning("Cannot initialize zlib, because: %s",
+        qCWarning(lcSvgHandler, "Cannot initialize zlib, because: %s",
                 (zlibStream.msg != NULL ? zlibStream.msg : "Unknown error"));
         return QByteArray();
     }
@@ -137,7 +137,7 @@ QByteArray qt_inflateGZipDataFrom(QIODevice *device)
                 case Z_STREAM_ERROR:
                 case Z_MEM_ERROR: {
                     inflateEnd(&zlibStream);
-                    qWarning("Error while inflating gzip file: %s",
+                    qCWarning(lcSvgHandler, "Error while inflating gzip file: %s",
                             (zlibStream.msg != NULL ? zlibStream.msg : "Unknown error"));
                     destination.chop(zlibStream.avail_out);
                     return destination;
@@ -167,8 +167,8 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QString &fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly)) {
-        qWarning("Cannot open file '%s', because: %s",
-                 qPrintable(fileName), qPrintable(file.errorString()));
+        qCWarning(lcSvgHandler, "Cannot open file '%s', because: %s",
+                  qPrintable(fileName), qPrintable(file.errorString()));
         return 0;
     }
 
@@ -185,7 +185,7 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QString &fileName)
         doc = handler.document();
         doc->m_animationDuration = handler.animationDuration();
     } else {
-        qWarning("Cannot read file '%s', because: %s (line %d)",
+        qCWarning(lcSvgHandler, "Cannot read file '%s', because: %s (line %d)",
                  qPrintable(fileName), qPrintable(handler.errorString()), handler.lineNumber());
     }
     return doc;
@@ -261,7 +261,7 @@ void QSvgTinyDocument::draw(QPainter *p, const QString &id,
     QSvgNode *node = scopeNode(id);
 
     if (!node) {
-        qDebug("Couldn't find node %s. Skipping rendering.", qPrintable(id));
+        qCDebug(lcSvgHandler, "Couldn't find node %s. Skipping rendering.", qPrintable(id));
         return;
     }
     if (m_time.isNull()) {
@@ -443,7 +443,7 @@ QMatrix QSvgTinyDocument::matrixForElement(const QString &id) const
     QSvgNode *node = scopeNode(id);
 
     if (!node) {
-        qDebug("Couldn't find node %s. Skipping rendering.", qPrintable(id));
+        qCDebug(lcSvgHandler, "Couldn't find node %s. Skipping rendering.", qPrintable(id));
         return QMatrix();
     }
 

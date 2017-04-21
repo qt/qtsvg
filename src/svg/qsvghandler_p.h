@@ -54,6 +54,7 @@
 #include "QtCore/qxmlstream.h"
 #include "QtCore/qhash.h"
 #include "QtCore/qstack.h"
+#include <QtCore/QLoggingCategory>
 #include "qsvgstyle_p.h"
 #include "private/qcssparser_p.h"
 #include "qsvggraphics_p.h"
@@ -185,6 +186,8 @@ private:
      */
     const bool m_ownsReader;
 };
+
+Q_DECLARE_LOGGING_CATEGORY(lcSvgHandler)
 
 QT_END_NAMESPACE
 
