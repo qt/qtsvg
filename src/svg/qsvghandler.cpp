@@ -2201,7 +2201,7 @@ static inline QSvgNode::DisplayMode displayStringToEnum(const QString &str)
         return QSvgNode::TableMode;
     } else if (str == QLatin1String("inline-table")) {
         return QSvgNode::InlineTableMode;
-    } else if (str == QLatin1String("table-row")) {
+    } else if (str == QLatin1String("table-row-group")) {
         return QSvgNode::TableRowGroupMode;
     } else if (str == QLatin1String("table-header-group")) {
         return QSvgNode::TableHeaderGroupMode;
