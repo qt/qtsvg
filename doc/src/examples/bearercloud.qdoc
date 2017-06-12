@@ -68,9 +68,9 @@
 
     \section1 Setting the Scene
 
-    When constructing the scene we first calculate some random offsets using the global qsand()
-    and qrand() functions.  We will use these offsets to scatter the initial position of new Cloud
-    objects.
+    When constructing the scene we first calculate some random offsets using \l
+    QRandomGenerator. We will use these offsets to scatter the initial position
+    of new Cloud objects.
 
     Next we place a text item in the center of the scene to represent the local device and
     surround it with four concentric circles to help visualize the orbits.
