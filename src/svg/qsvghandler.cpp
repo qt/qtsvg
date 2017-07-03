@@ -1143,9 +1143,9 @@ static QMatrix parseTransformationMatrix(const QStringRef &value)
         if(state == Matrix) {
             if(points.count() != 6)
                 goto error;
-            matrix = matrix * QMatrix(points[0], points[1],
-                                      points[2], points[3],
-                                      points[4], points[5]);
+            matrix = QMatrix(points[0], points[1],
+                             points[2], points[3],
+                             points[4], points[5]) * matrix;
         } else if (state == Translate) {
             if (points.count() == 1)
                 matrix.translate(points[0], 0);
