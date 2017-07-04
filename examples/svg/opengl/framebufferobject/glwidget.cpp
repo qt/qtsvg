@@ -300,7 +300,9 @@ void GLWidget::timerEvent(QTimerEvent *)
     rot_z += 0.3f;
     rot_x += 0.1f;
 
-    static float wt[128][128];
+    static float wt = 0.0;
+    wt += 0.1f;
+
     const int width = logo.width();
     const int dx = width >> 1, dy = dx; // disturbance point
     const float W = .3f;
@@ -310,8 +312,7 @@ void GLWidget::timerEvent(QTimerEvent *)
     for (int i = 0; i < width; ++i) {
         for (int j = 0; j < width; ++j) {
             const float s = hypot(j - dx, i - dy);
-            wt[i][j] += 0.1f;
-            const double raw = AMP * sin(2 * M_PI * W * (wt[i][j] + s / v));
+            const double raw = AMP * sin(2 * M_PI * W * (wt + s / v));
             if (s != 0)
                 wave[i * width + j] = raw / (0.2 * (s + 2));
             else
