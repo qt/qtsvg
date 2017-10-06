@@ -228,9 +228,9 @@ public:
             QTextStream str(&d_func()->defs, QIODevice::Append);
             str << "<mask id=\"" << maskId << "\" x=\"0\" y=\"0\" width=\"8\" height=\"8\" "
                 << "stroke=\"none\" fill=\"#ffffff\" patternUnits=\"userSpaceOnUse\" >" << endl;
-            for (QRect r : reg.rects()) {
+            const auto &rects = reg.rects();
+            for (const QRect &r : rects)
                 str << rct.arg(r.x()).arg(r.y()).arg(r.width()).arg(r.height()) << endl;
-            }
             str << QStringLiteral("</mask>") << endl << endl;
             d_func()->savedPatternMasks.append(maskId);
         }
