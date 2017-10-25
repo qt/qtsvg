@@ -67,7 +67,7 @@ BearerCloud::BearerCloud(QObject *parent)
     setSceneRect(-300, -300, 600, 600);
 
 
-    offset[QNetworkConfiguration::Active] = QRandomGenerator::bounded(2 * M_PI);
+    offset[QNetworkConfiguration::Active] = QRandomGenerator::global()->bounded(2 * M_PI);
     offset[QNetworkConfiguration::Discovered] = offset[QNetworkConfiguration::Active] + M_PI / 6;
     offset[QNetworkConfiguration::Defined] = offset[QNetworkConfiguration::Discovered] - M_PI / 6;
     offset[QNetworkConfiguration::Undefined] = offset[QNetworkConfiguration::Undefined] + M_PI / 6;
