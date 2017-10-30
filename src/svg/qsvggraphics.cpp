@@ -316,7 +316,6 @@ void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
 
     bool appendSpace = false;
     QVector<QString> paragraphs;
-    QStack<QTextCharFormat> formats;
     QVector<QVector<QTextLayout::FormatRange> > formatRanges(1);
     paragraphs.push_back(QString());
 
