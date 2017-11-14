@@ -465,6 +465,9 @@ QSvgUse::QSvgUse(const QPointF &start, QSvgNode *parent, QSvgNode *node)
 
 void QSvgUse::draw(QPainter *p, QSvgExtraStates &states)
 {
+    if (Q_UNLIKELY(!m_link || isDescendantOf(m_link)))
+        return;
+
     applyStyle(p, states);
 
     if (!m_start.isNull()) {
@@ -553,7 +556,7 @@ QSvgNode::Type QSvgVideo::type() const
 QRectF QSvgUse::bounds(QPainter *p, QSvgExtraStates &states) const
 {
     QRectF bounds;
-    if (m_link) {
+    if (Q_LIKELY(m_link && !isDescendantOf(m_link))) {
         p->translate(m_start);
         bounds = m_link->transformedBounds(p, states);
         p->translate(-m_start);

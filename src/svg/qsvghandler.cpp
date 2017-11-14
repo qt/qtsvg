@@ -3338,6 +3338,8 @@ static QSvgNode *createUseNode(QSvgNode *parent,
     if (group) {
         QSvgNode *link = group->scopeNode(linkId);
         if (link) {
+            if (parent->isDescendantOf(link))
+                qCWarning(lcSvgHandler, "link #%s is recursive!", qPrintable(linkId));
             QPointF pt;
             if (!xStr.isNull() || !yStr.isNull()) {
                 QSvgHandler::LengthType type;
