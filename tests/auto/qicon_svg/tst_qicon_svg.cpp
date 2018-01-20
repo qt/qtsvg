@@ -152,6 +152,16 @@ void tst_QIcon_Svg::isNull()
         //valid svg, we're not null
         QIcon icon(prefix + "heart.svg");
         QVERIFY(!icon.isNull());
+
+        // check for non null of serialized/deserialized valid icon
+        QByteArray buf;
+        QDataStream out(&buf, QIODevice::WriteOnly);
+        out << icon;
+
+        QIcon icon2;
+        QDataStream in(buf);
+        in >> icon2;
+        QVERIFY(!icon2.isNull());
     }
     {
         //invalid svg, but a pixmap added means we're not null
