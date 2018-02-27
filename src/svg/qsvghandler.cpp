@@ -896,10 +896,11 @@ static bool constructColor(const QStringRef &colorStr, const QStringRef &opacity
     return true;
 }
 
-static qreal parseLength(const QString &str, QSvgHandler::LengthType &type,
+template <class String> // QString/QStringRef
+static qreal parseLength(const String &str, QSvgHandler::LengthType &type,
                          QSvgHandler *handler, bool *ok = NULL)
 {
-    QString numStr = str.trimmed();
+    String numStr = str.trimmed();
 
     if (numStr.endsWith(QLatin1Char('%'))) {
         numStr.chop(1);
@@ -931,7 +932,7 @@ static qreal parseLength(const QString &str, QSvgHandler::LengthType &type,
     return len;
 }
 
-static inline qreal convertToNumber(const QString &str, QSvgHandler *handler, bool *ok = NULL)
+static inline qreal convertToNumber(const QStringRef &str, QSvgHandler *handler, bool *ok = NULL)
 {
     QSvgHandler::LengthType type;
     qreal num = parseLength(str, type, handler, ok);
@@ -1226,7 +1227,7 @@ static void parsePen(QSvgNode *node,
         //stroke-width handling
         if (!attributes.strokeWidth.isEmpty() && attributes.strokeWidth != QT_INHERIT) {
             QSvgHandler::LengthType lt;
-            prop->setWidth(parseLength(attributes.strokeWidth.toString(), lt, handler));
+            prop->setWidth(parseLength(attributes.strokeWidth, lt, handler));
         }
 
         //stroke-dasharray
@@ -1360,7 +1361,7 @@ static void parseFont(QSvgNode *node,
             break;
         case FontSizeValue: {
             QSvgHandler::LengthType dummy; // should always be pixel size
-            fontStyle->setSize(parseLength(attributes.fontSize.toString(), dummy, handler));
+            fontStyle->setSize(parseLength(attributes.fontSize, dummy, handler));
         }
             break;
         default:
@@ -1381,7 +1382,7 @@ static void parseFont(QSvgNode *node,
 
     if (!attributes.fontWeight.isEmpty() && attributes.fontWeight != QT_INHERIT) {
         bool ok = false;
-        int weightNum = attributes.fontWeight.toString().toInt(&ok);
+        const int weightNum = attributes.fontWeight.toInt(&ok);
         if (ok) {
             fontStyle->setWeight(weightNum);
         } else {
@@ -2124,7 +2125,7 @@ static void parseOpacity(QSvgNode *node,
     if (attributes.opacity.isEmpty())
         return;
 
-    const QString value = attributes.opacity.toString().trimmed();
+    const QStringRef value = attributes.opacity.trimmed();
 
     bool ok = false;
     qreal op = value.toDouble(&ok);
@@ -2534,9 +2535,9 @@ static QSvgNode *createCircleNode(QSvgNode *parent,
                                   const QXmlStreamAttributes &attributes,
                                   QSvgHandler *)
 {
-    QString cx      = attributes.value(QLatin1String("cx")).toString();
-    QString cy      = attributes.value(QLatin1String("cy")).toString();
-    QString r       = attributes.value(QLatin1String("r")).toString();
+    const QStringRef cx      = attributes.value(QLatin1String("cx"));
+    const QStringRef cy      = attributes.value(QLatin1String("cy"));
+    const QStringRef r       = attributes.value(QLatin1String("r"));
     qreal ncx = toDouble(cx);
     qreal ncy = toDouble(cy);
     qreal nr  = toDouble(r);
@@ -2575,10 +2576,10 @@ static QSvgNode *createEllipseNode(QSvgNode *parent,
                                    const QXmlStreamAttributes &attributes,
                                    QSvgHandler *)
 {
-    QString cx      = attributes.value(QLatin1String("cx")).toString();
-    QString cy      = attributes.value(QLatin1String("cy")).toString();
-    QString rx      = attributes.value(QLatin1String("rx")).toString();
-    QString ry      = attributes.value(QLatin1String("ry")).toString();
+    const QStringRef cx      = attributes.value(QLatin1String("cx"));
+    const QStringRef cy      = attributes.value(QLatin1String("cy"));
+    const QStringRef rx      = attributes.value(QLatin1String("rx"));
+    const QStringRef ry      = attributes.value(QLatin1String("ry"));
     qreal ncx = toDouble(cx);
     qreal ncy = toDouble(cy);
     qreal nrx = toDouble(rx);
@@ -2593,7 +2594,7 @@ static QSvgStyleProperty *createFontNode(QSvgNode *parent,
                                          const QXmlStreamAttributes &attributes,
                                          QSvgHandler *)
 {
-    QString hax      = attributes.value(QLatin1String("horiz-adv-x")).toString();
+    const QStringRef hax = attributes.value(QLatin1String("horiz-adv-x"));
     QString myId     = someId(attributes);
 
     qreal horizAdvX = toDouble(hax);
@@ -2626,7 +2627,7 @@ static bool parseFontFaceNode(QSvgStyleProperty *parent,
     QSvgFontStyle *style = static_cast<QSvgFontStyle*>(parent);
     QSvgFont *font = style->svgFont();
     QString name   = attributes.value(QLatin1String("font-family")).toString();
-    QString unitsPerEmStr   = attributes.value(QLatin1String("units-per-em")).toString();
+    const QStringRef unitsPerEmStr = attributes.value(QLatin1String("units-per-em"));
 
     qreal unitsPerEm = toDouble(unitsPerEmStr);
     if (!unitsPerEm)
@@ -2732,11 +2733,11 @@ static QSvgNode *createImageNode(QSvgNode *parent,
                                  const QXmlStreamAttributes &attributes,
                                  QSvgHandler *handler)
 {
-    QString x = attributes.value(QLatin1String("x")).toString();
-    QString y = attributes.value(QLatin1String("y")).toString();
-    QString width  = attributes.value(QLatin1String("width")).toString();
-    QString height = attributes.value(QLatin1String("height")).toString();
-    QString filename = attributes.value(QLatin1String("xlink:href")).toString();
+    const QStringRef x = attributes.value(QLatin1String("x"));
+    const QStringRef y = attributes.value(QLatin1String("y"));
+    const QStringRef width  = attributes.value(QLatin1String("width"));
+    const QStringRef height = attributes.value(QLatin1String("height"));
+    QStringRef filename = attributes.value(QLatin1String("xlink:href"));
     qreal nx = toDouble(x);
     qreal ny = toDouble(y);
     QSvgHandler::LengthType type;
@@ -2761,14 +2762,14 @@ static QSvgNode *createImageNode(QSvgNode *parent,
         int idx = filename.lastIndexOf(QLatin1String("base64,"));
         if (idx != -1) {
             idx += 7;
-            QString dataStr = filename.mid(idx);
+            QStringRef dataStr = filename.mid(idx);
             QByteArray data = QByteArray::fromBase64(dataStr.toLatin1());
             image = QImage::fromData(data);
         } else {
             qCDebug(lcSvgHandler) << "QSvgHandler::createImageNode: Unrecognized inline image format!";
         }
     } else
-        image = QImage(filename);
+        image = QImage(filename.toString());
 
     if (image.isNull()) {
         qDebug()<<"couldn't create image from "<<filename;
@@ -2791,10 +2792,10 @@ static QSvgNode *createLineNode(QSvgNode *parent,
                                 const QXmlStreamAttributes &attributes,
                                 QSvgHandler *)
 {
-    QString x1 = attributes.value(QLatin1String("x1")).toString();
-    QString y1 = attributes.value(QLatin1String("y1")).toString();
-    QString x2 = attributes.value(QLatin1String("x2")).toString();
-    QString y2 = attributes.value(QLatin1String("y2")).toString();
+    const QStringRef x1 = attributes.value(QLatin1String("x1"));
+    const QStringRef y1 = attributes.value(QLatin1String("y1"));
+    const QStringRef x2 = attributes.value(QLatin1String("x2"));
+    const QStringRef y2 = attributes.value(QLatin1String("y2"));
     qreal nx1 = toDouble(x1);
     qreal ny1 = toDouble(y1);
     qreal nx2 = toDouble(x2);
@@ -2871,10 +2872,10 @@ static QSvgStyleProperty *createLinearGradientNode(QSvgNode *node,
                                                    const QXmlStreamAttributes &attributes,
                                                    QSvgHandler *handler)
 {
-    QString x1 = attributes.value(QLatin1String("x1")).toString();
-    QString y1 = attributes.value(QLatin1String("y1")).toString();
-    QString x2 = attributes.value(QLatin1String("x2")).toString();
-    QString y2 = attributes.value(QLatin1String("y2")).toString();
+    const QStringRef x1 = attributes.value(QLatin1String("x1"));
+    const QStringRef y1 = attributes.value(QLatin1String("y1"));
+    const QStringRef x2 = attributes.value(QLatin1String("x2"));
+    const QStringRef y2 = attributes.value(QLatin1String("y2"));
 
     qreal nx1 = 0.0;
     qreal ny1 = 0.0;
@@ -2993,11 +2994,11 @@ static QSvgStyleProperty *createRadialGradientNode(QSvgNode *node,
                                                    const QXmlStreamAttributes &attributes,
                                                    QSvgHandler *handler)
 {
-    QString cx = attributes.value(QLatin1String("cx")).toString();
-    QString cy = attributes.value(QLatin1String("cy")).toString();
-    QString r  = attributes.value(QLatin1String("r")).toString();
-    QString fx = attributes.value(QLatin1String("fx")).toString();
-    QString fy = attributes.value(QLatin1String("fy")).toString();
+    const QStringRef cx = attributes.value(QLatin1String("cx"));
+    const QStringRef cy = attributes.value(QLatin1String("cy"));
+    const QStringRef r  = attributes.value(QLatin1String("r"));
+    const QStringRef fx = attributes.value(QLatin1String("fx"));
+    const QStringRef fy = attributes.value(QLatin1String("fy"));
 
     qreal ncx = 0.5;
     qreal ncy = 0.5;
@@ -3029,12 +3030,12 @@ static QSvgNode *createRectNode(QSvgNode *parent,
                                 const QXmlStreamAttributes &attributes,
                                 QSvgHandler *handler)
 {
-    QString x      = attributes.value(QLatin1String("x")).toString();
-    QString y      = attributes.value(QLatin1String("y")).toString();
-    QString width  = attributes.value(QLatin1String("width")).toString();
-    QString height = attributes.value(QLatin1String("height")).toString();
-    QString rx      = attributes.value(QLatin1String("rx")).toString();
-    QString ry      = attributes.value(QLatin1String("ry")).toString();
+    const QStringRef x      = attributes.value(QLatin1String("x"));
+    const QStringRef y      = attributes.value(QLatin1String("y"));
+    const QStringRef width  = attributes.value(QLatin1String("width"));
+    const QStringRef height = attributes.value(QLatin1String("height"));
+    const QStringRef rx      = attributes.value(QLatin1String("rx"));
+    const QStringRef ry      = attributes.value(QLatin1String("ry"));
 
     QSvgHandler::LengthType type;
     qreal nwidth = parseLength(width, type, handler);
@@ -3153,12 +3154,11 @@ static bool parseStopNode(QSvgStyleProperty *parent,
 
     QSvgGradientStyle *style =
         static_cast<QSvgGradientStyle*>(parent);
-    QString offsetStr   = attrs.offset.toString();
     QStringRef colorStr    = attrs.stopColor;
     QColor color;
 
     bool ok = true;
-    qreal offset = convertToNumber(offsetStr, handler, &ok);
+    qreal offset = convertToNumber(attrs.offset, handler, &ok);
     if (!ok)
         offset = 0.0;
     QString black = QString::fromLatin1("#000000");
@@ -3202,12 +3202,9 @@ static bool parseStyleNode(QSvgNode *parent,
     Q_UNUSED(attributes)
     Q_UNUSED(handler)
 #else
-    QString type = attributes.value(QLatin1String("type")).toString();
-    type = type.toLower();
-
-    if (type == QLatin1String("text/css")) {
+    const QStringRef type = attributes.value(QLatin1String("type"));
+    if (type.compare(QLatin1String("text/css"), Qt::CaseInsensitive) == 0)
         handler->setInStyle(true);
-    }
 #endif
 
     return true;
@@ -3220,8 +3217,8 @@ static QSvgNode *createSvgNode(QSvgNode *parent,
     Q_UNUSED(parent); Q_UNUSED(attributes);
 
     QSvgTinyDocument *node = new QSvgTinyDocument();
-    QString widthStr  = attributes.value(QLatin1String("width")).toString();
-    QString heightStr = attributes.value(QLatin1String("height")).toString();
+    const QStringRef widthStr  = attributes.value(QLatin1String("width"));
+    const QStringRef heightStr = attributes.value(QLatin1String("height"));
     QString viewBoxStr = attributes.value(QLatin1String("viewBox")).toString();
 
     QSvgHandler::LengthType type = QSvgHandler::LT_PX; // FIXME: is the default correct?
@@ -3297,8 +3294,8 @@ static QSvgNode *createTextNode(QSvgNode *parent,
                                 const QXmlStreamAttributes &attributes,
                                 QSvgHandler *handler)
 {
-    QString x = attributes.value(QLatin1String("x")).toString();
-    QString y = attributes.value(QLatin1String("y")).toString();
+    const QStringRef x = attributes.value(QLatin1String("x"));
+    const QStringRef y = attributes.value(QLatin1String("y"));
     //### editable and rotate not handled
     QSvgHandler::LengthType type;
     qreal nx = parseLength(x, type, handler);
@@ -3315,8 +3312,8 @@ static QSvgNode *createTextAreaNode(QSvgNode *parent,
     QSvgText *node = static_cast<QSvgText *>(createTextNode(parent, attributes, handler));
     if (node) {
         QSvgHandler::LengthType type;
-        qreal width = parseLength(attributes.value(QLatin1String("width")).toString(), type, handler);
-        qreal height = parseLength(attributes.value(QLatin1String("height")).toString(), type, handler);
+        qreal width = parseLength(attributes.value(QLatin1String("width")), type, handler);
+        qreal height = parseLength(attributes.value(QLatin1String("height")), type, handler);
         node->setTextArea(QSizeF(width, height));
     }
     return node;
@@ -3342,8 +3339,8 @@ static QSvgNode *createUseNode(QSvgNode *parent,
                                QSvgHandler *handler)
 {
     QString linkId = attributes.value(QLatin1String("xlink:href")).toString().remove(0, 1);
-    QString xStr = attributes.value(QLatin1String("x")).toString();
-    QString yStr = attributes.value(QLatin1String("y")).toString();
+    const QStringRef xStr = attributes.value(QLatin1String("x"));
+    const QStringRef yStr = attributes.value(QLatin1String("y"));
     QSvgStructureNode *group = 0;
 
     if (linkId.isEmpty())
