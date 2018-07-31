@@ -54,6 +54,8 @@ private slots:
     void getSetCheck();
     void inexistentUrl();
     void emptyUrl();
+    void invalidUrl_data();
+    void invalidUrl();
     void testStrokeWidth();
     void testMapViewBoxToTarget();
     void testRenderElement();
@@ -129,6 +131,30 @@ void tst_QSvgRenderer::emptyUrl()
     QByteArray data(src);
     QSvgRenderer renderer(data);
 
+    QVERIFY(renderer.isValid());
+}
+
+void tst_QSvgRenderer::invalidUrl_data()
+{
+    QTest::addColumn<QByteArray>("svg");
+
+    QTest::newRow("00") << QByteArray("<svg><circle fill=\"url\" /></svg>");
+    QTest::newRow("01") << QByteArray("<svg><circle fill=\"url0\" /></svg>");
+    QTest::newRow("02") << QByteArray("<svg><circle fill=\"url(0\" /></svg>");
+    QTest::newRow("03") << QByteArray("<svg><circle fill=\"url (0\" /></svg>");
+    QTest::newRow("04") << QByteArray("<svg><circle fill=\"url ( 0\" /></svg>");
+    QTest::newRow("05") << QByteArray("<svg><circle fill=\"url#\" /></svg>");
+    QTest::newRow("06") << QByteArray("<svg><circle fill=\"url#(\" /></svg>");
+    QTest::newRow("07") << QByteArray("<svg><circle fill=\"url(#\" /></svg>");
+    QTest::newRow("08") << QByteArray("<svg><circle fill=\"url(# \" /></svg>");
+    QTest::newRow("09") << QByteArray("<svg><circle fill=\"url(# 0\" /></svg>");
+}
+
+void tst_QSvgRenderer::invalidUrl()
+{
+    QFETCH(QByteArray, svg);
+
+    QSvgRenderer renderer(svg);
     QVERIFY(renderer.isValid());
 }
 
