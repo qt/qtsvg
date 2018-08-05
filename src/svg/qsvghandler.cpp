@@ -59,6 +59,7 @@
 #include "qdebug.h"
 #include "qmath.h"
 #include "qnumeric.h"
+#include <qregularexpression.h>
 #include "qvarlengtharray.h"
 #include "private/qmath_p.h"
 
@@ -3948,24 +3949,23 @@ bool QSvgHandler::processingInstruction(const QString &target, const QString &da
     Q_UNUSED(data)
 #else
     if (target == QLatin1String("xml-stylesheet")) {
-        QRegExp rx(QLatin1String("type=\\\"(.+)\\\""));
-        rx.setMinimal(true);
+        QRegularExpression rx(QLatin1String("type=\\\"(.+)\\\""),
+                              QRegularExpression::InvertedGreedinessOption);
+        QRegularExpressionMatchIterator iter = rx.globalMatch(data);
         bool isCss = false;
-        int pos = 0;
-        while ((pos = rx.indexIn(data, pos)) != -1) {
-            QString type =  rx.cap(1);
+        while (iter.hasNext()) {
+            QRegularExpressionMatch match = iter.next();
+            QString type = match.captured(1);
             if (type.toLower() == QLatin1String("text/css")) {
                 isCss = true;
             }
-            pos += rx.matchedLength();
         }
 
         if (isCss) {
-            QRegExp rx(QLatin1String("href=\\\"(.+)\\\""));
-            rx.setMinimal(true);
-            pos = 0;
-            pos = rx.indexIn(data, pos);
-            QString addr = rx.cap(1);
+            QRegularExpression rx(QLatin1String("href=\\\"(.+)\\\""),
+                                  QRegularExpression::InvertedGreedinessOption);
+            QRegularExpressionMatch match = rx.match(data);
+            QString addr = match.captured(1);
             QFileInfo fi(addr);
             //qDebug()<<"External CSS file "<<fi.absoluteFilePath()<<fi.exists();
             if (fi.exists()) {
