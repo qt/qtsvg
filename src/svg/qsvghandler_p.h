@@ -178,6 +178,7 @@ private:
 #endif
     void parse();
     void resolveGradients(QSvgNode *node);
+    void resolveNodes();
 
     QPen m_defaultPen;
     /**

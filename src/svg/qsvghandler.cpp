@@ -3359,29 +3359,30 @@ static QSvgNode *createUseNode(QSvgNode *parent,
     }
 
     if (group) {
+        QPointF pt;
+        if (!xStr.isNull() || !yStr.isNull()) {
+            QSvgHandler::LengthType type;
+            qreal nx = parseLength(xStr, type, handler);
+            nx = convertToPixels(nx, true, type);
+
+            qreal ny = parseLength(yStr, type, handler);
+            ny = convertToPixels(ny, true, type);
+            pt = QPointF(nx, ny);
+        }
+
         QSvgNode *link = group->scopeNode(linkId);
         if (link) {
             if (parent->isDescendantOf(link))
                 qCWarning(lcSvgHandler, "link #%s is recursive!", qPrintable(linkId));
-            QPointF pt;
-            if (!xStr.isNull() || !yStr.isNull()) {
-                QSvgHandler::LengthType type;
-                qreal nx = parseLength(xStr, type, handler);
-                nx = convertToPixels(nx, true, type);
 
-                qreal ny = parseLength(yStr, type, handler);
-                ny = convertToPixels(ny, true, type);
-                pt = QPointF(nx, ny);
-            }
-
-            //delay link resolving till the first draw call on
-            //use nodes, link 2might have not been created yet
-            QSvgUse *node = new QSvgUse(pt, parent, link);
-            return node;
+            return new QSvgUse(pt, parent, link);
         }
+
+        //delay link resolving, link might have not been created yet
+        return new QSvgUse(pt, parent, linkId);
     }
 
-    qCWarning(lcSvgHandler, "link %s hasn't been detected!", qPrintable(linkId));
+    qCWarning(lcSvgHandler, "<use> element %s in wrong context!", qPrintable(linkId));
     return 0;
 }
 
@@ -3647,6 +3648,7 @@ void QSvgHandler::parse()
         }
     }
     resolveGradients(m_doc);
+    resolveNodes();
 }
 
 bool QSvgHandler::startElement(const QString &localName,
@@ -3751,6 +3753,9 @@ bool QSvgHandler::startElement(const QString &localName,
                     static_cast<QSvgText *>(node)->setWhitespaceMode(m_whitespaceMode.top());
                 } else if (node->type() == QSvgNode::TSPAN) {
                     static_cast<QSvgTspan *>(node)->setWhitespaceMode(m_whitespaceMode.top());
+                } else if (node->type() == QSvgNode::USE) {
+                    if (!static_cast<QSvgUse *>(node)->isResolved())
+                        m_resolveNodes.append(node);
                 }
             }
         }
@@ -3851,6 +3856,33 @@ void QSvgHandler::resolveGradients(QSvgNode *node)
 
         resolveGradients(*it);
     }
+}
+
+void QSvgHandler::resolveNodes()
+{
+    for (QSvgNode *node : qAsConst(m_resolveNodes)) {
+        if (!node || !node->parent() || node->type() != QSvgNode::USE)
+            continue;
+        QSvgUse *useNode = static_cast<QSvgUse *>(node);
+        if (useNode->isResolved())
+            continue;
+        QSvgNode::Type t = useNode->parent()->type();
+        if (!(t == QSvgNode::DOC || t == QSvgNode::DEFS || t == QSvgNode::G || t == QSvgNode::SWITCH))
+            continue;
+
+        QSvgStructureNode *group = static_cast<QSvgStructureNode *>(useNode->parent());
+        QSvgNode *link = group->scopeNode(useNode->linkId());
+        if (!link) {
+            qCWarning(lcSvgHandler, "link #%s is undefined!", qPrintable(useNode->linkId()));
+            continue;
+        }
+
+        if (useNode->parent()->isDescendantOf(link))
+            qCWarning(lcSvgHandler, "link #%s is recursive!", qPrintable(useNode->linkId()));
+
+        useNode->setLink(link);
+    }
+    m_resolveNodes.clear();
 }
 
 bool QSvgHandler::characters(const QStringRef &str)
