@@ -99,6 +99,7 @@ public:
     QSvgHandler(QXmlStreamReader *const data);
     ~QSvgHandler();
 
+    QIODevice *device() const;
     QSvgTinyDocument *document() const;
 
     inline bool ok() const {

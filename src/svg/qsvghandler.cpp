@@ -2739,7 +2739,7 @@ static QSvgNode *createImageNode(QSvgNode *parent,
     const QStringRef y = attributes.value(QLatin1String("y"));
     const QStringRef width  = attributes.value(QLatin1String("width"));
     const QStringRef height = attributes.value(QLatin1String("height"));
-    QStringRef filename = attributes.value(QLatin1String("xlink:href"));
+    QString filename = attributes.value(QLatin1String("xlink:href")).toString();
     qreal nx = toDouble(x);
     qreal ny = toDouble(y);
     QSvgHandler::LengthType type;
@@ -2764,17 +2764,26 @@ static QSvgNode *createImageNode(QSvgNode *parent,
         int idx = filename.lastIndexOf(QLatin1String("base64,"));
         if (idx != -1) {
             idx += 7;
-            QStringRef dataStr = filename.mid(idx);
+            const QString dataStr = filename.mid(idx);
             QByteArray data = QByteArray::fromBase64(dataStr.toLatin1());
             image = QImage::fromData(data);
         } else {
             qCDebug(lcSvgHandler) << "QSvgHandler::createImageNode: Unrecognized inline image format!";
         }
-    } else
-        image = QImage(filename.toString());
+    } else {
+        const auto *file = qobject_cast<QFile *>(handler->device());
+        if (file) {
+            QUrl url(filename);
+            if (url.isRelative()) {
+                QFileInfo info(file->fileName());
+                filename = info.absoluteDir().absoluteFilePath(filename);
+            }
+        }
+        image = QImage(filename);
+    }
 
     if (image.isNull()) {
-        qDebug()<<"couldn't create image from "<<filename;
+        qCWarning(lcSvgHandler) << "Could not create image from" << filename;
         return 0;
     }
 
@@ -3906,6 +3915,11 @@ bool QSvgHandler::characters(const QStringRef &str)
     }
 
     return true;
+}
+
+QIODevice *QSvgHandler::device() const
+{
+    return xml->device();
 }
 
 QSvgTinyDocument * QSvgHandler::document() const
