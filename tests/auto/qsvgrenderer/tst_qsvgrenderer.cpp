@@ -76,6 +76,7 @@ private slots:
     void testStopOffsetOpacity();
     void testUseElement();
     void smallFont();
+    void styleSheet();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -1435,6 +1436,27 @@ void tst_QSvgRenderer::smallFont()
         p.end();
     }
     QVERIFY(images[0] != images[1]);
+}
+
+void tst_QSvgRenderer::styleSheet()
+{
+    static const char *svgs[] = { "<svg><style type=\"text/css\">.cls {fill:#ff0000;}</style><rect class=\"cls\" x = \"10\" y = \"10\" width = \"30\" height = \"30\"/></svg>",
+                                  "<svg><style>.cls {fill:#ff0000;}</style><rect class=\"cls\" x = \"10\" y = \"10\" width = \"30\" height = \"30\"/></svg>",
+    };
+    const int COUNT = sizeof(svgs) / sizeof(svgs[0]);
+    QImage images[COUNT];
+    QPainter p;
+
+    for (int i = 0; i < COUNT; ++i) {
+        QByteArray data(svgs[i]);
+        QSvgRenderer renderer(data);
+        images[i] = QImage(50, 50, QImage::Format_ARGB32_Premultiplied);
+        images[i].fill(-1);
+        p.begin(&images[i]);
+        renderer.render(&p);
+        p.end();
+    }
+    QCOMPARE(images[0], images[1]);
 }
 
 QTEST_MAIN(tst_QSvgRenderer)

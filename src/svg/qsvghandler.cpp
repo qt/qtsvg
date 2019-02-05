@@ -3214,7 +3214,7 @@ static bool parseStyleNode(QSvgNode *parent,
     Q_UNUSED(handler)
 #else
     const QStringRef type = attributes.value(QLatin1String("type"));
-    if (type.compare(QLatin1String("text/css"), Qt::CaseInsensitive) == 0)
+    if (type.compare(QLatin1String("text/css"), Qt::CaseInsensitive) == 0 || type.isNull())
         handler->setInStyle(true);
 #endif
 
