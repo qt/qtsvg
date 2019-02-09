@@ -2792,10 +2792,10 @@ static QSvgNode *createImageNode(QSvgNode *parent,
 
     QSvgNode *img = new QSvgImage(parent,
                                   image,
-                                  QRect(int(nx),
-                                        int(ny),
-                                        int(nwidth),
-                                        int(nheight)));
+                                  QRectF(nx,
+                                         ny,
+                                         nwidth,
+                                         nheight));
     return img;
 }
 
