@@ -3709,14 +3709,20 @@ bool QSvgHandler::startElement(const QString &localName,
             }
                 break;
             default:
+                const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
+                qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
+                delete node;
+                node = 0;
                 break;
             }
         }
-        parseCoreNode(node, attributes);
+        if (node) {
+            parseCoreNode(node, attributes);
 #ifndef QT_NO_CSSPARSER
-        cssStyleLookup(node, this, m_selector);
+            cssStyleLookup(node, this, m_selector);
 #endif
-        parseStyle(node, attributes, this);
+            parseStyle(node, attributes, this);
+        }
     } else if (FactoryMethod method = findGraphicsFactory(localName)) {
         //rendering element
         Q_ASSERT(!m_nodes.isEmpty());
