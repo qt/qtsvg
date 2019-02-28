@@ -1596,7 +1596,7 @@ static bool parsePathDataFast(const QStringRef &dataStr, QPainterPath &path)
     const QChar *end = str + dataStr.size();
 
     while (str != end) {
-        while (str->isSpace())
+        while (str->isSpace() && (str + 1) != end)
             ++str;
         QChar pathElem = *str;
         ++str;
