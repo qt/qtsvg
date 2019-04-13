@@ -3744,6 +3744,13 @@ bool QSvgHandler::startElement(const QString &localName,
             case QSvgNode::DEFS:
             case QSvgNode::SWITCH:
             {
+                if (node->type() == QSvgNode::TSPAN) {
+                    const QByteArray msg = QByteArrayLiteral("\'tspan\' element in wrong context.");
+                    qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
+                    delete node;
+                    node = 0;
+                    break;
+                }
                 QSvgStructureNode *group =
                     static_cast<QSvgStructureNode*>(m_nodes.top());
                 group->addChild(node, someId(attributes));
