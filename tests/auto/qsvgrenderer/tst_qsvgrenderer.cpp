@@ -67,6 +67,8 @@ private slots:
     void boundsOnElement() const;
     void gradientStops() const;
     void gradientRefs();
+    void recursiveRefs_data();
+    void recursiveRefs();
     void fillRule();
     void opacity();
     void paths();
@@ -672,6 +674,43 @@ void tst_QSvgRenderer::gradientRefs()
         QVERIFY((qAbs(qAlpha(mid) - 127) < 3) && (qAbs(qRed(mid) - 63) < 4) && (qGreen(mid) == 0) && (qAbs(qBlue(mid) - 63) < 4));
         QVERIFY((qAlpha(right) > 253) && (qRed(right) < 3) && (qGreen(right) == 0) && (qBlue(right) > 251));
     }
+}
+
+void tst_QSvgRenderer::recursiveRefs_data()
+{
+    QTest::addColumn<QByteArray>("svg");
+
+    QTest::newRow("single") << QByteArray("<svg>"
+                                          "<linearGradient id='0' xlink:href='#0'/>"
+                                          "<rect x='0' y='0' width='20' height='20' fill='url(#0)'/>"
+                                          "</svg>");
+
+    QTest::newRow("double") << QByteArray("<svg>"
+                                          "<linearGradient id='0' xlink:href='#1'/>"
+                                          "<linearGradient id='1' xlink:href='#0'/>"
+                                          "<rect x='0' y='0' width='20' height='20' fill='url(#0)'/>"
+                                          "</svg>");
+
+    QTest::newRow("triple") << QByteArray("<svg>"
+                                          "<linearGradient id='0' xlink:href='#1'/>"
+                                          "<linearGradient id='1' xlink:href='#2'/>"
+                                          "<linearGradient id='2' xlink:href='#0'/>"
+                                          "<rect x='0' y='0' width='20' height='20' fill='url(#0)'/>"
+                                          "</svg>");
+}
+
+void tst_QSvgRenderer::recursiveRefs()
+{
+    QFETCH(QByteArray, svg);
+
+    QImage image(20, 20, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::green);
+    QImage refImage = image.copy();
+
+    QSvgRenderer renderer(svg);
+    QPainter painter(&image);
+    renderer.render(&painter);
+    QCOMPARE(image, refImage);
 }
 
 
