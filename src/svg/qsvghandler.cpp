@@ -2615,17 +2615,17 @@ static QSvgStyleProperty *createFontNode(QSvgNode *parent,
         parent = parent->parent();
     }
 
-    if (parent) {
+    if (parent && !myId.isEmpty()) {
         QSvgTinyDocument *doc = static_cast<QSvgTinyDocument*>(parent);
-        QSvgFont *font = new QSvgFont(horizAdvX);
-        font->setFamilyName(myId);
-        if (!font->familyName().isEmpty()) {
-            if (!doc->svgFont(font->familyName()))
-                doc->addSvgFont(font);
+        QSvgFont *font = doc->svgFont(myId);
+        if (!font) {
+            font = new QSvgFont(horizAdvX);
+            font->setFamilyName(myId);
+            doc->addSvgFont(font);
         }
         return new QSvgFontStyle(font, doc);
     }
-    return 0;
+    return nullptr;
 }
 
 static bool parseFontFaceNode(QSvgStyleProperty *parent,
