@@ -7,7 +7,7 @@ project(QtSvg
     LANGUAGES CXX C
 )
 
-find_package(Qt5 ${PROJECT_VERSION} CONFIG REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt5 ${PROJECT_VERSION} CONFIG REQUIRED COMPONENTS BuildInternals Core Gui Widgets)
 qt_build_repo_begin()
 
 add_subdirectory(src)
