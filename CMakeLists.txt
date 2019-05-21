@@ -8,18 +8,4 @@ project(QtSvg
 )
 
 find_package(Qt5 ${PROJECT_VERSION} CONFIG REQUIRED COMPONENTS BuildInternals Core Gui Widgets)
-qt_build_repo_begin()
-
-add_subdirectory(src)
-
-if (BUILD_TESTING)
-    find_package(Qt5 ${PROJECT_VERSION} CONFIG REQUIRED COMPONENTS Test Xml)
-    add_subdirectory(tests)
-endif()
-
-if (BUILD_EXAMPLES)
-    # TODO: Implement me
-    #add_subdirectory(examples)
-endif()
-
-qt_build_repo_end()
+qt_build_repo()
