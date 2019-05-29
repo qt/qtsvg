@@ -8,7 +8,7 @@ add_qt_test(tst_qsvggenerator
     SOURCES
         tst_qsvggenerator.cpp
     DEFINES
-        SRCDIR=\\\"${CMAKE_CURRENT_SOURCE_DIR}/./\\\"
+        SRCDIR=\\\"${CMAKE_CURRENT_SOURCE_DIR}/\\\"
     LIBRARIES
         Qt::GuiPrivate
     PUBLIC_LIBRARIES
