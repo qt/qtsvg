@@ -104,13 +104,13 @@ class Q_SVG_PRIVATE_EXPORT QSvgImage : public QSvgNode
 {
 public:
     QSvgImage(QSvgNode *parent, const QImage &image,
-              const QRect &bounds);
+              const QRectF &bounds);
     void draw(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 private:
     QImage m_image;
-    QRect  m_bounds;
+    QRectF m_bounds;
 };
 
 class Q_SVG_PRIVATE_EXPORT QSvgLine : public QSvgNode
@@ -251,6 +251,7 @@ private:
     QSvgNode *m_link;
     QPointF   m_start;
     QString   m_linkId;
+    mutable bool m_recursing;
 };
 
 class QSvgVideo : public QSvgNode

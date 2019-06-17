@@ -774,21 +774,31 @@ static QVector<qreal> parsePercentageList(const QChar *&str)
 
 static QString idFromUrl(const QString &url)
 {
+    // The form is url(<IRI>), where IRI can be
+    // just an ID on #<id> form.
     QString::const_iterator itr = url.constBegin();
     QString::const_iterator end = url.constEnd();
+    QString id;
     while (itr != end && (*itr).isSpace())
         ++itr;
     if (itr != end && (*itr) == QLatin1Char('('))
         ++itr;
+    else
+        return QString();
     while (itr != end && (*itr).isSpace())
         ++itr;
-    if (itr != end && (*itr) == QLatin1Char('#'))
+    if (itr != end && (*itr) == QLatin1Char('#')) {
+        id += *itr;
         ++itr;
-    QString id;
+    } else {
+        return QString();
+    }
     while (itr != end && (*itr) != QLatin1Char(')')) {
         id += *itr;
         ++itr;
     }
+    if (itr == end || (*itr) != QLatin1Char(')'))
+        return QString();
     return id;
 }
 
@@ -1596,7 +1606,7 @@ static bool parsePathDataFast(const QStringRef &dataStr, QPainterPath &path)
     const QChar *end = str + dataStr.size();
 
     while (str != end) {
-        while (str->isSpace())
+        while (str->isSpace() && (str + 1) != end)
             ++str;
         QChar pathElem = *str;
         ++str;
@@ -2605,17 +2615,17 @@ static QSvgStyleProperty *createFontNode(QSvgNode *parent,
         parent = parent->parent();
     }
 
-    if (parent) {
+    if (parent && !myId.isEmpty()) {
         QSvgTinyDocument *doc = static_cast<QSvgTinyDocument*>(parent);
-        QSvgFont *font = new QSvgFont(horizAdvX);
-        font->setFamilyName(myId);
-        if (!font->familyName().isEmpty()) {
-            if (!doc->svgFont(font->familyName()))
-                doc->addSvgFont(font);
+        QSvgFont *font = doc->svgFont(myId);
+        if (!font) {
+            font = new QSvgFont(horizAdvX);
+            font->setFamilyName(myId);
+            doc->addSvgFont(font);
         }
         return new QSvgFontStyle(font, doc);
     }
-    return 0;
+    return nullptr;
 }
 
 static bool parseFontFaceNode(QSvgStyleProperty *parent,
@@ -2792,10 +2802,10 @@ static QSvgNode *createImageNode(QSvgNode *parent,
 
     QSvgNode *img = new QSvgImage(parent,
                                   image,
-                                  QRect(int(nx),
-                                        int(ny),
-                                        int(nwidth),
-                                        int(nheight)));
+                                  QRectF(nx,
+                                         ny,
+                                         nwidth,
+                                         nheight));
     return img;
 }
 
@@ -3709,14 +3719,20 @@ bool QSvgHandler::startElement(const QString &localName,
             }
                 break;
             default:
+                const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
+                qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
+                delete node;
+                node = 0;
                 break;
             }
         }
-        parseCoreNode(node, attributes);
+        if (node) {
+            parseCoreNode(node, attributes);
 #ifndef QT_NO_CSSPARSER
-        cssStyleLookup(node, this, m_selector);
+            cssStyleLookup(node, this, m_selector);
 #endif
-        parseStyle(node, attributes, this);
+            parseStyle(node, attributes, this);
+        }
     } else if (FactoryMethod method = findGraphicsFactory(localName)) {
         //rendering element
         Q_ASSERT(!m_nodes.isEmpty());
@@ -3728,6 +3744,13 @@ bool QSvgHandler::startElement(const QString &localName,
             case QSvgNode::DEFS:
             case QSvgNode::SWITCH:
             {
+                if (node->type() == QSvgNode::TSPAN) {
+                    const QByteArray msg = QByteArrayLiteral("\'tspan\' element in wrong context.");
+                    qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
+                    delete node;
+                    node = 0;
+                    break;
+                }
                 QSvgStructureNode *group =
                     static_cast<QSvgStructureNode*>(m_nodes.top());
                 group->addChild(node, someId(attributes));
