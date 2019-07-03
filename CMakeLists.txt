@@ -8,4 +8,5 @@ project(QtSvg
 )
 
 find_package(Qt6 ${PROJECT_VERSION} CONFIG REQUIRED COMPONENTS BuildInternals Core Gui Widgets)
+find_package(Qt6 ${PROJECT_VERSION} CONFIG COMPONENTS Xml) # For tests
 qt_build_repo()
