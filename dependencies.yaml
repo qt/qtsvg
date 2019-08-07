@@ -1,4 +1,0 @@
-dependencies:
-  ../qtbase.git:
-    ref: a823d0bd71be60b42eeb7cc3a726a7be96329e2e
-    required: true
