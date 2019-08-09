@@ -5,6 +5,7 @@
 #####################################################################
 
 add_qt_test(tst_qsvgrenderer
+    GUI
     SOURCES
         tst_qsvgrenderer.cpp
     DEFINES
@@ -18,8 +19,12 @@ add_qt_test(tst_qsvgrenderer
 )
 
 # Resources:
-add_qt_resource(tst_qsvgrenderer "resources" FILES
-    heart.svgz)
+add_qt_resource(tst_qsvgrenderer "resources"
+    PREFIX
+        "/"
+    FILES
+        heart.svgz
+)
 
 
 #### Keys ignored in scope 1:.:.:qsvgrenderer.pro:<TRUE>:

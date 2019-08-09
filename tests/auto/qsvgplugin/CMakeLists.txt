@@ -5,6 +5,7 @@
 #####################################################################
 
 add_qt_test(tst_qsvgplugin
+    GUI
     SOURCES
         tst_qsvgplugin.cpp
     DEFINES
@@ -18,21 +19,25 @@ add_qt_test(tst_qsvgplugin
 )
 
 # Resources:
-add_qt_resource(tst_qsvgplugin "resources" FILES
-    imageInclude.svg
-    imageIncludeA.svg
-    square.svg
-    square_size.svg
-    square_size_viewbox.svg
-    square_viewbox.svg
-    tall.svg
-    tall_size.svg
-    tall_size_viewbox.svg
-    tall_viewbox.svg
-    wide.svg
-    wide_size.svg
-    wide_size_viewbox.svg
-    wide_viewbox.svg)
+add_qt_resource(tst_qsvgplugin "resources"
+    PREFIX
+        "/"
+    FILES
+        imageInclude.svg
+        imageIncludeA.svg
+        square.svg
+        square_size.svg
+        square_size_viewbox.svg
+        square_viewbox.svg
+        tall.svg
+        tall_size.svg
+        tall_size_viewbox.svg
+        tall_viewbox.svg
+        wide.svg
+        wide_size.svg
+        wide_size_viewbox.svg
+        wide_viewbox.svg
+)
 
 
 #### Keys ignored in scope 1:.:.:qsvgplugin.pro:<TRUE>:
