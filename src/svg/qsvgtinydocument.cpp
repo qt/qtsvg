@@ -60,6 +60,7 @@ QSvgTinyDocument::QSvgTinyDocument()
     : QSvgStructureNode(0)
     , m_widthPercent(false)
     , m_heightPercent(false)
+    , m_time(0)
     , m_animated(false)
     , m_animationDuration(0)
     , m_fps(30)
@@ -230,9 +231,8 @@ QSvgTinyDocument * QSvgTinyDocument::load(QXmlStreamReader *contents)
 
 void QSvgTinyDocument::draw(QPainter *p, const QRectF &bounds)
 {
-    if (m_time.isNull()) {
-        m_time.start();
-    }
+    if (m_time == 0)
+        m_time = QDateTime::currentMSecsSinceEpoch();
 
     if (displayMode() == QSvgNode::NoneMode)
         return;
@@ -269,9 +269,8 @@ void QSvgTinyDocument::draw(QPainter *p, const QString &id,
         qCDebug(lcSvgHandler, "Couldn't find node %s. Skipping rendering.", qPrintable(id));
         return;
     }
-    if (m_time.isNull()) {
-        m_time.start();
-    }
+    if (m_time == 0)
+        m_time = QDateTime::currentMSecsSinceEpoch();
 
     if (node->displayMode() == QSvgNode::NoneMode)
         return;
@@ -377,7 +376,7 @@ QSvgFillStyleProperty *QSvgTinyDocument::namedStyle(const QString &id) const
 
 void QSvgTinyDocument::restartAnimation()
 {
-    m_time.restart();
+    m_time = QDateTime::currentMSecsSinceEpoch();
 }
 
 bool QSvgTinyDocument::animated() const
@@ -491,7 +490,7 @@ QMatrix QSvgTinyDocument::matrixForElement(const QString &id) const
 
 int QSvgTinyDocument::currentFrame() const
 {
-    double runningPercentage = qMin(m_time.elapsed()/double(m_animationDuration), 1.);
+    double runningPercentage = qMin(currentElapsed() / double(m_animationDuration), 1.);
 
     int totalFrames = m_fps * m_animationDuration;
 
@@ -504,8 +503,8 @@ void QSvgTinyDocument::setCurrentFrame(int frame)
     double framePercentage = frame/double(totalFrames);
     double timeForFrame = m_animationDuration * framePercentage; //in S
     timeForFrame *= 1000; //in ms
-    int timeToAdd = int(timeForFrame - m_time.elapsed());
-    m_time = m_time.addMSecs(timeToAdd);
+    int timeToAdd = int(timeForFrame - currentElapsed());
+    m_time += timeToAdd;
 }
 
 void QSvgTinyDocument::setFramesPerSecond(int num)
