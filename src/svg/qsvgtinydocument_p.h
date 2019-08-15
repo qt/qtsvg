@@ -132,7 +132,7 @@ private:
     QHash<QString, QSvgNode *> m_namedNodes;
     QHash<QString, QSvgRefCounter<QSvgFillStyleProperty> > m_namedStyles;
 
-    QTime m_time;
+    qint64 m_time;
     bool  m_animated;
     int   m_animationDuration;
     int   m_fps;
@@ -189,7 +189,7 @@ inline bool QSvgTinyDocument::preserveAspectRatio() const
 
 inline int QSvgTinyDocument::currentElapsed() const
 {
-    return m_time.elapsed();
+    return QDateTime::currentMSecsSinceEpoch() - m_time;
 }
 
 inline int QSvgTinyDocument::animationDuration() const

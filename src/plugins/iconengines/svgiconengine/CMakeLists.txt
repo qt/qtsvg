@@ -6,17 +6,22 @@
 
 add_qt_plugin(qsvgicon
     TYPE iconengines
+    CLASS_NAME QSvgIconPlugin
     SOURCES
         main.cpp
         qsvgiconengine.cpp qsvgiconengine.h
-    PUBLIC_LIBRARIES
-        Qt::Svg
     LIBRARIES
         Qt::CorePrivate
         Qt::GuiPrivate
-
-    # OTHER_FILES = "qsvgiconengine.json" "qsvgiconengine-nocompress.json"
-    # PLUGIN_CLASS_NAME = "QSvgIconPlugin"
-    # PLUGIN_EXTENDS = "svg"
-    # _LOADED = "qt_plugin"
+    PUBLIC_LIBRARIES
+        Qt::Core
+        Qt::Gui
+        Qt::Svg
 )
+
+#### Keys ignored in scope 1:.:.:svgiconengine.pro:<TRUE>:
+# OTHER_FILES = "qsvgiconengine.json" "qsvgiconengine-nocompress.json"
+# PLUGIN_CLASS_NAME = "QSvgIconPlugin"
+# PLUGIN_EXTENDS = "svg"
+# PLUGIN_TYPE = "iconengines"
+# _LOADED = "qt_plugin"
