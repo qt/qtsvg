@@ -218,7 +218,7 @@ void SvgView::paintEvent(QPaintEvent *event)
 
 void SvgView::wheelEvent(QWheelEvent *event)
 {
-    zoomBy(qPow(1.2, event->delta() / 240.0));
+    zoomBy(qPow(1.2, event->angleDelta().y() / 240.0));
 }
 
 void SvgView::zoomBy(qreal factor)
