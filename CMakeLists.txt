@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14.0)
+cmake_minimum_required(VERSION 3.15.0)
 
 project(QtSvg
     VERSION 6.0.0
