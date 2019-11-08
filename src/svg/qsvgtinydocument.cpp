@@ -434,10 +434,6 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
             // but the entire document. This attempts to emulate the default values of the <preserveAspectRatio>
             // tag that's implicitly defined when <viewbox> is used.
 
-            // Apply the view box translation if specified.
-            p->translate(target.x() - source.x(),
-                         target.y() - source.y());
-
             // Scale the view box into the view port (target) by preserve the aspect ratio.
             QSizeF viewBoxSize = source.size();
             viewBoxSize.scale(target.width(), target.height(), Qt::KeepAspectRatio);
@@ -448,6 +444,10 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
 
             p->scale(viewBoxSize.width() / source.width(),
                      viewBoxSize.height() / source.height());
+
+            // Apply the view box translation if specified.
+            p->translate(target.x() - source.x(),
+                         target.y() - source.y());
         }
     }
 }
