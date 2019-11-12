@@ -59,6 +59,7 @@ private slots:
     void testStrokeWidth();
     void testMapViewBoxToTarget();
     void testRenderElement();
+    void testRenderElementToBounds();
     void constructorQXmlStreamReader() const;
     void loadQXmlStreamReader() const;
     void nestedQXmlStreamReader() const;
@@ -334,6 +335,41 @@ void tst_QSvgRenderer::testRenderElement()
         QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
     }
 
+}
+
+void tst_QSvgRenderer::testRenderElementToBounds()
+{
+    // QTBUG-79933
+    QImage reference(400, 200, QImage::Format_ARGB32);
+    {
+        reference.fill(Qt::transparent);
+        QPainter p(&reference);
+        p.fillRect(  0,   0, 200, 100, Qt::blue);
+        p.fillRect(200, 100, 200, 100, Qt::blue);
+        p.fillRect(  0,   0, 100,  50, Qt::red);
+        p.fillRect(100,  50, 100,  50, Qt::red);
+        p.fillRect(200, 100, 100,  50, Qt::red);
+        p.fillRect(300, 150, 100,  50, Qt::red);
+    }
+
+    QImage rendering(400, 200, QImage::Format_ARGB32);
+    {
+        const char *const src =
+                "<svg viewBox=\"0 0 100 100\">" // Presence of a viewBox triggered QTBUG-79933
+                "<path id=\"el1\" d=\"M 80,10 H 0 V 0 h 40 v 20 h 40 z\" fill=\"red\" />"
+                "<path id=\"el2\" d=\"M 90,100 V 20 h 10 V 60 H 80 v 40 z\" fill=\"blue\" />"
+                "</svg>";
+        const QByteArray data(src);
+        QSvgRenderer rend(data);
+        rendering.fill(Qt::transparent);
+        QPainter p(&rendering);
+        rend.render(&p, "el1", QRectF(  0,   0, 200, 100));
+        rend.render(&p, "el2", QRectF(  0,   0, 200, 100));
+        rend.render(&p, "el1", QRectF(200, 100, 200, 100));
+        rend.render(&p, "el2", QRectF(200, 100, 200, 100));
+    }
+
+    QCOMPARE(reference, rendering);
 }
 
 void tst_QSvgRenderer::constructorQXmlStreamReader() const

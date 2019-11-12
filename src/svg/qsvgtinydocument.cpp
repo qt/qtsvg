@@ -420,7 +420,9 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
         source = viewBox();
 
     if (source != target && !source.isNull()) {
-        if (m_implicitViewBox) {
+        if (m_implicitViewBox || !sourceRect.isNull()) {
+            // Code path used when no view box is set, or when an explicit source size is given which
+            // overrides it (which is the case when we're rendering only a specific element by id).
             QTransform transform;
             transform.scale(target.width() / source.width(),
                             target.height() / source.height());
