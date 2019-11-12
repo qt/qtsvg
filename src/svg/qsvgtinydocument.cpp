@@ -338,7 +338,7 @@ void QSvgTinyDocument::setHeight(int len, bool percent)
 void QSvgTinyDocument::setViewBox(const QRectF &rect)
 {
     m_viewBox = rect;
-    m_implicitViewBox = false;
+    m_implicitViewBox = rect.isNull();
 }
 
 void QSvgTinyDocument::addSvgFont(QSvgFont *font)
