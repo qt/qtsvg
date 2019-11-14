@@ -4,7 +4,7 @@
 ## qsvg Plugin:
 #####################################################################
 
-add_qt_plugin(qsvg
+qt_add_plugin(qsvg
     TYPE imageformats
     CLASS_NAME QSvgPlugin
     SOURCES
@@ -17,7 +17,4 @@ add_qt_plugin(qsvg
 )
 
 #### Keys ignored in scope 1:.:.:svg.pro:<TRUE>:
-# PLUGIN_CLASS_NAME = "QSvgPlugin"
 # PLUGIN_EXTENDS = "svg"
-# PLUGIN_TYPE = "imageformats"
-# _LOADED = "qt_plugin"

@@ -4,7 +4,13 @@
 ## tst_qicon_svg Test:
 #####################################################################
 
-add_qt_test(tst_qicon_svg
+# Collect test data
+file(GLOB_RECURSE test_data_glob
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    icons/*)
+list(APPEND test_data ${test_data_glob})
+
+qt_add_test(tst_qicon_svg
     SOURCES
         tst_qicon_svg.cpp
     LIBRARIES
@@ -12,18 +18,23 @@ add_qt_test(tst_qicon_svg
     PUBLIC_LIBRARIES
         Qt::Gui
         Qt::Svg
+    TESTDATA ${test_data}
 )
 
 # Resources:
-add_qt_resource(tst_qicon_svg "tst_qicon_svg" PREFIX "/" FILES
-    ./icons/heart.svg
-    ./icons/heart.svgz
-    ./icons/image.png
-    ./icons/rect.svg
-    ./icons/rect_size_100percent.svg
-    ./icons/trash.svg)
+set(tst_qicon_svg_resource_files
+    "./icons/heart.svg"
+    "./icons/heart.svgz"
+    "./icons/image.png"
+    "./icons/rect.svg"
+    "./icons/rect_size_100percent.svg"
+    "./icons/trash.svg"
+)
 
+qt_add_resource(tst_qicon_svg "tst_qicon_svg"
+    PREFIX
+        "/"
+    FILES
+        ${tst_qicon_svg_resource_files}
+)
 
-#### Keys ignored in scope 1:.:.:qicon_svg.pro:<TRUE>:
-# CONFIG = "testcase"
-# TESTDATA = "icons/*"

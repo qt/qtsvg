@@ -4,7 +4,7 @@
 ## qsvgicon Plugin:
 #####################################################################
 
-add_qt_plugin(qsvgicon
+qt_add_plugin(qsvgicon
     TYPE iconengines
     CLASS_NAME QSvgIconPlugin
     SOURCES
@@ -21,7 +21,4 @@ add_qt_plugin(qsvgicon
 
 #### Keys ignored in scope 1:.:.:svgiconengine.pro:<TRUE>:
 # OTHER_FILES = "qsvgiconengine.json" "qsvgiconengine-nocompress.json"
-# PLUGIN_CLASS_NAME = "QSvgIconPlugin"
 # PLUGIN_EXTENDS = "svg"
-# PLUGIN_TYPE = "iconengines"
-# _LOADED = "qt_plugin"

@@ -4,8 +4,7 @@
 ## tst_qsvgplugin Test:
 #####################################################################
 
-add_qt_test(tst_qsvgplugin
-    GUI
+qt_add_test(tst_qsvgplugin
     SOURCES
         tst_qsvgplugin.cpp
     LIBRARIES
@@ -34,7 +33,7 @@ set(resources_resource_files
     "wide_viewbox.svg"
 )
 
-add_qt_resource(tst_qsvgplugin "resources"
+qt_add_resource(tst_qsvgplugin "resources"
     PREFIX
         "/"
     FILES

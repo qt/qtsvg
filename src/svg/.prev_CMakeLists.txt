@@ -4,8 +4,6 @@
 ## Svg Module:
 #####################################################################
 
-find_package(ZLIB MODULE REQUIRED) # special case
-
 qt_add_module(Svg
     SOURCES
         qgraphicssvgitem.cpp qgraphicssvgitem.h

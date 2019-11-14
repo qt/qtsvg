@@ -4,7 +4,7 @@
 ## tst_qsvgdevice Test:
 #####################################################################
 
-add_qt_test(tst_qsvgdevice
+qt_add_test(tst_qsvgdevice
     SOURCES
         tst_qsvgdevice.cpp
     LIBRARIES
@@ -13,6 +13,3 @@ add_qt_test(tst_qsvgdevice
         Qt::Gui
         Qt::Widgets
 )
-
-#### Keys ignored in scope 1:.:.:qsvgdevice.pro:<TRUE>:
-# CONFIG = "testcase"
