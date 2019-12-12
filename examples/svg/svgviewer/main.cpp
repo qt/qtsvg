@@ -52,9 +52,6 @@
 #include <QCommandLineParser>
 #include <QCommandLineOption>
 #include <QStringList>
-#ifndef QT_NO_OPENGL
-#include <QGLFormat>
-#endif
 
 #include "mainwindow.h"
 
