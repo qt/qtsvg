@@ -420,9 +420,10 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
         source = viewBox();
 
     if (source != target && !source.isNull()) {
-        if (m_implicitViewBox || !sourceRect.isNull()) {
+        if (m_implicitViewBox || !sourceRect.isNull() || !targetRect.isNull()) {
             // Code path used when no view box is set, or when an explicit source size is given which
-            // overrides it (which is the case when we're rendering only a specific element by id).
+            // overrides it (which is the case when we're rendering only a specific element by id),
+            // or when user has given explicit target bounds that overrides viebox aspect ratio
             QTransform transform;
             transform.scale(target.width() / source.width(),
                             target.height() / source.height());
@@ -441,15 +442,14 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
             viewBoxSize.scale(target.width(), target.height(), Qt::KeepAspectRatio);
 
             // Center the view box in the view port
-            p->translate((target.width() - viewBoxSize.width()) / 2,
-                         (target.height() - viewBoxSize.height()) / 2);
+            p->translate(target.x() + (target.width() - viewBoxSize.width()) / 2,
+                         target.y() + (target.height() - viewBoxSize.height()) / 2);
 
             p->scale(viewBoxSize.width() / source.width(),
                      viewBoxSize.height() / source.height());
 
             // Apply the view box translation if specified.
-            p->translate(target.x() - source.x(),
-                         target.y() - source.y());
+            p->translate(-source.x(), -source.y());
         }
     }
 }
