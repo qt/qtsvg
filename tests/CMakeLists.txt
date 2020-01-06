@@ -1,10 +1,7 @@
 # special case begin
-if(NOT TARGET Qt::Test)
-    cmake_minimum_required(VERSION 3.14.0)
-    project(QtSvgTests C CXX ASM)
-    find_package(Qt6 REQUIRED COMPONENTS BuildInternals Core Test)
-    find_package(Qt6 COMPONENTS Svg Widgets Xml)
-    qt_set_up_standalone_tests_build()
+if(QT_BUILD_STANDALONE_TESTS)
+    qt_find_package(Qt6 REQUIRED COMPONENTS BuildInternals Core Test)
+    qt_find_package(Qt6 COMPONENTS Svg Widgets Xml)
 endif()
 # special case end
 
