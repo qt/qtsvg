@@ -420,10 +420,10 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
         source = viewBox();
 
     if (source != target && !source.isNull()) {
-        if (m_implicitViewBox || !sourceRect.isNull() || !targetRect.isNull()) {
-            // Code path used when no view box is set, or when an explicit source size is given which
-            // overrides it (which is the case when we're rendering only a specific element by id),
-            // or when user has given explicit target bounds that overrides viebox aspect ratio
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+        if (m_implicitViewBox || !preserveAspectRatio()) {
+            // Code path used when no view box is set, or IgnoreAspectRatio requested
+#endif
             QTransform transform;
             transform.scale(target.width() / source.width(),
                             target.height() / source.height());
@@ -432,10 +432,10 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
                          target.y() - c2.y());
             p->scale(target.width() / source.width(),
                      target.height() / source.height());
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
         } else {
-            // Code path used when a view box is specified and we're not rendering a specific element by id
-            // but the entire document. This attempts to emulate the default values of the <preserveAspectRatio>
-            // tag that's implicitly defined when <viewbox> is used.
+            // Code path used when KeepAspectRatio is requested. This attempts to emulate the default values
+            // of the <preserveAspectRatio tag that's implicitly defined when <viewbox> is used.
 
             // Scale the view box into the view port (target) by preserve the aspect ratio.
             QSizeF viewBoxSize = source.size();
@@ -451,6 +451,7 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
             // Apply the view box translation if specified.
             p->translate(-source.x(), -source.y());
         }
+#endif
     }
 }
 
