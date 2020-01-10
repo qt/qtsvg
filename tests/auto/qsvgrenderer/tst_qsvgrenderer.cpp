@@ -561,15 +561,15 @@ void tst_QSvgRenderer::matrixForElement() const
     QPainter painter(&image);
     QSvgRenderer renderer(data);
 
-    compareTransforms(painter.worldTransform(), QTransform(renderer.matrixForElement(QLatin1String("ichi"))));
+    compareTransforms(painter.worldTransform(), renderer.transformForElement(QLatin1String("ichi")));
     painter.translate(-3, 1);
-    compareTransforms(painter.worldTransform(), QTransform(renderer.matrixForElement(QLatin1String("ni"))));
+    compareTransforms(painter.worldTransform(), renderer.transformForElement(QLatin1String("ni")));
     painter.rotate(45);
-    compareTransforms(painter.worldTransform(), QTransform(renderer.matrixForElement(QLatin1String("san"))));
+    compareTransforms(painter.worldTransform(), renderer.transformForElement(QLatin1String("san")));
     painter.scale(4, 2);
-    compareTransforms(painter.worldTransform(), QTransform(renderer.matrixForElement(QLatin1String("yon"))));
+    compareTransforms(painter.worldTransform(), renderer.transformForElement(QLatin1String("yon")));
     painter.setWorldTransform(QTransform(1, 2, 3, 4, 5, 6), true);
-    compareTransforms(painter.worldTransform(), QTransform(renderer.matrixForElement(QLatin1String("firkant"))));
+    compareTransforms(painter.worldTransform(), renderer.transformForElement(QLatin1String("firkant")));
 }
 
 void tst_QSvgRenderer::boundsOnElement() const

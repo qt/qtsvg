@@ -53,6 +53,7 @@
 #include "qbuffer.h"
 #include "qmath.h"
 #include "qbitmap.h"
+#include "qtransform.h"
 
 #include "qdebug.h"
 
@@ -117,7 +118,7 @@ public:
 
     QBrush brush;
     QPen pen;
-    QMatrix matrix;
+    QTransform matrix;
     QFont font;
 
     QString generateGradientName() {
@@ -1009,7 +1010,7 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
     }
 
     if (flags & QPaintEngine::DirtyTransform) {
-        d->matrix = state.transform().toAffine();
+        d->matrix = state.transform();
         *d->stream << "transform=\"matrix(" << d->matrix.m11() << ','
                    << d->matrix.m12() << ','
                    << d->matrix.m21() << ',' << d->matrix.m22() << ','
