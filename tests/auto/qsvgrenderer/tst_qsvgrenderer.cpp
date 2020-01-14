@@ -60,6 +60,7 @@ private slots:
     void testMapViewBoxToTarget();
     void testRenderElement();
     void testRenderElementToBounds();
+    void testRenderDocumentWithSizeToBounds();
     void constructorQXmlStreamReader() const;
     void loadQXmlStreamReader() const;
     void nestedQXmlStreamReader() const;
@@ -367,6 +368,36 @@ void tst_QSvgRenderer::testRenderElementToBounds()
         rend.render(&p, "el2", QRectF(  0,   0, 200, 100));
         rend.render(&p, "el1", QRectF(200, 100, 200, 100));
         rend.render(&p, "el2", QRectF(200, 100, 200, 100));
+    }
+
+    QCOMPARE(reference, rendering);
+}
+
+void tst_QSvgRenderer::testRenderDocumentWithSizeToBounds()
+{
+    // QTBUG-80888
+    QImage reference(400, 200, QImage::Format_ARGB32);
+    {
+        reference.fill(Qt::transparent);
+        QPainter p(&reference);
+        p.fillRect(100, 100, 100,  50, Qt::blue);
+        p.fillRect(200,  50, 100,  50, Qt::blue);
+    }
+
+    QImage rendering(400, 200, QImage::Format_ARGB32);
+    {
+        const char *const src = R"src(
+        <svg width="20" height="80">
+            <g transform="translate(-100,-100)">
+                <path d="m 110,180 v -80 h 10 v 40 h -20 v 40 z" fill="blue" />
+            </g>
+        </svg>
+        )src";
+        const QByteArray data(src);
+        QSvgRenderer rend(data);
+        rendering.fill(Qt::transparent);
+        QPainter p(&rendering);
+        rend.render(&p, QRectF(100, 50, 200, 100));
     }
 
     QCOMPARE(reference, rendering);
