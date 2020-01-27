@@ -270,18 +270,17 @@ void tst_QSvgRenderer::testMapViewBoxToTarget()
         QCOMPARE(picture.boundingRect(), QRect(125, 125, 250, 250));
     }
 
-#if 0
     // Requires keep-aspectratio feature
     { // Viewport and viewBox specified -> scale 500x500 square to 1000x750 while preserving aspect ratio gives 750x750
         data = "<svg width=\"1000\" height=\"750\" viewBox=\"-250 -250 500 500\"><g><rect x=\"0\" y=\"0\" width=\"500\" height=\"500\" /></g></svg>";
         QPicture picture;
         QPainter painter(&picture);
         QSvgRenderer rend(data);
+        rend.setAspectRatioMode(Qt::KeepAspectRatio);
         rend.render(&painter);
         painter.end();
         QCOMPARE(picture.boundingRect(), QRect(500, 375, 750, 750));
     }
-#endif
 }
 
 void tst_QSvgRenderer::testRenderElement()

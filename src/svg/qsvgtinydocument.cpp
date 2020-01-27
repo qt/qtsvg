@@ -336,6 +336,11 @@ void QSvgTinyDocument::setHeight(int len, bool percent)
     m_heightPercent = percent;
 }
 
+void QSvgTinyDocument::setPreserveAspectRatio(bool on)
+{
+    m_preserveAspectRatio = on;
+}
+
 void QSvgTinyDocument::setViewBox(const QRectF &rect)
 {
     m_viewBox = rect;
