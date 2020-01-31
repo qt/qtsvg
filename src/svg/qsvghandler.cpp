@@ -221,6 +221,7 @@ struct QSvgAttributes
     QStringView offset;
     QStringView stopColor;
     QStringView stopOpacity;
+    QStringView imageRendering;
 
 #ifndef QT_NO_CSSPARSER
     QList<QSvgCssAttribute> m_cssAttributes;
@@ -273,6 +274,10 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
                     fontWeight = value;
                 else if (name == QLatin1String("font-variant"))
                     fontVariant = value;
+                break;
+            case 'i':
+                if (name == QLatin1String("image-rendering"))
+                    imageRendering = value;
                 break;
 
             case 'o':
@@ -376,6 +381,8 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
         case 'i':
             if (name == QLatin1String("id"))
                 id = value.toString();
+            else if (name == QLatin1String("image-rendering"))
+                imageRendering = value;
             break;
 
         case 'o':
@@ -2251,6 +2258,25 @@ static void parseOthers(QSvgNode *node,
     }
 }
 
+static void parseRenderingHints(QSvgNode *node,
+                                const QSvgAttributes &attributes,
+                                QSvgHandler *)
+{
+    if (attributes.imageRendering.isEmpty())
+        return;
+
+    QString ir = attributes.imageRendering.toString().trimmed();
+    QSvgQualityStyle *p = new QSvgQualityStyle(0);
+    if (ir == QLatin1String("auto"))
+        p->setImageRendering(QSvgQualityStyle::ImageRenderingAuto);
+    else if (ir == QLatin1String("optimizeSpeed"))
+        p->setImageRendering(QSvgQualityStyle::ImageRenderingOptimizeSpeed);
+    else if (ir == QLatin1String("optimizeQuality"))
+        p->setImageRendering(QSvgQualityStyle::ImageRenderingOptimizeQuality);
+    node->appendStyleProperty(p, attributes.id);
+}
+
+
 static bool parseStyle(QSvgNode *node,
                        const QSvgAttributes &attributes,
                        QSvgHandler *handler)
@@ -2263,7 +2289,9 @@ static bool parseStyle(QSvgNode *node,
     parseVisibility(node, attributes, handler);
     parseOpacity(node, attributes, handler);
     parseCompOp(node, attributes, handler);
+    parseRenderingHints(node, attributes, handler);
     parseOthers(node, attributes, handler);
+
 #if 0
     value = attributes.value("audio-level");
 

@@ -85,6 +85,7 @@ private slots:
     void oss_fuzz_23731();
     void oss_fuzz_24131();
     void oss_fuzz_24738();
+    void imageRendering();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -1631,6 +1632,53 @@ void tst_QSvgRenderer::oss_fuzz_24738()
     // "runtime error: division by zero"
     QSvgRenderer().load(QByteArray("<svg><path d=\"a 2 1e-212.....\">"));
 }
+
+QByteArray image_data_url(QImage &image) {
+    QByteArray data;
+    QBuffer buffer(&data);
+    buffer.open(QBuffer::ReadWrite);
+    image.save(&buffer, "PNG");
+    buffer.close();
+    QByteArray url("data:image/png;base64,");
+    url.append(data.toBase64());
+    return url;
+}
+
+void tst_QSvgRenderer::imageRendering() {
+    QImage img(2, 2, QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::green);
+    img.setPixel(0, 0, qRgb(255, 0, 0));
+    img.setPixel(1, 1, qRgb(255, 0, 0));
+    QByteArray imgurl(image_data_url(img));
+    QString svgtemplate(
+        "<svg><g transform='scale(2, 2)'>"
+            "<image image-rendering='%1' xlink:href='%2' width='2' height='2' />"
+        "</g></svg>"
+    );
+    const char *cases[] = {"optimizeQuality", "optimizeSpeed"};
+    for (auto ir: cases) {
+        QString svg = svgtemplate.arg(QLatin1String(ir)).arg(QLatin1String(imgurl));
+        QImage img1(4, 4, QImage::Format_ARGB32);
+        QPainter p1;
+        p1.begin(&img1);
+        QSvgRenderer renderer(svg.toLatin1());
+        Q_ASSERT(renderer.isValid());
+        renderer.render(&p1);
+        p1.end();
+
+        QImage img2(4, 4, QImage::Format_ARGB32);
+        QPainter p2(&img2);
+        p2.scale(2, 2);
+        if (QLatin1String(ir) == QLatin1String("optimizeSpeed"))
+            p2.setRenderHint(QPainter::SmoothPixmapTransform, false);
+        else if (QLatin1String(ir) == QLatin1String("optimizeQuality"))
+            p2.setRenderHint(QPainter::SmoothPixmapTransform, true);
+        p2.drawImage(0, 0, img);
+        p2.end();
+        QCOMPARE(img1, img2);
+    }
+}
+
 
 QTEST_MAIN(tst_QSvgRenderer)
 #include "tst_qsvgrenderer.moc"

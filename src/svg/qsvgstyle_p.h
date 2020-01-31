@@ -148,6 +148,7 @@ struct Q_SVG_PRIVATE_EXPORT QSvgExtraStates
     int nestedUseLevel = 0;
     int nestedUseCount = 0;
     bool vectorEffect; // true if pen is cosmetic
+    qint8 imageRendering; // QSvgQualityStyle::ImageRendering
 };
 
 class Q_SVG_PRIVATE_EXPORT QSvgStyleProperty : public QSvgRefCounted
@@ -186,10 +187,18 @@ public:
 class Q_SVG_PRIVATE_EXPORT QSvgQualityStyle : public QSvgStyleProperty
 {
 public:
+    enum ImageRendering: qint8 {
+        ImageRenderingAuto = 0,
+        ImageRenderingOptimizeSpeed = 1,
+        ImageRenderingOptimizeQuality = 2,
+    };
+
     QSvgQualityStyle(int color);
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
+
+    void setImageRendering(ImageRendering);
 private:
     // color-render ing v 	v 	'auto' | 'optimizeSpeed' |
     //                                  'optimizeQuality' | 'inherit'
@@ -210,7 +219,9 @@ private:
 
     // image-rendering v 	v 	'auto' | 'optimizeSpeed' | 'optimizeQuality' |
     //                                      'inherit'
-    //QSvgImageRendering m_imageRendering;
+    qint32 m_imageRendering: 4;
+    qint32 m_oldImageRendering: 4;
+    qint32 m_imageRenderingSet: 1;
 };
 
 
