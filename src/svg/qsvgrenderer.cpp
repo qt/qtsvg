@@ -257,6 +257,41 @@ void QSvgRenderer::setFramesPerSecond(int num)
 }
 
 /*!
+    \property QSvgRenderer::aspectRatioMode
+
+    \brief how rendering adheres to the SVG view box aspect ratio
+
+    The accepted modes are:
+    \list
+    \li Qt::IgnoreAspectRatio (the default): the aspect ratio is ignored and the
+        rendering is stretched to the target bounds.
+    \li Qt::KeepAspectRatio: rendering is centered and scaled as large as possible
+        within the target bounds while preserving aspect ratio.
+    \endlist
+
+    \since 5.15
+*/
+
+Qt::AspectRatioMode QSvgRenderer::aspectRatioMode() const
+{
+    Q_D(const QSvgRenderer);
+    if (d->render && d->render->preserveAspectRatio())
+        return Qt::KeepAspectRatio;
+    return Qt::IgnoreAspectRatio;
+}
+
+void QSvgRenderer::setAspectRatioMode(Qt::AspectRatioMode mode)
+{
+    Q_D(QSvgRenderer);
+    if (d->render) {
+        if (mode == Qt::KeepAspectRatio)
+            d->render->setPreserveAspectRatio(true);
+        else if (mode == Qt::IgnoreAspectRatio)
+            d->render->setPreserveAspectRatio(false);
+    }
+}
+
+/*!
   \property QSvgRenderer::currentFrame
   \brief the current frame of the document's animation, or 0 if the document is not animated
   \internal

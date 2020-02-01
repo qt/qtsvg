@@ -89,6 +89,7 @@ public:
     bool heightPercent() const;
 
     bool preserveAspectRatio() const;
+    void setPreserveAspectRatio(bool on);
 
     QRectF viewBox() const;
     void setViewBox(const QRectF &rect);
@@ -128,6 +129,7 @@ private:
 
     mutable bool m_implicitViewBox = true;
     mutable QRectF m_viewBox;
+    bool m_preserveAspectRatio = false;
 
     QHash<QString, QSvgRefCounter<QSvgFont> > m_fonts;
     QHash<QString, QSvgNode *> m_namedNodes;
@@ -185,7 +187,7 @@ inline QRectF QSvgTinyDocument::viewBox() const
 
 inline bool QSvgTinyDocument::preserveAspectRatio() const
 {
-    return false;
+    return m_preserveAspectRatio;
 }
 
 inline int QSvgTinyDocument::currentElapsed() const
