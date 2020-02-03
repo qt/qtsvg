@@ -65,7 +65,7 @@ private slots:
     void loadQXmlStreamReader() const;
     void nestedQXmlStreamReader() const;
     void stylePropagation() const;
-    void matrixForElement() const;
+    void transformForElement() const;
     void boundsOnElement() const;
     void gradientStops() const;
     void gradientRefs();
@@ -545,7 +545,7 @@ static void compareTransforms(const QTransform &m1, const QTransform &m2)
     QVERIFY(diffIsSmallEnough(diffNorm, qMin(norm1, norm2)));
 }
 
-void tst_QSvgRenderer::matrixForElement() const
+void tst_QSvgRenderer::transformForElement() const
 {
     QByteArray data("<svg>"
                       "<g id='ichi' transform='translate(-3,1)'>"

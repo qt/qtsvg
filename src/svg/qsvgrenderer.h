@@ -40,8 +40,6 @@
 #ifndef QSVGRENDERER_H
 #define QSVGRENDERER_H
 
-#include <QtGui/qmatrix.h>
-
 #ifndef QT_NO_SVGRENDERER
 
 #include <QtCore/qobject.h>
@@ -94,10 +92,6 @@ public:
 
     QRectF boundsOnElement(const QString &id) const;
     bool elementExists(const QString &id) const;
-#if QT_DEPRECATED_SINCE(5, 15)
-    QT_DEPRECATED_X("Use transformForElement()")
-    QMatrix matrixForElement(const QString &id) const;
-#endif // QT_DEPRECATED_SINCE(5, 15)
     QTransform transformForElement(const QString &id) const;
 
 public Q_SLOTS:

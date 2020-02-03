@@ -507,33 +507,6 @@ bool QSvgRenderer::elementExists(const QString &id) const
     return exists;
 }
 
-#if QT_DEPRECATED_SINCE(5, 15)
-QT_WARNING_PUSH
-QT_WARNING_DISABLE_DEPRECATED
-/*!
-    \since 4.2
-    \deprecated
-
-    Use transformForElement() instead.
-
-
-    Returns the transformation matrix for the element
-    with the given \a id. The matrix is a product of
-    the transformation of the element's parents. The transformation of
-    the element itself is not included.
-
-    To find the bounding rectangle of the element in logical coordinates,
-    you can apply the matrix on the rectangle returned from boundsOnElement().
-
-    \sa boundsOnElement()
-*/
-QMatrix QSvgRenderer::matrixForElement(const QString &id) const
-{
-    return transformForElement(id).toAffine();
-}
-QT_WARNING_POP
-#endif // QT_DEPRECATED_SINCE(5, 15)
-
 /*!
     \since 5.15
 
