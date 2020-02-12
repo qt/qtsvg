@@ -1,12 +1,12 @@
 # Generated from svg.pro.
 
 #####################################################################
-## qsvg Plugin:
+## QSvgPlugin Plugin:
 #####################################################################
 
-qt_add_plugin(qsvg
+qt_add_plugin(QSvgPlugin
+    OUTPUT_NAME qsvg
     TYPE imageformats
-    CLASS_NAME QSvgPlugin
     SOURCES
         main.cpp
         qsvgiohandler.cpp qsvgiohandler.h

@@ -29,6 +29,9 @@ qt_add_module(Svg
     PUBLIC_LIBRARIES
         Qt::Core
         Qt::Gui
+    PRIVATE_MODULE_INTERFACE
+        Qt::CorePrivate
+        Qt::GuiPrivate
 )
 
 ## Scopes:
@@ -39,6 +42,8 @@ qt_extend_target(Svg CONDITION TARGET Qt::Widgets
         Qt::WidgetsPrivate
     PUBLIC_LIBRARIES
         Qt::Widgets
+    PRIVATE_MODULE_INTERFACE
+        Qt::WidgetsPrivate
 )
 
 qt_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")

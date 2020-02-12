@@ -13,10 +13,9 @@ list(APPEND test_data ${test_data_glob})
 qt_add_test(tst_qicon_svg
     SOURCES
         tst_qicon_svg.cpp
-    LIBRARIES
-        Qt::GuiPrivate
     PUBLIC_LIBRARIES
         Qt::Gui
+        Qt::GuiPrivate
         Qt::Svg
     TESTDATA ${test_data}
 )

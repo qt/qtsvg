@@ -7,10 +7,9 @@
 qt_add_test(tst_qsvgplugin
     SOURCES
         tst_qsvgplugin.cpp
-    LIBRARIES
-        Qt::GuiPrivate
     PUBLIC_LIBRARIES
         Qt::Gui
+        Qt::GuiPrivate
         Qt::Svg
         Qt::Widgets
 )

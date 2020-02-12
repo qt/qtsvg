@@ -1,21 +1,20 @@
 # Generated from svgiconengine.pro.
 
 #####################################################################
-## qsvgicon Plugin:
+## QSvgIconPlugin Plugin:
 #####################################################################
 
-qt_add_plugin(qsvgicon
+qt_add_plugin(QSvgIconPlugin
+    OUTPUT_NAME qsvgicon
     TYPE iconengines
-    CLASS_NAME QSvgIconPlugin
     SOURCES
         main.cpp
         qsvgiconengine.cpp qsvgiconengine.h
-    LIBRARIES
-        Qt::CorePrivate
-        Qt::GuiPrivate
     PUBLIC_LIBRARIES
         Qt::Core
+        Qt::CorePrivate
         Qt::Gui
+        Qt::GuiPrivate
         Qt::Svg
 )
 
