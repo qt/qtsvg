@@ -1,0 +1,2 @@
+add_subdirectory(iconengines)
+add_subdirectory(imageformats)
