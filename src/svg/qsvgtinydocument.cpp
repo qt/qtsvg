@@ -48,6 +48,7 @@
 #include "qbytearray.h"
 #include "qqueue.h"
 #include "qstack.h"
+#include "qtransform.h"
 #include "qdebug.h"
 
 #ifndef QT_NO_COMPRESS
@@ -335,10 +336,15 @@ void QSvgTinyDocument::setHeight(int len, bool percent)
     m_heightPercent = percent;
 }
 
+void QSvgTinyDocument::setPreserveAspectRatio(bool on)
+{
+    m_preserveAspectRatio = on;
+}
+
 void QSvgTinyDocument::setViewBox(const QRectF &rect)
 {
     m_viewBox = rect;
-    m_implicitViewBox = false;
+    m_implicitViewBox = rect.isNull();
 }
 
 void QSvgTinyDocument::addSvgFont(QSvgFont *font)
@@ -420,7 +426,10 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
         source = viewBox();
 
     if (source != target && !source.isNull()) {
-        if (m_implicitViewBox) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+        if (m_implicitViewBox || !preserveAspectRatio()) {
+            // Code path used when no view box is set, or IgnoreAspectRatio requested
+#endif
             QTransform transform;
             transform.scale(target.width() / source.width(),
                             target.height() / source.height());
@@ -429,26 +438,26 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
                          target.y() - c2.y());
             p->scale(target.width() / source.width(),
                      target.height() / source.height());
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
         } else {
-            // Code path used when a view box is specified and we're not rendering a specific element by id
-            // but the entire document. This attempts to emulate the default values of the <preserveAspectRatio>
-            // tag that's implicitly defined when <viewbox> is used.
-
-            // Apply the view box translation if specified.
-            p->translate(target.x() - source.x(),
-                         target.y() - source.y());
+            // Code path used when KeepAspectRatio is requested. This attempts to emulate the default values
+            // of the <preserveAspectRatio tag that's implicitly defined when <viewbox> is used.
 
             // Scale the view box into the view port (target) by preserve the aspect ratio.
             QSizeF viewBoxSize = source.size();
             viewBoxSize.scale(target.width(), target.height(), Qt::KeepAspectRatio);
 
             // Center the view box in the view port
-            p->translate((target.width() - viewBoxSize.width()) / 2,
-                         (target.height() - viewBoxSize.height()) / 2);
+            p->translate(target.x() + (target.width() - viewBoxSize.width()) / 2,
+                         target.y() + (target.height() - viewBoxSize.height()) / 2);
 
             p->scale(viewBoxSize.width() / source.width(),
                      viewBoxSize.height() / source.height());
+
+            // Apply the view box translation if specified.
+            p->translate(-source.x(), -source.y());
         }
+#endif
     }
 }
 
@@ -467,13 +476,13 @@ bool QSvgTinyDocument::elementExists(const QString &id) const
     return (node!=0);
 }
 
-QMatrix QSvgTinyDocument::matrixForElement(const QString &id) const
+QTransform QSvgTinyDocument::transformForElement(const QString &id) const
 {
     QSvgNode *node = scopeNode(id);
 
     if (!node) {
         qCDebug(lcSvgHandler, "Couldn't find node %s. Skipping rendering.", qPrintable(id));
-        return QMatrix();
+        return QTransform();
     }
 
     QTransform t;
@@ -485,7 +494,7 @@ QMatrix QSvgTinyDocument::matrixForElement(const QString &id) const
         node = node->parent();
     }
 
-    return t.toAffine();
+    return t;
 }
 
 int QSvgTinyDocument::currentFrame() const

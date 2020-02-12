@@ -45,6 +45,7 @@
 
 #include "qbytearray.h"
 #include "qtimer.h"
+#include "qtransform.h"
 #include "qdebug.h"
 #include "private/qobject_p.h"
 
@@ -256,6 +257,41 @@ void QSvgRenderer::setFramesPerSecond(int num)
 }
 
 /*!
+    \property QSvgRenderer::aspectRatioMode
+
+    \brief how rendering adheres to the SVG view box aspect ratio
+
+    The accepted modes are:
+    \list
+    \li Qt::IgnoreAspectRatio (the default): the aspect ratio is ignored and the
+        rendering is stretched to the target bounds.
+    \li Qt::KeepAspectRatio: rendering is centered and scaled as large as possible
+        within the target bounds while preserving aspect ratio.
+    \endlist
+
+    \since 5.15
+*/
+
+Qt::AspectRatioMode QSvgRenderer::aspectRatioMode() const
+{
+    Q_D(const QSvgRenderer);
+    if (d->render && d->render->preserveAspectRatio())
+        return Qt::KeepAspectRatio;
+    return Qt::IgnoreAspectRatio;
+}
+
+void QSvgRenderer::setAspectRatioMode(Qt::AspectRatioMode mode)
+{
+    Q_D(QSvgRenderer);
+    if (d->render) {
+        if (mode == Qt::KeepAspectRatio)
+            d->render->setPreserveAspectRatio(true);
+        else if (mode == Qt::IgnoreAspectRatio)
+            d->render->setPreserveAspectRatio(false);
+    }
+}
+
+/*!
   \property QSvgRenderer::currentFrame
   \brief the current frame of the document's animation, or 0 if the document is not animated
   \internal
@@ -401,10 +437,10 @@ void QSvgRenderer::render(QPainter *painter, const QString &elementId,
 }
 
 /*!
-    Renders the current document, or the current frame of an animated
-    document, using the given \a painter on the specified \a bounds within
-    the painter.  If the bounding rectangle is not specified
-    the SVG file is mapped to the whole paint device.
+    Renders the current document, or the current frame of an animated document,
+    using the given \a painter on the specified \a bounds within the painter.
+    If \a bounds is not empty, the output will be scaled to fill it, ignoring
+    any aspect ratio implied by the SVG.
 */
 void QSvgRenderer::render(QPainter *painter, const QRectF &bounds)
 {
@@ -437,7 +473,7 @@ void QSvgRenderer::setViewBox(const QRectF &viewbox)
     The transformation matrix of parent elements is not affecting
     the bounds of the element.
 
-    \sa matrixForElement()
+    \sa transformForElement()
 */
 QRectF QSvgRenderer::boundsOnElement(const QString &id) const
 {
@@ -472,7 +508,7 @@ bool QSvgRenderer::elementExists(const QString &id) const
 }
 
 /*!
-    \since 4.2
+    \since 5.15
 
     Returns the transformation matrix for the element
     with the given \a id. The matrix is a product of
@@ -484,13 +520,13 @@ bool QSvgRenderer::elementExists(const QString &id) const
 
     \sa boundsOnElement()
 */
-QMatrix QSvgRenderer::matrixForElement(const QString &id) const
+QTransform QSvgRenderer::transformForElement(const QString &id) const
 {
     Q_D(const QSvgRenderer);
-    QMatrix mat;
+    QTransform trans;
     if (d->render)
-        mat = d->render->matrixForElement(id);
-    return mat;
+        trans = d->render->transformForElement(id);
+    return trans;
 }
 
 QT_END_NAMESPACE
