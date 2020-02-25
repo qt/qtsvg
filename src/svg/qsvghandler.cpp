@@ -2076,7 +2076,7 @@ static void cssStyleLookup(QSvgNode *node,
 
 static inline QStringList stringToList(const QString &str)
 {
-    QStringList lst = str.split(QLatin1Char(','), QString::SkipEmptyParts);
+    QStringList lst = str.split(QLatin1Char(','), Qt::SkipEmptyParts);
     return lst;
 }
 
@@ -3265,7 +3265,7 @@ static QSvgNode *createSvgNode(QSvgNode *parent,
         viewBoxStr = viewBoxStr.replace(QLatin1Char('\r'), QLatin1Char(','));
         viewBoxStr = viewBoxStr.replace(QLatin1Char('\n'), QLatin1Char(','));
         viewBoxStr = viewBoxStr.replace(QLatin1Char('\t'), QLatin1Char(','));
-        viewBoxValues = viewBoxStr.split(QLatin1Char(','), QString::SkipEmptyParts);
+        viewBoxValues = viewBoxStr.split(QLatin1Char(','), Qt::SkipEmptyParts);
     }
     if (viewBoxValues.count() == 4) {
         QString xStr      = viewBoxValues.at(0).trimmed();
