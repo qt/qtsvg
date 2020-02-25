@@ -4,7 +4,14 @@
 ## Svg Module:
 #####################################################################
 
-find_package(ZLIB MODULE REQUIRED) # special case
+# special case begin
+# Handle the conditional finding of either system zlib or qt zlib.
+if(NOT QT_FEATURE_system_zlib)
+    find_package(Qt6 COMPONENTS Zlib)
+elseif(NOT TARGET ZLIB::ZLIB)
+    qt_find_package(ZLIB PROVIDED_TARGETS ZLIB::ZLIB)
+endif()
+# special case end
 
 qt_add_module(Svg
     SOURCES
@@ -25,7 +32,6 @@ qt_add_module(Svg
     LIBRARIES
         Qt::CorePrivate
         Qt::GuiPrivate
-        ZLIB::ZLIB
     PUBLIC_LIBRARIES
         Qt::Core
         Qt::Gui
@@ -53,6 +59,16 @@ qt_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")
 
 #### Keys ignored in scope 4:.:.:svg.pro:solaris-cc_x_:
 # QMAKE_CXXFLAGS_RELEASE = "--O2"
+
+qt_extend_target(Svg CONDITION QT_FEATURE_system_zlib
+    LIBRARIES
+        ZLIB::ZLIB
+)
+
+qt_extend_target(Svg CONDITION NOT QT_FEATURE_system_zlib
+    LIBRARIES
+        Qt::ZlibPrivate
+)
 qt_add_docs(Svg
     doc/qtsvg.qdocconf
 )
