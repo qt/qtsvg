@@ -1,2 +1,6 @@
+# Generated from plugins.pro.
+
 add_subdirectory(iconengines)
-add_subdirectory(imageformats)
+if(QT_FEATURE_imageformatplugin)
+    add_subdirectory(imageformats)
+endif()
