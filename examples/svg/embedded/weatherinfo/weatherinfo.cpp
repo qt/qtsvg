@@ -140,7 +140,7 @@ private slots:
 
     void handleNetworkData(QNetworkReply *networkReply) {
         QUrl url = networkReply->url();
-        if (!networkReply->networkError())
+        if (!networkReply->error())
             digest(QString::fromUtf8(networkReply->readAll()));
         networkReply->deleteLater();
     }
