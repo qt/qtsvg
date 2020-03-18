@@ -232,7 +232,7 @@ void QSvgFontStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &states
     QFont font = m_oldQFont;
     if (m_familySet) {
         states.svgFont = m_svgFont;
-        font.setFamily(m_qfont.family());
+        font.setFamilies(m_qfont.families());
     }
 
     if (m_sizeSet)

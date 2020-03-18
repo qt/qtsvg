@@ -348,7 +348,7 @@ public:
 
     void setFamily(const QString &family)
     {
-        m_qfont.setFamily(family);
+        m_qfont.setFamilies({family});
         m_familySet = 1;
     }
 
