@@ -59,6 +59,10 @@ Window::Window(QWidget *parent)
     : QWidget(parent)
 {
     setupUi(this);
+    connect(shapeComboBox, &QComboBox::currentIndexChanged, this, &Window::updateShape);
+    connect(colorButton, &QToolButton::clicked, this, &Window::updateColor);
+    connect(shapeComboBox_2, &QComboBox::currentIndexChanged, this, &Window::updateBackground);
+    connect(toolButton_2, &QToolButton::clicked, this, &Window::saveSvg);
 }
 
 void Window::updateBackground(int background)
