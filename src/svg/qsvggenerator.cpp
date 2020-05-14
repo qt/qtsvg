@@ -48,7 +48,6 @@
 #include "private/qdrawhelper_p.h"
 
 #include "qfile.h"
-#include "qtextcodec.h"
 #include "qtextstream.h"
 #include "qbuffer.h"
 #include "qmath.h"
@@ -938,9 +937,6 @@ bool QSvgPaintEngine::end()
     *d->stream << "</defs>\n";
 
     d->stream->setDevice(d->outputDevice);
-#ifndef QT_NO_TEXTCODEC
-    d->stream->setCodec(QTextCodec::codecForName("UTF-8"));
-#endif
 
     *d->stream << d->header;
     *d->stream << d->defs;

@@ -291,8 +291,6 @@ void tst_QSvgGenerator::radialGradient()
 
 void tst_QSvgGenerator::fileEncoding()
 {
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("ISO-8859-1"));
-
     QByteArray byteArray;
     QBuffer buffer(&byteArray);
 
