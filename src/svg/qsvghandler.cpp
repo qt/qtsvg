@@ -235,8 +235,8 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
         handler->parseCSStoXMLAttrs(style.toString(), &m_cssAttributes);
         for (int j = 0; j < m_cssAttributes.count(); ++j) {
             const QSvgCssAttribute &attribute = m_cssAttributes.at(j);
-            QStringRef name = attribute.name;
-            QStringRef value = attribute.value;
+            QStringRef name(&attribute.name);
+            QStringRef value(&attribute.value);
             if (name.isEmpty())
                 continue;
 
@@ -2008,13 +2008,13 @@ void QSvgHandler::parseCSStoXMLAttrs(const QString &css, QList<QSvgCssAttribute>
             break;
         m_cssParser.next();
 
-        QStringRef name;
+        QString name;
         if (m_cssParser.hasEscapeSequences) {
             key = m_cssParser.lexem();
-            name = QStringRef(&key, 0, key.length());
+            name = key;
         } else {
             const QCss::Symbol &sym = m_cssParser.symbol();
-            name = QStringRef(&sym.text, sym.start, sym.len);
+            name = sym.text.mid(sym.start, sym.len);
         }
 
         m_cssParser.skipSpace();
@@ -2026,7 +2026,7 @@ void QSvgHandler::parseCSStoXMLAttrs(const QString &css, QList<QSvgCssAttribute>
             break;
 
         QSvgCssAttribute attribute;
-        attribute.name = QXmlStreamStringRef(name);
+        attribute.name = name;
 
         const int firstSymbol = m_cssParser.index;
         int symbolCount = 0;
@@ -2049,14 +2049,14 @@ void QSvgHandler::parseCSStoXMLAttrs(const QString &css, QList<QSvgCssAttribute>
             }
             if (canExtractValueByRef) {
                 const QCss::Symbol &sym = m_cssParser.symbols.at(firstSymbol);
-                attribute.value = QXmlStreamStringRef(QStringRef(&sym.text, sym.start, len));
+                attribute.value = sym.text.mid(sym.start, len);
             }
         }
         if (!canExtractValueByRef) {
             QString value;
             for (int i = firstSymbol; i < m_cssParser.index - 1; ++i)
                 value += m_cssParser.symbols.at(i).lexem();
-            attribute.value = QXmlStreamStringRef(QStringRef(&value, 0, value.length()));
+            attribute.value = value;
         }
 
         attributes->append(attribute);
