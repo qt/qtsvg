@@ -673,24 +673,23 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
     if (totalTimeElapsed < m_from || m_finished)
         return;
 
-    qreal animationFrame = 0;
+    qreal fractionOfTotalTime = 0;
     if (m_totalRunningTime != 0) {
-        animationFrame = (totalTimeElapsed - m_from) / m_totalRunningTime;
+        fractionOfTotalTime = (totalTimeElapsed - m_from) / m_totalRunningTime;
 
-        if (m_repeatCount >= 0 && m_repeatCount < animationFrame) {
+        if (m_repeatCount >= 0 && m_repeatCount < fractionOfTotalTime) {
             m_finished = true;
-            animationFrame = m_repeatCount;
+            fractionOfTotalTime = m_repeatCount;
         }
     }
 
-    qreal percentOfAnimation = animationFrame;
-    if (percentOfAnimation > 1) {
-        percentOfAnimation -= ((int)percentOfAnimation);
-    }
+    qreal fractionOfCurrentIterationTime = fractionOfTotalTime - std::trunc(fractionOfTotalTime);
 
-    qreal currentPosition = percentOfAnimation * (m_count - 1);
-    int endElem   = qCeil(currentPosition);
+    qreal currentIndexPosition = fractionOfCurrentIterationTime * (m_count - 1);
+    int endElem = qCeil(currentIndexPosition);
     int startElem = qMax(endElem - 1, 0);
+
+    qreal fractionOfCurrentElement = currentIndexPosition - std::trunc(currentIndexPosition);
 
     switch(m_type)
     {
@@ -704,9 +703,9 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         to1   = m_args[endElem++];
         to2   = m_args[endElem++];
 
-        qreal transXDiff = (to1-from1) * percentOfAnimation;
+        qreal transXDiff = (to1 - from1) * fractionOfCurrentElement;
         qreal transX = from1 + transXDiff;
-        qreal transYDiff = (to2-from2) * percentOfAnimation;
+        qreal transYDiff = (to2 - from2) * fractionOfCurrentElement;
         qreal transY = from2 + transYDiff;
         m_transform = QTransform();
         m_transform.translate(transX, transY);
@@ -722,9 +721,9 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         to1   = m_args[endElem++];
         to2   = m_args[endElem++];
 
-        qreal transXDiff = (to1-from1) * percentOfAnimation;
+        qreal transXDiff = (to1 - from1) * fractionOfCurrentElement;
         qreal transX = from1 + transXDiff;
-        qreal transYDiff = (to2-from2) * percentOfAnimation;
+        qreal transYDiff = (to2 - from2) * fractionOfCurrentElement;
         qreal transY = from2 + transYDiff;
         if (transY == 0)
             transY = transX;
@@ -744,12 +743,12 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         to2   = m_args[endElem++];
         to3   = m_args[endElem++];
 
-        qreal rotationDiff = (to1 - from1) * percentOfAnimation;
+        qreal rotationDiff = (to1 - from1) * fractionOfCurrentElement;
         //qreal rotation = from1 + rotationDiff;
 
-        qreal transXDiff = (to2-from2) * percentOfAnimation;
+        qreal transXDiff = (to2 - from2) * fractionOfCurrentElement;
         qreal transX = from2 + transXDiff;
-        qreal transYDiff = (to3-from3) * percentOfAnimation;
+        qreal transYDiff = (to3 - from3) * fractionOfCurrentElement;
         qreal transY = from3 + transYDiff;
         m_transform = QTransform();
         m_transform.translate(transX, transY);
@@ -765,7 +764,7 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         from1 = m_args[startElem++];
         to1   = m_args[endElem++];
 
-        qreal transXDiff = (to1-from1) * percentOfAnimation;
+        qreal transXDiff = (to1 - from1) * fractionOfCurrentElement;
         qreal transX = from1 + transXDiff;
         m_transform = QTransform();
         m_transform.shear(qTan(qDegreesToRadians(transX)), 0);
@@ -779,8 +778,7 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         from1 = m_args[startElem++];
         to1   = m_args[endElem++];
 
-
-        qreal transYDiff = (to1 - from1) * percentOfAnimation;
+        qreal transYDiff = (to1 - from1) * fractionOfCurrentElement;
         qreal transY = from1 + transYDiff;
         m_transform = QTransform();
         m_transform.shear(0, qTan(qDegreesToRadians(transY)));
