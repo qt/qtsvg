@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt SVG module of the Qt Toolkit.
@@ -38,15 +38,15 @@
 ****************************************************************************/
 #include "qgraphicssvgitem.h"
 
-#if !defined(QT_NO_GRAPHICSVIEW) && !defined(QT_NO_WIDGETS)
+#if !defined(QT_NO_GRAPHICSVIEW)
 
 #include "qpainter.h"
 #include "qstyleoption.h"
 #include "qsvgrenderer.h"
 #include "qdebug.h"
 
-#include "private/qobject_p.h"
-#include "private/qgraphicsitem_p.h"
+#include <QtCore/private/qobject_p.h>
+#include <QtWidgets/private/qgraphicsitem_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -385,4 +385,4 @@ QT_END_NAMESPACE
 
 #include "moc_qgraphicssvgitem.cpp"
 
-#endif // QT_NO_WIDGETS
+#endif // QT_NO_GRAPHICSVIEW

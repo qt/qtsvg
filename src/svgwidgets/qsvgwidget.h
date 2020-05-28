@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt SVG module of the Qt Toolkit.
@@ -36,64 +36,42 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef QGRAPHICSSVGITEM_H
-#define QGRAPHICSSVGITEM_H
 
-#include <QtCore/qglobal.h>
+#ifndef QSVGWIDGET_H
+#define QSVGWIDGET_H
 
-#if !defined(QT_NO_GRAPHICSVIEW) && !defined(QT_NO_WIDGETS)
+#include <QtSvgWidgets/qtsvgwidgetsglobal.h>
+#include <QtWidgets/qwidget.h>
 
-#include <QtWidgets/qgraphicsitem.h>
-
-#include <QtSvg/qtsvgglobal.h>
 
 QT_BEGIN_NAMESPACE
 
 
+class QSvgWidgetPrivate;
+class QPaintEvent;
 class QSvgRenderer;
-class QGraphicsSvgItemPrivate;
 
-class Q_SVG_EXPORT QGraphicsSvgItem : public QGraphicsObject
+class Q_SVGWIDGETS_EXPORT QSvgWidget : public QWidget
 {
     Q_OBJECT
-    Q_INTERFACES(QGraphicsItem)
-    Q_PROPERTY(QString elementId READ elementId WRITE setElementId)
-    Q_PROPERTY(QSize maximumCacheSize READ maximumCacheSize WRITE setMaximumCacheSize)
-
 public:
-    QGraphicsSvgItem(QGraphicsItem *parentItem = nullptr);
-    QGraphicsSvgItem(const QString &fileName, QGraphicsItem *parentItem = nullptr);
+    QSvgWidget(QWidget *parent = nullptr);
+    QSvgWidget(const QString &file, QWidget *parent = nullptr);
+    ~QSvgWidget();
 
-    void setSharedRenderer(QSvgRenderer *renderer);
     QSvgRenderer *renderer() const;
 
-    void setElementId(const QString &id);
-    QString elementId() const;
-
-    void setCachingEnabled(bool);
-    bool isCachingEnabled() const;
-
-    void setMaximumCacheSize(const QSize &size);
-    QSize maximumCacheSize() const;
-
-    QRectF boundingRect() const override;
-
-    void paint(QPainter *painter,
-               const QStyleOptionGraphicsItem *option,
-               QWidget *widget = nullptr) override;
-
-    enum { Type = 13 };
-    int type() const override;
-
+    QSize sizeHint() const override;
+public Q_SLOTS:
+    void load(const QString &file);
+    void load(const QByteArray &contents);
+protected:
+    void paintEvent(QPaintEvent *event) override;
 private:
-    Q_DISABLE_COPY(QGraphicsSvgItem)
-    Q_DECLARE_PRIVATE_D(QGraphicsItem::d_ptr.data(), QGraphicsSvgItem)
-
-    Q_PRIVATE_SLOT(d_func(), void _q_repaintItem())
+    Q_DISABLE_COPY(QSvgWidget)
+    Q_DECLARE_PRIVATE(QSvgWidget)
 };
 
 QT_END_NAMESPACE
 
-#endif // QT_NO_GRAPHICSVIEW or QT_NO_WIDGETS
-
-#endif // QGRAPHICSSVGITEM_H
+#endif // QSVGWIDGET_H

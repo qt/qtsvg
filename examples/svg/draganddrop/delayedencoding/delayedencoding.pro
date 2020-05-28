@@ -1,4 +1,4 @@
-QT          += widgets svg
+QT          += widgets svg svgwidgets
 
 HEADERS     = mimedata.h \
               sourcewidget.h

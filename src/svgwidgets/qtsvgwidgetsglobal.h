@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt SVG module of the Qt Toolkit.
@@ -37,47 +37,25 @@
 **
 ****************************************************************************/
 
-#ifndef QSVGWIDGET_H
-#define QSVGWIDGET_H
+#ifndef QTSVGWIDGETSGLOBAL_H
+#define QTSVGWIDGETSGLOBAL_H
 
 #include <QtCore/qglobal.h>
 
-#ifndef QT_NO_WIDGETS
-
-#include <QtWidgets/qwidget.h>
-
-#include <QtSvg/qtsvgglobal.h>
-
 QT_BEGIN_NAMESPACE
 
-
-class QSvgWidgetPrivate;
-class QPaintEvent;
-class QSvgRenderer;
-
-class Q_SVG_EXPORT QSvgWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    QSvgWidget(QWidget *parent = nullptr);
-    QSvgWidget(const QString &file, QWidget *parent = nullptr);
-    ~QSvgWidget();
-
-    QSvgRenderer *renderer() const;
-
-    QSize sizeHint() const override;
-public Q_SLOTS:
-    void load(const QString &file);
-    void load(const QByteArray &contents);
-protected:
-    void paintEvent(QPaintEvent *event) override;
-private:
-    Q_DISABLE_COPY(QSvgWidget)
-    Q_DECLARE_PRIVATE(QSvgWidget)
-};
+#ifndef Q_SVGWIDGETS_EXPORT
+#  ifndef QT_STATIC
+#    if defined(QT_BUILD_SVGWIDGETS_LIB)
+#      define Q_SVGWIDGETS_EXPORT Q_DECL_EXPORT
+#    else
+#      define Q_SVGWIDGETS_EXPORT Q_DECL_IMPORT
+#    endif
+#  else
+#    define Q_SVGWIDGETS_EXPORT
+#  endif
+#endif
 
 QT_END_NAMESPACE
 
-#endif // QT_NO_WIDGETS
-
-#endif // QSVGWIDGET_H
+#endif

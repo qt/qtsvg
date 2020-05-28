@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2020 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt SVG module of the Qt Toolkit.
@@ -39,13 +39,11 @@
 
 #include "qsvgwidget.h"
 
-#ifndef QT_NO_WIDGETS
-
-#include "qsvgrenderer.h"
+#include <qsvgrenderer.h>
 
 #include "qstyleoption.h"
 #include "qpainter.h"
-#include "private/qwidget_p.h"
+#include <QtWidgets/private/qwidget_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -172,5 +170,3 @@ void QSvgWidget::load(const QByteArray &contents)
 }
 
 QT_END_NAMESPACE
-
-#endif // QT_NO_WIDGETS

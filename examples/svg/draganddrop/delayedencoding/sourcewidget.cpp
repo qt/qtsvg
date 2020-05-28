@@ -50,6 +50,7 @@
 
 #include <QtWidgets>
 #include <QtSvg>
+#include <QtSvgWidgets>
 #include "mimedata.h"
 #include "sourcewidget.h"
 

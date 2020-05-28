@@ -6,7 +6,6 @@
 
 qt_add_module(Svg
     SOURCES
-        qgraphicssvgitem.cpp qgraphicssvgitem.h
         qsvgfont.cpp qsvgfont_p.h
         qsvggenerator.cpp qsvggenerator.h
         qsvggraphics.cpp qsvggraphics_p.h
@@ -16,7 +15,6 @@ qt_add_module(Svg
         qsvgstructure.cpp qsvgstructure_p.h
         qsvgstyle.cpp qsvgstyle_p.h
         qsvgtinydocument.cpp qsvgtinydocument_p.h
-        qsvgwidget.cpp qsvgwidget.h
         qtsvgglobal.h
     DEFINES
         QT_NO_USING_NAMESPACE
@@ -33,15 +31,6 @@ qt_add_module(Svg
 
 ## Scopes:
 #####################################################################
-
-qt_extend_target(Svg CONDITION TARGET Qt::Widgets
-    LIBRARIES
-        Qt::WidgetsPrivate
-    PUBLIC_LIBRARIES
-        Qt::Widgets
-    PRIVATE_MODULE_INTERFACE
-        Qt::WidgetsPrivate
-)
 
 qt_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")
     LINK_OPTIONS

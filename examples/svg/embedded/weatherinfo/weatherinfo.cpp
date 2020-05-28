@@ -51,7 +51,7 @@
 #include <QtCore>
 #include <QtWidgets>
 #include <QtNetwork>
-#include <QtSvg>
+#include <QtSvgWidgets>
 
 #define GET_DATA_ATTR(val) xml.attributes().value(val).toString()
 #define GET_DATETIME(val) QDateTime::fromString(val, "yyyy-MM-ddThh:mm:ss")

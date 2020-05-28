@@ -15,7 +15,6 @@ endif()
 
 qt_add_module(Svg
     SOURCES
-        qgraphicssvgitem.cpp qgraphicssvgitem.h
         qsvgfont.cpp qsvgfont_p.h
         qsvggenerator.cpp qsvggenerator.h
         qsvggraphics.cpp qsvggraphics_p.h
@@ -25,7 +24,6 @@ qt_add_module(Svg
         qsvgstructure.cpp qsvgstructure_p.h
         qsvgstyle.cpp qsvgstyle_p.h
         qsvgtinydocument.cpp qsvgtinydocument_p.h
-        qsvgwidget.cpp qsvgwidget.h
         qtsvgglobal.h
     DEFINES
         QT_NO_USING_NAMESPACE

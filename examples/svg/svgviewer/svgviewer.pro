@@ -6,7 +6,7 @@ SOURCES       = main.cpp \
                 mainwindow.cpp \
                 svgview.cpp \
                 exportdialog.cpp
-QT           += widgets svg
+QT           += widgets svg svgwidgets
 
 qtHaveModule(opengl): QT += opengl openglwidgets
 
