@@ -1263,7 +1263,7 @@ void PictureFlow::keyPressEvent(QKeyEvent* event)
 
 void PictureFlow::mouseMoveEvent(QMouseEvent* event)
 {
-  int distanceMovedSinceLastEvent = event->pos().x() - d->previousPos.x();
+  int distanceMovedSinceLastEvent = event->position().toPoint().x() - d->previousPos.x();
 
   // Check to see if we need to switch from single press mode to a drag mode
   if (d->singlePress)
@@ -1287,7 +1287,7 @@ void PictureFlow::mouseMoveEvent(QMouseEvent* event)
       speed = SPEED_LOWER_THRESHOLD;
     else
     {
-      speed = ((qAbs(event->pos().x()-d->previousPos.x())*1000) / d->previousPosTimestamp.elapsed())
+      speed = ((qAbs(event->position().toPoint().x()-d->previousPos.x())*1000) / d->previousPosTimestamp.elapsed())
                     / (d->buffer.width() / 10);
 
       if (speed < SPEED_LOWER_THRESHOLD)
@@ -1339,7 +1339,7 @@ void PictureFlow::mouseMoveEvent(QMouseEvent* event)
     }
   }
 
-  d->previousPos = event->pos();
+  d->previousPos = event->position().toPoint();
   d->previousPosTimestamp.restart();
 
   emit inputReceived();
@@ -1347,8 +1347,8 @@ void PictureFlow::mouseMoveEvent(QMouseEvent* event)
 
 void PictureFlow::mousePressEvent(QMouseEvent* event)
 {
-  d->firstPress = event->pos();
-  d->previousPos = event->pos();
+  d->firstPress = event->position().toPoint();
+  d->previousPos = event->position().toPoint();
   d->previousPosTimestamp.start();
   d->singlePress = true; // Initially assume a single press
 //  d->dragStartSlide = d->getTarget();
@@ -1363,10 +1363,10 @@ void PictureFlow::mouseReleaseEvent(QMouseEvent* event)
 
   if (d->singlePress)
   {
-    if (event->x() < sideWidth )
+    if (event->position().toPoint().x() < sideWidth )
     {
       showPrevious();
-    } else if ( event->x() > sideWidth + slideSize().width() ) {
+    } else if ( event->position().toPoint().x() > sideWidth + slideSize().width() ) {
       showNext();
     } else {
       emit itemActivated(d->getTarget());
