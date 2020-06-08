@@ -204,7 +204,7 @@ private:
 
     // 'm_tspans' is also used to store characters outside tspans and line breaks.
     // If a 'm_tspan' item is null, it indicates a line break.
-    QVector<QSvgTspan *> m_tspans;
+    QList<QSvgTspan *> m_tspans;
 
     Type m_type;
     QSizeF m_size;

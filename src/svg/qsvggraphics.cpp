@@ -319,8 +319,8 @@ void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
         bounds = QRectF(0, py, 1, scaledSize.height()); // x and width are not used.
 
     bool appendSpace = false;
-    QVector<QString> paragraphs;
-    QVector<QVector<QTextLayout::FormatRange> > formatRanges(1);
+    QList<QString> paragraphs;
+    QList<QList<QTextLayout::FormatRange> > formatRanges(1);
     paragraphs.push_back(QString());
 
     for (int i = 0; i < m_tspans.size(); ++i) {
@@ -442,7 +442,7 @@ void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
 
                 y += 1.1 * line.height();
             }
-            tl.draw(p, QPointF(px, py), QVector<QTextLayout::FormatRange>(), bounds);
+            tl.draw(p, QPointF(px, py), QList<QTextLayout::FormatRange>(), bounds);
 
             if (endOfBoundsReached)
                 break;

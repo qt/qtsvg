@@ -72,7 +72,7 @@ static void translate_color(const QColor &color, QString *color_string,
     *opacity_string = QString::number(color.alphaF());
 }
 
-static void translate_dashPattern(const QVector<qreal> &pattern, qreal width, QString *pattern_string)
+static void translate_dashPattern(const QList<qreal> &pattern, qreal width, QString *pattern_string)
 {
     Q_ASSERT(pattern_string);
 

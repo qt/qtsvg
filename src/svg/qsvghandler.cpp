@@ -52,7 +52,7 @@
 #include "qbrush.h"
 #include "qcolor.h"
 #include "qtextformat.h"
-#include "qvector.h"
+#include "qlist.h"
 #include "qfileinfo.h"
 #include "qfile.h"
 #include "qdir.h"
@@ -220,7 +220,7 @@ struct QSvgAttributes
     QStringRef stopOpacity;
 
 #ifndef QT_NO_CSSPARSER
-    QVector<QSvgCssAttribute> m_cssAttributes;
+    QList<QSvgCssAttribute> m_cssAttributes;
 #endif
 };
 
@@ -693,9 +693,9 @@ static qreal toDouble(const QStringRef &str, bool *ok = NULL)
     return res;
 }
 
-static QVector<qreal> parseNumbersList(const QChar *&str)
+static QList<qreal> parseNumbersList(const QChar *&str)
 {
-    QVector<qreal> points;
+    QList<qreal> points;
     if (!str)
         return points;
     points.reserve(32);
@@ -742,9 +742,9 @@ static inline void parseNumbersArray(const QChar *&str, QVarLengthArray<qreal, 8
     }
 }
 
-static QVector<qreal> parsePercentageList(const QChar *&str)
+static QList<qreal> parsePercentageList(const QChar *&str)
 {
-    QVector<qreal> points;
+    QList<qreal> points;
     if (!str)
         return points;
 
@@ -855,7 +855,7 @@ static bool resolveColor(const QStringRef &colorStr, QColor &color, QSvgHandler 
                 if (colorStrTr.length() >= 7 && colorStrTr.at(colorStrTr.length() - 1) == QLatin1Char(')')
                     && QStringRef(colorStrTr.string(), colorStrTr.position(), 4) == QLatin1String("rgb(")) {
                     const QChar *s = colorStrTr.constData() + 4;
-                    QVector<qreal> compo = parseNumbersList(s);
+                    QList<qreal> compo = parseNumbersList(s);
                     //1 means that it failed after reaching non-parsable
                     //character which is going to be "%"
                     if (compo.size() == 1) {
@@ -1250,10 +1250,10 @@ static void parsePen(QSvgNode *node,
             } else {
                 QString dashArray  = attributes.strokeDashArray.toString();
                 const QChar *s = dashArray.constData();
-                QVector<qreal> dashes = parseNumbersList(s);
+                QList<qreal> dashes = parseNumbersList(s);
                 // if the dash count is odd the dashes should be duplicated
                 if ((dashes.size() & 1) != 0)
-                    dashes << QVector<qreal>(dashes);
+                    dashes << QList<qreal>(dashes);
                 prop->setDashArray(dashes);
             }
         }
@@ -1944,7 +1944,7 @@ static bool parseStyle(QSvgNode *node,
 
 #ifndef QT_NO_CSSPARSER
 
-static void parseCSStoXMLAttrs(const QVector<QCss::Declaration> &declarations,
+static void parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarations,
                                QXmlStreamAttributes &attributes)
 {
     for (int i = 0; i < declarations.count(); ++i) {
@@ -1990,7 +1990,7 @@ static void parseCSStoXMLAttrs(const QVector<QCss::Declaration> &declarations,
     }
 }
 
-void QSvgHandler::parseCSStoXMLAttrs(const QString &css, QVector<QSvgCssAttribute> *attributes)
+void QSvgHandler::parseCSStoXMLAttrs(const QString &css, QList<QSvgCssAttribute> *attributes)
 {
     // preprocess (for unicode escapes), tokenize and remove comments
     m_cssParser.init(css);
@@ -2068,7 +2068,7 @@ static void cssStyleLookup(QSvgNode *node,
 {
     QCss::StyleSelector::NodePtr cssNode;
     cssNode.ptr = node;
-    QVector<QCss::Declaration> decls = selector->declarationsForNode(cssNode);
+    QList<QCss::Declaration> decls = selector->declarationsForNode(cssNode);
 
     QXmlStreamAttributes attributes;
     parseCSStoXMLAttrs(decls, attributes);
@@ -2417,9 +2417,9 @@ static bool parseAimateMotionNode(QSvgNode *parent,
     return true;
 }
 
-static void parseNumberTriplet(QVector<qreal> &values, const QChar *&s)
+static void parseNumberTriplet(QList<qreal> &values, const QChar *&s)
 {
-    QVector<qreal> list = parseNumbersList(s);
+    QList<qreal> list = parseNumbersList(s);
     values << list;
     for (int i = 3 - list.size(); i > 0; --i)
         values.append(0.0);
@@ -2444,7 +2444,7 @@ static bool parseAnimateTransformNode(QSvgNode *parent,
     if (addtv == QLatin1String("sum"))
         additive = QSvgAnimateTransform::Sum;
 
-    QVector<qreal> vals;
+    QList<qreal> vals;
     if (values.isEmpty()) {
         const QChar *s;
         if (fromStr.isEmpty()) {
@@ -2982,7 +2982,7 @@ static QSvgNode *createPolygonNode(QSvgNode *parent,
 
     //same QPolygon parsing is in createPolylineNode
     const QChar *s = pointsStr.constData();
-    QVector<qreal> points = parseNumbersList(s);
+    QList<qreal> points = parseNumbersList(s);
     QPolygonF poly(points.count()/2);
     for (int i = 0; i < poly.size(); ++i)
         poly[i] = QPointF(points.at(2 * i), points.at(2 * i + 1));
@@ -2998,7 +2998,7 @@ static QSvgNode *createPolylineNode(QSvgNode *parent,
 
     //same QPolygon parsing is in createPolygonNode
     const QChar *s = pointsStr.constData();
-    QVector<qreal> points = parseNumbersList(s);
+    QList<qreal> points = parseNumbersList(s);
     QPolygonF poly(points.count()/2);
     for (int i = 0; i < poly.size(); ++i)
         poly[i] = QPointF(points.at(2 * i), points.at(2 * i + 1));
@@ -3155,7 +3155,7 @@ static bool parseStopNode(QSvgStyleProperty *parent,
 #ifndef QT_NO_CSSPARSER
     QCss::StyleSelector::NodePtr cssNode;
     cssNode.ptr = &anim;
-    QVector<QCss::Declaration> decls = handler->selector()->declarationsForNode(cssNode);
+    QList<QCss::Declaration> decls = handler->selector()->declarationsForNode(cssNode);
 
     for (int i = 0; i < decls.count(); ++i) {
         const QCss::Declaration &decl = decls.at(i);

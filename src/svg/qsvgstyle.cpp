@@ -336,7 +336,7 @@ void QSvgStrokeStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &stat
             setDashOffsetNeeded = true;
         } else {
             // If dash array was set, but not the width, the dash array has to be scaled with respect to the old width.
-            QVector<qreal> dashes = m_stroke.dashPattern();
+            QList<qreal> dashes = m_stroke.dashPattern();
             for (int i = 0; i < dashes.size(); ++i)
                 dashes[i] /= oldWidth;
             pen.setDashPattern(dashes);
@@ -344,7 +344,7 @@ void QSvgStrokeStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &stat
         }
     } else if (m_strokeWidthSet && pen.style() != Qt::SolidLine && scale != 1) {
         // If the width was set, but not the dash array, the old dash array must be scaled with respect to the new width.
-        QVector<qreal> dashes = pen.dashPattern();
+        QList<qreal> dashes = pen.dashPattern();
         for (int i = 0; i < dashes.size(); ++i)
             dashes[i] *= scale;
         pen.setDashPattern(dashes);
@@ -381,10 +381,10 @@ void QSvgStrokeStyle::revert(QPainter *p, QSvgExtraStates &states)
     states.vectorEffect = m_oldVectorEffect;
 }
 
-void QSvgStrokeStyle::setDashArray(const QVector<qreal> &dashes)
+void QSvgStrokeStyle::setDashArray(const QList<qreal> &dashes)
 {
     if (m_strokeWidthSet) {
-        QVector<qreal> d = dashes;
+        QList<qreal> d = dashes;
         qreal w = m_stroke.widthF();
         if (w != 0 && w != 1) {
             for (int i = 0; i < d.size(); ++i)
@@ -648,7 +648,7 @@ QSvgAnimateTransform::QSvgAnimateTransform(int startMs, int endMs, int byMs )
     Q_UNUSED(byMs);
 }
 
-void QSvgAnimateTransform::setArgs(TransformType type, Additive additive, const QVector<qreal> &args)
+void QSvgAnimateTransform::setArgs(TransformType type, Additive additive, const QList<qreal> &args)
 {
     m_type = type;
     m_args = args;

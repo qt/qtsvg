@@ -425,7 +425,7 @@ public:
         m_strokeSet = 1;
     }
 
-    void setDashArray(const QVector<qreal> &dashes);
+    void setDashArray(const QList<qreal> &dashes);
 
     void setDashArrayNone()
     {
@@ -650,7 +650,7 @@ public:
     };
 public:
     QSvgAnimateTransform(int startMs, int endMs, int by = 0);
-    void setArgs(TransformType type, Additive additive, const QVector<qreal> &args);
+    void setArgs(TransformType type, Additive additive, const QList<qreal> &args);
     void setFreeze(bool freeze);
     void setRepeatCount(qreal repeatCount);
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
@@ -693,7 +693,7 @@ private:
     qreal m_totalRunningTime;
     TransformType m_type;
     Additive m_additive;
-    QVector<qreal> m_args;
+    QList<qreal> m_args;
     int m_count;
     QTransform m_transform;
     QTransform m_oldWorldTransform;

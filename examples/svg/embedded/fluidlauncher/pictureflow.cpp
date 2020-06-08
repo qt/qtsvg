@@ -83,7 +83,7 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QTimer>
-#include <QVector>
+#include <QList>
 #include <QWidget>
 #include <QElapsedTimer>
 
@@ -380,7 +380,7 @@ public:
   int    pixelDistanceMoved;
   int    pixelsToMovePerSlide;
 
-  QVector<QString> captions;
+  QList<QString> captions;
 
 private:
   PictureFlow* widget;
@@ -389,13 +389,13 @@ private:
   int slideHeight;
   int zoom;
 
-  QVector<QImage> slideImages;
+  QList<QImage> slideImages;
   int centerIndex;
   SlideInfo centerSlide;
-  QVector<SlideInfo> leftSlides;
-  QVector<SlideInfo> rightSlides;
+  QList<SlideInfo> leftSlides;
+  QList<SlideInfo> rightSlides;
 
-  QVector<PFreal> rays;
+  QList<PFreal> rays;
   int itilt;
   int spacing;
   PFreal offsetX;

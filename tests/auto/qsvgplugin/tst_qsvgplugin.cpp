@@ -32,7 +32,6 @@
 #include "../../../src/plugins/imageformats/svg/qsvgiohandler.cpp"
 #include <QImage>
 #include <QStringList>
-#include <QVector>
 
 #ifndef SRCDIR
 #define SRCDIR
