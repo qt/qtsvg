@@ -245,7 +245,7 @@ public:
             QString geo(QStringLiteral("x=\"0\" y=\"0\" width=\"8\" height=\"8\""));
             QTextStream str(&d_func()->defs, QIODevice::Append);
             str << QString(QStringLiteral("<pattern id=\"%1\" %2 patternUnits=\"userSpaceOnUse\" >")).arg(patternId, geo) << Qt::endl;
-            str << QString(QStringLiteral("<rect %1 stroke=\"none\" fill=\"%2\" mask=\"url(#%3);\" />")).arg(geo, color, maskId) << Qt::endl;
+            str << QString(QStringLiteral("<rect %1 stroke=\"none\" fill=\"%2\" mask=\"url(#%3)\" />")).arg(geo, color, maskId) << Qt::endl;
             str << QStringLiteral("</pattern>") << Qt::endl << Qt::endl;
             d_func()->savedPatternBrushes.append(patternId);
         }
