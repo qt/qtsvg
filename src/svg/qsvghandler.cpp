@@ -3232,8 +3232,8 @@ static bool parseStyleNode(QSvgNode *parent,
 {
     Q_UNUSED(parent);
 #ifdef QT_NO_CSSPARSER
-    Q_UNUSED(attributes)
-    Q_UNUSED(handler)
+    Q_UNUSED(attributes);
+    Q_UNUSED(handler);
 #else
     const QStringRef type = attributes.value(QLatin1String("type"));
     if (type.compare(QLatin1String("text/css"), Qt::CaseInsensitive) == 0 || type.isNull())
@@ -3850,7 +3850,7 @@ bool QSvgHandler::endElement(const QStringRef &localName)
     }
 
 #ifdef QT_NO_CSSPARSER
-    Q_UNUSED(localName)
+    Q_UNUSED(localName);
 #else
     if (m_inStyle && localName == QLatin1String("style"))
         m_inStyle = false;
@@ -4028,8 +4028,8 @@ QSvgStyleSelector * QSvgHandler::selector() const
 bool QSvgHandler::processingInstruction(const QString &target, const QString &data)
 {
 #ifdef QT_NO_CSSPARSER
-    Q_UNUSED(target)
-    Q_UNUSED(data)
+    Q_UNUSED(target);
+    Q_UNUSED(data);
 #else
     if (target == QLatin1String("xml-stylesheet")) {
         QRegularExpression rx(QLatin1String("type=\\\"(.+)\\\""),

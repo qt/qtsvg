@@ -85,7 +85,7 @@ EmbeddedSvgViewer::EmbeddedSvgViewer(const QString &filePath)
 
 void EmbeddedSvgViewer::paintEvent(QPaintEvent *event)
 {
-    Q_UNUSED(event)
+    Q_UNUSED(event);
     QPainter painter(this);
     m_renderer->setViewBox(m_viewBox);
     m_renderer->render(&painter);
