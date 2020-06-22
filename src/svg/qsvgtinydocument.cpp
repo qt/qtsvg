@@ -408,11 +408,11 @@ void QSvgTinyDocument::draw(QPainter *p, QSvgExtraStates &)
 void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, const QRectF &sourceRect)
 {
     QRectF target = targetRect;
-    if (target.isNull()) {
+    if (target.isEmpty()) {
         QPaintDevice *dev = p->device();
         QRectF deviceRect(0, 0, dev->width(), dev->height());
-        if (deviceRect.isNull()) {
-            if (sourceRect.isNull())
+        if (deviceRect.isEmpty()) {
+            if (sourceRect.isEmpty())
                 target = QRectF(QPointF(0, 0), size());
             else
                 target = QRectF(QPointF(0, 0), sourceRect.size());
@@ -422,10 +422,10 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
     }
 
     QRectF source = sourceRect;
-    if (source.isNull())
+    if (source.isEmpty())
         source = viewBox();
 
-    if (source != target && !source.isNull()) {
+    if (source != target && !source.isEmpty()) {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
         if (m_implicitViewBox || !preserveAspectRatio()) {
             // Code path used when no view box is set, or IgnoreAspectRatio requested
