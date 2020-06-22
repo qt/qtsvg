@@ -3058,17 +3058,27 @@ static QSvgNode *createRectNode(QSvgNode *parent,
     const QStringRef rx      = attributes.value(QLatin1String("rx"));
     const QStringRef ry      = attributes.value(QLatin1String("ry"));
 
+    bool ok = true;
     QSvgHandler::LengthType type;
-    qreal nwidth = parseLength(width, type, handler);
+    qreal nwidth = parseLength(width, type, handler, &ok);
+    if (!ok)
+        return nullptr;
     nwidth = convertToPixels(nwidth, true, type);
-
-    qreal nheight = parseLength(height, type, handler);
+    qreal nheight = parseLength(height, type, handler, &ok);
+    if (!ok)
+        return nullptr;
     nheight = convertToPixels(nheight, true, type);
     qreal nrx = toDouble(rx);
     qreal nry = toDouble(ry);
 
-    QRectF bounds(toDouble(x), toDouble(y),
-                  nwidth, nheight);
+    QRectF bounds(toDouble(x), toDouble(y), nwidth, nheight);
+    if (bounds.isEmpty())
+        return nullptr;
+
+    if (!rx.isEmpty() && ry.isEmpty())
+        nry = nrx;
+    else if (!ry.isEmpty() && rx.isEmpty())
+        nrx = nry;
 
     //9.2 The 'rect'  element clearly specifies it
     // but the case might in fact be handled because
@@ -3077,11 +3087,6 @@ static QSvgNode *createRectNode(QSvgNode *parent,
         nrx = bounds.width()/2;
     if (nry > bounds.height()/2)
         nry = bounds.height()/2;
-
-    if (!rx.isEmpty() && ry.isEmpty())
-        nry = nrx;
-    else if (!ry.isEmpty() && rx.isEmpty())
-        nrx = nry;
 
     //we draw rounded rect from 0...99
     //svg from 0...bounds.width()/2 so we're adjusting the
