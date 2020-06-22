@@ -402,11 +402,11 @@ void QSvgTinyDocument::draw(QPainter *p, QSvgExtraStates &)
 void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, const QRectF &sourceRect)
 {
     QRectF target = targetRect;
-    if (target.isNull()) {
+    if (target.isEmpty()) {
         QPaintDevice *dev = p->device();
         QRectF deviceRect(0, 0, dev->width(), dev->height());
-        if (deviceRect.isNull()) {
-            if (sourceRect.isNull())
+        if (deviceRect.isEmpty()) {
+            if (sourceRect.isEmpty())
                 target = QRectF(QPointF(0, 0), size());
             else
                 target = QRectF(QPointF(0, 0), sourceRect.size());
@@ -416,10 +416,10 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
     }
 
     QRectF source = sourceRect;
-    if (source.isNull())
+    if (source.isEmpty())
         source = viewBox();
 
-    if (source != target && !source.isNull()) {
+    if (source != target && !source.isEmpty()) {
         QTransform transform;
         transform.scale(target.width() / source.width(),
                   target.height() / source.height());
