@@ -3861,16 +3861,17 @@ bool QSvgHandler::endElement(const QStringRef &localName)
     return true;
 }
 
-void QSvgHandler::resolveGradients(QSvgNode *node)
+void QSvgHandler::resolveGradients(QSvgNode *node, int nestedDepth)
 {
     if (!node || (node->type() != QSvgNode::DOC && node->type() != QSvgNode::G
         && node->type() != QSvgNode::DEFS && node->type() != QSvgNode::SWITCH)) {
         return;
     }
+
     QSvgStructureNode *structureNode = static_cast<QSvgStructureNode *>(node);
 
-    QList<QSvgNode *> ren = structureNode->renderers();
-    for (QList<QSvgNode *>::iterator it = ren.begin(); it != ren.end(); ++it) {
+    const QList<QSvgNode *> ren = structureNode->renderers();
+    for (auto it = ren.begin(); it != ren.end(); ++it) {
         QSvgFillStyle *fill = static_cast<QSvgFillStyle *>((*it)->styleProperty(QSvgStyleProperty::FILL));
         if (fill && !fill->isGradientResolved()) {
             QString id = fill->gradientId();
@@ -3895,7 +3896,8 @@ void QSvgHandler::resolveGradients(QSvgNode *node)
             }
         }
 
-        resolveGradients(*it);
+        if (nestedDepth < 2048)
+            resolveGradients(*it, nestedDepth + 1);
     }
 }
 
