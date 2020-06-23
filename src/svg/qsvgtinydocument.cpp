@@ -125,6 +125,12 @@ QByteArray qt_inflateGZipDataFrom(QIODevice *device)
         do {
             // Prepare the destination buffer
             int oldSize = destination.size();
+            if (oldSize > INT_MAX - CHUNK_SIZE) {
+                inflateEnd(&zlibStream);
+                qCWarning(lcSvgHandler, "Error while inflating gzip file: integer size overflow");
+                return destination;
+            }
+
             destination.resize(oldSize + CHUNK_SIZE);
             zlibStream.next_out = reinterpret_cast<Bytef*>(
                     destination.data() + oldSize - zlibStream.avail_out);
