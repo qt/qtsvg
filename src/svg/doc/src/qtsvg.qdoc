@@ -29,6 +29,7 @@
     \module QtSvg
     \title Qt SVG C++ Classes
     \ingroup modules
+    \qtcmakepackage Svg
     \qtvariable svg
 
     \brief The Qt SVG module provides functionality for handling SVG images.
