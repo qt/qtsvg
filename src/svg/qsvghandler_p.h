@@ -136,8 +136,8 @@ public:
 
 public:
     bool startElement(const QString &localName, const QXmlStreamAttributes &attributes);
-    bool endElement(const QStringRef &localName);
-    bool characters(const QStringRef &str);
+    bool endElement(QStringView localName);
+    bool characters(QStringView str);
     bool processingInstruction(const QString &target, const QString &data);
 
 private:

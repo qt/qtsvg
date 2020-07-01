@@ -238,7 +238,7 @@ public:
 
     QString savePatternBrush(const QString &color, const QBrush &brush)
     {
-        QString patternId = QString(QStringLiteral("fillpattern%1_")).arg(brush.style()) + color.midRef(1);
+        QString patternId = QString(QStringLiteral("fillpattern%1_")).arg(brush.style()) + QStringView{color}.mid(1);
         if (!d_func()->savedPatternBrushes.contains(patternId)) {
             QString maskId = savePatternMask(brush.style());
             QString geo(QStringLiteral("x=\"0\" y=\"0\" width=\"8\" height=\"8\""));

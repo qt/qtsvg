@@ -155,11 +155,11 @@ void FluidLauncher::parseDemos(QXmlStreamReader& reader)
         reader.readNext();
         if (reader.isStartElement() && reader.name() == "example") {
             QXmlStreamAttributes attrs = reader.attributes();
-            QStringRef filename = attrs.value("filename");
+            QStringView filename = attrs.value("filename");
             if (!filename.isEmpty()) {
-                QStringRef name = attrs.value("name");
-                QStringRef image = attrs.value("image");
-                QStringRef args = attrs.value("args");
+                QStringView name = attrs.value("name");
+                QStringView image = attrs.value("image");
+                QStringView args = attrs.value("args");
 
                 DemoApplication* newDemo = new DemoApplication(
                         filename.toString(),
@@ -178,7 +178,7 @@ void FluidLauncher::parseSlideshow(QXmlStreamReader& reader)
 {
     QXmlStreamAttributes attrs = reader.attributes();
 
-    QStringRef timeout = attrs.value("timeout");
+    QStringView timeout = attrs.value("timeout");
     bool valid;
     if (!timeout.isEmpty()) {
         int t = timeout.toString().toInt(&valid);
@@ -186,7 +186,7 @@ void FluidLauncher::parseSlideshow(QXmlStreamReader& reader)
             inputTimer->setInterval(t);
     }
 
-    QStringRef interval = attrs.value("interval");
+    QStringView interval = attrs.value("interval");
     if (!interval.isEmpty()) {
         int i = interval.toString().toInt(&valid);
         if (valid)
@@ -198,10 +198,10 @@ void FluidLauncher::parseSlideshow(QXmlStreamReader& reader)
         if (reader.isStartElement()) {
             QXmlStreamAttributes attrs = reader.attributes();
             if (reader.name() == "imagedir") {
-                QStringRef dir = attrs.value("dir");
+                QStringView dir = attrs.value("dir");
                 slideShowWidget->addImageDir(dir.toString());
             } else if(reader.name() == "image") {
-                QStringRef image = attrs.value("image");
+                QStringView image = attrs.value("image");
                 slideShowWidget->addImage(image.toString());
             }
         } else if(reader.isEndElement() && reader.name() == "slideshow") {
