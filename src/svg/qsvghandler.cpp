@@ -1529,6 +1529,9 @@ static void pathArc(QPainterPath &path,
                     qreal               y,
                     qreal curx, qreal cury)
 {
+    if (!rx || !ry)
+        return;
+
     qreal sin_th, cos_th;
     qreal a00, a01, a10, a11;
     qreal x0, y0, x1, y1, xc, yc;
