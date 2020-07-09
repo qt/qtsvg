@@ -82,6 +82,7 @@ private slots:
     void smallFont();
     void styleSheet();
     void duplicateStyleId();
+    void oss_fuzz_23731();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -1603,6 +1604,13 @@ void tst_QSvgRenderer::duplicateStyleId()
     QPainter painter(&image);
     QSvgRenderer renderer(svg);
     renderer.render(&painter);
+}
+
+void tst_QSvgRenderer::oss_fuzz_23731()
+{
+    // when configured with "-sanitize undefined", this resulted in:
+    // "runtime error: division by zero"
+    QSvgRenderer().load(QByteArray("<svg><path d=\"A4------\">"));
 }
 
 QTEST_MAIN(tst_QSvgRenderer)
