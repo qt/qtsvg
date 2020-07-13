@@ -3633,6 +3633,10 @@ void QSvgHandler::init()
     parse();
 }
 
+// Having too many unfinished elements will cause a stack overflow
+// in the dtor of QSvgTinyDocument, see oss-fuzz issue 24000.
+static const int unfinishedElementsLimit = 2048;
+
 void QSvgHandler::parse()
 {
     xml->setNamespaceProcessing(false);
@@ -3641,6 +3645,7 @@ void QSvgHandler::parse()
     m_inStyle = false;
 #endif
     bool done = false;
+    int remainingUnfinishedElements = unfinishedElementsLimit;
     while (!xml->atEnd() && !done) {
         switch (xml->readNext()) {
         case QXmlStreamReader::StartElement:
@@ -3652,7 +3657,10 @@ void QSvgHandler::parse()
             // namespaceUri is empty. The only possible strategy at
             // this point is to do what everyone else seems to do and
             // ignore the reported namespaceUri completely.
-            if (!startElement(xml->name().toString(), xml->attributes())) {
+            if (remainingUnfinishedElements
+                    && startElement(xml->name().toString(), xml->attributes())) {
+                --remainingUnfinishedElements;
+            } else {
                 delete m_doc;
                 m_doc = 0;
                 return;
@@ -3660,6 +3668,7 @@ void QSvgHandler::parse()
             break;
         case QXmlStreamReader::EndElement:
             endElement(xml->name());
+            ++remainingUnfinishedElements;
             // if we are using somebody else's qxmlstreamreader
             // we should not read until the end of the stream
             done = !m_ownsReader && (xml->name() == QLatin1String("svg"));
