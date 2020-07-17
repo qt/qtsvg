@@ -433,7 +433,7 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
     if (source.isEmpty())
         source = viewBox();
 
-    if (source != target && !source.isEmpty()) {
+    if (source != target && !qFuzzyIsNull(source.width()) && !qFuzzyIsNull(source.height())) {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
         if (m_implicitViewBox || !preserveAspectRatio()) {
             // Code path used when no view box is set, or IgnoreAspectRatio requested
