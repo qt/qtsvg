@@ -427,7 +427,7 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
     if (source.isEmpty())
         source = viewBox();
 
-    if (source != target && !source.isEmpty()) {
+    if (source != target && !qFuzzyIsNull(source.width()) && !qFuzzyIsNull(source.height())) {
         QTransform transform;
         transform.scale(target.width() / source.width(),
                   target.height() / source.height());
