@@ -210,7 +210,7 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QByteArray &contents)
 
     QSvgHandler handler(contents);
 
-    QSvgTinyDocument *doc = 0;
+    QSvgTinyDocument *doc = nullptr;
     if (handler.ok()) {
         doc = handler.document();
         doc->m_animationDuration = handler.animationDuration();
