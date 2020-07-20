@@ -147,8 +147,7 @@ QByteArray qt_inflateGZipDataFrom(QIODevice *device)
                     inflateEnd(&zlibStream);
                     qCWarning(lcSvgHandler, "Error while inflating gzip file: %s",
                             (zlibStream.msg != NULL ? zlibStream.msg : "Unknown error"));
-                    destination.chop(zlibStream.avail_out);
-                    return destination;
+                    return QByteArray();
                 }
             }
 
@@ -206,7 +205,10 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QByteArray &contents)
     // Check for gzip magic number and inflate if appropriate
     if (contents.startsWith("\x1f\x8b")) {
         QBuffer buffer(const_cast<QByteArray *>(&contents));
-        return load(qt_inflateGZipDataFrom(&buffer));
+        const QByteArray inflated = qt_inflateGZipDataFrom(&buffer);
+        if (inflated.isNull())
+            return nullptr;
+        return load(inflated);
     }
 #endif
 

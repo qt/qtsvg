@@ -837,10 +837,9 @@ void tst_QSvgRenderer::testGzHelper_data()
             "cbcfe70200a865327e040000001f8b08001c2a934800034b4a2ce20200e9b3a20404000000"))
         << QByteArray("foo\nbar\n");
 
-    // We should still get data of the first member if subsequent members are corrupt
     QTest::newRow("corruptedSecondMember") << QByteArray::fromHex(QByteArray("1f8b08001c2a934800034b"
             "cbcfe70200a865327e040000001f8c08001c2a934800034b4a2ce20200e9b3a20404000000"))
-        << QByteArray("foo\n");
+        << QByteArray();
 
 }
 
