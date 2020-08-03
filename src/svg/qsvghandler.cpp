@@ -1579,6 +1579,8 @@ static void pathArc(QPainterPath &path,
        The arc fits a unit-radius circle in this space.
     */
     d = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0);
+    if (!d)
+        return;
     sfactor_sq = 1.0 / d - 0.25;
     if (sfactor_sq < 0) sfactor_sq = 0;
     sfactor = qSqrt(sfactor_sq);
