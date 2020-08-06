@@ -299,7 +299,7 @@ void QSvgIconEngine::paint(QPainter *painter, const QRect &rect,
 {
     QSize pixmapSize = rect.size();
     if (painter->device())
-        pixmapSize *= painter->device()->devicePixelRatioF();
+        pixmapSize *= painter->device()->devicePixelRatio();
     painter->drawPixmap(rect, pixmap(pixmapSize, mode, state));
 }
 
