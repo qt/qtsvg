@@ -521,22 +521,7 @@ public:
         else
             d->attributes.font_size = QString::number(d->font.pixelSize());
 
-        int svgWeight = d->font.weight();
-        switch (svgWeight) {
-        case QFont::Light:
-            svgWeight = 100;
-            break;
-        case QFont::Normal:
-            svgWeight = 400;
-            break;
-        case QFont::Bold:
-            svgWeight = 700;
-            break;
-        default:
-            svgWeight *= 10;
-        }
-
-        d->attributes.font_weight = QString::number(svgWeight);
+        d->attributes.font_weight = QString::number(d->font.weight());
         d->attributes.font_family = d->font.family();
         d->attributes.font_style = d->font.italic() ? QLatin1String("italic") : QLatin1String("normal");
 

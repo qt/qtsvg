@@ -363,8 +363,6 @@ public:
         m_variantSet = 1;
     }
 
-    static int SVGToQtWeight(int weight);
-
     void setWeight(int weight)
     {
         m_weight = weight;

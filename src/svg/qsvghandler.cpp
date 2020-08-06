@@ -1369,9 +1369,9 @@ static void parseFont(QSvgNode *node,
             fontStyle->setWeight(weightNum);
         } else {
             if (attributes.fontWeight == QLatin1String("normal")) {
-                fontStyle->setWeight(400);
+                fontStyle->setWeight(QFont::Normal);
             } else if (attributes.fontWeight == QLatin1String("bold")) {
-                fontStyle->setWeight(700);
+                fontStyle->setWeight(QFont::Bold);
             } else if (attributes.fontWeight == QLatin1String("bolder")) {
                 fontStyle->setWeight(QSvgFontStyle::BOLDER);
             } else if (attributes.fontWeight == QLatin1String("lighter")) {
