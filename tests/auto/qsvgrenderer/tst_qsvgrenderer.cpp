@@ -81,6 +81,8 @@ private slots:
     void styleSheet();
     void duplicateStyleId();
     void oss_fuzz_23731();
+    void oss_fuzz_24131();
+    void oss_fuzz_24738();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -1532,6 +1534,24 @@ void tst_QSvgRenderer::oss_fuzz_23731()
     // when configured with "-sanitize undefined", this resulted in:
     // "runtime error: division by zero"
     QSvgRenderer().load(QByteArray("<svg><path d=\"A4------\">"));
+}
+
+void tst_QSvgRenderer::oss_fuzz_24131()
+{
+    // when configured with "-sanitize undefined", this resulted in:
+    // "runtime error: -nan is outside the range of representable values of type 'int'"
+    // runtime error: signed integer overflow: -2147483648 + -2147483648 cannot be represented in type 'int'
+    QImage image(377, 233, QImage::Format_RGB32);
+    QPainter painter(&image);
+    QSvgRenderer renderer(QByteArray("<svg><path d=\"M- 4 44044404444E-334-\"/></svg>"));
+    renderer.render(&painter);
+}
+
+void tst_QSvgRenderer::oss_fuzz_24738()
+{
+    // when configured with "-sanitize undefined", this resulted in:
+    // "runtime error: division by zero"
+    QSvgRenderer().load(QByteArray("<svg><path d=\"a 2 1e-212.....\">"));
 }
 
 QTEST_MAIN(tst_QSvgRenderer)

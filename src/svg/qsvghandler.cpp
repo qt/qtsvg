@@ -1529,7 +1529,10 @@ static void pathArc(QPainterPath &path,
                     qreal               y,
                     qreal curx, qreal cury)
 {
-    if (!rx || !ry)
+    const qreal Pr1 = rx * rx;
+    const qreal Pr2 = ry * ry;
+
+    if (!Pr1 || !Pr2)
         return;
 
     qreal sin_th, cos_th;
@@ -1538,7 +1541,7 @@ static void pathArc(QPainterPath &path,
     qreal d, sfactor, sfactor_sq;
     qreal th0, th1, th_arc;
     int i, n_segs;
-    qreal dx, dy, dx1, dy1, Pr1, Pr2, Px, Py, check;
+    qreal dx, dy, dx1, dy1, Px, Py, check;
 
     rx = qAbs(rx);
     ry = qAbs(ry);
@@ -1550,8 +1553,6 @@ static void pathArc(QPainterPath &path,
     dy = (cury - y) / 2.0;
     dx1 =  cos_th * dx + sin_th * dy;
     dy1 = -sin_th * dx + cos_th * dy;
-    Pr1 = rx * rx;
-    Pr2 = ry * ry;
     Px = dx1 * dx1;
     Py = dy1 * dy1;
     /* Spec : check if radii are large enough */
