@@ -212,7 +212,10 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QByteArray &contents)
     }
 #endif
 
-    QSvgHandler handler(contents);
+    QBuffer buffer;
+    buffer.setData(contents);
+    buffer.open(QIODevice::ReadOnly);
+    QSvgHandler handler(&buffer);
 
     QSvgTinyDocument *doc = nullptr;
     if (handler.ok()) {
