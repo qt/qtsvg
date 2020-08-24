@@ -126,9 +126,9 @@ bool FluidLauncher::loadConfig(QString configPath)
         reader.readNext();
 
         if (reader.isStartElement()) {
-            if (reader.name() == "demos")
+            if (reader.name() == u"demos")
                 parseDemos(reader);
-            else if(reader.name() == "slideshow")
+            else if(reader.name() == u"slideshow")
                 parseSlideshow(reader);
         }
     }
@@ -153,7 +153,7 @@ void FluidLauncher::parseDemos(QXmlStreamReader& reader)
 {
     while (!reader.atEnd()) {
         reader.readNext();
-        if (reader.isStartElement() && reader.name() == "example") {
+        if (reader.isStartElement() && reader.name() == u"example") {
             QXmlStreamAttributes attrs = reader.attributes();
             QStringView filename = attrs.value("filename");
             if (!filename.isEmpty()) {
@@ -168,7 +168,7 @@ void FluidLauncher::parseDemos(QXmlStreamReader& reader)
                         args.toString().split(" "));
                 demoList.append(newDemo);
             }
-        } else if(reader.isEndElement() && reader.name() == "demos") {
+        } else if(reader.isEndElement() && reader.name() == u"demos") {
             return;
         }
     }
@@ -197,14 +197,14 @@ void FluidLauncher::parseSlideshow(QXmlStreamReader& reader)
         reader.readNext();
         if (reader.isStartElement()) {
             QXmlStreamAttributes attrs = reader.attributes();
-            if (reader.name() == "imagedir") {
+            if (reader.name() == u"imagedir") {
                 QStringView dir = attrs.value("dir");
                 slideShowWidget->addImageDir(dir.toString());
-            } else if(reader.name() == "image") {
+            } else if(reader.name() == u"image") {
                 QStringView image = attrs.value("image");
                 slideShowWidget->addImage(image.toString());
             }
-        } else if(reader.isEndElement() && reader.name() == "slideshow") {
+        } else if(reader.isEndElement() && reader.name() == u"slideshow") {
             return;
         }
     }
