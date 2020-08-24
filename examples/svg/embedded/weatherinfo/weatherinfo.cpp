@@ -266,11 +266,11 @@ private:
         while (!xml.atEnd()) {
             xml.readNext();
             if (xml.tokenType() == QXmlStreamReader::StartElement) {
-                if (xml.name() == "location") {
+                if (xml.name() == u"location") {
                     while (!xml.atEnd()) {
                         xml.readNext();
                         if (xml.tokenType() == QXmlStreamReader::StartElement) {
-                            if (xml.name() == "name") {
+                            if (xml.name() == u"name") {
                                 city = xml.readElementText();
                                 m_cityItem->setPlainText(city);
                                 setWindowTitle(city);
@@ -279,22 +279,22 @@ private:
                             }
                         }
                     }
-                } else if (xml.name() == "credit") {
+                } else if (xml.name() == u"credit") {
                     while (!xml.atEnd()) {
                         xml.readNext();
                         if (xml.tokenType() == QXmlStreamReader::StartElement) {
-                            if (xml.name() == "link") {
+                            if (xml.name() == u"link") {
                                 m_copyright->setHtml(QString("<td align=\"center\">%1 <a href=\"%2\">(source)</a></td>").arg(GET_DATA_ATTR("text")).arg(GET_DATA_ATTR("url")));
                                 xml.skipCurrentElement();
                                 break;
                             }
                         }
                     }
-                } else if (xml.name() == "tabular") {
+                } else if (xml.name() == u"tabular") {
                     while (!xml.atEnd()) {
                         xml.readNext();
                         if (xml.tokenType() == QXmlStreamReader::StartElement) {
-                            if (xml.name() == "time") {
+                            if (xml.name() == u"time") {
                                 if (!foundCurrentForecast) {
                                     QString temperature;
                                     QString symbol;
@@ -315,7 +315,7 @@ private:
                             }
                         }
                     }
-                } else if (xml.name() != "weatherdata" && xml.name() != "forecast" && xml.name() != "credit"){
+                } else if (xml.name() != u"weatherdata" && xml.name() != u"forecast" && xml.name() != u"credit"){
                     xml.skipCurrentElement();
                 }
             }
@@ -354,7 +354,7 @@ private:
         while (!xml.atEnd()) {
             xml.readNext();
             if (xml.tokenType() == QXmlStreamReader::StartElement) {
-                if (xml.name() == "time") {
+                if (xml.name() == u"time") {
                     QString period = GET_DATA_ATTR("period");
                     // save data if new day starts
                     if (period == "0") {
@@ -418,14 +418,14 @@ private:
         while (!xml.atEnd()) {
             xml.readNext();
             if (xml.tokenType() == QXmlStreamReader::StartElement) {
-                if (xml.name() == "symbol") {
+                if (xml.name() == u"symbol") {
                     QString condition = GET_DATA_ATTR("name");
                     symbol = extractIcon(condition);
                     if (m_conditionItem->toPlainText().isEmpty())
                         m_conditionItem->setPlainText(condition);
                     foundIcon = true;
                 }
-                if (xml.name() == "temperature") {
+                if (xml.name() == u"temperature") {
                     temp = GET_DATA_ATTR("value");
                     foundTemp = true;
                 }
