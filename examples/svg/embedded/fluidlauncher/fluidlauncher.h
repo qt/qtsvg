@@ -53,7 +53,6 @@
 
 #include <QtWidgets>
 #include <QTimer>
-#include <QStringRef>
 
 #include "pictureflow.h"
 #include "slideshow.h"
