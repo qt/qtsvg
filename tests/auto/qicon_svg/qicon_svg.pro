@@ -1,4 +1,4 @@
-CONFIG += testcase
+CONFIG += testcase testcase_lowdpi
 TARGET = tst_qicon_svg
 
 QT += svg testlib gui-private

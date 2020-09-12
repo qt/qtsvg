@@ -11,6 +11,7 @@ file(GLOB_RECURSE test_data_glob
 list(APPEND test_data ${test_data_glob})
 
 qt_add_test(tst_qicon_svg
+    LOWDPI
     SOURCES
         tst_qicon_svg.cpp
     PUBLIC_LIBRARIES
