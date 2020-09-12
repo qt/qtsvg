@@ -3013,7 +3013,7 @@ static QSvgStyleProperty *createRadialGradientNode(QSvgNode *node,
     if (!fy.isEmpty())
         nfy = toDouble(fy);
 
-    QRadialGradient *grad = new QRadialGradient(ncx, ncy, nr, nfx, nfy);
+    QRadialGradient *grad = new QRadialGradient(ncx, ncy, nr, nfx, nfy, 0);
     grad->setInterpolationMode(QGradient::ComponentInterpolation);
 
     QSvgGradientStyle *prop = new QSvgGradientStyle(grad);
