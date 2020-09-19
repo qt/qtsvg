@@ -159,8 +159,8 @@ static QByteArray qt_inflateSvgzDataFrom(QIODevice *device, bool doCheckContent)
 
         if (doCheckContent) {
             // Quick format check, equivalent to QSvgIOHandler::canRead()
-            QByteArray buf = destination.left(8);
-            if (!buf.contains("<?xml") && !buf.contains("<svg") && !buf.contains("<!--")) {
+            QByteArray buf = destination.left(16);
+            if (!buf.contains("<?xml") && !buf.contains("<svg") && !buf.contains("<!--") && !buf.contains("<!DOCTYPE svg")) {
                 inflateEnd(&zlibStream);
                 qCWarning(lcSvgHandler, "Error while inflating gzip file: SVG format check failed");
                 return QByteArray();
