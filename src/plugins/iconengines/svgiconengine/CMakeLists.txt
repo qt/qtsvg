@@ -4,7 +4,7 @@
 ## QSvgIconPlugin Plugin:
 #####################################################################
 
-qt_add_plugin(QSvgIconPlugin
+qt_internal_add_plugin(QSvgIconPlugin
     OUTPUT_NAME qsvgicon
     TYPE iconengines
     SOURCES

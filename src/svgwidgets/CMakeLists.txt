@@ -1,12 +1,14 @@
+# Generated from svgwidgets.pro.
+
 #####################################################################
 ## SvgWidgets Module:
 #####################################################################
 
 qt_add_module(SvgWidgets
     SOURCES
-        qtsvgwidgetsglobal.h
         qgraphicssvgitem.cpp qgraphicssvgitem.h
         qsvgwidget.cpp qsvgwidget.h
+        qtsvgwidgetsglobal.h
     DEFINES
         QT_NO_USING_NAMESPACE
     LIBRARIES
@@ -16,10 +18,18 @@ qt_add_module(SvgWidgets
     PUBLIC_LIBRARIES
         Qt::Core
         Qt::Gui
-        Qt::Widgets
         Qt::Svg
+        Qt::Widgets
     PRIVATE_MODULE_INTERFACE
         Qt::CorePrivate
         Qt::GuiPrivate
         Qt::WidgetsPrivate
+)
+
+## Scopes:
+#####################################################################
+
+qt_extend_target(SvgWidgets CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")
+    LINK_OPTIONS
+        "/BASE:0x66000000"
 )

@@ -4,7 +4,7 @@
 ## QSvgPlugin Plugin:
 #####################################################################
 
-qt_add_plugin(QSvgPlugin
+qt_internal_add_plugin(QSvgPlugin
     OUTPUT_NAME qsvg
     TYPE imageformats
     SOURCES
