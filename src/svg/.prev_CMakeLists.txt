@@ -4,7 +4,7 @@
 ## Svg Module:
 #####################################################################
 
-qt_add_module(Svg
+qt_internal_add_module(Svg
     SOURCES
         qsvgfont.cpp qsvgfont_p.h
         qsvggenerator.cpp qsvggenerator.h
@@ -32,7 +32,7 @@ qt_add_module(Svg
 ## Scopes:
 #####################################################################
 
-qt_extend_target(Svg CONDITION TARGET Qt::Widgets
+qt_internal_extend_target(Svg CONDITION TARGET Qt::Widgets
     LIBRARIES
         Qt::WidgetsPrivate
     PUBLIC_LIBRARIES
@@ -41,7 +41,7 @@ qt_extend_target(Svg CONDITION TARGET Qt::Widgets
         Qt::WidgetsPrivate
 )
 
-qt_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")
+qt_internal_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")
     LINK_OPTIONS
         "/BASE:0x66000000"
 )
@@ -49,16 +49,16 @@ qt_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")
 #### Keys ignored in scope 4:.:.:svg.pro:solaris-cc_x_:
 # QMAKE_CXXFLAGS_RELEASE = "--O2"
 
-qt_extend_target(Svg CONDITION QT_FEATURE_system_zlib
+qt_internal_extend_target(Svg CONDITION QT_FEATURE_system_zlib
     LIBRARIES
         ZLIB::ZLIB
 )
 
-qt_extend_target(Svg CONDITION NOT QT_FEATURE_system_zlib
+qt_internal_extend_target(Svg CONDITION NOT QT_FEATURE_system_zlib
     LIBRARIES
         Qt::ZlibPrivate
 )
-qt_add_docs(Svg
+qt_internal_add_docs(Svg
     doc/qtsvg.qdocconf
 )
 

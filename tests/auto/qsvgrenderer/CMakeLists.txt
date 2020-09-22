@@ -4,7 +4,7 @@
 ## tst_qsvgrenderer Test:
 #####################################################################
 
-qt_add_test(tst_qsvgrenderer
+qt_internal_add_test(tst_qsvgrenderer
     SOURCES
         tst_qsvgrenderer.cpp
     DEFINES
@@ -21,7 +21,7 @@ set(resources_resource_files
     "heart.svgz"
 )
 
-qt_add_resource(tst_qsvgrenderer "resources"
+qt_internal_add_resource(tst_qsvgrenderer "resources"
     PREFIX
         "/"
     FILES

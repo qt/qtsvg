@@ -4,7 +4,7 @@
 ## SvgWidgets Module:
 #####################################################################
 
-qt_add_module(SvgWidgets
+qt_internal_add_module(SvgWidgets
     SOURCES
         qgraphicssvgitem.cpp qgraphicssvgitem.h
         qsvgwidget.cpp qsvgwidget.h
@@ -29,7 +29,7 @@ qt_add_module(SvgWidgets
 ## Scopes:
 #####################################################################
 
-qt_extend_target(SvgWidgets CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")
+qt_internal_extend_target(SvgWidgets CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")
     LINK_OPTIONS
         "/BASE:0x66000000"
 )

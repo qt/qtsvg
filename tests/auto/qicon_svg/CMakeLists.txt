@@ -10,7 +10,7 @@ file(GLOB_RECURSE test_data_glob
     icons/*)
 list(APPEND test_data ${test_data_glob})
 
-qt_add_test(tst_qicon_svg
+qt_internal_add_test(tst_qicon_svg
     LOWDPI # special case
     SOURCES
         tst_qicon_svg.cpp
@@ -31,7 +31,7 @@ set(tst_qicon_svg_resource_files
     "./icons/trash.svg"
 )
 
-qt_add_resource(tst_qicon_svg "tst_qicon_svg"
+qt_internal_add_resource(tst_qicon_svg "tst_qicon_svg"
     PREFIX
         "/"
     FILES

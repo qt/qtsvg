@@ -4,7 +4,7 @@
 ## tst_qsvggenerator Test:
 #####################################################################
 
-qt_add_test(tst_qsvggenerator
+qt_internal_add_test(tst_qsvggenerator
     SOURCES
         tst_qsvggenerator.cpp
     PUBLIC_LIBRARIES
@@ -21,7 +21,7 @@ set(qmake_immediate_resource_files
     "referenceSvgs/radial_gradient.svg"
 )
 
-qt_add_resource(tst_qsvggenerator "qmake_immediate"
+qt_internal_add_resource(tst_qsvggenerator "qmake_immediate"
     PREFIX
         "/"
     FILES
