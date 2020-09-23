@@ -64,7 +64,7 @@ QStringList MimeData::formats() const
 //![0]
 
 //![1]
-QVariant MimeData::retrieveData(const QString &mimeType, QVariant::Type type)
+QVariant MimeData::retrieveData(const QString &mimeType, QMetaType type)
          const
 {
     emit dataRequested(mimeType);

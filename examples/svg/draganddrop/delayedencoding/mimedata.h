@@ -66,7 +66,7 @@ signals:
     void dataRequested(const QString &mimeType) const;
 
 protected:
-    QVariant retrieveData(const QString &mimetype, QVariant::Type type) const override;
+    QVariant retrieveData(const QString &mimetype, QMetaType type) const override;
 };
 //![0]
 
