@@ -735,6 +735,45 @@ static inline void parseNumbersArray(const QChar *&str, QVarLengthArray<qreal, 8
     }
 }
 
+static inline void parseArcNumbersArray(const QChar *&str, QVarLengthArray<qreal, 8> &points)
+{
+    while (str->isSpace())
+        ++str;
+    while (isDigit(str->unicode()) ||
+           *str == QLatin1Char('-') || *str == QLatin1Char('+') ||
+           *str == QLatin1Char('.')) {
+
+        // Arc has 7 parameters, of which the 4th and 5th parameters are
+        // flags encoded as 0 or 1 and they do not need to be separated
+        // by spaces from each other nor from the following number.
+        // For example: ".5 .5 0 01.5 2 1" should
+        // be parsed as ".5 .5 0 0 1 .5 2 1".
+        int ord = points.size() % 7;
+        if (ord == 3 || ord == 4) {
+            if (*str == QLatin1Char('0')) {
+                points.append(0.0);
+                ++str;
+            }
+            else if (*str == QLatin1Char('1')) {
+                points.append(1.0);
+                ++str;
+            }
+        }
+        else {
+            points.append(toDouble(str));
+        }
+
+        while (str->isSpace())
+            ++str;
+        if (*str == QLatin1Char(','))
+            ++str;
+
+        //eat the rest of space
+        while (str->isSpace())
+            ++str;
+    }
+}
+
 static QList<qreal> parsePercentageList(const QChar *&str)
 {
     QList<qreal> points;
@@ -1589,7 +1628,10 @@ static bool parsePathDataFast(QStringView dataStr, QPainterPath &path)
         QChar endc = *end;
         *const_cast<QChar *>(end) = 0; // parseNumbersArray requires 0-termination that QStringView cannot guarantee
         QVarLengthArray<qreal, 8> arg;
-        parseNumbersArray(str, arg);
+        if (pathElem == QLatin1Char('a') || pathElem == QLatin1Char('A'))
+            parseArcNumbersArray(str, arg);
+        else
+            parseNumbersArray(str, arg);
         *const_cast<QChar *>(end) = endc;
         if (pathElem == QLatin1Char('z') || pathElem == QLatin1Char('Z'))
             arg.append(0);//dummy
