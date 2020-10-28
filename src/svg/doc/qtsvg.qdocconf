@@ -33,11 +33,13 @@ tagfile                 = ../../../doc/qtsvg/qtsvg.tags
 
 headerdirs  += .. \
                 ../../plugins/imageformats \
-                ../../plugins/iconengines
+                ../../plugins/iconengines \
+                ../../svgwidgets
 
 sourcedirs  += .. \
                ../../plugins/imageformats \
-               ../../plugins/iconengines
+               ../../plugins/iconengines \
+               ../../svgwidgets
 
 exampledirs += ../../../examples/svg \
                snippets/

@@ -49,7 +49,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
     \class QSvgWidget
-    \inmodule QtSvg
+    \inmodule QtSvgWidgets
     \ingroup painting
 
     \brief The QSvgWidget class provides a widget that is used to display the contents of

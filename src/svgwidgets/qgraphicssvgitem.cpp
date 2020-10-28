@@ -98,7 +98,7 @@ public:
 
 /*!
     \class QGraphicsSvgItem
-    \inmodule QtSvg
+    \inmodule QtSvgWidgets
     \ingroup graphicsview-api
     \brief The QGraphicsSvgItem class is a QGraphicsItem that can be used to render
            the contents of SVG files.

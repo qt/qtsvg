@@ -73,6 +73,7 @@
     \section1 References
     \list
         \li \l{Qt SVG C++ Classes}
+        \li \l{Qt SVG Widgets C++ Classes}
     \endlist
 
     Qt SVG comes with the following examples:
