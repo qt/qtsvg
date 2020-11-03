@@ -41,6 +41,8 @@
     In this topic we summarize those changes in Qt SVG, and provide
     guidance to handle them.
 
-    \section1 ADD STUFF HERE
+    \section1 Library split
 
+    The QtSvg module has been split into two libraries, with those classes
+    depending on QtWidgets living in a separate library, QtSvgWidgets.
 */
