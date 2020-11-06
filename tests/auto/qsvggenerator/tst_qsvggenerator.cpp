@@ -298,7 +298,7 @@ void tst_QSvgGenerator::fileEncoding()
     generator.setOutputDevice(&buffer);
 
     static const QChar unicode[] = { 'f', 'o', 'o',
-            0x00F8, 'b', 'a', 'r'};
+            u'\u00F8', 'b', 'a', 'r'};
 
     int size = sizeof(unicode) / sizeof(QChar);
     QString unicodeString = QString::fromRawData(unicode, size);

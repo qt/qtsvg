@@ -938,7 +938,7 @@ static bool createSvgGlyph(QSvgFont *font, const QXmlStreamAttributes &attribute
     QStringView havStr = attributes.value(QLatin1String("horiz-adv-x"));
     QStringView pathStr = attributes.value(QLatin1String("d"));
 
-    QChar unicode = (uncStr.isEmpty()) ? 0 : uncStr.at(0);
+    QChar unicode = (uncStr.isEmpty()) ? u'\0' : uncStr.at(0);
     qreal havx = (havStr.isEmpty()) ? -1 : toDouble(havStr);
     QPainterPath path;
     path.setFillRule(Qt::WindingFill);
@@ -1594,7 +1594,7 @@ static bool parsePathDataFast(QStringView dataStr, QPainterPath &path)
         QChar pathElem = *str;
         ++str;
         QChar endc = *end;
-        *const_cast<QChar *>(end) = 0; // parseNumbersArray requires 0-termination that QStringView cannot guarantee
+        *const_cast<QChar *>(end) = u'\0'; // parseNumbersArray requires 0-termination that QStringView cannot guarantee
         QVarLengthArray<qreal, 8> arg;
         parseNumbersArray(str, arg);
         *const_cast<QChar *>(end) = endc;
