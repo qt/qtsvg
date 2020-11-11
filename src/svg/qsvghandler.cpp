@@ -134,7 +134,7 @@ bool qsvg_get_hex_rgb(const char *name, QRgb *rgb)
     if(name[0] != '#')
         return false;
     name++;
-    int len = qstrlen(name);
+    const size_t len = qstrlen(name);
     int r, g, b;
     bool ok = true;
     if (len == 12) {
