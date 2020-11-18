@@ -169,7 +169,7 @@ public:
     {
     }
 	int clip_counter = 0;
-	std::map<string, int> clip_path_to_id;
+	std::map<std::string, int> clip_path_to_id;
 
     bool begin(QPaintDevice *device) override;
     bool end() override;
@@ -944,7 +944,7 @@ bool QSvgPaintEngine::end()
 
 	for (auto it = clip_path_to_id.begin(); it != clip_path_to_id.end(); it++)
 	{
-		string path = it->first;
+		std::string path = it->first;
 		int path_id = it->second;
 
 		*d->stream << "<clipPath id=\"clip" << path_id << "\">" << '\n';
@@ -1018,12 +1018,12 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
 
 	QPainter* p = painter();
 	if (p->hasClipping()) {
-		string clip_path = "<path d = \"M ";
+		std::string clip_path = "<path d = \"M ";
 
 		QPainterPath path = p->clipPath();
 		for (int i = 0; i < path.elementCount(); i++) {
 			QPainterPath::Element element = path.elementAt(i);
-			string point = to_string(element.x) + " " + to_string(element.y) + " ";
+			std::string point = std::to_string(element.x) + " " + std::to_string(element.y) + " ";
 			clip_path.append(point);
 		}
 
@@ -1037,6 +1037,7 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
 	else {
 		*d->stream << "<g ";
 	}
+
 
     if (flags & QPaintEngine::DirtyBrush) {
         qbrushToSvg(state.brush());
