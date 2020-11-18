@@ -36,7 +36,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
+#include <iterator>
+#include <map>
+#include <string>
 #include "qsvggenerator.h"
 
 #ifndef QT_NO_SVGGENERATOR
@@ -166,6 +168,8 @@ public:
                        svgEngineFeatures())
     {
     }
+	int clip_counter = 0;
+	std::map<string, int> clip_path_to_id;
 
     bool begin(QPaintDevice *device) override;
     bool end() override;
@@ -872,6 +876,9 @@ int QSvgGenerator::metric(QPaintDevice::PaintDeviceMetric metric) const
 bool QSvgPaintEngine::begin(QPaintDevice *)
 {
     Q_D(QSvgPaintEngine);
+
+	clip_counter = 0;
+
     if (!d->outputDevice) {
         qWarning("QSvgPaintEngine::begin(), no output device");
         return false;
@@ -934,6 +941,17 @@ bool QSvgPaintEngine::end()
     Q_D(QSvgPaintEngine);
 
     d->stream->setString(&d->defs);
+
+	for (auto it = clip_path_to_id.begin(); it != clip_path_to_id.end(); it++)
+	{
+		string path = it->first;
+		int path_id = it->second;
+
+		*d->stream << "<clipPath id=\"clip" << path_id << "\">" << '\n';
+		*d->stream << "\t" << path.c_str() << " \"/> \n";
+		*d->stream << "</clipPath>" << '\n';
+	}
+
     *d->stream << "</defs>\n";
 
     d->stream->setDevice(d->outputDevice);
@@ -998,7 +1016,27 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
     if (d->afterFirstUpdate)
         *d->stream << "</g>\n\n";
 
-    *d->stream << "<g ";
+	QPainter* p = painter();
+	if (p->hasClipping()) {
+		string clip_path = "<path d = \"M ";
+
+		QPainterPath path = p->clipPath();
+		for (int i = 0; i < path.elementCount(); i++) {
+			QPainterPath::Element element = path.elementAt(i);
+			string point = to_string(element.x) + " " + to_string(element.y) + " ";
+			clip_path.append(point);
+		}
+
+		bool key_exists = clip_path_to_id.count(clip_path);
+		if (!key_exists) {
+			clip_path_to_id[clip_path] = clip_counter++;
+		}
+
+		*d->stream << "<g clip-path=\"url(#clip" << clip_path_to_id[clip_path] << ")\" ";
+	}
+	else {
+		*d->stream << "<g ";
+	}
 
     if (flags & QPaintEngine::DirtyBrush) {
         qbrushToSvg(state.brush());
