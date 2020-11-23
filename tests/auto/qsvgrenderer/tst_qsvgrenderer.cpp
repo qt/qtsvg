@@ -523,14 +523,17 @@ static qreal transformNorm(const QTransform &m)
         + m.m33() * m.m33());
 }
 
-static bool diffIsSmallEnough(double diff, double norm)
+template<typename T>
+static inline bool diffIsSmallEnough(T diff, T norm)
 {
-    return diff <= 1e-12 * norm;
-}
-
-static inline bool diffIsSmallEnough(float diff, float norm)
-{
-    return diff <= 1e-5 * norm;
+    static_assert(std::is_same_v<T, double> || std::is_same_v<T, float>);
+    T sigma = []{
+        if constexpr (std::is_same_v<T, double>)
+            return 1e-12;
+        else
+            return 1e-5;
+    }();
+    return diff <= sigma * norm;
 }
 
 static void compareTransforms(const QTransform &m1, const QTransform &m2)
