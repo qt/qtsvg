@@ -39,11 +39,12 @@
 #include <iterator>
 #include <map>
 #include <string>
-#include "qsvggenerator.h"
 
 #ifndef QT_NO_SVGGENERATOR
 
 #include "qpainterpath.h"
+#include "qsvggenerator.h"
+#include "qtransform.h"
 
 #include "private/qpaintengine_p.h"
 #include "private/qtextengine_p.h"
@@ -1018,21 +1019,31 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
 
 	QPainter* p = painter();
 	if (p->hasClipping()) {
-		std::string clip_path = "<path d = \"M ";
+		std::string clip_path = "";
 
 		QPainterPath path = p->clipPath();
-		for (int i = 0; i < path.elementCount(); i++) {
-			QPainterPath::Element element = path.elementAt(i);
-			std::string point = std::to_string(element.x) + " " + std::to_string(element.y) + " ";
-			clip_path.append(point);
-		}
 
-		bool key_exists = clip_path_to_id.count(clip_path);
-		if (!key_exists) {
-			clip_path_to_id[clip_path] = clip_counter++;
-		}
+		if (path.elementCount() > 0) {
+			QPainterPath::Element starting_point = path.elementAt(0);
+			clip_path.append("<path d=\"M " + std::to_string(starting_point.x) + " " + std::to_string(starting_point.y) + " ");
 
-		*d->stream << "<g clip-path=\"url(#clip" << clip_path_to_id[clip_path] << ")\" ";
+
+			for (int i = 1; i < path.elementCount(); i++) {
+				QPainterPath::Element element = path.elementAt(i);
+				std::string point = "L" + std::to_string(element.x) + ", " + std::to_string(element.y) + " ";
+				clip_path.append(point);
+			}
+
+			bool key_exists = clip_path_to_id.count(clip_path);
+			if (!key_exists) {
+				clip_path_to_id[clip_path] = clip_counter++;
+			}
+
+			*d->stream << "<g clip-path=\"url(#clip" << clip_path_to_id[clip_path] << ")\" ";
+		}
+		else {
+			*d->stream << "<g ";
+		}
 	}
 	else {
 		*d->stream << "<g ";
