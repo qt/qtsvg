@@ -1020,13 +1020,11 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
 	QPainter* p = painter();
 	if (p->hasClipping()) {
 		std::string clip_path = "";
-
 		QPainterPath path = p->clipPath();
 
 		if (path.elementCount() > 0) {
 			QPainterPath::Element starting_point = path.elementAt(0);
 			clip_path.append("<path d=\"M " + std::to_string(starting_point.x) + " " + std::to_string(starting_point.y) + " ");
-
 
 			for (int i = 1; i < path.elementCount(); i++) {
 				QPainterPath::Element element = path.elementAt(i);
