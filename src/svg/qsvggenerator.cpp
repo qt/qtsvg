@@ -75,13 +75,24 @@ static void translate_color(const QColor &color, QString *color_string,
     *opacity_string = QString::number(color.alphaF());
 }
 
-static void translate_dashPattern(const QVector<qreal> &pattern, qreal width, QString *pattern_string)
+static void translate_dashPattern(const QVector<qreal> &pattern, QString *pattern_string)
 {
     Q_ASSERT(pattern_string);
 
     // Note that SVG operates in absolute lengths, whereas Qt uses a length/width ratio.
-    for (qreal entry : pattern)
-		*pattern_string += QString::fromLatin1("%1,").arg(entry);
+	for (qreal entry : pattern)
+        /*
+        LF-37399
+        
+        Previously this function multiplied the entry position by the width, however
+        the line width was already being correctly set on the stroke-width SVG tag, 
+        multiplying these values increases the values inside the stroke-dasharray tag, 
+        which should not be happening because it increases the space seperation between 
+        the dashed lines, causing larger spaces when increasing the line width, distorting 
+        the image.
+        */
+        *pattern_string += QString::fromLatin1("%1,").arg(entry);
+	     
 
     pattern_string->chop(1);
 }
@@ -396,7 +407,7 @@ public:
             qreal penWidth = spen.width() == 0 ? qreal(1) : spen.widthF();
 
             translate_color(spen.color(), &color, &colorOpacity);
-            translate_dashPattern(spen.dashPattern(), penWidth, &dashPattern);
+            translate_dashPattern(spen.dashPattern(), &dashPattern);
 
             // SVG uses absolute offset
             dashOffset = QString::number(spen.dashOffset() * penWidth);
