@@ -36,9 +36,6 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include <iterator>
-#include <map>
-#include <string>
 
 #ifndef QT_NO_SVGGENERATOR
 
@@ -173,6 +170,10 @@ Q_GUI_EXPORT QImage qt_imageForBrush(int brushStyle, bool invert);
 class QSvgPaintEngine : public QPaintEngine
 {
     Q_DECLARE_PRIVATE(QSvgPaintEngine)
+
+private:
+	int clip_counter = 0;
+	std::map<std::string, int> clip_path_to_id;
 public:
 
     QSvgPaintEngine()
@@ -180,8 +181,6 @@ public:
                        svgEngineFeatures())
     {
     }
-	int clip_counter = 0;
-	std::map<std::string, int> clip_path_to_id;
 
     bool begin(QPaintDevice *device) override;
     bool end() override;
@@ -889,7 +888,7 @@ bool QSvgPaintEngine::begin(QPaintDevice *)
 {
     Q_D(QSvgPaintEngine);
 
-	clip_counter = 0;
+    clip_counter = 0;
 
     if (!d->outputDevice) {
         qWarning("QSvgPaintEngine::begin(), no output device");
@@ -954,15 +953,15 @@ bool QSvgPaintEngine::end()
 
     d->stream->setString(&d->defs);
 
-	for (auto it = clip_path_to_id.begin(); it != clip_path_to_id.end(); it++)
-	{
-		std::string path = it->first;
-		int path_id = it->second;
+    for (auto it = clip_path_to_id.begin(); it != clip_path_to_id.end(); it++)
+    {
+        std::string path = it->first;
+        int path_id = it->second;
 
-		*d->stream << "<clipPath id=\"clip" << path_id << "\">" << '\n';
-		*d->stream << "\t" << path.c_str() << " \"/> \n";
-		*d->stream << "</clipPath>" << '\n';
-	}
+        *d->stream << "<clipPath id=\"clip" << path_id << "\">" << '\n';
+        *d->stream << "\t" << path.c_str() << " \"/> \n";
+        *d->stream << "</clipPath>" << '\n';
+    }
 
     *d->stream << "</defs>\n";
 
@@ -1027,15 +1026,15 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
     // close old state and start a new one...
     if (d->afterFirstUpdate)
         *d->stream << "</g>\n\n";
-
+	
 	QPainter* p = painter();
 	if (p->hasClipping()) {
 		std::string clip_path = "";
-		QPainterPath path = p->clipPath();
+		QPainterPath path = p->clipPathF();
 
 		if (path.elementCount() > 0) {
 			QPainterPath::Element starting_point = path.elementAt(0);
-			clip_path.append("<path d=\"M " + std::to_string(starting_point.x) + " " + std::to_string(starting_point.y) + " ");
+			clip_path.append("<path d=\"M " + std::to_string(starting_point.x) + ", " + std::to_string(starting_point.y) + " ");
 
 			for (int i = 1; i < path.elementCount(); i++) {
 				QPainterPath::Element element = path.elementAt(i);
