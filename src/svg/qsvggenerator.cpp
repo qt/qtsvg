@@ -1029,7 +1029,7 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
 	
 	QPainter* p = painter();
 	if (p->hasClipping()) {
-		std::string clip_path = "";
+		std::string clip_path;
 		QPainterPath path = p->clipPathF();
 
 		if (path.elementCount() > 0) {
@@ -1042,8 +1042,7 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
 				clip_path.append(point);
 			}
 
-			bool key_exists = clip_path_to_id.count(clip_path);
-			if (!key_exists) {
+            if (0 == clip_path_to_id.count(clip_path)) {
 				clip_path_to_id[clip_path] = clip_counter++;
 			}
 
