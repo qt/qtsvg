@@ -77,7 +77,7 @@ static void translate_dashPattern(const QVector<qreal> &pattern, QString *patter
     Q_ASSERT(pattern_string);
 
     // Note that SVG operates in absolute lengths, whereas Qt uses a length/width ratio.
-	for (qreal entry : pattern)
+    for (qreal entry : pattern)
         /*
         LF-37399
         
@@ -89,7 +89,7 @@ static void translate_dashPattern(const QVector<qreal> &pattern, QString *patter
         the image.
         */
         *pattern_string += QString::fromLatin1("%1,").arg(entry);
-	     
+         
 
     pattern_string->chop(1);
 }
@@ -172,8 +172,8 @@ class QSvgPaintEngine : public QPaintEngine
     Q_DECLARE_PRIVATE(QSvgPaintEngine)
 
 private:
-	int clip_counter = 0;
-	std::map<std::string, int> clip_path_to_id;
+    int clip_counter = 0;
+    std::map<std::string, int> clip_path_to_id;
 public:
 
     QSvgPaintEngine()
@@ -1026,35 +1026,35 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
     // close old state and start a new one...
     if (d->afterFirstUpdate)
         *d->stream << "</g>\n\n";
-	
-	QPainter* p = painter();
-	if (p->hasClipping()) {
-		std::string clip_path;
-		QPainterPath path = p->clipPathF();
+    
+    QPainter* p = painter();
+    if (p->hasClipping()) {
+        std::string clip_path;
+        QPainterPath path = p->clipPathF();
 
-		if (path.elementCount() > 0) {
-			QPainterPath::Element starting_point = path.elementAt(0);
-			clip_path.append("<path d=\"M " + std::to_string(starting_point.x) + ", " + std::to_string(starting_point.y) + " ");
+        if (path.elementCount() > 0) {
+            QPainterPath::Element starting_point = path.elementAt(0);
+            clip_path.append("<path d=\"M " + std::to_string(starting_point.x) + ", " + std::to_string(starting_point.y) + " ");
 
-			for (int i = 1; i < path.elementCount(); i++) {
-				QPainterPath::Element element = path.elementAt(i);
-				std::string point = "L" + std::to_string(element.x) + ", " + std::to_string(element.y) + " ";
-				clip_path.append(point);
-			}
+            for (int i = 1; i < path.elementCount(); i++) {
+                QPainterPath::Element element = path.elementAt(i);
+                std::string point = "L" + std::to_string(element.x) + ", " + std::to_string(element.y) + " ";
+                clip_path.append(point);
+            }
 
             if (0 == clip_path_to_id.count(clip_path)) {
-				clip_path_to_id[clip_path] = clip_counter++;
-			}
+                clip_path_to_id[clip_path] = clip_counter++;
+            }
 
-			*d->stream << "<g clip-path=\"url(#clip" << clip_path_to_id[clip_path] << ")\" ";
-		}
-		else {
-			*d->stream << "<g ";
-		}
-	}
-	else {
-		*d->stream << "<g ";
-	}
+            *d->stream << "<g clip-path=\"url(#clip" << clip_path_to_id[clip_path] << ")\" ";
+        }
+        else {
+            *d->stream << "<g ";
+        }
+    }
+    else {
+        *d->stream << "<g ";
+    }
 
 
     if (flags & QPaintEngine::DirtyBrush) {
