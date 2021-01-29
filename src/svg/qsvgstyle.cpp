@@ -263,7 +263,9 @@ void QSvgFontStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &states
         } else {
             states.fontWeight = m_weight;
         }
-        font.setWeight(QFont::Weight(states.fontWeight));
+        font.setWeight(QFont::Weight(qBound(static_cast<int>(QFont::Weight::Thin),
+                                            states.fontWeight,
+                                            static_cast<int>(QFont::Weight::Black))));
     }
 
     p->setFont(font);
