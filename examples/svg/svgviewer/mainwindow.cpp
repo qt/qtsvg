@@ -108,7 +108,7 @@ MainWindow::MainWindow()
     m_nativeAction->setCheckable(true);
     m_nativeAction->setChecked(true);
     m_nativeAction->setData(int(SvgView::Native));
-#ifndef QT_NO_OPENGL
+#ifdef USE_OPENGLWIDGETS
     m_glAction = rendererMenu->addAction(tr("&OpenGL"));
     m_glAction->setCheckable(true);
     m_glAction->setData(int(SvgView::OpenGL));
@@ -125,7 +125,7 @@ MainWindow::MainWindow()
 
     QActionGroup *rendererGroup = new QActionGroup(this);
     rendererGroup->addAction(m_nativeAction);
-#ifndef QT_NO_OPENGL
+#ifdef USE_OPENGLWIDGETS
     rendererGroup->addAction(m_glAction);
 #endif
     rendererGroup->addAction(m_imageAction);

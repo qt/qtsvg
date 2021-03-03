@@ -1,5 +1,5 @@
 TEMPLATE = app
-TARGET = weatherinfo
+TARGET = svgweatherinfo
 SOURCES = weatherinfo.cpp
 RESOURCES = weatherinfo.qrc
 QT += network widgets svg svgwidgets

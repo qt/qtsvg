@@ -8,7 +8,10 @@ SOURCES       = main.cpp \
                 exportdialog.cpp
 QT           += widgets svg svgwidgets
 
-qtHaveModule(opengl): QT += opengl openglwidgets
+qtHaveModule(opengl): qtHaveModule(openglwidgets) {
+    DEFINES += USE_OPENGLWIDGETS
+    QT += opengl openglwidgets
+}
 
 CONFIG += console
 
