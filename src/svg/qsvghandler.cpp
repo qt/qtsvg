@@ -2560,6 +2560,8 @@ static QSvgNode *createCircleNode(QSvgNode *parent,
     qreal ncx = toDouble(cx);
     qreal ncy = toDouble(cy);
     qreal nr  = toDouble(r);
+    if (nr < 0.0)
+        return nullptr;
 
     QRectF rect(ncx-nr, ncy-nr, nr*2, nr*2);
     QSvgNode *circle = new QSvgCircle(parent, rect);
@@ -3030,15 +3032,16 @@ static QSvgStyleProperty *createRadialGradientNode(QSvgNode *node,
 
     qreal ncx = 0.5;
     qreal ncy = 0.5;
-    qreal nr  = 0.5;
     if (!cx.isEmpty())
         ncx = toDouble(cx);
     if (!cy.isEmpty())
         ncy = toDouble(cy);
+
+    qreal nr = 0.0;
     if (!r.isEmpty())
         nr = toDouble(r);
-    if (nr < 0.5)
-        nr = 0.5;
+    if (nr <= 0.0)
+        return nullptr;
 
     qreal nfx = ncx;
     if (!fx.isEmpty())
