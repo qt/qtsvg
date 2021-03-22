@@ -33,7 +33,9 @@ set_target_properties(svggenerator PROPERTIES
 target_include_directories(svggenerator PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
+set_target_properties(svggenerator PROPERTIES
+                      AUTOUIC_SEARCH_PATHS
+                      "${CMAKE_CURRENT_SOURCE_DIR}/forms")
 target_link_libraries(svggenerator PUBLIC
     Qt::Core
     Qt::Gui
