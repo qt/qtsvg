@@ -118,6 +118,24 @@ QSvgIOHandler::~QSvgIOHandler()
     delete d;
 }
 
+static bool isPossiblySvg(QIODevice *device, bool *isCompressed = nullptr)
+{
+    constexpr int bufSize = 64;
+    char buf[bufSize];
+    const qint64 readLen = device->peek(buf, bufSize);
+    if (readLen < 8)
+        return false;
+#    ifndef QT_NO_COMPRESS
+    if (quint8(buf[0]) == 0x1f && quint8(buf[1]) == 0x8b) {
+        if (isCompressed)
+            *isCompressed = true;
+        return true;
+    }
+#    endif
+    QTextStream str(QByteArray::fromRawData(buf, readLen));
+    QByteArray ba = str.read(16).trimmed().toLatin1();
+    return ba.startsWith("<?xml") || ba.startsWith("<svg") || ba.startsWith("<!--") || ba.startsWith("<!DOCTYPE svg");
+}
 
 bool QSvgIOHandler::canRead() const
 {
@@ -126,15 +144,9 @@ bool QSvgIOHandler::canRead() const
     if (d->loaded && !d->readDone)
         return true;        // Will happen if we have been asked for the size
 
-    QByteArray buf = device()->peek(16);
-#ifndef QT_NO_COMPRESS
-    if (buf.startsWith("\x1f\x8b")) {
-        setFormat("svgz");
-        return true;
-    } else
-#endif
-    if (buf.contains("<?xml") || buf.contains("<svg") || buf.contains("<!--") || buf.contains("<!DOCTYPE svg")) {
-        setFormat("svg");
+    bool isCompressed = false;
+    if (isPossiblySvg(device(), &isCompressed)) {
+        setFormat(isCompressed ? "svgz" : "svg");
         return true;
     }
     return false;
@@ -260,12 +272,7 @@ bool QSvgIOHandler::supportsOption(ImageOption option) const
 
 bool QSvgIOHandler::canRead(QIODevice *device)
 {
-    QByteArray buf = device->peek(16);
-    return
-#ifndef QT_NO_COMPRESS
-            buf.startsWith("\x1f\x8b") ||
-#endif
-            buf.contains("<?xml") || buf.contains("<svg") || buf.contains("<!--") || buf.contains("<!DOCTYPE svg");
+    return isPossiblySvg(device);
 }
 
 QT_END_NAMESPACE

@@ -61,6 +61,8 @@ private slots:
     void checkSize_data();
     void checkSize();
     void checkImageInclude();
+    void encodings_data();
+    void encodings();
 };
 
 
@@ -145,6 +147,36 @@ void tst_QSvgPlugin::checkImageInclude()
     logMessages.clear();
 }
 
+void tst_QSvgPlugin::encodings_data()
+{
+    QTest::addColumn<QString>("filename");
+
+    QTest::newRow("utf-8") << QFINDTESTDATA("simple_Utf8.svg");
+    QTest::newRow("utf-16LE") << QFINDTESTDATA("simple_Utf16LE.svg");
+    QTest::newRow("utf-16BE") << QFINDTESTDATA("simple_Utf16BE.svg");
+    QTest::newRow("utf-32LE") << QFINDTESTDATA("simple_Utf32LE.svg");
+    QTest::newRow("utf-32BE") << QFINDTESTDATA("simple_Utf32BE.svg");
+}
+
+void tst_QSvgPlugin::encodings()
+{
+    QFETCH(QString, filename);
+
+    {
+        QFile file(filename);
+        file.open(QIODevice::ReadOnly);
+        QVERIFY(QSvgIOHandler::canRead(&file));
+    }
+
+    QFile file(filename);
+    file.open(QIODevice::ReadOnly);
+    QSvgIOHandler plugin;
+    plugin.setDevice(&file);
+    QVERIFY(plugin.canRead());
+    QImage img;
+    QVERIFY(plugin.read(&img));
+    QCOMPARE(img.size(), QSize(50, 50));
+}
 
 QTEST_MAIN(tst_QSvgPlugin)
 #include "tst_qsvgplugin.moc"
