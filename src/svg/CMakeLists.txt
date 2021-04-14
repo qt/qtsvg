@@ -8,8 +8,8 @@
 # Handle the conditional finding of either system zlib or qt zlib.
 if(NOT QT_FEATURE_system_zlib)
     find_package(Qt6 COMPONENTS Zlib)
-elseif(NOT TARGET ZLIB::ZLIB)
-    qt_find_package(ZLIB PROVIDED_TARGETS ZLIB::ZLIB)
+elseif(NOT TARGET WrapZLIB::WrapZLIB)
+    qt_find_package(WrapZLIB PROVIDED_TARGETS WrapZLIB::WrapZLIB)
 endif()
 # special case end
 
@@ -60,7 +60,7 @@ qt_internal_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUA
 
 qt_internal_extend_target(Svg CONDITION QT_FEATURE_system_zlib
     LIBRARIES
-        ZLIB::ZLIB
+        WrapZLIB::WrapZLIB
 )
 
 qt_internal_extend_target(Svg CONDITION NOT QT_FEATURE_system_zlib
