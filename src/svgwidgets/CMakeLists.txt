@@ -6,7 +6,6 @@
 
 qt_internal_add_module(SvgWidgets
     SOURCES
-        qgraphicssvgitem.cpp qgraphicssvgitem.h
         qsvgwidget.cpp qsvgwidget.h
         qtsvgwidgetsglobal.h
     DEFINES
@@ -24,6 +23,11 @@ qt_internal_add_module(SvgWidgets
         Qt::CorePrivate
         Qt::GuiPrivate
         Qt::WidgetsPrivate
+)
+
+qt_internal_extend_target(SvgWidgets CONDITION QT_FEATURE_graphicsview
+    SOURCES
+        qgraphicssvgitem.cpp qgraphicssvgitem.h
 )
 
 ## Scopes:
