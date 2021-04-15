@@ -45,8 +45,10 @@
 #include "qsvgrenderer.h"
 #include "qpixmapcache.h"
 #include "qfileinfo.h"
+#if QT_CONFIG(mimetype)
 #include <qmimedatabase.h>
 #include <qmimetype.h>
+#endif
 #include <QAtomicInt>
 #include "qdebug.h"
 #include <private/qguiapplication_p.h>
@@ -259,13 +261,13 @@ static FileType fileType(const QFileInfo &fi)
         || abs.endsWith(QLatin1String(".svg.gz"), Qt::CaseInsensitive)) {
         return CompressedSvgFile;
     }
-#ifndef QT_NO_MIMETYPE
+#if QT_CONFIG(mimetype)
     const QString &mimeTypeName = QMimeDatabase().mimeTypeForFile(fi).name();
     if (mimeTypeName == QLatin1String("image/svg+xml"))
         return SvgFile;
     if (mimeTypeName == QLatin1String("image/svg+xml-compressed"))
         return CompressedSvgFile;
-#endif // !QT_NO_MIMETYPE
+#endif
     return OtherFile;
 }
 
