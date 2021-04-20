@@ -181,14 +181,11 @@ bool QSvgIOHandler::read(QImage *image)
             t.translate(tr1.x(), tr1.y());
             bounds = t.mapRect(bounds);
         }
-        if (image->size() != finalSize || !image->reinterpretAsFormat(QImage::Format_ARGB32_Premultiplied)) {
-            *image = QImage(finalSize, QImage::Format_ARGB32_Premultiplied);
-            if (!finalSize.isEmpty() && image->isNull()) {
-                qWarning("QSvgIOHandler: QImage allocation failed (size %i x %i)", finalSize.width(), finalSize.height());
+        if (finalSize.isEmpty()) {
+            *image = QImage();
+        } else {
+            if (!QImageIOHandler::allocateImage(finalSize, QImage::Format_ARGB32_Premultiplied, image))
                 return false;
-            }
-        }
-        if (!finalSize.isEmpty()) {
             image->fill(d->backColor.rgba());
             QPainter p(image);
             d->r.render(&p, bounds);
