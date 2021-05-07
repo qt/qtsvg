@@ -285,10 +285,21 @@ void QSvgText::setTextArea(const QSizeF &size)
     m_type = TEXTAREA;
 }
 
-//QRectF QSvgText::bounds(QPainter *p, QSvgExtraStates &) const {}
+QRectF QSvgText::bounds(QPainter *p, QSvgExtraStates &states) const
+{
+    QRectF boundingRect;
+    draw_helper(p, states, &boundingRect);
+    return boundingRect;
+}
 
 void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
 {
+    draw_helper(p, states);
+}
+
+void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundingRect) const
+{
+    const bool isPainting = (boundingRect == nullptr);
     applyStyle(p, states);
     qreal oldOpacity = p->opacity();
     p->setOpacity(oldOpacity * states.fillOpacity);
@@ -397,6 +408,7 @@ void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
         }
         states.svgFont->draw(p, m_coord * scale, text, p->font().pointSizeF() * scale, states.textAnchor);
     } else {
+        QRectF brect;
         for (int i = 0; i < paragraphs.size(); ++i) {
             QTextLayout tl(paragraphs[i]);
             QTextOption op = tl.textOption();
@@ -429,6 +441,7 @@ void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
                 initial = false;
 
                 line.setPosition(QPointF(x, y));
+                brect |= line.naturalTextRect();
 
                 // Check if the current line fits into the bounding rectangle.
                 if ((m_size.width() != 0 && line.naturalTextWidth() > scaledSize.width())
@@ -442,10 +455,17 @@ void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
 
                 y += 1.1 * line.height();
             }
-            tl.draw(p, QPointF(px, py), QList<QTextLayout::FormatRange>(), bounds);
+            if (isPainting)
+                tl.draw(p, QPointF(px, py), QList<QTextLayout::FormatRange>(), bounds);
 
             if (endOfBoundsReached)
                 break;
+        }
+        if (boundingRect) {
+            brect.translate(m_coord * scale);
+            if (bounds.height() > 0)
+                brect.setBottom(qMin(brect.bottom(), bounds.bottom()));
+            *boundingRect = p->transform().mapRect(brect);
         }
     }
 
