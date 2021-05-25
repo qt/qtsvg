@@ -305,7 +305,7 @@ void QGraphicsSvgItem::setSharedRenderer(QSvgRenderer *renderer)
 }
 
 /*!
-    \obsolete
+    \deprecated
 
     Use QGraphicsItem::setCacheMode() instead. Passing true to this function is equivalent
     to QGraphicsItem::setCacheMode(QGraphicsItem::DeviceCoordinateCache).
@@ -316,7 +316,7 @@ void QGraphicsSvgItem::setCachingEnabled(bool caching)
 }
 
 /*!
-    \obsolete
+    \deprecated
 
     Use QGraphicsItem::cacheMode() instead.
 */
