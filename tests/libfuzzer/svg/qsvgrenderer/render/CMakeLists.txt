@@ -13,9 +13,6 @@ find_package(Qt6 COMPONENTS Svg)
 qt_add_executable(render
     main.cpp
 )
-qt_import_plugins(render
-    INCLUDE Qt::QMinimalIntegrationPlugin
-)
 
 target_link_libraries(render PUBLIC
     Qt::Core
@@ -31,3 +28,6 @@ else()
     )
 endif()
 
+qt_import_plugins(render
+    INCLUDE Qt::QMinimalIntegrationPlugin
+)
