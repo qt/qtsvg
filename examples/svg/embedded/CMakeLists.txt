@@ -1,11 +1,11 @@
 # Generated from embedded.pro.
 
 if(TARGET Qt::Widgets)
-    add_subdirectory(desktopservices)
+    qt_internal_add_example(desktopservices)
 endif()
 if(QT_FEATURE_process AND TARGET Qt::Widgets)
-    add_subdirectory(fluidlauncher)
+    qt_internal_add_example(fluidlauncher)
 endif()
 if(TARGET Qt::Network AND TARGET Qt::Widgets)
-    add_subdirectory(weatherinfo)
+    qt_internal_add_example(weatherinfo)
 endif()

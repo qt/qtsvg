@@ -1,5 +1,5 @@
 # Generated from draganddrop.pro.
 
 if(TARGET Qt::Widgets)
-    add_subdirectory(delayedencoding)
+    qt_internal_add_example(delayedencoding)
 endif()
