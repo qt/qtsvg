@@ -41,21 +41,6 @@
 #define QTSVGWIDGETSGLOBAL_H
 
 #include <QtCore/qglobal.h>
-
-QT_BEGIN_NAMESPACE
-
-#ifndef Q_SVGWIDGETS_EXPORT
-#  ifndef QT_STATIC
-#    if defined(QT_BUILD_SVGWIDGETS_LIB)
-#      define Q_SVGWIDGETS_EXPORT Q_DECL_EXPORT
-#    else
-#      define Q_SVGWIDGETS_EXPORT Q_DECL_IMPORT
-#    endif
-#  else
-#    define Q_SVGWIDGETS_EXPORT
-#  endif
-#endif
-
-QT_END_NAMESPACE
+#include <QtSvgWidgets/qtsvgwidgetsexports.h>
 
 #endif

@@ -52,7 +52,6 @@
 //
 
 #include "qtsvgglobal.h"
-
-#define Q_SVG_PRIVATE_EXPORT Q_SVG_EXPORT
+#include <QtSvg/private/qtsvgexports_p.h>
 
 #endif // QTSVGGLOBAL_P_H
