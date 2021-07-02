@@ -2349,6 +2349,27 @@ static bool parseAnimateNode(QSvgNode *parent,
     return true;
 }
 
+static int parseClockValue(QStringView str, bool *ok)
+{
+    int res = 0;
+    int ms = 1000;
+    str = str.trimmed();
+    if (str.endsWith(QLatin1String("ms"))) {
+        str.chop(2);
+        ms = 1;
+    } else if (str.endsWith(QLatin1String("s"))) {
+        str.chop(1);
+    }
+    double val = ms * toDouble(str, ok);
+    if (ok) {
+        if (val > std::numeric_limits<int>::min() && val < std::numeric_limits<int>::max())
+            res = static_cast<int>(val);
+        else
+            *ok = false;
+    }
+    return res;
+}
+
 static bool parseAnimateColorNode(QSvgNode *parent,
                                   const QXmlStreamAttributes &attributes,
                                   QSvgHandler *handler)
@@ -2381,23 +2402,13 @@ static bool parseAnimateColorNode(QSvgNode *parent,
         }
     }
 
-    int ms = 1000;
-    beginStr = beginStr.trimmed();
-    if (beginStr.endsWith(QLatin1String("ms"))) {
-        beginStr.chop(2);
-        ms = 1;
-    } else if (beginStr.endsWith(QLatin1String("s"))) {
-        beginStr.chop(1);
-    }
-    durStr = durStr.trimmed();
-    if (durStr.endsWith(QLatin1String("ms"))) {
-        durStr.chop(2);
-        ms = 1;
-    } else if (durStr.endsWith(QLatin1String("s"))) {
-        durStr.chop(1);
-    }
-    int begin = static_cast<int>(toDouble(beginStr) * ms);
-    int end   = static_cast<int>((toDouble(durStr) + begin) * ms);
+    bool ok = true;
+    int begin = parseClockValue(beginStr, &ok);
+    if (!ok)
+        return false;
+    int end = begin + parseClockValue(durStr, &ok);
+    if (!ok || end <= begin)
+        return false;
 
     QSvgAnimateColor *anim = new QSvgAnimateColor(begin, end, 0);
     anim->setArgs((targetStr == QLatin1String("fill")), colors);
@@ -2487,24 +2498,13 @@ static bool parseAnimateTransformNode(QSvgNode *parent,
         }
     }
 
-    int ms = 1000;
-    beginStr = beginStr.trimmed();
-    if (beginStr.endsWith(QLatin1String("ms"))) {
-        beginStr.chop(2);
-        ms = 1;
-    } else if (beginStr.endsWith(QLatin1String("s"))) {
-        beginStr.chop(1);
-    }
-    int begin = static_cast<int>(toDouble(beginStr) * ms);
-    durStr = durStr.trimmed();
-    if (durStr.endsWith(QLatin1String("ms"))) {
-        durStr.chop(2);
-        ms = 1;
-    } else if (durStr.endsWith(QLatin1String("s"))) {
-        durStr.chop(1);
-        ms = 1000;
-    }
-    int end = static_cast<int>(toDouble(durStr)*ms) + begin;
+    bool ok = true;
+    int begin = parseClockValue(beginStr, &ok);
+    if (!ok)
+        return false;
+    int end = begin + parseClockValue(durStr, &ok);
+    if (!ok || end <= begin)
+        return false;
 
     QSvgAnimateTransform::TransformType type = QSvgAnimateTransform::Empty;
     if (typeStr == QLatin1String("translate")) {
