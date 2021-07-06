@@ -10,7 +10,7 @@ qt_internal_add_plugin(QSvgPlugin
     SOURCES
         main.cpp
         qsvgiohandler.cpp qsvgiohandler.h
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Core
         Qt::Gui
         Qt::Svg
