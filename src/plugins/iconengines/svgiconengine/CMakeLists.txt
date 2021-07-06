@@ -10,7 +10,7 @@ qt_internal_add_plugin(QSvgIconPlugin
     SOURCES
         main.cpp
         qsvgiconengine.cpp qsvgiconengine.h
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Core
         Qt::CorePrivate
         Qt::Gui
