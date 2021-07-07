@@ -725,15 +725,25 @@ static QList<qreal> parseNumbersList(const QChar *&str)
     return points;
 }
 
-static inline void parseNumbersArray(const QChar *&str, QVarLengthArray<qreal, 8> &points)
+static inline void parseNumbersArray(const QChar *&str, QVarLengthArray<qreal, 8> &points,
+                                     const char *pattern = nullptr)
 {
+    const size_t patternLen = qstrlen(pattern);
     while (str->isSpace())
         ++str;
     while (isDigit(str->unicode()) ||
            *str == QLatin1Char('-') || *str == QLatin1Char('+') ||
            *str == QLatin1Char('.')) {
 
-        points.append(toDouble(str));
+        if (patternLen && pattern[points.size() % patternLen] == 'f') {
+            // flag expected, may only be 0 or 1
+            if (*str != QLatin1Char('0') && *str != QLatin1Char('1'))
+                return;
+            points.append(*str == QLatin1Char('0') ? 0.0 : 1.0);
+            ++str;
+        } else {
+            points.append(toDouble(str));
+        }
 
         while (str->isSpace())
             ++str;
@@ -1599,8 +1609,11 @@ static bool parsePathDataFast(QStringView dataStr, QPainterPath &path)
         ++str;
         QChar endc = *end;
         *const_cast<QChar *>(end) = u'\0'; // parseNumbersArray requires 0-termination that QStringView cannot guarantee
+        const char *pattern = nullptr;
+        if (pathElem == QLatin1Char('a') || pathElem == QLatin1Char('A'))
+            pattern = "rrrffrr";
         QVarLengthArray<qreal, 8> arg;
-        parseNumbersArray(str, arg);
+        parseNumbersArray(str, arg, pattern);
         *const_cast<QChar *>(end) = endc;
         if (pathElem == QLatin1Char('z') || pathElem == QLatin1Char('Z'))
             arg.append(0);//dummy
