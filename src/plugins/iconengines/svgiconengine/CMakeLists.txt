@@ -6,7 +6,7 @@
 
 qt_internal_add_plugin(QSvgIconPlugin
     OUTPUT_NAME qsvgicon
-    TYPE iconengines
+    PLUGIN_TYPE iconengines
     SOURCES
         main.cpp
         qsvgiconengine.cpp qsvgiconengine.h
