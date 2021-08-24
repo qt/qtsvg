@@ -13,9 +13,6 @@ qhp.QtSvg.virtualFolder       = qtsvg
 qhp.QtSvg.indexTitle          = Qt SVG
 qhp.QtSvg.indexRoot           =
 
-qhp.QtSvg.filterAttributes    = qtsvg $QT_VERSION qtrefdoc
-qhp.QtSvg.customFilters.Qt.name = QtSvg $QT_VERSION
-qhp.QtSvg.customFilters.Qt.filterAttributes = qtsvg $QT_VERSION
 qhp.QtSvg.subprojects         = classes
 qhp.QtSvg.subprojects.classes.title = C++ Classes
 qhp.QtSvg.subprojects.classes.indexTitle = Qt SVG C++ Classes
