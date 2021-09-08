@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt SVG module of the Qt Toolkit.
@@ -686,7 +686,6 @@ void QSvgAnimateTransform::revert(QPainter *p, QSvgExtraStates &)
 
 void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
 {
-    static const qreal deg2rad = qreal(0.017453292519943295769);
     qreal totalTimeElapsed = node->document()->currentElapsed();
     if (totalTimeElapsed < m_from || m_finished)
         return;
@@ -786,7 +785,7 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         qreal transXDiff = (to1-from1) * percentOfAnimation;
         qreal transX = from1 + transXDiff;
         m_transform = QTransform();
-        m_transform.shear(qTan(transX * deg2rad), 0);
+        m_transform.shear(qTan(qDegreesToRadians(transX)), 0);
         break;
     }
     case SkewY: {
@@ -801,7 +800,7 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         qreal transYDiff = (to1 - from1) * percentOfAnimation;
         qreal transY = from1 + transYDiff;
         m_transform = QTransform();
-        m_transform.shear(0, qTan(transY * deg2rad));
+        m_transform.shear(0, qTan(qDegreesToRadians(transY)));
         break;
     }
     default:
