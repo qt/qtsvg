@@ -1363,9 +1363,10 @@ static void parseFont(QSvgNode *node,
         case FontSizeNone:
             break;
         case FontSizeValue: {
-            QSvgHandler::LengthType dummy; // should always be pixel size
-            fontStyle->setSize(qMin(parseLength(attributes.fontSize, dummy, handler),
-                                    qreal(0xffff)));
+            QSvgHandler::LengthType type;
+            qreal fs = parseLength(attributes.fontSize, type, handler);
+            fs = convertToPixels(fs, true, type);
+            fontStyle->setSize(qMin(fs, qreal(0xffff)));
         }
             break;
         default:
