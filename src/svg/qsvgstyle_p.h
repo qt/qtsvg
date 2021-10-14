@@ -70,7 +70,7 @@ class QSvgTinyDocument;
 template <class T> class QSvgRefCounter
 {
 public:
-    QSvgRefCounter() { t = 0; }
+    QSvgRefCounter() { t = nullptr; }
     QSvgRefCounter(T *_t)
     {
         t = _t;
@@ -424,7 +424,7 @@ public:
     void setStroke(QBrush brush)
     {
         m_stroke.setBrush(brush);
-        m_style = 0;
+        m_style = nullptr;
         m_strokeSet = 1;
     }
 

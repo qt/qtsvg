@@ -90,7 +90,7 @@ public:
     {
         size = QSize();
         viewBox = QRectF();
-        outputDevice = 0;
+        outputDevice = nullptr;
         resolution = 72;
 
         attributes.document_title = QLatin1String("Qt SVG Document");

@@ -202,7 +202,7 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QString &fileName)
         return load(qt_inflateSvgzDataFrom(&file));
     }
 
-    QSvgTinyDocument *doc = 0;
+    QSvgTinyDocument *doc = nullptr;
     QSvgHandler handler(&file);
     if (handler.ok()) {
         doc = handler.document();
@@ -248,7 +248,7 @@ QSvgTinyDocument * QSvgTinyDocument::load(QXmlStreamReader *contents)
 {
     QSvgHandler handler(contents);
 
-    QSvgTinyDocument *doc = 0;
+    QSvgTinyDocument *doc = nullptr;
     if (handler.ok()) {
         doc = handler.document();
         doc->m_animationDuration = handler.animationDuration();

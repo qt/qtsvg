@@ -1339,7 +1339,7 @@ static void parseFont(QSvgNode *node,
         return;
 
     QSvgTinyDocument *doc = node->document();
-    QSvgFontStyle *fontStyle = 0;
+    QSvgFontStyle *fontStyle = nullptr;
     if (!attributes.fontFamily.isEmpty()) {
         QSvgFont *svgFont = doc->svgFont(attributes.fontFamily.toString());
         if (svgFont)
@@ -3394,7 +3394,7 @@ static QSvgNode *createUseNode(QSvgNode *parent,
     QString linkId = attributes.value(QLatin1String("xlink:href")).toString().remove(0, 1);
     const QStringView xStr = attributes.value(QLatin1String("x"));
     const QStringView yStr = attributes.value(QLatin1String("y"));
-    QSvgStructureNode *group = 0;
+    QSvgStructureNode *group = nullptr;
 
     if (linkId.isEmpty())
         linkId = attributes.value(QLatin1String("href")).toString().remove(0, 1);
@@ -3714,7 +3714,7 @@ void QSvgHandler::parse()
 bool QSvgHandler::startElement(const QString &localName,
                                const QXmlStreamAttributes &attributes)
 {
-    QSvgNode *node = 0;
+    QSvgNode *node = nullptr;
 
     pushColorCopy();
 

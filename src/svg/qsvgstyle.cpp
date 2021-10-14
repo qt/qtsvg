@@ -158,7 +158,7 @@ void QSvgFillStyle::setFillStyle(QSvgFillStyleProperty* style)
 void QSvgFillStyle::setBrush(QBrush brush)
 {
     m_fill = std::move(brush);
-    m_style = 0;
+    m_style = nullptr;
     m_fillSet = 1;
 }
 

@@ -239,7 +239,7 @@ QRectF QSvgNode::transformedBounds() const
 
 QSvgTinyDocument * QSvgNode::document() const
 {
-    QSvgTinyDocument *doc = 0;
+    QSvgTinyDocument *doc = nullptr;
     QSvgNode *node = const_cast<QSvgNode*>(this);
     while (node && node->type() != QSvgNode::DOC) {
         node = node->parent();

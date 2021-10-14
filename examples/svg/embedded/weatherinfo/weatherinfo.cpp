@@ -332,7 +332,7 @@ private:
     }
 
     void createNewDay(QXmlStreamReader &xml) {
-        QGraphicsTextItem *dayItem  = 0;
+        QGraphicsTextItem *dayItem  = nullptr;
         QString lowT;
         QString highT;
         QString period = GET_DATA_ATTR("period");
@@ -384,7 +384,7 @@ private:
     }
 
     void saveDayItem(QGraphicsTextItem *dayItem, QString lowT, QString highT, QString symbolToShow) {
-        QGraphicsSvgItem *statusItem = 0;
+        QGraphicsSvgItem *statusItem = nullptr;
         if (!symbolToShow.isEmpty()) {
             statusItem = new QGraphicsSvgItem(symbolToShow);
             m_scene.addItem(statusItem);

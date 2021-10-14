@@ -372,7 +372,7 @@ QRectF QSvgStructureNode::bounds(QPainter *p, QSvgExtraStates &states) const
 
 QSvgNode * QSvgStructureNode::previousSiblingNode(QSvgNode *n) const
 {
-    QSvgNode *prev = 0;
+    QSvgNode *prev = nullptr;
     QList<QSvgNode*>::const_iterator itr = m_renderers.constBegin();
     for (; itr != m_renderers.constEnd(); ++itr) {
         QSvgNode *node = *itr;
