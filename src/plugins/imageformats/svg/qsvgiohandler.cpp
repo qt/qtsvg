@@ -182,6 +182,8 @@ bool QSvgIOHandler::read(QImage *image)
             bounds = t.mapRect(bounds);
         }
         if (image->size() != finalSize || !image->reinterpretAsFormat(QImage::Format_ARGB32_Premultiplied)) {
+            if (qMax(finalSize.width(), finalSize.height()) > 0xffff)
+                return false; // Assume corrupted file
             *image = QImage(finalSize, QImage::Format_ARGB32_Premultiplied);
             if (!finalSize.isEmpty() && image->isNull()) {
                 qWarning("QSvgIOHandler: QImage allocation failed (size %i x %i)", finalSize.width(), finalSize.height());
