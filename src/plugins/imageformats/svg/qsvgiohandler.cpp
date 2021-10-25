@@ -184,6 +184,8 @@ bool QSvgIOHandler::read(QImage *image)
         if (finalSize.isEmpty()) {
             *image = QImage();
         } else {
+            if (qMax(finalSize.width(), finalSize.height()) > 0xffff)
+                return false; // Assume corrupted file
             if (!QImageIOHandler::allocateImage(finalSize, QImage::Format_ARGB32_Premultiplied, image))
                 return false;
             image->fill(d->backColor.rgba());
