@@ -144,9 +144,10 @@ private:
     void init();
 
     QSvgTinyDocument *m_doc;
-    QStack<QSvgNode*> m_nodes;
-
-    QList<QSvgNode*>  m_resolveNodes;
+    QStack<QSvgNode *> m_nodes;
+    // TODO: This is only needed during parsing, so it unnecessarily takes up space after that.
+    // Temporary container for <use> nodes which haven't been resolved yet.
+    QList<QSvgUse *> m_toBeResolved;
 
     enum CurrentNode
     {
