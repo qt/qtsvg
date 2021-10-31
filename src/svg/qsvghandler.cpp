@@ -3679,7 +3679,7 @@ void QSvgHandler::parse()
                 --remainingUnfinishedElements;
             } else {
                 delete m_doc;
-                m_doc = 0;
+                m_doc = nullptr;
                 return;
             }
             break;
@@ -3981,7 +3981,7 @@ QIODevice *QSvgHandler::device() const
     return xml->device();
 }
 
-QSvgTinyDocument * QSvgHandler::document() const
+QSvgTinyDocument *QSvgHandler::document() const
 {
     return m_doc;
 }
