@@ -599,6 +599,8 @@ void tst_QSvgRenderer::boundsOnElement() const
                           "<use x=\"0\" y=\"0\" transform=\"rotate(45)\" xlink:href=\"#baconost\"/>"
                         "</g>"
                       "</g>"
+                      "<text id=\"textA\" x=\"50\" y=\"100\">Lorem ipsum</text>"
+                      "<text id=\"textB\" transform=\"matrix(1 0 0 1 50 100)\">Lorem ipsum</text>"
                     "</svg>");
     
     qreal sqrt2 = qSqrt(2);
@@ -610,6 +612,10 @@ void tst_QSvgRenderer::boundsOnElement() const
     QCOMPARE(renderer.boundsOnElement(QLatin1String("baconost")), QRectF(-10 * sqrt2, -10 * sqrt2, 20 * sqrt2, 20 * sqrt2));
     QCOMPARE(renderer.boundsOnElement(QLatin1String("hapaa")), QRectF(-13, -9, 22, 22));
     QCOMPARE(renderer.boundsOnElement(QLatin1String("prim")), QRectF(-10 * sqrt2 - 3, -10 * sqrt2 + 1, 20 * sqrt2, 20 * sqrt2));
+
+    QRectF textBoundsA = renderer.boundsOnElement(QLatin1String("textA"));
+    QVERIFY(!textBoundsA.isEmpty());
+    QCOMPARE(renderer.boundsOnElement(QLatin1String("textB")), textBoundsA);
 }
 
 void tst_QSvgRenderer::gradientStops() const
