@@ -289,7 +289,7 @@ QRectF QSvgText::bounds(QPainter *p, QSvgExtraStates &states) const
 {
     QRectF boundingRect;
     draw_helper(p, states, &boundingRect);
-    return boundingRect;
+    return p->transform().mapRect(boundingRect);
 }
 
 void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
@@ -465,7 +465,7 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
             brect.translate(m_coord * scale);
             if (bounds.height() > 0)
                 brect.setBottom(qMin(brect.bottom(), bounds.bottom()));
-            *boundingRect = p->transform().mapRect(brect);
+            *boundingRect = QTransform::fromScale(1 / scale, 1 / scale).mapRect(brect);
         }
     }
 
