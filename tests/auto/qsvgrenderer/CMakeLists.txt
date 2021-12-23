@@ -19,6 +19,8 @@ qt_internal_add_test(tst_qsvgrenderer
 # Resources:
 set(resources_resource_files
     "heart.svgz"
+    "large.svg"
+    "large.svgz"
 )
 
 qt_internal_add_resource(tst_qsvgrenderer "resources"
