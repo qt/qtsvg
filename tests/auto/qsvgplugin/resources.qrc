@@ -14,5 +14,10 @@
    <file>wide_size.svg</file>
    <file>wide_size_viewbox.svg</file>
    <file>wide_viewbox.svg</file>
+   <file>simple_Utf8.svg</file>
+   <file>simple_Utf16LE.svg</file>
+   <file>simple_Utf16BE.svg</file>
+   <file>simple_Utf32LE.svg</file>
+   <file>simple_Utf32BE.svg</file>
 </qresource>
 </RCC>

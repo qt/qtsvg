@@ -4,6 +4,7 @@
 ## tst_qsvgplugin Test:
 #####################################################################
 
+# Collect test data
 qt_internal_add_test(tst_qsvgplugin
     SOURCES
         tst_qsvgplugin.cpp
@@ -30,6 +31,11 @@ set(resources_resource_files
     "wide_size.svg"
     "wide_size_viewbox.svg"
     "wide_viewbox.svg"
+    "simple_Utf8.svg"
+    "simple_Utf16LE.svg"
+    "simple_Utf16BE.svg"
+    "simple_Utf32LE.svg"
+    "simple_Utf32BE.svg"
 )
 
 qt_internal_add_resource(tst_qsvgplugin "resources"

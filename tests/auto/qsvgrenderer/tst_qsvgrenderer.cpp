@@ -809,13 +809,13 @@ void tst_QSvgRenderer::recursiveRefs()
 #ifndef QT_NO_COMPRESS
 void tst_QSvgRenderer::testGzLoading()
 {
-    QSvgRenderer renderer(QLatin1String(SRCDIR "heart.svgz"));
+    QSvgRenderer renderer(QFINDTESTDATA("heart.svgz"));
     QVERIFY(renderer.isValid());
 
     QSvgRenderer resourceRenderer(QLatin1String(":/heart.svgz"));
     QVERIFY(resourceRenderer.isValid());
 
-    QFile largeFileGz(SRCDIR "large.svgz");
+    QFile largeFileGz(QFINDTESTDATA("large.svgz"));
     largeFileGz.open(QIODevice::ReadOnly);
     QByteArray data = largeFileGz.readAll();
     QSvgRenderer autoDetectGzData(data);
@@ -837,9 +837,9 @@ void tst_QSvgRenderer::testGzHelper_data()
     QTest::newRow("small") << QByteArray::fromHex(QByteArray("1f8b08005819934800034b"
             "cbcfe70200a865327e04000000")) << QByteArray("foo\n");
 
-    QFile largeFileGz("large.svgz");
+    QFile largeFileGz(QFINDTESTDATA("large.svgz"));
     largeFileGz.open(QIODevice::ReadOnly);
-    QFile largeFile("large.svg");
+    QFile largeFile(QFINDTESTDATA("large.svg"));
     largeFile.open(QIODevice::ReadOnly);
     QTest::newRow("large") << largeFileGz.readAll() << largeFile.readAll();
 
