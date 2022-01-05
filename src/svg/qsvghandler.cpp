@@ -3686,9 +3686,7 @@ void QSvgHandler::parse()
         case QXmlStreamReader::EndElement:
             endElement(xml->name());
             ++remainingUnfinishedElements;
-            // if we are using somebody else's qxmlstreamreader
-            // we should not read until the end of the stream
-            done = !m_ownsReader && (xml->name() == QLatin1String("svg"));
+            done = (xml->name() == QLatin1String("svg"));
             break;
         case QXmlStreamReader::Characters:
             characters(xml->text());
