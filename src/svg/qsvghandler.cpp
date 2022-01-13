@@ -516,8 +516,9 @@ public:
         QString name = nodeToName(n);
         return QString::compare(name, nodeName, Qt::CaseInsensitive) == 0;
     }
-    QString attribute(NodePtr node, const QString &name) const override
+    QString attributeValue(NodePtr node, const QCss::AttributeSelector &asel) const override
     {
+        const QString &name = asel.name;
         QSvgNode *n = svgNode(node);
         if ((!n->nodeId().isEmpty() && (name == QLatin1String("id") ||
                                         name == QLatin1String("xml:id"))))
