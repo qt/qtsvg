@@ -43,15 +43,6 @@ qt_internal_add_module(Svg
 ## Scopes:
 #####################################################################
 
-qt_internal_extend_target(Svg CONDITION TARGET Qt::Widgets
-    LIBRARIES
-        Qt::WidgetsPrivate
-    PUBLIC_LIBRARIES
-        Qt::Widgets
-    PRIVATE_MODULE_INTERFACE
-        Qt::WidgetsPrivate
-)
-
 qt_internal_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")
     LINK_OPTIONS
         "/BASE:0x66000000"
