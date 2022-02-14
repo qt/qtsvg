@@ -1,23 +1,15 @@
-# Generated from fluidlauncher.pro.
-
 cmake_minimum_required(VERSION 3.16)
 project(fluidlauncher LANGUAGES CXX)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
 
 if(NOT DEFINED INSTALL_EXAMPLESDIR)
-  set(INSTALL_EXAMPLESDIR "examples")
+    set(INSTALL_EXAMPLESDIR "examples")
 endif()
 
 set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/svg/embedded/fluidlauncher")
 
-find_package(Qt6 COMPONENTS Core)
-find_package(Qt6 COMPONENTS Gui)
-find_package(Qt6 COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 qt_add_executable(fluidlauncher
     demoapplication.cpp demoapplication.h
@@ -26,16 +18,17 @@ qt_add_executable(fluidlauncher
     pictureflow.cpp pictureflow.h
     slideshow.cpp slideshow.h
 )
+
 set_target_properties(fluidlauncher PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
+
 target_link_libraries(fluidlauncher PUBLIC
     Qt::Core
     Qt::Gui
     Qt::Widgets
 )
-
 
 # Resources:
 set(fluidlauncher_resource_files
