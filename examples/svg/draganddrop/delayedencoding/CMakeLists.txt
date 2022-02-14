@@ -1,35 +1,27 @@
-# Generated from delayedencoding.pro.
-
 cmake_minimum_required(VERSION 3.16)
 project(delayedencoding LANGUAGES CXX)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
 
 if(NOT DEFINED INSTALL_EXAMPLESDIR)
-  set(INSTALL_EXAMPLESDIR "examples")
+    set(INSTALL_EXAMPLESDIR "examples")
 endif()
 
 set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/svg/draganddrop/delayedencoding")
 
-find_package(Qt6 COMPONENTS Core)
-find_package(Qt6 COMPONENTS Gui)
-find_package(Qt6 COMPONENTS Widgets)
-find_package(Qt6 COMPONENTS Svg)
-find_package(Qt6 COMPONENTS SvgWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Svg SvgWidgets Widgets)
 
 qt_add_executable(delayedencoding
     main.cpp
     mimedata.cpp mimedata.h
     sourcewidget.cpp sourcewidget.h
 )
+
 set_target_properties(delayedencoding PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
+
 target_link_libraries(delayedencoding PUBLIC
     Qt::Core
     Qt::Gui
@@ -37,7 +29,6 @@ target_link_libraries(delayedencoding PUBLIC
     Qt::SvgWidgets
     Qt::Widgets
 )
-
 
 # Resources:
 set(delayedencoding_resource_files

@@ -1,5 +1,3 @@
-# Generated from embedded.pro.
-
 if(TARGET Qt::Widgets)
     qt_internal_add_example(desktopservices)
 endif()

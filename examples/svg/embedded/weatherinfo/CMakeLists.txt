@@ -1,34 +1,25 @@
-# Generated from weatherinfo.pro.
-
 cmake_minimum_required(VERSION 3.16)
 project(svgweatherinfo LANGUAGES CXX)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
 
 if(NOT DEFINED INSTALL_EXAMPLESDIR)
-  set(INSTALL_EXAMPLESDIR "examples")
+    set(INSTALL_EXAMPLESDIR "examples")
 endif()
 
 set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/svg/embedded/weatherinfo")
 
-find_package(Qt6 COMPONENTS Core)
-find_package(Qt6 COMPONENTS Gui)
-find_package(Qt6 COMPONENTS Network)
-find_package(Qt6 COMPONENTS Widgets)
-find_package(Qt6 COMPONENTS Svg)
-find_package(Qt6 COMPONENTS SvgWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Svg SvgWidgets Widgets)
 
 qt_add_executable(svgweatherinfo
     weatherinfo.cpp
 )
+
 set_target_properties(svgweatherinfo PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
+
 target_link_libraries(svgweatherinfo PUBLIC
     Qt::Core
     Qt::Gui
@@ -37,7 +28,6 @@ target_link_libraries(svgweatherinfo PUBLIC
     Qt::SvgWidgets
     Qt::Widgets
 )
-
 
 # Resources:
 set(weatherinfo_resource_files
