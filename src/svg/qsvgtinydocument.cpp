@@ -454,10 +454,8 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
         source = viewBox();
 
     if (source != target && !qFuzzyIsNull(source.width()) && !qFuzzyIsNull(source.height())) {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
         if (m_implicitViewBox || !preserveAspectRatio()) {
             // Code path used when no view box is set, or IgnoreAspectRatio requested
-#endif
             QTransform transform;
             transform.scale(target.width() / source.width(),
                             target.height() / source.height());
@@ -466,7 +464,6 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
                          target.y() - c2.y());
             p->scale(target.width() / source.width(),
                      target.height() / source.height());
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
         } else {
             // Code path used when KeepAspectRatio is requested. This attempts to emulate the default values
             // of the <preserveAspectRatio tag that's implicitly defined when <viewbox> is used.
@@ -485,7 +482,6 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
             // Apply the view box translation if specified.
             p->translate(-source.x(), -source.y());
         }
-#endif
     }
 }
 
