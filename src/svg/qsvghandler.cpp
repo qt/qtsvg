@@ -883,7 +883,7 @@ static bool resolveColor(QStringView colorStr, QColor &color, QSvgHandler *handl
             break;
     }
 
-    color = QColor(colorStrTr.toString());
+    color = QColor::fromString(colorStrTr.toString());
     return color.isValid();
 }
 
