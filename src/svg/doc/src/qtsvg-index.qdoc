@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the documentation of the Qt SVG module.
@@ -35,17 +35,38 @@
     for rendering and displaying SVG drawings in widgets and on other
     paint devices.
 
-    \section1 Getting Started
+    \section1 Using the Module
 
-    Qt SVG provides classes for rendering SVG files. To include the definitions
-    of the module's classes, use the following directive:
+    \include {module-use.qdocinc} {using the c++ api}
 
-    \snippet doc_src_qtsvg.cpp 0
+    \section2 Building with CMake
 
-    To link against the module, add this line to your \l qmake \c
-    .pro file:
+    \include {module-use.qdocinc} {building with cmake} {Svg}
 
-    \snippet doc_src_qtsvg.pro 1
+    \section2 Building with qmake
+
+    \include {module-use.qdocinc} {building with cmake} {svg}
+
+    \section1 Articles and Guides
+
+    \list
+        \li \l {Rendering SVG Files} contains information about how to
+        render SVG files
+    \endlist
+
+    \section1 Examples
+
+    \list
+        \li \l {SVG Generator Example}
+        \li \l {SVG Viewer Example}
+    \endlist
+
+    \section1 References
+
+    \list
+        \li \l {Qt SVG C++ Classes}
+        \li \l {Qt SVG Widgets C++ Classes}
+    \endlist
 
     \section1 Module Evolution
     \l{Changes to Qt SVG} lists important changes in the module API
@@ -59,27 +80,8 @@
     the \l{GNU General Public License, version 2}.
     See \l{Qt Licensing} for further details.
 
-    Furthermore Qt SVG contains third party
+    Furthermore, Qt SVG contains third party
     code under following permissive licenses:
 
     \generatelist{groupsbymodule attributions-qtsvg}
-
-    \section1 Articles
-    \list
-    \li \l{Rendering SVG Files} contains information about how to
-    render SVG files
-    \endlist
-
-    \section1 References
-    \list
-        \li \l{Qt SVG C++ Classes}
-        \li \l{Qt SVG Widgets C++ Classes}
-    \endlist
-
-    Qt SVG comes with the following examples:
-
-    \list
-        \li \l{SVG Generator Example}
-        \li \l{SVG Viewer Example}
-    \endlist
 */
