@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2021 The Qt Company Ltd.
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the Qt SVG module of the Qt Toolkit.
@@ -2862,7 +2862,7 @@ static void parseBaseGradient(QSvgNode *node,
 
     QTransform matrix;
     QGradient *grad = gradProp->qgradient();
-    if (!link.isEmpty()) {
+    if (node && !link.isEmpty()) {
         QSvgStyleProperty *prop = node->styleProperty(link);
         //qDebug()<<"inherited "<<prop<<" ("<<link<<")";
         if (prop && prop->type() == QSvgStyleProperty::GRADIENT) {
