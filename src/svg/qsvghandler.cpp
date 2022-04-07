@@ -673,7 +673,8 @@ static qreal toDouble(const QChar *&str)
             val = -val;
     } else {
         val = QByteArray::fromRawData(temp, pos).toDouble();
-        if (qFpClassify(val) != FP_NORMAL)
+        // Do not tolerate values too wild to be represented normally by floats
+        if (qFpClassify(float(val)) != FP_NORMAL)
             val = 0;
     }
     return val;
@@ -3046,6 +3047,8 @@ static QSvgStyleProperty *createRadialGradientNode(QSvgNode *node,
         ncy = toDouble(cy);
     if (!r.isEmpty())
         nr = toDouble(r);
+    if (nr < 0.5)
+        nr = 0.5;
 
     qreal nfx = ncx;
     if (!fx.isEmpty())
