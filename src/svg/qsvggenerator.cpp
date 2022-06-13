@@ -859,11 +859,11 @@ bool QSvgPaintEngine::begin(QPaintDevice *)
                   " version=\"1.2\" baseProfile=\"tiny\">" << Qt::endl;
 
     if (!d->attributes.document_title.isEmpty()) {
-        *d->stream << "<title>" << d->attributes.document_title << "</title>" << Qt::endl;
+        *d->stream << "<title>" << d->attributes.document_title.toHtmlEscaped() << "</title>" << Qt::endl;
     }
 
     if (!d->attributes.document_description.isEmpty()) {
-        *d->stream << "<desc>" << d->attributes.document_description << "</desc>" << Qt::endl;
+        *d->stream << "<desc>" << d->attributes.document_description.toHtmlEscaped() << "</desc>" << Qt::endl;
     }
 
     d->stream->setString(&d->defs);
