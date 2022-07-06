@@ -397,8 +397,16 @@ void QSvgTinyDocument::draw(QPainter *p, QSvgExtraStates &)
     draw(p);
 }
 
+static bool isValidMatrix(const QTransform &transform)
+{
+    qreal determinant = transform.determinant();
+    return qIsFinite(determinant);
+}
+
 void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, const QRectF &sourceRect)
 {
+    QTransform oldTransform = p->worldTransform();
+
     QRectF target = targetRect;
     if (target.isEmpty()) {
         QPaintDevice *dev = p->device();
@@ -447,6 +455,9 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
             p->translate(-source.x(), -source.y());
         }
     }
+
+    if (!isValidMatrix(p->worldTransform()))
+        p->setWorldTransform(oldTransform);
 }
 
 QRectF QSvgTinyDocument::boundsOnElement(const QString &id) const
