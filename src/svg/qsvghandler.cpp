@@ -195,6 +195,113 @@ struct QSvgAttributes
 
 QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHandler *handler)
 {
+    for (int i = 0; i < xmlAttributes.count(); ++i) {
+        const QXmlStreamAttribute &attribute = xmlAttributes.at(i);
+        QStringView name = attribute.qualifiedName();
+        if (name.isEmpty())
+            continue;
+        QStringView value = attribute.value();
+
+        switch (name.at(0).unicode()) {
+
+        case 'c':
+            if (name == QLatin1String("color"))
+                color = value;
+            else if (name == QLatin1String("color-opacity"))
+                colorOpacity = value;
+            else if (name == QLatin1String("comp-op"))
+                compOp = value;
+            break;
+
+        case 'd':
+            if (name == QLatin1String("display"))
+                display = value;
+            break;
+
+        case 'f':
+            if (name == QLatin1String("fill"))
+                fill = value;
+            else if (name == QLatin1String("fill-rule"))
+                fillRule = value;
+            else if (name == QLatin1String("fill-opacity"))
+                fillOpacity = value;
+            else if (name == QLatin1String("font-family"))
+                fontFamily = value;
+            else if (name == QLatin1String("font-size"))
+                fontSize = value;
+            else if (name == QLatin1String("font-style"))
+                fontStyle = value;
+            else if (name == QLatin1String("font-weight"))
+                fontWeight = value;
+            else if (name == QLatin1String("font-variant"))
+                fontVariant = value;
+            break;
+
+        case 'i':
+            if (name == QLatin1String("id"))
+                id = value.toString();
+            else if (name == QLatin1String("image-rendering"))
+                imageRendering = value;
+            break;
+
+        case 'o':
+            if (name == QLatin1String("opacity"))
+                opacity = value;
+            if (name == QLatin1String("offset"))
+                offset = value;
+            break;
+
+        case 's':
+            if (name.length() > 5 && name.mid(1, 5) == QLatin1String("troke")) {
+                QStringView strokeRef = name.mid(6, name.length() - 6);
+                if (strokeRef.isEmpty())
+                    stroke = value;
+                else if (strokeRef == QLatin1String("-dasharray"))
+                    strokeDashArray = value;
+                else if (strokeRef == QLatin1String("-dashoffset"))
+                    strokeDashOffset = value;
+                else if (strokeRef == QLatin1String("-linecap"))
+                    strokeLineCap = value;
+                else if (strokeRef == QLatin1String("-linejoin"))
+                    strokeLineJoin = value;
+                else if (strokeRef == QLatin1String("-miterlimit"))
+                    strokeMiterLimit = value;
+                else if (strokeRef == QLatin1String("-opacity"))
+                    strokeOpacity = value;
+                else if (strokeRef == QLatin1String("-width"))
+                    strokeWidth = value;
+            } else if (name == QLatin1String("stop-color"))
+                stopColor = value;
+            else if (name == QLatin1String("stop-opacity"))
+                stopOpacity = value;
+            break;
+
+        case 't':
+            if (name == QLatin1String("text-anchor"))
+                textAnchor = value;
+            else if (name == QLatin1String("transform"))
+                transform = value;
+            break;
+
+        case 'v':
+            if (name == QLatin1String("vector-effect"))
+                vectorEffect = value;
+            else if (name == QLatin1String("visibility"))
+                visibility = value;
+            break;
+
+        case 'x':
+            if (name == QLatin1String("xml:id") && id.isEmpty())
+                id = value.toString();
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    // If a style attribute is present, let its attribute settings override the plain attribute
+    // values. The spec seems to indicate that, and it is common behavior in svg renderers.
 #ifndef QT_NO_CSSPARSER
     QStringView style = xmlAttributes.value(QLatin1String("style"));
     if (!style.isEmpty()) {
@@ -271,8 +378,7 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
                         strokeOpacity = value;
                     else if (strokeRef == QLatin1String("-width"))
                         strokeWidth = value;
-                }
-                else if (name == QLatin1String("stop-color"))
+                } else if (name == QLatin1String("stop-color"))
                     stopColor = value;
                 else if (name == QLatin1String("stop-opacity"))
                     stopOpacity = value;
@@ -294,119 +400,12 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
 
             default:
                 break;
-           }
+            }
         }
     }
 #else
     Q_UNUSED(handler);
 #endif // QT_NO_CSSPARSER
-
-    for (int i = 0; i < xmlAttributes.count(); ++i) {
-        const QXmlStreamAttribute &attribute = xmlAttributes.at(i);
-        QStringView name = attribute.qualifiedName();
-        if (name.isEmpty())
-            continue;
-        QStringView value = attribute.value();
-
-        switch (name.at(0).unicode()) {
-
-        case 'c':
-            if (name == QLatin1String("color"))
-                color = value;
-            else if (name == QLatin1String("color-opacity"))
-                colorOpacity = value;
-            else if (name == QLatin1String("comp-op"))
-                compOp = value;
-            break;
-
-        case 'd':
-            if (name == QLatin1String("display"))
-                display = value;
-            break;
-
-        case 'f':
-            if (name == QLatin1String("fill"))
-                fill = value;
-            else if (name == QLatin1String("fill-rule"))
-                fillRule = value;
-            else if (name == QLatin1String("fill-opacity"))
-                fillOpacity = value;
-            else if (name == QLatin1String("font-family"))
-                fontFamily = value;
-            else if (name == QLatin1String("font-size"))
-                fontSize = value;
-            else if (name == QLatin1String("font-style"))
-                fontStyle = value;
-            else if (name == QLatin1String("font-weight"))
-                fontWeight = value;
-            else if (name == QLatin1String("font-variant"))
-                fontVariant = value;
-            break;
-
-        case 'i':
-            if (name == QLatin1String("id"))
-                id = value.toString();
-            else if (name == QLatin1String("image-rendering"))
-                imageRendering = value;
-            break;
-
-        case 'o':
-            if (name == QLatin1String("opacity"))
-                opacity = value;
-            if (name == QLatin1String("offset"))
-                offset = value;
-            break;
-
-        case 's':
-            if (name.length() > 5 && name.mid(1, 5) == QLatin1String("troke")) {
-                QStringView strokeRef = name.mid(6, name.length() - 6);
-                if (strokeRef.isEmpty())
-                    stroke = value;
-                else if (strokeRef == QLatin1String("-dasharray"))
-                    strokeDashArray = value;
-                else if (strokeRef == QLatin1String("-dashoffset"))
-                    strokeDashOffset = value;
-                else if (strokeRef == QLatin1String("-linecap"))
-                    strokeLineCap = value;
-                else if (strokeRef == QLatin1String("-linejoin"))
-                    strokeLineJoin = value;
-                else if (strokeRef == QLatin1String("-miterlimit"))
-                    strokeMiterLimit = value;
-                else if (strokeRef == QLatin1String("-opacity"))
-                    strokeOpacity = value;
-                else if (strokeRef == QLatin1String("-width"))
-                    strokeWidth = value;
-            }
-            else if (name == QLatin1String("stop-color"))
-                stopColor = value;
-            else if (name == QLatin1String("stop-opacity"))
-                stopOpacity = value;
-            break;
-
-        case 't':
-            if (name == QLatin1String("text-anchor"))
-                textAnchor = value;
-            else if (name == QLatin1String("transform"))
-                transform = value;
-            break;
-
-        case 'v':
-            if (name == QLatin1String("vector-effect"))
-                vectorEffect = value;
-            else if (name == QLatin1String("visibility"))
-                visibility = value;
-            break;
-
-        case 'x':
-            if (name == QLatin1String("xml:id") && id.isEmpty())
-                id = value.toString();
-            break;
-
-        default:
-            break;
-        }
-    }
-
 }
 
 #ifndef QT_NO_CSSPARSER
