@@ -77,7 +77,7 @@ MainWindow::MainWindow()
     const QIcon exportIcon = QIcon::fromTheme("document-save", QIcon(":/qt-project.org/styles/commonstyle/images/standardbutton-save-32.png"));
     QAction *exportAction = fileMenu->addAction(exportIcon, tr("&Export..."), this, &MainWindow::exportImage);
     exportAction->setToolTip(tr("Export Image"));
-    exportAction->setShortcut(Qt::CTRL + Qt::Key_E);
+    exportAction->setShortcut(Qt::CTRL | Qt::Key_E);
     toolBar->addAction(exportAction);
     QAction *quitAction = fileMenu->addAction(tr("E&xit"), qApp, QCoreApplication::quit);
     quitAction->setShortcuts(QKeySequence::Quit);
@@ -101,7 +101,7 @@ MainWindow::MainWindow()
     zoomAction = viewMenu->addAction(tr("Zoom &Out"), m_view, &SvgView::zoomOut);
     zoomAction->setShortcut(QKeySequence::ZoomOut);
     zoomAction = viewMenu->addAction(tr("Reset Zoom"), m_view, &SvgView::resetZoom);
-    zoomAction->setShortcut(Qt::CTRL + Qt::Key_0);
+    zoomAction->setShortcut(Qt::CTRL | Qt::Key_0);
 
     QMenu *rendererMenu = menuBar()->addMenu(tr("&Renderer"));
     m_nativeAction = rendererMenu->addAction(tr("&Native"));
