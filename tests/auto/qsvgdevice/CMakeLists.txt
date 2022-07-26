@@ -10,7 +10,7 @@
 qt_internal_add_test(tst_qsvgdevice
     SOURCES
         tst_qsvgdevice.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Gui
         Qt::GuiPrivate
         Qt::Widgets

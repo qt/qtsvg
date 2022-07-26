@@ -17,7 +17,7 @@ qt_internal_add_test(tst_qicon_svg
     LOWDPI # special case
     SOURCES
         tst_qicon_svg.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Gui
         Qt::GuiPrivate
         Qt::Svg

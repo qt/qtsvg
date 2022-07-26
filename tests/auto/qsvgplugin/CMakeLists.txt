@@ -11,7 +11,7 @@
 qt_internal_add_test(tst_qsvgplugin
     SOURCES
         tst_qsvgplugin.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Gui
         Qt::GuiPrivate
         Qt::Svg
