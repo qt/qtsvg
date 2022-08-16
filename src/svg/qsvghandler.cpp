@@ -728,15 +728,25 @@ static QVector<qreal> parseNumbersList(const QChar *&str)
     return points;
 }
 
-static inline void parseNumbersArray(const QChar *&str, QVarLengthArray<qreal, 8> &points)
+static inline void parseNumbersArray(const QChar *&str, QVarLengthArray<qreal, 8> &points,
+                                     const char *pattern = nullptr)
 {
+    const size_t patternLen = qstrlen(pattern);
     while (str->isSpace())
         ++str;
     while (isDigit(str->unicode()) ||
            *str == QLatin1Char('-') || *str == QLatin1Char('+') ||
            *str == QLatin1Char('.')) {
 
-        points.append(toDouble(str));
+        if (patternLen && pattern[points.size() % patternLen] == 'f') {
+            // flag expected, may only be 0 or 1
+            if (*str != QLatin1Char('0') && *str != QLatin1Char('1'))
+                return;
+            points.append(*str == QLatin1Char('0') ? 0.0 : 1.0);
+            ++str;
+        } else {
+            points.append(toDouble(str));
+        }
 
         while (str->isSpace())
             ++str;
@@ -1384,7 +1394,8 @@ static void parseFont(QSvgNode *node,
             break;
         case FontSizeValue: {
             QSvgHandler::LengthType dummy; // should always be pixel size
-            fontStyle->setSize(parseLength(attributes.fontSize, dummy, handler));
+            fontStyle->setSize(qMin(parseLength(attributes.fontSize, dummy, handler),
+                                    qreal(0xffff)));
         }
             break;
         default:
@@ -1629,8 +1640,11 @@ static bool parsePathDataFast(const QStringRef &dataStr, QPainterPath &path)
         ++str;
         QChar endc = *end;
         *const_cast<QChar *>(end) = 0; // parseNumbersArray requires 0-termination that QStringRef cannot guarantee
+        const char *pattern = nullptr;
+        if (pathElem == QLatin1Char('a') || pathElem == QLatin1Char('A'))
+            pattern = "rrrffrr";
         QVarLengthArray<qreal, 8> arg;
-        parseNumbersArray(str, arg);
+        parseNumbersArray(str, arg, pattern);
         *const_cast<QChar *>(end) = endc;
         if (pathElem == QLatin1Char('z') || pathElem == QLatin1Char('Z'))
             arg.append(0);//dummy
@@ -2358,6 +2372,28 @@ static bool parseAnimateNode(QSvgNode *parent,
     return true;
 }
 
+static int parseClockValue(const QString &instr, bool *ok)
+{
+    QStringRef str(&instr);
+    int res = 0;
+    int ms = 1000;
+    str = str.trimmed();
+    if (str.endsWith(QLatin1String("ms"))) {
+        str.chop(2);
+        ms = 1;
+    } else if (str.endsWith(QLatin1String("s"))) {
+        str.chop(1);
+    }
+    double val = ms * toDouble(str, ok);
+    if (ok) {
+        if (val > std::numeric_limits<int>::min() && val < std::numeric_limits<int>::max())
+            res = static_cast<int>(val);
+        else
+            *ok = false;
+    }
+    return res;
+}
+
 static bool parseAnimateColorNode(QSvgNode *parent,
                                   const QXmlStreamAttributes &attributes,
                                   QSvgHandler *handler)
@@ -2391,23 +2427,13 @@ static bool parseAnimateColorNode(QSvgNode *parent,
         }
     }
 
-    int ms = 1000;
-    beginStr = beginStr.trimmed();
-    if (beginStr.endsWith(QLatin1String("ms"))) {
-        beginStr.chop(2);
-        ms = 1;
-    } else if (beginStr.endsWith(QLatin1String("s"))) {
-        beginStr.chop(1);
-    }
-    durStr = durStr.trimmed();
-    if (durStr.endsWith(QLatin1String("ms"))) {
-        durStr.chop(2);
-        ms = 1;
-    } else if (durStr.endsWith(QLatin1String("s"))) {
-        durStr.chop(1);
-    }
-    int begin = static_cast<int>(toDouble(beginStr) * ms);
-    int end   = static_cast<int>((toDouble(durStr) + begin) * ms);
+    bool ok = true;
+    int begin = parseClockValue(beginStr, &ok);
+    if (!ok)
+        return false;
+    int end = begin + parseClockValue(durStr, &ok);
+    if (!ok || end <= begin)
+        return false;
 
     QSvgAnimateColor *anim = new QSvgAnimateColor(begin, end, 0);
     anim->setArgs((targetStr == QLatin1String("fill")), colors);
@@ -2497,24 +2523,13 @@ static bool parseAnimateTransformNode(QSvgNode *parent,
         }
     }
 
-    int ms = 1000;
-    beginStr = beginStr.trimmed();
-    if (beginStr.endsWith(QLatin1String("ms"))) {
-        beginStr.chop(2);
-        ms = 1;
-    } else if (beginStr.endsWith(QLatin1String("s"))) {
-        beginStr.chop(1);
-    }
-    int begin = static_cast<int>(toDouble(beginStr) * ms);
-    durStr = durStr.trimmed();
-    if (durStr.endsWith(QLatin1String("ms"))) {
-        durStr.chop(2);
-        ms = 1;
-    } else if (durStr.endsWith(QLatin1String("s"))) {
-        durStr.chop(1);
-        ms = 1000;
-    }
-    int end = static_cast<int>(toDouble(durStr)*ms) + begin;
+    bool ok = true;
+    int begin = parseClockValue(beginStr, &ok);
+    if (!ok)
+        return false;
+    int end = begin + parseClockValue(durStr, &ok);
+    if (!ok || end <= begin)
+        return false;
 
     QSvgAnimateTransform::TransformType type = QSvgAnimateTransform::Empty;
     if (typeStr == QLatin1String("translate")) {
