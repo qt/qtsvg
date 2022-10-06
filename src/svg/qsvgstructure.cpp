@@ -328,7 +328,7 @@ QRectF QSvgStructureNode::bounds(QPainter *p, QSvgExtraStates &states) const
     QRectF bounds;
     if (!m_recursing) {
         QScopedValueRollback<bool> guard(m_recursing, true);
-        for (QSvgNode *node : qAsConst(m_renderers))
+        for (QSvgNode *node : std::as_const(m_renderers))
             bounds |= node->transformedBounds(p, states);
     }
     return bounds;

@@ -3891,7 +3891,7 @@ void QSvgHandler::resolveGradients(QSvgNode *node, int nestedDepth)
 
 void QSvgHandler::resolveNodes()
 {
-    for (QSvgUse *useNode : qAsConst(m_toBeResolved)) {
+    for (QSvgUse *useNode : std::as_const(m_toBeResolved)) {
         const auto parent = useNode->parent();
         if (!parent)
             continue;
