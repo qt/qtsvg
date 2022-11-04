@@ -23,6 +23,7 @@ class Q_SVG_EXPORT QSvgGenerator : public QPaintDevice
 {
     Q_DECLARE_PRIVATE(QSvgGenerator)
 
+    // Not a QObject; just a hack to get documentation from qdoc
     Q_PROPERTY(QSize size READ size WRITE setSize)
     Q_PROPERTY(QRectF viewBox READ viewBoxF WRITE setViewBox)
     Q_PROPERTY(QString title READ title WRITE setTitle)
