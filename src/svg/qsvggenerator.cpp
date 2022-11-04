@@ -176,7 +176,7 @@ public:
         d_func()->outputDevice = device;
     }
 
-    int resolution() { return d_func()->resolution; }
+    int resolution() const { return d_func()->resolution; }
     void setResolution(int resolution) {
         Q_ASSERT(!isActive());
         d_func()->resolution = resolution;
