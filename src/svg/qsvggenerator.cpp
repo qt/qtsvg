@@ -50,7 +50,8 @@ static void translate_dashPattern(const QList<qreal> &pattern, qreal width, QStr
 class QSvgPaintEnginePrivate : public QPaintEnginePrivate
 {
 public:
-    QSvgPaintEnginePrivate()
+    explicit QSvgPaintEnginePrivate(QSvgGenerator::SvgVersion version)
+        : svgVersion(version)
     {
         size = QSize();
         viewBox = QRectF();
@@ -68,6 +69,7 @@ public:
         numGradients = 0;
     }
 
+    QSvgGenerator::SvgVersion svgVersion;
     QSize size;
     QRectF viewBox;
     QIODevice *outputDevice;
@@ -125,8 +127,8 @@ class QSvgPaintEngine : public QPaintEngine
     Q_DECLARE_PRIVATE(QSvgPaintEngine)
 public:
 
-    QSvgPaintEngine()
-        : QPaintEngine(*new QSvgPaintEnginePrivate,
+    explicit QSvgPaintEngine(QSvgGenerator::SvgVersion version)
+        : QPaintEngine(*new QSvgPaintEnginePrivate(version),
                        svgEngineFeatures())
     {
     }
@@ -181,6 +183,8 @@ public:
         Q_ASSERT(!isActive());
         d_func()->resolution = resolution;
     }
+
+    QSvgGenerator::SvgVersion svgVersion() const { return d_func()->svgVersion; }
 
     QString savePatternMask(Qt::BrushStyle style)
     {
@@ -545,14 +549,37 @@ public:
 */
 
 /*!
-    Constructs a new generator.
+    \enum QSvgGenerator::SvgVersion
+    \since 6.5
+
+    This enumeration describes the version of the SVG output of the
+    generator.
+
+    \value SvgTiny12 The generated document follows the SVG Tiny 1.2 specification.
+    \value Svg11 The generated document follows the SVG 1.1 specification.
+*/
+
+#if QT_VERSION < QT_VERSION_CHECK(7, 0, 0)
+/*!
+    Constructs a new generator using the SVG Tiny 1.2 profile.
 */
 QSvgGenerator::QSvgGenerator()
+    : QSvgGenerator(SvgVersion::SvgTiny12)
+{
+}
+#endif
+
+/*!
+    \since 6.5
+
+    Constructs a new generator that uses the SVG version \a version.
+*/
+QSvgGenerator::QSvgGenerator(SvgVersion version)
     : d_ptr(new QSvgGeneratorPrivate)
 {
     Q_D(QSvgGenerator);
 
-    d->engine = new QSvgPaintEngine;
+    d->engine = new QSvgPaintEngine(version);
     d->owns_iodevice = false;
 }
 
@@ -767,6 +794,18 @@ void QSvgGenerator::setResolution(int dpi)
 }
 
 /*!
+    \since 6.5
+
+    Returns the version of the SVG document that this generator is
+    producing.
+*/
+QSvgGenerator::SvgVersion QSvgGenerator::svgVersion() const
+{
+    Q_D(const QSvgGenerator);
+    return d->engine->svgVersion();
+}
+
+/*!
     Returns the paint engine used to render graphics to be converted to SVG
     format information.
 */
@@ -855,8 +894,16 @@ bool QSvgPaintEngine::begin(QPaintDevice *)
     }
 
     *d->stream << " xmlns=\"http://www.w3.org/2000/svg\""
-                  " xmlns:xlink=\"http://www.w3.org/1999/xlink\" "
-                  " version=\"1.2\" baseProfile=\"tiny\">" << Qt::endl;
+                  " xmlns:xlink=\"http://www.w3.org/1999/xlink\"";
+    switch (d->svgVersion) {
+    case QSvgGenerator::SvgVersion::SvgTiny12:
+        *d->stream << " version=\"1.2\" baseProfile=\"tiny\">";
+        break;
+    case QSvgGenerator::SvgVersion::Svg11:
+        *d->stream << " version=\"1.1\">";
+        break;
+    }
+    *d->stream << Qt::endl;
 
     if (!d->attributes.document_title.isEmpty()) {
         *d->stream << "<title>" << d->attributes.document_title.toHtmlEscaped() << "</title>" << Qt::endl;

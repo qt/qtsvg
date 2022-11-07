@@ -32,7 +32,18 @@ class Q_SVG_EXPORT QSvgGenerator : public QPaintDevice
     Q_PROPERTY(QIODevice* outputDevice READ outputDevice WRITE setOutputDevice)
     Q_PROPERTY(int resolution READ resolution WRITE setResolution)
 public:
+    enum class SvgVersion {
+        SvgTiny12,
+        Svg11,
+    };
+
+    // ### Qt 7: unify overloads
+#if QT_VERSION < QT_VERSION_CHECK(7, 0, 0)
     QSvgGenerator();
+    explicit QSvgGenerator(SvgVersion version);
+#else
+    explicit QSvgGenerator(SvgVersion version = SvgVersion::SvgTiny12);
+#endif
     ~QSvgGenerator();
 
     QString title() const;
@@ -57,6 +68,8 @@ public:
 
     void setResolution(int dpi);
     int resolution() const;
+
+    SvgVersion svgVersion() const;
 protected:
     QPaintEngine *paintEngine() const override;
     int metric(QPaintDevice::PaintDeviceMetric metric) const override;
