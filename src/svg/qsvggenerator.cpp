@@ -20,6 +20,8 @@
 
 #include "qdebug.h"
 
+#include <optional>
+
 QT_BEGIN_NAMESPACE
 
 static void translate_color(const QColor &color, QString *color_string,
@@ -109,6 +111,21 @@ public:
         QString dashPattern, dashOffset;
         QString fill, fillOpacity;
     } attributes;
+
+    QString generateClipPathName() {
+        ++numClipPaths;
+        currentClipPathName = QStringLiteral("clipPath%1").arg(numClipPaths);
+        return currentClipPathName;
+    }
+
+    std::optional<QPainterPath> clipPath;
+    bool clipEnabled = false;
+    bool isClippingEffective() const {
+        return clipEnabled && clipPath.has_value();
+    }
+    QString currentClipPathName;
+    int numClipPaths = 0;
+    bool hasEmittedClipGroup = false;
 };
 
 static inline QPaintEngine::PaintEngineFeatures svgEngineFeatures()
@@ -137,6 +154,7 @@ public:
     bool end() override;
 
     void updateState(const QPaintEngineState &state) override;
+    void updateClipState(const QPaintEngineState &state);
     void popGroup();
 
     void drawEllipse(const QRectF &r) override;
@@ -937,6 +955,8 @@ bool QSvgPaintEngine::end()
     *d->stream << d->header;
     *d->stream << d->defs;
     *d->stream << d->body;
+    if (d->hasEmittedClipGroup)
+        *d->stream << "</g>";
     if (d->afterFirstUpdate)
         *d->stream << "</g>" << Qt::endl; // close the updateState
 
@@ -992,8 +1012,19 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
     // always stream full gstate, which is not required, but...
 
     // close old state and start a new one...
+    if (d->hasEmittedClipGroup)
+        *d->stream << "</g>\n";
     if (d->afterFirstUpdate)
         *d->stream << "</g>\n\n";
+
+    updateClipState(state);
+
+    if (d->isClippingEffective()) {
+        *d->stream << QStringLiteral("<g clip-path=\"url(#%1)\">").arg(d->currentClipPathName);
+        d->hasEmittedClipGroup = true;
+    } else {
+        d->hasEmittedClipGroup = false;
+    }
 
     *d->stream << "<g ";
 
@@ -1016,6 +1047,45 @@ void QSvgPaintEngine::updateState(const QPaintEngineState &state)
     *d->stream << '>' << Qt::endl;
 
     d->afterFirstUpdate = true;
+}
+
+void QSvgPaintEngine::updateClipState(const QPaintEngineState &state)
+{
+    Q_D(QSvgPaintEngine);
+    switch (d->svgVersion) {
+    case QSvgGenerator::SvgVersion::SvgTiny12:
+        // no clip handling in Tiny 1.2
+        return;
+    case QSvgGenerator::SvgVersion::Svg11:
+        break;
+    }
+
+    const QPaintEngine::DirtyFlags flags = state.state();
+
+    const bool clippingChanged = flags.testAnyFlags(DirtyClipPath | DirtyClipRegion);
+    if (clippingChanged) {
+        switch (state.clipOperation()) {
+        case Qt::NoClip:
+            d->clipEnabled = false;
+            d->clipPath.reset();
+            break;
+        case Qt::ReplaceClip:
+        case Qt::IntersectClip:
+            d->clipPath = painter()->transform().map(painter()->clipPath());
+            break;
+        }
+    }
+
+    if (flags & DirtyClipEnabled)
+        d->clipEnabled = state.isClipEnabled();
+
+    if (d->isClippingEffective() && clippingChanged) {
+        d->stream->setString(&d->defs);
+        *d->stream << QLatin1String("<clipPath id=\"%1\">\n").arg(d->generateClipPathName());
+        drawPath(*d->clipPath);
+        *d->stream << "</clipPath>\n";
+        d->stream->setString(&d->body);
+    }
 }
 
 void QSvgPaintEngine::drawEllipse(const QRectF &r)
