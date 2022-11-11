@@ -287,7 +287,7 @@ public:
             }
         }
 
-        for (const QGradientStop &stop : qAsConst(stops)) {
+        for (const QGradientStop &stop : std::as_const(stops)) {
             const QString color = stop.second.name(QColor::HexRgb);
             str << QLatin1String("    <stop offset=\"")<< stop.first << QLatin1String("\" ")
                 << QLatin1String("stop-color=\"") << color << QLatin1String("\" ")
