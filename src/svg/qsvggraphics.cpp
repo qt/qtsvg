@@ -341,8 +341,8 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
             }
 
             QTextLayout::FormatRange range;
-            range.start = paragraphs.back().length();
-            range.length = newText.length();
+            range.start = paragraphs.back().size();
+            range.length = newText.size();
             range.format.setFont(font);
             range.format.setTextOutline(p->pen());
             range.format.setForeground(p->brush());

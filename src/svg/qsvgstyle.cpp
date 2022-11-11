@@ -630,8 +630,8 @@ void QSvgAnimateTransform::setArgs(TransformType type, Additive additive, const 
     m_type = type;
     m_args = args;
     m_additive = additive;
-    Q_ASSERT(!(args.count()%3));
-    m_count = args.count() / 3;
+    Q_ASSERT(!(args.size()%3));
+    m_count = args.size() / 3;
 }
 
 void QSvgAnimateTransform::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &)
@@ -836,7 +836,7 @@ void QSvgAnimateColor::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates 
         percentOfAnimation -= ((int)percentOfAnimation);
     }
 
-    qreal currentPosition = percentOfAnimation * (m_colors.count() - 1);
+    qreal currentPosition = percentOfAnimation * (m_colors.size() - 1);
 
     int startElem = qFloor(currentPosition);
     int endElem   = qCeil(currentPosition);
