@@ -3,7 +3,7 @@
     "Name": "XSVG",
     "QDocModule": "qtsvg",
     "QtUsage": "Used in the Qt SVG library.",
-    "Files": "qtsvghandler.cpp",
+    "Files": "qsvghandler.cpp",
 
     "Description": "Some code for arc handling is derived from code from the XSVG project.",
     "License": "Historical Permission Notice and Disclaimer - sell variant",
