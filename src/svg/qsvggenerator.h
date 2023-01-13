@@ -37,13 +37,8 @@ public:
         Svg11,
     };
 
-    // ### Qt 7: unify overloads
-#if QT_VERSION < QT_VERSION_CHECK(7, 0, 0)
     QSvgGenerator();
     explicit QSvgGenerator(SvgVersion version);
-#else
-    explicit QSvgGenerator(SvgVersion version = SvgVersion::SvgTiny12);
-#endif
     ~QSvgGenerator();
 
     QString title() const;
