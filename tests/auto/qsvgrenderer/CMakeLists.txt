@@ -11,7 +11,7 @@ qt_internal_add_test(tst_qsvgrenderer
     SOURCES
         tst_qsvgrenderer.cpp
     DEFINES
-        SRCDIR=\\\"${CMAKE_CURRENT_SOURCE_DIR}/\\\"
+        SRCDIR="${CMAKE_CURRENT_SOURCE_DIR}/"
     LIBRARIES
         Qt::Gui
         Qt::GuiPrivate
