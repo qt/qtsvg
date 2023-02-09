@@ -1,20 +1,16 @@
 # Copyright (C) 2022 The Qt Company Ltd.
 # SPDX-License-Identifier: BSD-3-Clause
 
-# Generated from svg.pro.
-
 #####################################################################
 ## Svg Module:
 #####################################################################
 
-# special case begin
 # Handle the conditional finding of either system zlib or qt zlib.
 if(NOT QT_FEATURE_system_zlib)
     find_package(Qt6 COMPONENTS ZlibPrivate)
 elseif(NOT TARGET WrapZLIB::WrapZLIB)
     qt_find_package(WrapZLIB PROVIDED_TARGETS WrapZLIB::WrapZLIB)
 endif()
-# special case end
 
 qt_internal_add_module(Svg
     SOURCES
@@ -51,9 +47,6 @@ qt_internal_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUA
         "/BASE:0x66000000"
 )
 
-#### Keys ignored in scope 4:.:.:svg.pro:solaris-cc_x_:
-# QMAKE_CXXFLAGS_RELEASE = "--O2"
-
 qt_internal_extend_target(Svg CONDITION QT_FEATURE_system_zlib
     LIBRARIES
         WrapZLIB::WrapZLIB
@@ -66,4 +59,3 @@ qt_internal_extend_target(Svg CONDITION NOT QT_FEATURE_system_zlib
 qt_internal_add_docs(Svg
     doc/qtsvg.qdocconf
 )
-
