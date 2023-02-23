@@ -6,11 +6,12 @@
 
 #include <QWidget>
 #include <QString>
-#include <QSvgRenderer>
 #include <QSize>
-#include <QMouseEvent>
-#include <QSlider>
-#include <QPushButton>
+
+class QSvgRenderer;
+class QMouseEvent;
+class QSlider;
+class QPushButton;
 
 class EmbeddedSvgViewer : public QWidget
 {
@@ -22,7 +23,7 @@ public:
     void mousePressEvent(QMouseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
-public slots:
+public Q_SLOTS:
     void setZoom(int); // 100 <= newZoom < 0
 
 private:

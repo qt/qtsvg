@@ -3,10 +3,12 @@
 
 #include <QPainter>
 #include <QApplication>
+#include <QMouseEvent>
+#include <QSlider>
+#include <QPushButton>
+#include <QSvgRenderer>
 
 #include "embeddedsvgviewer.h"
-
-
 
 EmbeddedSvgViewer::EmbeddedSvgViewer(const QString &filePath)
 {
@@ -24,15 +26,16 @@ EmbeddedSvgViewer::EmbeddedSvgViewer(const QString &filePath)
     m_zoomSlider->setMaximum(150);
     m_zoomSlider->setMinimum(1);
 
-    connect(m_zoomSlider, SIGNAL(valueChanged(int)), this, SLOT(setZoom(int)));
+    connect(m_zoomSlider, &QSlider::valueChanged, this, &EmbeddedSvgViewer::setZoom);
     m_zoomSlider->setValue(100);
 
     m_quitButton = new QPushButton("Quit", this);
 
-    connect(m_quitButton, SIGNAL(pressed()), QApplication::instance(), SLOT(quit()));
+    connect(m_quitButton, &QPushButton::pressed, QApplication::instance(), &QApplication::quit);
 
     if (m_renderer->animated())
-        connect(m_renderer, SIGNAL(repaintNeeded()), this, SLOT(update()));
+        connect(m_renderer, &QSvgRenderer::repaintNeeded,
+                this, qOverload<>(&EmbeddedSvgViewer::update));
 
 }
 
