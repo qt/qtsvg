@@ -28,7 +28,7 @@ SourceWidget::SourceWidget(QWidget *parent)
     QPushButton *dragIcon = new QPushButton(tr("Export"));
     dragIcon->setIcon(QIcon(":/images/drag.png"));
 
-    connect(dragIcon, SIGNAL(pressed()), this, SLOT(startDrag()));
+    connect(dragIcon, &QPushButton::pressed, this, &SourceWidget::startDrag);
 
     QGridLayout *layout = new QGridLayout;
     layout->addWidget(instructTopLabel, 0, 0, 1, 2);
@@ -66,8 +66,8 @@ void SourceWidget::startDrag()
 {
     mimeData = new MimeData;
 
-    connect(mimeData, SIGNAL(dataRequested(QString)),
-            this, SLOT(createData(QString)), Qt::DirectConnection);
+    connect(mimeData, &MimeData::dataRequested,
+            this, &SourceWidget::createData, Qt::DirectConnection);
 
     QDrag *drag = new QDrag(this);
     drag->setMimeData(mimeData);
