@@ -61,8 +61,8 @@ void Window::setupGui()
     insertTextObjectButton = new QPushButton(tr("Insert Image"));
 
     fileNameLineEdit->setText(":/files/heart.svg");
-    connect(insertTextObjectButton, SIGNAL(clicked()),
-            this, SLOT(insertTextObject()));
+    connect(insertTextObjectButton, &QPushButton::clicked,
+            this, &Window::insertTextObject);
 
     QHBoxLayout *bottomLayout = new QHBoxLayout;
     bottomLayout->addWidget(fileNameLabel);
