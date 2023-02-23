@@ -4,7 +4,6 @@
 #ifndef DEMO_APPLICATION_H
 #define DEMO_APPLICATION_H
 
-#include <QPixmap>
 #include <QImage>
 #include <QProcess>
 #include <QObject>

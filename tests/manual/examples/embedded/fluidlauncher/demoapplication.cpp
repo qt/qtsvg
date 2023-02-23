@@ -6,8 +6,6 @@
 
 #include "demoapplication.h"
 
-
-
 DemoApplication::DemoApplication(QString executableName, QString caption, QString imageName, QStringList args)
 {
     imagePath = imageName;

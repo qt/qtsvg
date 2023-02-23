@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 // EXTERNAL INCLUDES
+#include <QDesktopServices>
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QListWidget>
 #include <QVBoxLayout>
+#include <QFileInfo>
 #include <QFileInfoList>
 #include <QListWidgetItem>
 
@@ -38,8 +40,8 @@ void ContentTab::init(const QStandardPaths::StandardLocation &location,
     m_ContentDir.setNameFilters(filterList);
     setIcon(icon);
 
-    connect(this, SIGNAL(itemClicked(QListWidgetItem*)),
-            this, SLOT(openItem(QListWidgetItem*)));
+    connect(this, &ContentTab::itemClicked,
+            this, &ContentTab::openItem);
 
     populateListWidget();
 }

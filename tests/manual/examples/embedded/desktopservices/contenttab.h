@@ -8,9 +8,7 @@
 #include <QDir>
 #include <QUrl>
 #include <QIcon>
-#include <QFileInfo>
 #include <QListWidget>
-#include <QDesktopServices>
 #include <QStandardPaths>
 
 // INTERNAL INCLUDES
@@ -18,6 +16,7 @@
 // FORWARD DECLARATIONS
 QT_BEGIN_NAMESPACE
 class QListWidgetItem;
+class QFileInfo;
 QT_END_NAMESPACE
 
 // CLASS DECLARATION
