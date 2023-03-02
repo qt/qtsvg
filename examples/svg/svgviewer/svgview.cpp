@@ -106,14 +106,14 @@ bool SvgView::openFile(const QString &fileName)
     const bool drawBackground = (m_backgroundItem ? m_backgroundItem->isVisible() : false);
     const bool drawOutline = (m_outlineItem ? m_outlineItem->isVisible() : true);
 
-    QScopedPointer<QGraphicsSvgItem> svgItem(new QGraphicsSvgItem(fileName));
+    auto svgItem = std::make_unique<QGraphicsSvgItem>(fileName);
     if (!svgItem->renderer()->isValid())
         return false;
 
     s->clear();
     resetTransform();
 
-    m_svgItem = svgItem.take();
+    m_svgItem = svgItem.release();
     m_svgItem->setFlags(QGraphicsItem::ItemClipsToShape);
     m_svgItem->setCacheMode(QGraphicsItem::NoCache);
     m_svgItem->setZValue(0);

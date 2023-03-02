@@ -87,6 +87,8 @@ private slots:
     void oss_fuzz_24131();
     void oss_fuzz_24738();
     void imageRendering();
+    void illegalAnimateTransform_data();
+    void illegalAnimateTransform();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -1702,6 +1704,22 @@ void tst_QSvgRenderer::imageRendering() {
     }
 }
 
+void tst_QSvgRenderer::illegalAnimateTransform_data()
+{
+    QTest::addColumn<QByteArray>("svg");
+
+    QTest::newRow("case1") << QByteArray("<svg><animateTransform type=\"rotate\" begin=\"1\" dur=\"2\" values=\"8,0,5,0\">");
+    QTest::newRow("case2") << QByteArray("<svg><animateTransform type=\"rotate\" begin=\"1\" dur=\"2\" values=\"1,2\">");
+    QTest::newRow("case3") << QByteArray("<svg><animateTransform type=\"rotate\" begin=\"1\" dur=\"2\" from=\".. 5 2\" to=\"f\">");
+    QTest::newRow("case4") << QByteArray("<svg><animateTransform type=\"scale\" begin=\"1\" dur=\"2\" by=\"--,..\">");
+}
+
+void tst_QSvgRenderer::illegalAnimateTransform()
+{
+    QFETCH(QByteArray, svg);
+    QSvgRenderer renderer;
+    QVERIFY(!renderer.load(svg)); // also shouldn't assert
+}
 
 QTEST_MAIN(tst_QSvgRenderer)
 #include "tst_qsvgrenderer.moc"
