@@ -4,10 +4,20 @@
 #include "qsvgnode_p.h"
 #include "qsvgtinydocument_p.h"
 
+#include <QLoggingCategory>
+
 #include "qdebug.h"
 #include "qstack.h"
 
+#include <QtGui/private/qoutlinemapper_p.h>
+
+#if !defined(QT_SVG_SIZE_LIMIT)
+#  define QT_SVG_SIZE_LIMIT QT_RASTER_COORD_LIMIT
+#endif
+
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw)
 
 QSvgNode::QSvgNode(QSvgNode *parent)
     : m_parent(parent),
@@ -167,6 +177,11 @@ QSvgFillStyleProperty * QSvgNode::styleProperty(const QString &id) const
     return doc ? doc->namedStyle(rid) : 0;
 }
 
+QRectF QSvgNode::fastBounds(QPainter *p, QSvgExtraStates &states) const
+{
+    return bounds(p, states);
+}
+
 QRectF QSvgNode::bounds(QPainter *, QSvgExtraStates &) const
 {
     return QRectF(0, 0, 0, 0);
@@ -309,6 +324,22 @@ qreal QSvgNode::strokeWidth(QPainter *p)
     if (pen.style() == Qt::NoPen || pen.brush().style() == Qt::NoBrush || pen.isCosmetic())
         return 0;
     return pen.widthF();
+}
+
+bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
+{
+    static bool alwaysDraw = qEnvironmentVariableIntValue("QT_SVG_DISABLE_SIZE_LIMIT");
+    if (alwaysDraw)
+        return true;
+
+    QRectF brect = fastBounds(p, states);
+    if (brect.width() <= QT_SVG_SIZE_LIMIT && brect.height() <= QT_SVG_SIZE_LIMIT) {
+        return true;
+    } else {
+        qCWarning(lcSvgDraw) << "Shape of type" << type() << "ignored because it will take too long to rasterize (bounding rect=" << brect << ")."
+                             << "Set QT_SVG_DISABLE_SIZE_LIMIT=1 to disable this check.";
+        return false;
+    }
 }
 
 QT_END_NAMESPACE
