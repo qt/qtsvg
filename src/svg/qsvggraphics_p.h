@@ -77,6 +77,7 @@ public:
     QSvgArc(QSvgNode *parent, const QPainterPath &path);
     void draw(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
+    QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 private:
     QPainterPath m_path;
@@ -88,6 +89,7 @@ public:
     QSvgEllipse(QSvgNode *parent, const QRectF &rect);
     void draw(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
+    QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 private:
     QRectF m_bounds;
@@ -119,6 +121,7 @@ public:
     QSvgLine(QSvgNode *parent, const QLineF &line);
     void draw(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
+    QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 private:
     QLineF m_line;
@@ -130,6 +133,7 @@ public:
     QSvgPath(QSvgNode *parent, const QPainterPath &qpath);
     void draw(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
+    QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 
     QPainterPath *qpath() {
@@ -145,6 +149,7 @@ public:
     QSvgPolygon(QSvgNode *parent, const QPolygonF &poly);
     void draw(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
+    QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 private:
     QPolygonF m_poly;
@@ -156,6 +161,7 @@ public:
     QSvgPolyline(QSvgNode *parent, const QPolygonF &poly);
     void draw(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
+    QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 private:
     QPolygonF m_poly;
@@ -167,6 +173,7 @@ public:
     QSvgRect(QSvgNode *paren, const QRectF &rect, int rx=0, int ry=0);
     Type type() const override;
     void draw(QPainter *p, QSvgExtraStates &states) override;
+    QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 private:
     QRectF m_rect;
@@ -196,6 +203,7 @@ public:
     void addLineBreak() {m_tspans.append(LINEBREAK);}
     void setWhitespaceMode(WhitespaceMode mode) {m_mode = mode;}
 
+    QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 
 private:
