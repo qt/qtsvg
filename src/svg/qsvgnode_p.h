@@ -88,6 +88,7 @@ public:
     QSvgTinyDocument *document() const;
 
     virtual Type type() const =0;
+    virtual QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const;
     virtual QRectF bounds(QPainter *p, QSvgExtraStates &states) const;
     virtual QRectF transformedBounds(QPainter *p, QSvgExtraStates &states) const;
     QRectF transformedBounds() const;
@@ -118,6 +119,8 @@ public:
 
     QString xmlClass() const;
     void setXmlClass(const QString &str);
+
+    bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const;
 protected:
     mutable QSvgStyle m_style;
 
