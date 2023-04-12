@@ -20,7 +20,9 @@
 #include "QtCore/qstack.h"
 #include <QtCore/QLoggingCategory>
 #include "qsvgstyle_p.h"
+#if QT_CONFIG(cssparser)
 #include "private/qcssparser_p.h"
+#endif
 #include "qsvggraphics_p.h"
 #include "qtsvgglobal_p.h"
 
