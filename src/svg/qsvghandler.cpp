@@ -2622,7 +2622,7 @@ static bool parseFontFaceNode(QSvgStyleProperty *parent,
 
     qreal unitsPerEm = toDouble(unitsPerEmStr);
     if (!unitsPerEm)
-        unitsPerEm = 1000;
+        unitsPerEm = QSvgFont::DEFAULT_UNITS_PER_EM;
 
     if (!name.isEmpty())
         font->setFamilyName(name);
