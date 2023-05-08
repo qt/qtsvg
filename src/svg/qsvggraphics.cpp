@@ -12,6 +12,7 @@
 #include <qscopedvaluerollback.h>
 #include <qtextcursor.h>
 #include <qtextdocument.h>
+#include <private/qfixed_p.h>
 
 #include <QElapsedTimer>
 #include <QLoggingCategory>
@@ -47,6 +48,9 @@ Q_LOGGING_CATEGORY(lcSvgTiming, "qt.svg.timing")
     }                                                       \
     p->setOpacity(oldOpacity); }
 
+#ifndef QT_SVG_MAX_LAYOUT_SIZE
+#define QT_SVG_MAX_LAYOUT_SIZE (qint64(QFIXED_MAX / 2))
+#endif
 
 void QSvgAnimation::draw(QPainter *, QSvgExtraStates &)
 {
@@ -328,14 +332,45 @@ QRectF QSvgText::fastBounds(QPainter *p, QSvgExtraStates &) const
 QRectF QSvgText::bounds(QPainter *p, QSvgExtraStates &states) const
 {
     QRectF boundingRect;
-    draw_helper(p, states, &boundingRect);
+    if (precheck(p))
+        draw_helper(p, states, &boundingRect);
     return p->transform().mapRect(boundingRect);
+}
+
+bool QSvgText::precheck(QPainter *p) const
+{
+    qsizetype numChars = 0;
+    qreal originalFontSize = p->font().pointSizeF();
+    qreal maxFontSize = originalFontSize;
+    for (const QSvgTspan *span : std::as_const(m_tspans)) {
+        numChars += span->text().size();
+
+        QSvgFontStyle *style = static_cast<QSvgFontStyle *>(span->styleProperty(QSvgStyleProperty::FONT));
+        if (style != nullptr && style->qfont().pointSizeF() > maxFontSize)
+            maxFontSize = style->qfont().pointSizeF();
+    }
+
+    QFont font = p->font();
+    font.setPixelSize((100.0 / originalFontSize) * maxFontSize);
+    QFontMetricsF fm(font);
+    if (m_tspans.size() * fm.height() >= QT_SVG_MAX_LAYOUT_SIZE) {
+        qCWarning(lcSvgDraw) << "Text element too high to lay out, ignoring";
+        return false;
+    }
+
+    if (numChars * fm.maxWidth() >= QT_SVG_MAX_LAYOUT_SIZE) {
+        qCWarning(lcSvgDraw) << "Text element too wide to lay out, ignoring";
+        return false;
+    }
+
+    return true;
 }
 
 void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
 {
     QT_SVG_TIMING_ENTER
-    draw_helper(p, states);
+    if (precheck(p))
+        draw_helper(p, states);
     QT_SVG_TIMING_EXIT("Text")
 }
 
