@@ -171,6 +171,7 @@ public:
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 
 private:
+    bool precheck(QPainter *p) const;
     void draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundingRect = nullptr) const;
 
     static QSvgTspan * const LINEBREAK;
