@@ -6,8 +6,6 @@
 
 int main(int argc, char *argv[])
 {
-    Q_INIT_RESOURCE(desktopservices);
-
     QApplication app(argc, argv);
     DesktopWidget* myWidget = new DesktopWidget(0);
     myWidget->showMaximized();
