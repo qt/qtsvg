@@ -33,7 +33,6 @@ class QSvgTinyDocument;
 class QSvgHandler;
 class QColor;
 class QSvgStyleSelector;
-class QXmlStreamReader;
 
 #ifndef QT_NO_CSSPARSER
 
