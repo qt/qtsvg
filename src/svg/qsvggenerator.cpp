@@ -560,9 +560,6 @@ public:
     it is necessary to use the QPainter::begin() and \l{QPainter::}{end()} to
     explicitly begin and end painting on the device.
 
-    The \l{SVG Generator Example} shows how the same painting commands can be used
-    for painting a widget and writing an SVG file.
-
     \sa QSvgRenderer, QSvgWidget, {Qt SVG C++ Classes}
 */
 

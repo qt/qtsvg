@@ -30,13 +30,6 @@
         render SVG files
     \endlist
 
-    \section1 Examples
-
-    \list
-        \li \l {SVG Generator Example}
-        \li \l {SVG Viewer Example}
-    \endlist
-
     \section1 References
 
     \list
