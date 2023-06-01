@@ -49,6 +49,5 @@
     Once you have loaded the SVG file successfully, you can render it
     with the QSvgRenderer::render() function. Note that this scheme allows
     you to render SVG files on all paint devices supported by Qt, including
-    QWidget, QGLWidget, and QImage. See the \l{SVG Viewer Example}{SVG Viewer}
-    example for more details.
+    QWidget, QGLWidget, and QImage.
 */
