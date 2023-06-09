@@ -2513,6 +2513,8 @@ static bool parseAnimateTransformNode(QSvgNode *parent,
             ++s;
         }
     }
+    if (vals.count() % 3 != 0)
+        return false;
 
     bool ok = true;
     int begin = parseClockValue(beginStr, &ok);
