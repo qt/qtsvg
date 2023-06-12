@@ -23,7 +23,7 @@ qt_internal_add_module(Svg
         qsvgstructure.cpp qsvgstructure_p.h
         qsvgstyle.cpp qsvgstyle_p.h
         qsvgtinydocument.cpp qsvgtinydocument_p.h
-        qtsvgglobal.h
+        qtsvgglobal.h qtsvgglobal_p.h
     DEFINES
         QT_NO_USING_NAMESPACE
     LIBRARIES
