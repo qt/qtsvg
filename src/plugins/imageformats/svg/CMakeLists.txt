@@ -11,6 +11,8 @@ qt_internal_add_plugin(QSvgPlugin
     SOURCES
         main.cpp
         qsvgiohandler.cpp qsvgiohandler.h
+    DEFINES
+        QT_NO_CONTEXTLESS_CONNECT
     LIBRARIES
         Qt::Core
         Qt::Gui

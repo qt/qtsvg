@@ -11,6 +11,8 @@ qt_internal_add_plugin(QSvgIconPlugin
     SOURCES
         main.cpp
         qsvgiconengine.cpp qsvgiconengine.h
+    DEFINES
+        QT_NO_CONTEXTLESS_CONNECT
     LIBRARIES
         Qt::Core
         Qt::CorePrivate
