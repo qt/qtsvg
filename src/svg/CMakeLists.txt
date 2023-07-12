@@ -25,6 +25,7 @@ qt_internal_add_module(Svg
         qsvgtinydocument.cpp qsvgtinydocument_p.h
         qtsvgglobal.h qtsvgglobal_p.h
     DEFINES
+        QT_NO_CONTEXTLESS_CONNECT
         QT_NO_USING_NAMESPACE
     LIBRARIES
         Qt::CorePrivate
