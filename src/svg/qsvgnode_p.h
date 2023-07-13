@@ -17,6 +17,7 @@
 
 #include "qsvgstyle_p.h"
 #include "qtsvgglobal_p.h"
+#include "qsvghelper_p.h"
 
 #include "QtCore/qstring.h"
 #include "QtCore/qhash.h"
@@ -90,6 +91,10 @@ public:
     virtual bool separateFillStroke() const {return false;}
     virtual void drawCommand(QPainter *p, QSvgExtraStates &states) = 0;
     void fillThenStroke(QPainter *p, QSvgExtraStates &states);
+    QImage drawIntoBuffer(QPainter *p, QSvgExtraStates &states, const QRect &boundsRect);
+    void applyMaskToBuffer(QImage *proxy, QImage mask) const;
+    void drawWithMask(QPainter *p, QSvgExtraStates &states, const QImage &mask, const QRect &boundsRect);
+    void applyBufferToCanvas(QPainter *p, QImage proxy, QRect boundsRect) const;
 
     QSvgNode *parent() const;
     bool isDescendantOf(const QSvgNode *parent) const;
@@ -136,6 +141,10 @@ public:
     QString xmlClass() const;
     void setXmlClass(const QString &str);
 
+    QString maskId() const;
+    void setMaskId(const QString &str);
+    bool hasMask() const;
+
     virtual bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const;
     const QSvgStyle &style() const { return m_style; }
 protected:
@@ -155,6 +164,7 @@ private:
 
     QString m_id;
     QString m_class;
+    QString m_maskId;
 
     DisplayMode m_displayMode;
     mutable QRectF m_cachedBounds;

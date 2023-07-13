@@ -67,6 +67,7 @@ private slots:
     void tSpanLineBreak();
     void animated();
     void notAnimated();
+    void testMaskElement();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -1718,6 +1719,65 @@ void tst_QSvgRenderer::illegalAnimateTransform()
     QFETCH(QByteArray, svg);
     QSvgRenderer renderer;
     QVERIFY(!renderer.load(svg)); // also shouldn't assert
+}
+
+void tst_QSvgRenderer::testMaskElement()
+{
+    QByteArray svgDoc("<svg width=\"240\" height=\"240\">"
+                        "<defs>"
+                            "<radialGradient id=\"myGradient\">"
+                                "<stop offset=\"0\" stop-color=\"black\"/>"
+                                "<stop offset=\"1\" stop-color=\"white\"/>"
+                            "</radialGradient>"
+                            "<mask id=\"mask\" width=\"240\" height=\"240\">"
+                                "<rect width=\"240\" height=\"240\" fill=\"white\"/>"
+                                "<circle cx=\"120\" cy=\"120\" r=\"120\" fill=\"url(#myGradient)\"/>"
+                            "</mask>"
+                        "</defs>"
+                        "<rect width=\"240\" height=\"240\" fill=\"red\" mask=\"url(#mask)\"/>"
+                      "</svg>");
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(240, 240, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::transparent);
+    QImage refImage(240, 240, QImage::Format_ARGB32_Premultiplied);
+    refImage.fill(Qt::transparent);
+    QImage refMask(240, 240, QImage::QImage::Format_RGBA8888);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    p.begin(&refMask);
+    p.fillRect(0, 0, 240, 240, QColorConstants::Svg::white);
+    QRadialGradient radialGradient(0.5, 0.5, 0.5, 0.5, 0.5, 0);
+    radialGradient.setCoordinateMode(QGradient::ObjectMode);
+    radialGradient.setInterpolationMode(QGradient::ComponentInterpolation);
+    QBrush gradientBrush(radialGradient);
+    p.setBrush(gradientBrush);
+    p.setPen(Qt::NoPen);
+    p.drawEllipse(QPointF(120, 120), 120, 120);
+    p.end();
+
+    for (int i=0; i < refMask.height(); i++) {
+        QRgb *line = reinterpret_cast<QRgb *>(refMask.scanLine(i));
+        for (int j=0; j < refMask.width(); j++) {
+            const qreal rC = 0.2125, gC = 0.7154, bC = 0.0721; //luminanceToAlpha following SVG 1.1
+            int alpha = 255 - (qRed(line[j]) * rC + qGreen(line[j]) * gC + qBlue(line[j]) * bC) * qAlpha(line[j])/255.;
+            line[j] = qRgba(0, 0, 0, alpha);
+        }
+    }
+
+    p.begin(&refImage);
+    p.fillRect(0, 0, 240, 240, QColorConstants::Svg::red);
+    p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+    p.drawImage(QRect(0, 0, 240, 240), refMask);
+    p.end();
+
+    QCOMPARE(refImage, image);
 }
 
 void tst_QSvgRenderer::tSpanLineBreak()

@@ -75,6 +75,20 @@ private:
     QString m_systemLanguagePrefix;
 };
 
+class Q_SVG_PRIVATE_EXPORT QSvgMask : public QSvgStructureNode
+{
+public:
+    QSvgMask(QSvgNode *parent, QSvgRectF bounds,
+             QSvg::UnitTypes contentsUnits);
+    void drawCommand(QPainter *, QSvgExtraStates &) override {};
+    Type type() const override;
+    QImage createMask(QPainter *p, QSvgExtraStates &states, QSvgNode *targetNode, QRectF *globalRect) const;
+    QImage createMask(QPainter *p, QSvgExtraStates &states, const QRectF &localRect, QRectF *globalRect) const;
+private:
+    QSvgRectF m_rect;
+    QSvg::UnitTypes m_contentUnits;
+};
+
 QT_END_NAMESPACE
 
 #endif // QSVGSTRUCTURE_P_H

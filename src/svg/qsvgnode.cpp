@@ -6,6 +6,7 @@
 
 #include <QLoggingCategory>
 #include<QElapsedTimer>
+#include <QtGui/qimageiohandler.h>
 
 #include "qdebug.h"
 #include "qstack.h"
@@ -14,7 +15,7 @@
 
 QT_BEGIN_NAMESPACE
 
-Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw)
+Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw);
 
 Q_LOGGING_CATEGORY(lcSvgTiming, "qt.svg.timing")
 
@@ -34,7 +35,6 @@ QSvgNode::~QSvgNode()
 
 }
 
-
 void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
 {
 #ifndef QT_NO_DEBUG
@@ -43,10 +43,19 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
 
     if (shouldDrawNode(p, states)) {
         applyStyle(p, states);
-        if (separateFillStroke())
-            fillThenStroke(p, states);
-        else
-            drawCommand(p, states);
+        if (this->hasMask()) {
+            QSvgNode *maskNode = document()->namedNode(this->maskId());
+            if (maskNode && maskNode->type() == QSvgNode::Mask) {
+                QRectF boundsRect;
+                QImage mask = static_cast<QSvgMask*>(maskNode)->createMask(p, states, this, &boundsRect);
+                drawWithMask(p, states, mask, boundsRect.toRect());
+            }
+        } else {
+            if (separateFillStroke())
+                fillThenStroke(p, states);
+            else
+                drawCommand(p, states);
+        }
         revertStyle(p, states);
     }
 
@@ -78,6 +87,57 @@ void QSvgNode::fillThenStroke(QPainter *p, QSvgExtraStates &states)
         p->setBrush(oldBrush);
     }
     p->setOpacity(oldOpacity);
+}
+
+void QSvgNode::drawWithMask(QPainter *p, QSvgExtraStates &states, const QImage &mask, const QRect &boundsRect)
+{
+    QImage proxy = drawIntoBuffer(p, states, boundsRect);
+    if (proxy.isNull())
+        return;
+    applyMaskToBuffer(&proxy, mask);
+
+    p->save();
+    p->resetTransform();
+    p->drawImage(boundsRect, proxy);
+    p->restore();
+}
+
+QImage QSvgNode::drawIntoBuffer(QPainter *p, QSvgExtraStates &states, const QRect &boundsRect)
+{
+    QImage proxy;
+    if (!QImageIOHandler::allocateImage(boundsRect.size(), QImage::Format_RGBA8888, &proxy)) {
+        qCWarning(lcSvgDraw) << "The requested buffer size is too big, ignoring";
+        return proxy;
+    }
+    proxy.setOffset(boundsRect.topLeft());
+    proxy.fill(Qt::transparent);
+    QPainter proxyPainter(&proxy);
+    proxyPainter.setPen(p->pen());
+    proxyPainter.setBrush(p->brush());
+    proxyPainter.translate(-boundsRect.topLeft());
+    proxyPainter.setTransform(p->transform(), true);
+    proxyPainter.setRenderHints(p->renderHints());
+    if (separateFillStroke())
+        fillThenStroke(&proxyPainter, states);
+    else
+        drawCommand(&proxyPainter, states);
+    return proxy;
+}
+
+void QSvgNode::applyMaskToBuffer(QImage *proxy, QImage mask) const
+{
+    QPainter proxyPainter(proxy);
+    proxyPainter.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+    proxyPainter.resetTransform();
+    proxyPainter.drawImage(QRect(0, 0, mask.width(), mask.height()), mask);
+}
+
+void QSvgNode::applyBufferToCanvas(QPainter *p, QImage proxy, QRect boundsRect) const
+{
+    QTransform t = p->transform();
+    p->resetTransform();
+    p->drawImage(boundsRect, proxy);
+    p->setTransform(t);
 }
 
 bool QSvgNode::isDescendantOf(const QSvgNode *parent) const
@@ -394,6 +454,23 @@ void QSvgNode::setNodeId(const QString &i)
 void QSvgNode::setXmlClass(const QString &str)
 {
     m_class = str;
+}
+
+QString QSvgNode::maskId() const
+{
+    return m_maskId;
+}
+
+void QSvgNode::setMaskId(const QString &str)
+{
+    m_maskId = str;
+}
+
+bool QSvgNode::hasMask() const
+{
+    if (document()->featureSet() == QSvg::FeatureSet::StaticTiny1_2)
+        return false;
+    return !m_maskId.isEmpty();
 }
 
 void QSvgNode::setDisplayMode(DisplayMode mode)

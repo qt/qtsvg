@@ -3,17 +3,20 @@
 
 #include "qsvgstructure_p.h"
 
-#include "qsvgnode_p.h"
 #include "qsvgstyle_p.h"
 #include "qsvgtinydocument_p.h"
+#include <QtGui/qimageiohandler.h>
 
 #include "qpainter.h"
 #include "qlocale.h"
 #include "qdebug.h"
 
+#include <QLoggingCategory>
 #include <qscopedvaluerollback.h>
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw);
 
 QSvgG::QSvgG(QSvgNode *parent)
     : QSvgStructureNode(parent)
@@ -334,7 +337,7 @@ QRectF QSvgStructureNode::bounds(QPainter *p, QSvgExtraStates &states) const
     return bounds;
 }
 
-QSvgNode * QSvgStructureNode::previousSiblingNode(QSvgNode *n) const
+QSvgNode* QSvgStructureNode::previousSiblingNode(QSvgNode *n) const
 {
     QSvgNode *prev = nullptr;
     QList<QSvgNode*>::const_iterator itr = m_renderers.constBegin();
@@ -345,6 +348,111 @@ QSvgNode * QSvgStructureNode::previousSiblingNode(QSvgNode *n) const
         prev = node;
     }
     return prev;
+}
+
+QSvgMask::QSvgMask(QSvgNode *parent, QSvgRectF bounds,
+                   QSvg::UnitTypes contentUnits)
+    : QSvgStructureNode(parent)
+    , m_rect(bounds)
+    , m_contentUnits(contentUnits)
+{
+}
+
+QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, QSvgNode *targetNode, QRectF *globalRect) const
+{
+    QTransform t = p->transform();
+    p->resetTransform();
+    QRectF basicRect = targetNode->bounds(p, states);
+    *globalRect = t.mapRect(basicRect);
+    p->setTransform(t);
+    return createMask(p, states, basicRect, globalRect);
+}
+
+QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &localRect, QRectF *globalRect) const
+{
+    QRect imageBound = globalRect->toAlignedRect();
+    *globalRect = imageBound.toRectF();
+
+    QImage mask;
+    if (!QImageIOHandler::allocateImage(imageBound.size(), QImage::Format_RGBA8888, &mask)) {
+        qCWarning(lcSvgDraw) << "The requested mask size is too big, ignoring";
+        return mask;
+    }
+
+    if (Q_UNLIKELY(m_recursing))
+        return mask;
+    QScopedValueRollback<bool> recursingGuard(m_recursing, true);
+
+    // Chrome seems to return the mask of the mask if a mask is set on the mask
+    if (this->hasMask()) {
+        QSvgMask *maskNode = static_cast<QSvgMask*>(document()->namedNode(this->maskId()));
+        if (maskNode) {
+            QRectF boundsRect;
+            return maskNode->createMask(p, states, localRect, &boundsRect);
+        }
+    }
+
+    // The mask is created with other elements during rendering.
+    // Black pixels are masked out, white pixels are not masked.
+    // The strategy is to draw the elements in a buffer (QImage) and to map
+    // the white-black image into a transparent-white image that can be used
+    // with QPainters composition mode to set the mask.
+
+    mask.fill(Qt::transparent);
+    QPainter painter(&mask);
+
+    painter.setRenderHints(p->renderHints());
+    painter.translate(-imageBound.topLeft());
+    painter.setTransform(p->transform(), true);
+
+    // This is required because the QPen is scaled if contentUnits is objectBoundingBox,
+    // which does not match Chrome and Firefox.
+    painter.setPen(Qt::NoPen);
+
+    QSvgExtraStates states2; // Fake states so scopes do not propagate
+
+    QTransform oldT = painter.transform();
+    if (m_contentUnits == QSvg::UnitTypes::objectBoundingBox){
+        painter.translate(localRect.topLeft());
+        painter.scale(localRect.width(), localRect.height());
+    }
+
+    // Draw all content items of the mask to generate the mask
+    QList<QSvgNode*>::const_iterator itr = m_renderers.begin();
+    while (itr != m_renderers.end()) {
+        QSvgNode *node = *itr;
+        if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode))
+            node->draw(&painter, states2);
+        ++itr;
+    }
+
+    for (int i=0; i < mask.height(); i++) {
+        QRgb *line = reinterpret_cast<QRgb *>(mask.scanLine(i));
+        for (int j=0; j < mask.width(); j++) {
+            const qreal rC = 0.2125, gC = 0.7154, bC = 0.0721; //luminanceToAlpha times alpha following SVG 1.1
+            int alpha = 255 - (qRed(line[j]) * rC + qGreen(line[j]) * gC + qBlue(line[j]) * bC) * qAlpha(line[j])/255.;
+            line[j] = qRgba(0, 0, 0, alpha);
+        }
+    }
+
+    // Make a path out of the clipRectangle and draw it inverted - black over all content items.
+    // This is required to apply a clip rectangle with transformations.
+    // painter.setClipRect(clipRect) sounds like the obvious thing to do but
+    // created artifacts due to antialiasing.
+    QRectF clipRect = m_rect.combineWithLocalRect(localRect);
+    QPainterPath clipPath;
+    clipPath.setFillRule(Qt::OddEvenFill);
+    clipPath.addRect(mask.rect().adjusted(-10, -10, 20, 20));
+    clipPath.addPolygon(oldT.map(QPolygonF(clipRect)));
+    painter.resetTransform();
+    painter.fillPath(clipPath, Qt::black);
+
+    return mask;
+}
+
+QSvgNode::Type QSvgMask::type() const
+{
+    return Mask;
 }
 
 QT_END_NAMESPACE
