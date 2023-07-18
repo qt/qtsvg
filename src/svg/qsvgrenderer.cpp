@@ -72,8 +72,10 @@ public:
     explicit QSvgRendererPrivate()
         : QObjectPrivate(),
           render(0), timer(0),
-          fps(30)
+          fps(30),
+          featureSet(QSvg::FeatureSet::AllAvailable)
     {}
+
     ~QSvgRendererPrivate()
     {
         delete render;
@@ -84,6 +86,7 @@ public:
     QSvgTinyDocument *render;
     QTimer *timer;
     int fps;
+    QSvg::FeatureSet featureSet;
 };
 
 /*!
@@ -256,6 +259,28 @@ void QSvgRenderer::setAspectRatioMode(Qt::AspectRatioMode mode)
 }
 
 /*!
+    \property QSvgRenderer::featureSet
+    \since 6.7
+
+    This property holds the feature set that will be used to load and
+    render an SVG file. Set this propety before calling any of the load
+    functions to change the behavior of the QSvgRenderer.
+
+    The default value is QSvg::AllAvailable.
+ */
+QSvg::FeatureSet QSvgRenderer::featureSet() const
+{
+    Q_D(const QSvgRenderer);
+    return d->featureSet;
+}
+
+
+void QSvgRenderer::setFeatureSet(QSvg::FeatureSet flags)
+{
+    Q_D(QSvgRenderer);
+    d->featureSet = flags;
+}
+/*!
   \property QSvgRenderer::currentFrame
   \brief the current frame of the document's animation, or 0 if the document is not animated
   \internal
@@ -313,7 +338,7 @@ static bool loadDocument(QSvgRenderer *const q,
                          const TInputType &in)
 {
     delete d->render;
-    d->render = QSvgTinyDocument::load(in);
+    d->render = QSvgTinyDocument::load(in, d->featureSet);
     if (d->render && !d->render->size().isValid()) {
         delete d->render;
         d->render = nullptr;

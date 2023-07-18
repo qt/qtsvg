@@ -59,9 +59,9 @@ public:
     };
 
 public:
-    QSvgHandler(QIODevice *device);
-    QSvgHandler(const QByteArray &data);
-    QSvgHandler(QXmlStreamReader *const data);
+    QSvgHandler(QIODevice *device, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
+    QSvgHandler(const QByteArray &data, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
+    QSvgHandler(QXmlStreamReader *const data, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
     ~QSvgHandler();
 
     QIODevice *device() const;
@@ -98,6 +98,8 @@ public:
 
     inline QPen defaultPen() const
     { return m_defaultPen; }
+
+    QSvg::FeatureSet featureSet() const;
 
 public:
     bool startElement(const QString &localName, const QXmlStreamAttributes &attributes);
@@ -153,6 +155,8 @@ private:
      * we need to delete it.
      */
     const bool m_ownsReader;
+
+    const QSvg::FeatureSet m_featureSet;
 };
 
 Q_DECLARE_LOGGING_CATEGORY(lcSvgHandler)

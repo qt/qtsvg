@@ -6,5 +6,6 @@
 
 #include <QtCore/qglobal.h>
 #include <QtSvgWidgets/qtsvgwidgetsexports.h>
+#include <QtSvg/qtsvgglobal.h>
 
 #endif

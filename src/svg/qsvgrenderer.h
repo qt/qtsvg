@@ -28,6 +28,7 @@ class Q_SVG_EXPORT QSvgRenderer : public QObject
     Q_PROPERTY(int framesPerSecond READ framesPerSecond WRITE setFramesPerSecond)
     Q_PROPERTY(int currentFrame READ currentFrame WRITE setCurrentFrame)
     Q_PROPERTY(Qt::AspectRatioMode aspectRatioMode READ aspectRatioMode WRITE setAspectRatioMode)
+    Q_PROPERTY(QSvg::FeatureSet featureSet READ featureSet WRITE setFeatureSet)
 public:
     QSvgRenderer(QObject *parent = nullptr);
     QSvgRenderer(const QString &filename, QObject *parent = nullptr);
@@ -46,6 +47,9 @@ public:
 
     Qt::AspectRatioMode aspectRatioMode() const;
     void setAspectRatioMode(Qt::AspectRatioMode mode);
+
+    QSvg::FeatureSet featureSet() const;
+    void setFeatureSet(QSvg::FeatureSet flags);
 
     bool animated() const;
     int framesPerSecond() const;

@@ -2013,6 +2013,11 @@ void QSvgHandler::parseCSStoXMLAttrs(const QString &css, QList<QSvgCssAttribute>
     }
 }
 
+QSvg::FeatureSet QSvgHandler::featureSet() const
+{
+    return m_featureSet;
+}
+
 static void cssStyleLookup(QSvgNode *node,
                            QSvgHandler *handler,
                            QSvgStyleSelector *selector,
@@ -3214,7 +3219,7 @@ static QSvgNode *createSvgNode(QSvgNode *parent,
 {
     Q_UNUSED(parent); Q_UNUSED(attributes);
 
-    QSvgTinyDocument *node = new QSvgTinyDocument();
+    QSvgTinyDocument *node = new QSvgTinyDocument(handler->featureSet());
     const QStringView widthStr  = attributes.value(QLatin1String("width"));
     const QStringView heightStr = attributes.value(QLatin1String("height"));
     QString viewBoxStr = attributes.value(QLatin1String("viewBox")).toString();
@@ -3394,8 +3399,9 @@ static QSvgNode *createVideoNode(QSvgNode *parent,
 
 typedef QSvgNode *(*FactoryMethod)(QSvgNode *, const QXmlStreamAttributes &, QSvgHandler *);
 
-static FactoryMethod findGroupFactory(const QString &name)
+static FactoryMethod findGroupFactory(const QString &name, QSvg::FeatureSet featureSet)
 {
+    Q_UNUSED(featureSet);
     if (name.isEmpty())
         return 0;
 
@@ -3417,8 +3423,9 @@ static FactoryMethod findGroupFactory(const QString &name)
     return 0;
 }
 
-static FactoryMethod findGraphicsFactory(const QString &name)
+static FactoryMethod findGraphicsFactory(const QString &name, QSvg::FeatureSet featureSet)
 {
+    Q_UNUSED(featureSet);
     if (name.isEmpty())
         return 0;
 
@@ -3466,8 +3473,9 @@ static FactoryMethod findGraphicsFactory(const QString &name)
 
 typedef bool (*ParseMethod)(QSvgNode *, const QXmlStreamAttributes &, QSvgHandler *);
 
-static ParseMethod findUtilFactory(const QString &name)
+static ParseMethod findUtilFactory(const QString &name, QSvg::FeatureSet featureSet)
 {
+    Q_UNUSED(featureSet);
     if (name.isEmpty())
         return 0;
 
@@ -3575,20 +3583,26 @@ static StyleParseMethod findStyleUtilFactoryMethod(const QString &name)
     return 0;
 }
 
-QSvgHandler::QSvgHandler(QIODevice *device) : xml(new QXmlStreamReader(device))
-                                             , m_ownsReader(true)
+QSvgHandler::QSvgHandler(QIODevice *device, QSvg::FeatureSet featureSet)
+    : xml(new QXmlStreamReader(device))
+    , m_ownsReader(true)
+    , m_featureSet(featureSet)
 {
     init();
 }
 
-QSvgHandler::QSvgHandler(const QByteArray &data) : xml(new QXmlStreamReader(data))
-                                                 , m_ownsReader(true)
+QSvgHandler::QSvgHandler(const QByteArray &data, QSvg::FeatureSet featureSet)
+    : xml(new QXmlStreamReader(data))
+    , m_ownsReader(true)
+    , m_featureSet(featureSet)
 {
     init();
 }
 
-QSvgHandler::QSvgHandler(QXmlStreamReader *const reader) : xml(reader)
-                                                         , m_ownsReader(false)
+QSvgHandler::QSvgHandler(QXmlStreamReader *const reader, QSvg::FeatureSet featureSet)
+    : xml(reader)
+    , m_ownsReader(false)
+    , m_featureSet(featureSet)
 {
     init();
 }
@@ -3723,7 +3737,7 @@ bool QSvgHandler::startElement(const QString &localName,
     if (!m_doc && localName != QLatin1String("svg"))
         return false;
 
-    if (FactoryMethod method = findGroupFactory(localName)) {
+    if (FactoryMethod method = findGroupFactory(localName, featureSet())) {
         //group
         node = method(m_doc ? m_nodes.top() : 0, attributes, this);
         Q_ASSERT(node);
@@ -3757,7 +3771,7 @@ bool QSvgHandler::startElement(const QString &localName,
 #endif
             parseStyle(node, attributes, this);
         }
-    } else if (FactoryMethod method = findGraphicsFactory(localName)) {
+    } else if (FactoryMethod method = findGraphicsFactory(localName, featureSet())) {
         //rendering element
         Q_ASSERT(!m_nodes.isEmpty());
         node = method(m_nodes.top(), attributes, this);
@@ -3816,7 +3830,7 @@ bool QSvgHandler::startElement(const QString &localName,
                 }
             }
         }
-    } else if (ParseMethod method = findUtilFactory(localName)) {
+    } else if (ParseMethod method = findUtilFactory(localName, featureSet())) {
         Q_ASSERT(!m_nodes.isEmpty());
         if (!method(m_nodes.top(), attributes, this))
             qCWarning(lcSvgHandler, "%s", msgProblemParsing(localName, xml).constData());

@@ -49,7 +49,19 @@ public:
         TEXTAREA,
         TSPAN,
         USE,
-        VIDEO
+        VIDEO,
+        MASK,
+        SYMBOL,
+        MARKER,
+        PATTERN,
+        FILTER,
+        FEMERGE,
+        FEMERGENODE,
+        FECOLORMATRIX,
+        FEGAUSSIANBLUR,
+        FEOFFSET,
+        FECOMPOSITE,
+        FEFLOOD
     };
     enum DisplayMode {
         InlineMode,

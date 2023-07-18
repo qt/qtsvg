@@ -1,0 +1,24 @@
+// Copyright (C) 2023 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+
+/*!
+    \namespace QSvg
+    \brief The QSvg namespace contains enums used by the svg classes.
+    \inmodule QtSvg
+*/
+
+/*!
+    \enum QSvg::FeatureSet
+
+    This enum is used to control the parsing and renderering of features
+    that go beyond the \l{http://www.w3.org/TR/SVGMobile12}{SVG 1.2 Tiny}
+    standard.
+
+    The following feature sets are available for the
+    renderer.
+
+    \value StaticTiny1_2    Strictly and exclusivly parse only tags that are part
+                            of the SVG 1.2 Tiny Static Feature set.
+    \value AllAvailable     Parses the extra features supported by the renderer
+                            from the SVG 1.1 standard.
+*/

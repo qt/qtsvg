@@ -26,6 +26,9 @@ public:
     QSvgRenderer *renderer() const;
 
     QSize sizeHint() const override;
+
+    QSvg::FeatureSet featureSet() const;
+    void setFeatureSet(QSvg::FeatureSet featureSet);
 public Q_SLOTS:
     void load(const QString &file);
     void load(const QByteArray &contents);

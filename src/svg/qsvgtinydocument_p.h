@@ -36,11 +36,11 @@ class QTransform;
 class Q_SVG_PRIVATE_EXPORT QSvgTinyDocument : public QSvgStructureNode
 {
 public:
-    static QSvgTinyDocument * load(const QString &file);
-    static QSvgTinyDocument * load(const QByteArray &contents);
-    static QSvgTinyDocument * load(QXmlStreamReader *contents);
+    static QSvgTinyDocument * load(const QString &file, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
+    static QSvgTinyDocument * load(const QByteArray &contents, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
+    static QSvgTinyDocument * load(QXmlStreamReader *contents, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
 public:
-    QSvgTinyDocument();
+    QSvgTinyDocument(QSvg::FeatureSet featureSet);
     ~QSvgTinyDocument();
     Type type() const override;
 
@@ -57,6 +57,8 @@ public:
 
     QRectF viewBox() const;
     void setViewBox(const QRectF &rect);
+
+    QSvg::FeatureSet featureSet() const;
 
     void draw(QPainter *p, QSvgExtraStates &) override; //from the QSvgNode
 
@@ -105,6 +107,8 @@ private:
     int   m_fps;
 
     QSvgExtraStates m_states;
+
+    const QSvg::FeatureSet m_featureSet;
 };
 
 inline QSize QSvgTinyDocument::size() const

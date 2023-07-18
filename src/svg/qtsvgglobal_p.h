@@ -18,4 +18,18 @@
 #include "qtsvgglobal.h"
 #include <QtSvg/private/qtsvgexports_p.h>
 
+QT_BEGIN_NAMESPACE
+
+namespace QSvg {
+
+enum class UnitTypes : quint32 {
+    unknown,
+    objectBoundingBox,
+    userSpaceOnUse
+};
+
+}
+
+QT_END_NAMESPACE
+
 #endif // QTSVGGLOBAL_P_H
