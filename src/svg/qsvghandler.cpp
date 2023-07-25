@@ -188,6 +188,10 @@ struct QSvgAttributes
     QStringView stopOpacity;
     QStringView imageRendering;
     QStringView mask;
+    QStringView markerStart;
+    QStringView markerMid;
+    QStringView markerEnd;
+
 
 #ifndef QT_NO_CSSPARSER
     QList<QSvgCssAttribute> m_cssAttributes;
@@ -249,6 +253,15 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
             if (name == QLatin1String("mask") &&
                 handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
                 mask = value;
+            if (name == QLatin1String("marker-start") &&
+                handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                markerStart = value;
+            if (name == QLatin1String("marker-mid") &&
+                handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                markerMid = value;
+            if (name == QLatin1String("marker-end") &&
+                handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                markerEnd = value;
             break;
 
         case 'o':
@@ -364,6 +377,15 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
                 if (name == QLatin1String("mask") &&
                     handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
                     mask = value.toString();
+                if (name == QLatin1String("marker-start") &&
+                    handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                    markerStart = value.toString();
+                if (name == QLatin1String("marker-mid") &&
+                    handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                    markerMid = value.toString();
+                if (name == QLatin1String("marker-end") &&
+                    handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                    markerEnd = value.toString();
                 break;
 
             case 'o':
@@ -2279,6 +2301,37 @@ static void parseExtendedAttributes(QSvgNode *node,
 
         node->setMaskId(maskId);
     }
+
+    if (!attributes.markerStart.isEmpty() &&
+        handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2) {
+        QString markerStr = attributes.markerStart.toString().trimmed();
+        if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
+            markerStr = markerStr.mid(3, markerStr.size() - 3);
+        QString markerId = idFromUrl(markerStr);
+        if (markerId.startsWith(QLatin1Char('#'))) //TODO: handle urls and ids in a single place
+            markerId.remove(0, 1);
+        node->setMarkerStartId(markerId);
+    }
+    if (!attributes.markerMid.isEmpty() &&
+        handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2) {
+        QString markerStr = attributes.markerMid.toString().trimmed();
+        if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
+            markerStr = markerStr.mid(3, markerStr.size() - 3);
+        QString markerId = idFromUrl(markerStr);
+        if (markerId.startsWith(QLatin1Char('#'))) //TODO: handle urls and ids in a single place
+            markerId.remove(0, 1);
+        node->setMarkerMidId(markerId);
+    }
+    if (!attributes.markerEnd.isEmpty() &&
+        handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2) {
+        QString markerStr = attributes.markerEnd.toString().trimmed();
+        if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
+            markerStr = markerStr.mid(3, markerStr.size() - 3);
+        QString markerId = idFromUrl(markerStr);
+        if (markerId.startsWith(QLatin1Char('#'))) //TODO: handle urls and ids in a single place
+            markerId.remove(0, 1);
+        node->setMarkerEndId(markerId);
+    }
 }
 
 static void parseRenderingHints(QSvgNode *node,
@@ -2994,6 +3047,13 @@ static bool parseMaskNode(QSvgNode *parent,
     return true;
 }
 
+static bool parseMarkerNode(QSvgNode *,
+                          const QXmlStreamAttributes &,
+                          QSvgHandler *)
+{
+    return true;
+}
+
 static QSvgNode *createMaskNode(QSvgNode *parent,
                           const QXmlStreamAttributes &attributes,
                           QSvgHandler *handler)
@@ -3069,6 +3129,208 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
     QSvgNode *mask = new QSvgMask(parent, QSvgRectF(bounds, nmUx, nmUy, nmUw, nmUh), nmCU);
 
     return mask;
+}
+
+static bool parseSymbolLikeAttributes(const QXmlStreamAttributes &attributes, QSvgHandler *handler,
+                                      QRectF *rect, QRectF *viewBox, QPointF *refPoint,
+                                      QSvgSymbolLike::PreserveAspectRatios *aspect,
+                                      QSvgSymbolLike::Overflow *overflow,
+                                      bool marker = false)
+{
+    const QStringView xStr        = attributes.value(QLatin1String("x"));
+    const QStringView yStr        = attributes.value(QLatin1String("y"));
+    const QStringView refXStr     = attributes.value(QLatin1String("refX"));
+    const QStringView refYStr     = attributes.value(QLatin1String("refY"));
+    const QStringView widthStr    = attributes.value(QLatin1String(marker ? "markerWidth":"width"));
+    const QStringView heightStr   = attributes.value(QLatin1String(marker ? "markerHeight":"height"));
+    const QString pAspectRStr     = attributes.value(QLatin1String("preserveAspectRatio")).toString();
+    const QStringView overflowStr = attributes.value(QLatin1String("overflow"));
+
+    QString viewBoxStr = attributes.value(QLatin1String("viewBox")).toString();
+
+    QSvgHandler::LengthType type;
+
+    qreal x = 0;
+    if (!xStr.isEmpty()) {
+        x = parseLength(xStr.toString(), type, handler);
+        if (type != QSvgHandler::LT_PT)
+            x = convertToPixels(x, true, type);
+    }
+    qreal y = 0;
+    if (!yStr.isEmpty()) {
+        y = parseLength(yStr.toString(), type, handler);
+        if (type != QSvgHandler::LT_PT)
+            y = convertToPixels(y, false, type);
+    }
+    qreal width = 0;
+    if (!widthStr.isEmpty()) {
+        width = parseLength(widthStr.toString(), type, handler);
+        if (type != QSvgHandler::LT_PT)
+            width = convertToPixels(width, true, type);
+    }
+    qreal height = 0;
+    if (!heightStr.isEmpty()) {
+        height = parseLength(heightStr.toString(), type, handler);
+        if (type != QSvgHandler::LT_PT)
+            height = convertToPixels(height, false, type);
+    }
+
+    *rect = QRectF(x, y, width, height);
+
+    x = 0;
+    if (!refXStr.isEmpty()) {
+        x = parseLength(refXStr.toString(), type, handler);
+        if (type != QSvgHandler::LT_PT)
+            x = convertToPixels(x, true, type);
+    }
+    y = 0;
+    if (!refYStr.isEmpty()) {
+        y = parseLength(refYStr.toString(), type, handler);
+        if (type != QSvgHandler::LT_PT)
+            y = convertToPixels(y, false, type);
+    }
+    *refPoint = QPointF(x,y);
+
+    QStringList viewBoxValues;
+    if (!viewBoxStr.isEmpty()) {
+        viewBoxStr = viewBoxStr.replace(QLatin1Char(' '), QLatin1Char(','));
+        viewBoxStr = viewBoxStr.replace(QLatin1Char('\r'), QLatin1Char(','));
+        viewBoxStr = viewBoxStr.replace(QLatin1Char('\n'), QLatin1Char(','));
+        viewBoxStr = viewBoxStr.replace(QLatin1Char('\t'), QLatin1Char(','));
+        viewBoxValues = viewBoxStr.split(QLatin1Char(','), Qt::SkipEmptyParts);
+    }
+    if (viewBoxValues.size() == 4) {
+        QString xStr      = viewBoxValues.at(0).trimmed();
+        QString yStr      = viewBoxValues.at(1).trimmed();
+        QString widthStr  = viewBoxValues.at(2).trimmed();
+        QString heightStr = viewBoxValues.at(3).trimmed();
+
+        QSvgHandler::LengthType lt;
+        qreal x = parseLength(xStr, lt, handler);
+        qreal y = parseLength(yStr, lt, handler);
+        qreal w = parseLength(widthStr, lt, handler);
+        qreal h = parseLength(heightStr, lt, handler);
+
+        *viewBox = QRectF(x, y, w, h);
+
+    } else if (width > 0 && height > 0) {
+        if (type == QSvgHandler::LT_PT) {
+            width = convertToPixels(width, false, type);
+            height = convertToPixels(height, false, type);
+        }
+        *viewBox = QRectF(0, 0, width, height);
+    } else {
+        *viewBox = handler->document()->viewBox();
+    }
+
+    if (viewBox->isNull())
+        return false;
+
+    QStringList pAspectRStrs = pAspectRStr.split(QLatin1String(" "));
+    QSvgSymbolLike::PreserveAspectRatio aspectX = QSvgSymbolLike::PreserveAspectRatio::xMid;
+    QSvgSymbolLike::PreserveAspectRatio aspectY = QSvgSymbolLike::PreserveAspectRatio::yMid;
+    QSvgSymbolLike::PreserveAspectRatio aspectMS = QSvgSymbolLike::PreserveAspectRatio::meet;
+
+    for (auto &pAStr : std::as_const(pAspectRStrs)) {
+        if (pAStr.startsWith(QLatin1String("none"))) {
+            aspectX = QSvgSymbolLike::PreserveAspectRatio::None;
+            aspectY = QSvgSymbolLike::PreserveAspectRatio::None;
+        }else {
+            if (pAStr.startsWith(QLatin1String("xMin")))
+                aspectX = QSvgSymbolLike::PreserveAspectRatio::xMin;
+            else if (pAStr.startsWith(QLatin1String("xMax")))
+                aspectX = QSvgSymbolLike::PreserveAspectRatio::xMax;
+            if (pAStr.endsWith(QLatin1String("YMin")))
+                aspectY = QSvgSymbolLike::PreserveAspectRatio::yMin;
+            else if (pAStr.endsWith(QLatin1String("YMax")))
+                aspectY = QSvgSymbolLike::PreserveAspectRatio::yMax;
+        }
+
+        if (pAStr.endsWith(QLatin1String("slice")))
+            aspectMS = QSvgSymbolLike::PreserveAspectRatio::slice;
+    }
+    *aspect = aspectX | aspectY | aspectMS;
+
+    // overflow is not limited to the symbol element but it is often found with the symbol element.
+    // the symbol element makes little sense without the overflow attribute so it is added here.
+    // if we decide to remove this from QSvgSymbol, the default value should be set to visible.
+
+    // The default value is visible but chrome uses default value hidden.
+    *overflow = QSvgSymbolLike::Overflow::Hidden;
+
+    if (overflowStr.endsWith(QLatin1String("auto")))
+        *overflow = QSvgSymbolLike::Overflow::Auto;
+    else if (overflowStr.endsWith(QLatin1String("visible")))
+        *overflow = QSvgSymbolLike::Overflow::Visible;
+    else if (overflowStr.endsWith(QLatin1String("hidden")))
+        *overflow = QSvgSymbolLike::Overflow::Hidden;
+    else if (overflowStr.endsWith(QLatin1String("scroll")))
+        *overflow = QSvgSymbolLike::Overflow::Scroll;
+
+    return true;
+}
+
+static QSvgNode *createSymbolNode(QSvgNode *parent,
+                          const QXmlStreamAttributes &attributes,
+                          QSvgHandler *handler)
+{
+    QRectF rect, viewBox;
+    QPointF refP;
+    QSvgSymbolLike::PreserveAspectRatios aspect;
+    QSvgSymbolLike::Overflow overflow;
+
+    if (!parseSymbolLikeAttributes(attributes, handler, &rect, &viewBox, &refP, &aspect, &overflow))
+        return nullptr;
+
+    refP = QPointF(0, 0); //refX, refY is ignored in Symbol in Firefox and Chrome.
+    QSvgNode *symbol = new QSvgSymbol(parent, rect, viewBox, refP, aspect, overflow);
+    return symbol;
+}
+
+static QSvgNode *createMarkerNode(QSvgNode *parent,
+                                  const QXmlStreamAttributes &attributes,
+                                  QSvgHandler *handler)
+{
+    QRectF rect, viewBox;
+    QPointF refP;
+    QSvgSymbolLike::PreserveAspectRatios aspect;
+    QSvgSymbolLike::Overflow overflow;
+
+    const QString orientStr      = attributes.value(QLatin1String("orient")).toString();
+    const QString markerUnitsStr = attributes.value(QLatin1String("markerUnits")).toString();
+
+    qreal orientationAngle = 0;
+    QSvgMarker::Orientation orientation;
+    if (orientStr.startsWith(QLatin1String("auto-start-reverse")))
+        orientation = QSvgMarker::Orientation::AutoStartReverse;
+    else if (orientStr.startsWith(QLatin1String("auto")))
+        orientation = QSvgMarker::Orientation::Auto;
+    else {
+        orientation = QSvgMarker::Orientation::Value;
+        bool ok;
+        qreal a;
+        if (orientStr.endsWith(QStringLiteral("turn")))
+            a = 360. * toDouble(orientStr.mid(0, orientStr.length()-4), &ok);
+        else if (orientStr.endsWith(QStringLiteral("grad")))
+            a = toDouble(orientStr.mid(0, orientStr.length()-4), &ok);
+        else if (orientStr.endsWith(QStringLiteral("rad")))
+            a = 180. / M_PI * toDouble(orientStr.mid(0, orientStr.length()-3), &ok);
+        else
+            a = toDouble(orientStr, &ok);
+        if (ok)
+            orientationAngle = a;
+    }
+
+    QSvgMarker::MarkerUnits markerUnits = QSvgMarker::MarkerUnits::StrokeWidth;
+    if (markerUnitsStr.startsWith(QLatin1String("userSpaceOnUse")))
+        markerUnits = QSvgMarker::MarkerUnits::UserSpaceOnUse;
+
+    if (!parseSymbolLikeAttributes(attributes, handler, &rect, &viewBox, &refP, &aspect, &overflow, true))
+        return nullptr;
+
+    QSvgNode *marker = new QSvgMarker(parent, rect, viewBox, refP, aspect, overflow,
+                                      orientation, orientationAngle, markerUnits);
+    return marker;
 }
 
 static QSvgNode *createPathNode(QSvgNode *parent,
@@ -3537,10 +3799,12 @@ static FactoryMethod findGroupFactory(const QString &name, QSvg::FeatureSet feat
         break;
     case 'm':
         if (ref == QLatin1String("ask") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return createMaskNode;
+        if (ref == QLatin1String("arker") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return createMarkerNode;
         break;
     case 's':
         if (ref == QLatin1String("vg")) return createSvgNode;
         if (ref == QLatin1String("witch")) return createSwitchNode;
+        if (ref == QLatin1String("ymbol")) return createSymbolNode;
         break;
     default:
         break;
@@ -3629,6 +3893,7 @@ static ParseMethod findUtilFactory(const QString &name, QSvg::FeatureSet feature
         if (ref == QLatin1String("etadata")) return parseMetadataNode;
         if (ref == QLatin1String("path")) return parseMpathNode;
         if (ref == QLatin1String("ask") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return parseMaskNode;
+        if (ref == QLatin1String("arker") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return parseMarkerNode;
         break;
     case 'p':
         if (ref == QLatin1String("refetch")) return parsePrefetchNode;
@@ -3879,6 +4144,8 @@ bool QSvgHandler::startElement(const QString &localName,
             case QSvgNode::Defs:
             case QSvgNode::Switch:
             case QSvgNode::Mask:
+            case QSvgNode::Symbol:
+            case QSvgNode::Marker:
             {
                 QSvgStructureNode *group =
                     static_cast<QSvgStructureNode*>(m_nodes.top());
@@ -3911,6 +4178,8 @@ bool QSvgHandler::startElement(const QString &localName,
             case QSvgNode::Defs:
             case QSvgNode::Switch:
             case QSvgNode::Mask:
+            case QSvgNode::Symbol:
+            case QSvgNode::Marker:
             {
                 if (node->type() == QSvgNode::Tspan) {
                     const QByteArray msg = QByteArrayLiteral("\'tspan\' element in wrong context.");

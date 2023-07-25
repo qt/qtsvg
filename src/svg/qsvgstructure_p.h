@@ -62,6 +62,101 @@ public:
     Type type() const override;
 };
 
+class Q_SVG_PRIVATE_EXPORT QSvgSymbolLike : public QSvgStructureNode
+{
+    // Marker, Symbol and potentially other elements share a lot of common
+    // attributes and functionality. By making a common base class we can
+    // avoid repetition.
+public:
+    enum class Overflow : quint8 {
+        Visible,
+        Hidden,
+        Scroll = Visible, //Will not support scrolling
+        Auto = Visible
+    };
+
+    enum class PreserveAspectRatio : quint8 {
+        None =  0b000000,
+        xMin =  0b000001,
+        xMid =  0b000010,
+        xMax =  0b000011,
+        yMin =  0b000100,
+        yMid =  0b001000,
+        yMax =  0b001100,
+        meet =  0b010000,
+        slice = 0b100000,
+        xMask = xMin | xMid | xMax,
+        yMask = yMin | yMid | yMax,
+        xyMask = xMask | yMask,
+        meetSliceMask = meet | slice
+    };
+    Q_DECLARE_FLAGS(PreserveAspectRatios, PreserveAspectRatio)
+
+    QSvgSymbolLike(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF refP,
+                   QSvgSymbolLike::PreserveAspectRatios pAspectRatios, QSvgSymbolLike::Overflow overflow);
+    void drawCommand(QPainter *, QSvgExtraStates &) override {};
+protected:
+    void setPainterToRectAndAdjustment(QPainter *p) const;
+protected:
+    QRectF m_rect;
+    QRectF m_viewBox;
+    QPointF m_refP;
+    PreserveAspectRatios m_pAspectRatios;
+    Overflow m_overflow;
+};
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QSvgSymbolLike::PreserveAspectRatios)
+
+class Q_SVG_PRIVATE_EXPORT QSvgSymbol : public QSvgSymbolLike
+{
+public:
+    QSvgSymbol(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF refP,
+               QSvgSymbolLike::PreserveAspectRatios pAspectRatios, QSvgSymbolLike::Overflow overflow);
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
+    Type type() const override;
+};
+
+class Q_SVG_PRIVATE_EXPORT QSvgMarker : public QSvgSymbolLike
+{
+public:
+    enum class Orientation : quint8 {
+        Auto,
+        AutoStartReverse,
+        Value
+    };
+    enum class MarkerUnits : quint8 {
+        StrokeWidth,
+        UserSpaceOnUse
+    };
+
+    QSvgMarker(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF refP,
+               QSvgSymbolLike::PreserveAspectRatios pAspectRatios, QSvgSymbolLike::Overflow overflow,
+               Orientation orientation, qreal orientationAngle, MarkerUnits markerUnits);
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
+    static void drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates &states);
+    Orientation orientation() const {
+        return m_orientation;
+    }
+    qreal orientationAngle() const {
+        return m_orientationAngle;
+    }
+    MarkerUnits markerUnits() const {
+        return m_markerUnits;
+    }
+    Type type() const override;
+private:
+    struct PositionMarkerPair {
+        qreal x;
+        qreal y;
+        qreal angle;
+        QString markerId;
+        bool isStartNode = false;
+    };
+    Orientation m_orientation;
+    qreal m_orientationAngle;
+    MarkerUnits m_markerUnits;
+};
+
 class Q_SVG_PRIVATE_EXPORT QSvgSwitch : public QSvgStructureNode
 {
 public:

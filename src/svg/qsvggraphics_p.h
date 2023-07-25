@@ -94,11 +94,7 @@ public:
     Type type() const override;
     QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
-
-    const QPainterPath &path() const {
-        return m_path;
-    }
-
+    const QPainterPath &path() const { return m_path; }
 private:
     QPainterPath m_path;
 };
@@ -112,9 +108,7 @@ public:
     Type type() const override;
     QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
-    const QPolygonF &polygon() const {
-        return m_poly;
-    }
+    const QPolygonF &polygon() const { return m_poly; }
 private:
     QPolygonF m_poly;
 };
@@ -128,9 +122,7 @@ public:
     Type type() const override;
     QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
-    const QPolygonF &polygon() const {
-        return m_poly;
-    }
+    const QPolygonF &polygon() const { return m_poly; }
 private:
     QPolygonF m_poly;
 };

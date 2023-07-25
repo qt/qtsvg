@@ -115,6 +115,7 @@ struct Q_SVG_PRIVATE_EXPORT QSvgExtraStates
     int nestedUseCount = 0;
     bool vectorEffect; // true if pen is cosmetic
     qint8 imageRendering; // QSvgQualityStyle::ImageRendering
+    bool inUse = false; // true if currently in QSvgUseNode
 };
 
 class Q_SVG_PRIVATE_EXPORT QSvgStyleProperty : public QSvgRefCounted

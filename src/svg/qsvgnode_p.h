@@ -145,6 +145,20 @@ public:
     void setMaskId(const QString &str);
     bool hasMask() const;
 
+    QString markerStartId() const;
+    void setMarkerStartId(const QString &str);
+    bool hasMarkerStart() const;
+
+    QString markerMidId() const;
+    void setMarkerMidId(const QString &str);
+    bool hasMarkerMid() const;
+
+    QString markerEndId() const;
+    void setMarkerEndId(const QString &str);
+    bool hasMarkerEnd() const;
+
+    bool hasAnyMarker() const;
+
     virtual bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const;
     const QSvgStyle &style() const { return m_style; }
 protected:
@@ -165,6 +179,10 @@ private:
     QString m_id;
     QString m_class;
     QString m_maskId;
+    QString m_markerStartId;
+    QString m_markerMidId;
+    QString m_markerEndId;
+
 
     DisplayMode m_displayMode;
     mutable QRectF m_cachedBounds;

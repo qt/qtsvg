@@ -68,6 +68,8 @@ private slots:
     void animated();
     void notAnimated();
     void testMaskElement();
+    void testSymbol();
+    void testMarker();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -1775,6 +1777,70 @@ void tst_QSvgRenderer::testMaskElement()
     p.fillRect(0, 0, 240, 240, QColorConstants::Svg::red);
     p.setCompositionMode(QPainter::CompositionMode_DestinationOut);
     p.drawImage(QRect(0, 0, 240, 240), refMask);
+    p.end();
+
+    QCOMPARE(refImage, image);
+}
+
+void tst_QSvgRenderer::testSymbol()
+{
+    QByteArray svgDoc("<svg width=\"100\" height=\"100\">"
+                      "<symbol id=\"dot\" width=\"100\" height=\"100\" viewBox=\"0 0 1 1\">"
+                      "<rect x=\"0.25\" y=\"0.25\" width=\"0.5\" height=\"0.5\" fill=\"red\"/>"
+                      "</symbol>"
+                      "<use href=\"#dot\" x=\"0\" y=\"0\" />"
+                      "</svg>");
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(100, 100, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+    QImage refImage(100, 100, QImage::Format_ARGB32_Premultiplied);
+    refImage.fill(Qt::white);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    p.begin(&refImage);
+    p.setBrush(Qt::red);
+    p.setPen(Qt::NoPen);
+    p.drawRect(25, 25, 50, 50);
+    p.end();
+
+    QCOMPARE(refImage, image);
+}
+
+void tst_QSvgRenderer::testMarker()
+{
+    QByteArray svgDoc("<svg width=\"100\" height=\"100\">"
+                      "<marker id=\"mark\" markerWidth=\"10\" markerHeight=\"10\" viewBox=\"0 0 1 1\" refX=\"0\" refY=\"0.5\">"
+                      "<rect x=\"0\" y=\"0\" width=\"1\" height=\"1\" fill=\"red\"/>"
+                      "</marker>"
+                      "<line x1=\"10\" y1=\"50\" x2=\"90\" y2=\"50\" stroke=\"white\" marker-end=\"url(#mark)\" />"
+                      "</svg>");
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(100, 100, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+    QImage refImage(100, 100, QImage::Format_ARGB32_Premultiplied);
+    refImage.fill(Qt::white);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    p.begin(&refImage);
+    p.setPen(Qt::white);
+    p.drawLine(10, 50, 90, 50);
+    p.setBrush(Qt::red);
+    p.setPen(Qt::NoPen);
+    p.drawRect(90, 45, 10, 10);
     p.end();
 
     QCOMPARE(refImage, image);

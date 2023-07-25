@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "qsvgstructure_p.h"
+#include "qsvggraphics_p.h"
 
 #include "qsvgstyle_p.h"
 #include "qsvgtinydocument_p.h"
@@ -87,6 +88,279 @@ bool QSvgDefs::shouldDrawNode(QPainter *, QSvgExtraStates &) const
 QSvgNode::Type QSvgDefs::type() const
 {
     return Defs;
+}
+
+QSvgSymbolLike::QSvgSymbolLike(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF refP,
+               QSvgSymbolLike::PreserveAspectRatios pAspectRatios, QSvgSymbolLike::Overflow overflow)
+    : QSvgStructureNode(parent)
+    , m_rect(bounds)
+    , m_viewBox(viewBox)
+    , m_refP(refP)
+    , m_pAspectRatios(pAspectRatios)
+    , m_overflow(overflow)
+{
+
+}
+
+void QSvgSymbolLike::setPainterToRectAndAdjustment(QPainter *p) const
+{
+    qreal scaleX = 1;
+    if (m_rect.width() > 0 && m_viewBox.width() > 0)
+        scaleX = m_rect.width()/m_viewBox.width();
+    qreal scaleY = 1;
+    if (m_rect.height() > 0 && m_viewBox.height() > 0)
+        scaleY = m_rect.height()/m_viewBox.height();
+
+    if (m_overflow == Overflow::Hidden) {
+        QTransform t;
+        t.translate(- m_refP.x() * scaleX - m_rect.left() - m_viewBox.left() * scaleX,
+                    - m_refP.y() * scaleY - m_rect.top() - m_viewBox.top() * scaleY);
+        t.scale(scaleX, scaleY);
+
+        if (m_viewBox.isValid())
+            p->setClipRect(t.mapRect(m_viewBox));
+    }
+
+    qreal offsetX = 0;
+    qreal offsetY = 0;
+
+    if (!qFuzzyCompare(scaleX, scaleY) &&
+        m_pAspectRatios.testAnyFlag(PreserveAspectRatio::xyMask)) {
+
+        if (m_pAspectRatios.testAnyFlag(PreserveAspectRatio::meet))
+            scaleX = scaleY = qMin(scaleX, scaleY);
+        else
+            scaleX = scaleY = qMax(scaleX, scaleY);
+
+        qreal xOverflow = scaleX * m_viewBox.width() - m_rect.width();
+        qreal yOverflow = scaleY * m_viewBox.height() - m_rect.height();
+
+        if ((m_pAspectRatios & PreserveAspectRatio::xMask) == PreserveAspectRatio::xMid)
+            offsetX -= xOverflow / 2.;
+        else if ((m_pAspectRatios & PreserveAspectRatio::xMask) == PreserveAspectRatio::xMax)
+            offsetX -= xOverflow;
+
+        if ((m_pAspectRatios & PreserveAspectRatio::yMask) == PreserveAspectRatio::yMid)
+            offsetY -= yOverflow / 2.;
+        else if ((m_pAspectRatios & PreserveAspectRatio::yMask) == PreserveAspectRatio::yMax)
+            offsetY -= yOverflow;
+    }
+
+    p->translate(offsetX - m_refP.x() * scaleX, offsetY - m_refP.y() * scaleY);
+    p->scale(scaleX, scaleY);
+}
+
+QSvgSymbol::QSvgSymbol(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF refP,
+                       QSvgSymbol::PreserveAspectRatios pAspectRatios,
+                       QSvgSymbol::Overflow overflow)
+    : QSvgSymbolLike(parent, bounds, viewBox, refP, pAspectRatios, overflow)
+{
+}
+
+void QSvgSymbol::drawCommand(QPainter *p, QSvgExtraStates &states)
+{
+    if (!states.inUse) //Symbol is only drawn when within a use node.
+        return;
+
+    QList<QSvgNode*>::iterator itr = m_renderers.begin();
+
+    p->save();
+    setPainterToRectAndAdjustment(p);
+    while (itr != m_renderers.end()) {
+        QSvgNode *node = *itr;
+        if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode))
+            node->draw(p, states);
+        ++itr;
+    }
+    p->restore();
+}
+
+QSvgNode::Type QSvgSymbol::type() const
+{
+    return Symbol;
+}
+
+QSvgMarker::QSvgMarker(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF refP,
+                       QSvgSymbol::PreserveAspectRatios pAspectRatios, QSvgSymbol::Overflow overflow,
+                       Orientation orientation, qreal orientationAngle, MarkerUnits markerUnits)
+    : QSvgSymbolLike(parent, bounds, viewBox, refP, pAspectRatios, overflow)
+    , m_orientation(orientation)
+    , m_orientationAngle(orientationAngle)
+    , m_markerUnits(markerUnits)
+{
+    // apply the svg standard style
+    QSvgFillStyle *fillProp = new QSvgFillStyle();
+    fillProp->setBrush(Qt::black);
+    appendStyleProperty(fillProp, QStringLiteral(""));
+
+    QSvgStrokeStyle *strokeProp = new QSvgStrokeStyle();
+    strokeProp->setMiterLimit(4);
+    strokeProp->setWidth(1);
+    strokeProp->setLineCap(Qt::FlatCap);
+    strokeProp->setLineJoin(Qt::SvgMiterJoin);
+    strokeProp->setStroke(Qt::NoBrush);
+    appendStyleProperty(strokeProp, QStringLiteral(""));
+}
+
+void QSvgMarker::drawCommand(QPainter *p, QSvgExtraStates &states)
+{
+    if (!states.inUse) //Symbol is only drawn in combination with another node.
+        return;
+
+    if (Q_UNLIKELY(m_recursing))
+        return;
+    QScopedValueRollback<bool> recursingGuard(m_recursing, true);
+
+    QList<QSvgNode*>::iterator itr = m_renderers.begin();
+
+    p->save();
+    applyStyle(p, states);
+
+    setPainterToRectAndAdjustment(p);
+
+    while (itr != m_renderers.end()) {
+        QSvgNode *node = *itr;
+        if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode))
+            node->draw(p, states);
+        ++itr;
+    }
+    revertStyle(p, states);
+    p->restore();
+}
+
+void QSvgMarker::drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates &states)
+{
+    QScopedValueRollback<bool> inUseGuard(states.inUse, true);
+
+    auto getMeanAngle = [] (QPointF p0, QPointF p1, QPointF p2) {
+        QPointF t1 = p1 - p0;
+        QPointF t2 = p2 - p1;
+        qreal hyp1 =  hypot(t1.x(), t1.y());
+        if (hyp1 > 0)
+            t1 /= hyp1;
+        else
+            return 0.;
+        qreal hyp2 =  hypot(t2.x(), t2.y());
+        if (hyp2 > 0)
+            t2 /= hyp2;
+        else
+            return 0.;
+        QPointF tangent = t1 + t2;
+        return -atan2(tangent.y(), tangent.x()) / M_PI * 180.;
+    };
+
+    if (node->hasAnyMarker()) {
+        QList<PositionMarkerPair> marks;
+        if (node->type() == Line) {
+            QSvgLine *line = static_cast<QSvgLine*>(node);
+            if (!line)
+                return;
+            if (node->hasMarkerStart())
+                marks << PositionMarkerPair { line->line().p1().x(), line->line().p1().y(),
+                                              line->line().angle(), line->markerStartId(),
+                                              true};
+            if (node->hasMarkerEnd())
+                marks << PositionMarkerPair { line->line().p2().x(), line->line().p2().y(),
+                                              line->line().angle(), line->markerEndId() };
+        } else if (node->type() == Polyline || node->type() == Polygon) {
+            QSvgPolyline *polyline = static_cast<QSvgPolyline*>(node);
+            QSvgPolygon *polygon = static_cast<QSvgPolygon*>(node);
+
+            const QPolygonF &polyData = (node->type() == Polyline) ? polyline->polygon() : polygon->polygon();
+
+            if (node->hasMarkerStart() && polyData.size() > 1) {
+                QLineF line(polyData.at(0), polyData.at(1));
+                marks << PositionMarkerPair { line.p1().x(),
+                                              line.p1().y(),
+                                              line.angle(),
+                                              node->markerStartId(),
+                                              true };
+            }
+            if (node->hasMarkerMid()) {
+                for (int i = 1; i < polyData.size() - 1; i++) {
+                    QPointF p0 = polyData.at(i-1);
+                    QPointF p1 = polyData.at(i);
+                    QPointF p2 = polyData.at(i+1);
+
+                    marks << PositionMarkerPair { p1.x(),
+                                                  p1.y(),
+                                                  getMeanAngle(p0, p1, p2),
+                                                  node->markerStartId() };
+                }
+            }
+            if (node->hasMarkerEnd() && polyData.size() > 1) {
+                QLineF line(polyData.at(polyData.size()-1), polyData.last());
+                marks << PositionMarkerPair { line.p2().x(),
+                                              line.p2().y(),
+                                              line.angle(),
+                                              node->markerEndId() };
+            }
+        } else if (node->type() == Path) {
+            QSvgPath *path = static_cast<QSvgPath*>(node);
+            if (!path)
+                return;
+            if (node->hasMarkerStart())
+                marks << PositionMarkerPair { path->path().pointAtPercent(0.).x(),
+                                              path->path().pointAtPercent(0.).y(),
+                                              path->path().angleAtPercent(0.),
+                                              path->markerStartId(),
+                                              true };
+            if (node->hasMarkerMid()) {
+                for (int i = 1; i < path->path().elementCount() - 1; i++) {
+                    if (path->path().elementAt(i).type == QPainterPath::MoveToElement)
+                        continue;
+                    if (path->path().elementAt(i).type == QPainterPath::CurveToElement)
+                        continue;
+                    if (( path->path().elementAt(i).type == QPainterPath::CurveToDataElement &&
+                        path->path().elementAt(i+1).type != QPainterPath::CurveToDataElement ) ||
+                        path->path().elementAt(i).type == QPainterPath::LineToElement) {
+
+                        QPointF p0(path->path().elementAt(i-1).x, path->path().elementAt(i-1).y);
+                        QPointF p1(path->path().elementAt(i).x, path->path().elementAt(i).y);
+                        QPointF p2(path->path().elementAt(i+1).x, path->path().elementAt(i+1).y);
+
+                        marks << PositionMarkerPair { p1.x(),
+                                                      p1.y(),
+                                                      getMeanAngle(p0, p1, p2),
+                                                      path->markerMidId() };
+                    }
+                }
+            }
+            if (node->hasMarkerEnd())
+                marks << PositionMarkerPair { path->path().pointAtPercent(1.).x(),
+                                              path->path().pointAtPercent(1.).y(),
+                                              path->path().angleAtPercent(1.),
+                                              path->markerEndId() };
+        }
+        for (auto &i : marks) {
+            QSvgMarker *markNode = static_cast<QSvgMarker*>(node->document()->namedNode(i.markerId));
+            if (!markNode) {
+                continue;
+            }
+            p->save();
+            p->translate(i.x, i.y);
+            if (markNode->orientation() == QSvgMarker::Orientation::Value)
+                p->rotate(markNode->orientationAngle());
+            else {
+                p->rotate(-i.angle);
+                if (i.isStartNode && markNode->orientation() == QSvgMarker::Orientation::AutoStartReverse)
+                    p->rotate(-180);
+            }
+            QRectF oldRect = markNode->m_rect;
+            if (markNode->markerUnits() == QSvgMarker::MarkerUnits::StrokeWidth) {
+                markNode->m_rect.setWidth(markNode->m_rect.width() * p->pen().widthF());
+                markNode->m_rect.setHeight(markNode->m_rect.height() * p->pen().widthF());
+            }
+            markNode->draw(p, states);
+            markNode->m_rect = oldRect;
+            p->restore();
+        }
+    }
+}
+
+QSvgNode::Type QSvgMarker::type() const
+{
+    return Marker;
 }
 
 /*

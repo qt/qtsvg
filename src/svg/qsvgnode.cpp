@@ -473,6 +473,64 @@ bool QSvgNode::hasMask() const
     return !m_maskId.isEmpty();
 }
 
+QString QSvgNode::markerStartId() const
+{
+    return m_markerStartId;
+}
+
+void QSvgNode::setMarkerStartId(const QString &str)
+{
+    m_markerStartId = str;
+}
+
+bool QSvgNode::hasMarkerStart() const
+{
+    if (document()->featureSet() == QSvg::FeatureSet::StaticTiny1_2)
+        return false;
+    return !m_markerStartId.isEmpty();
+}
+
+QString QSvgNode::markerMidId() const
+{
+    return m_markerMidId;
+}
+
+void QSvgNode::setMarkerMidId(const QString &str)
+{
+    m_markerMidId = str;
+}
+
+bool QSvgNode::hasMarkerMid() const
+{
+    if (document()->featureSet() == QSvg::FeatureSet::StaticTiny1_2)
+        return false;
+    return !m_markerMidId.isEmpty();
+}
+
+QString QSvgNode::markerEndId() const
+{
+    return m_markerEndId;
+}
+
+void QSvgNode::setMarkerEndId(const QString &str)
+{
+    m_markerEndId = str;
+}
+
+bool QSvgNode::hasMarkerEnd() const
+{
+    if (document()->featureSet() == QSvg::FeatureSet::StaticTiny1_2)
+        return false;
+    return !m_markerEndId.isEmpty();
+}
+
+bool QSvgNode::hasAnyMarker() const
+{
+    if (document()->featureSet() == QSvg::FeatureSet::StaticTiny1_2)
+        return false;
+    return hasMarkerStart() || hasMarkerMid() || hasMarkerEnd();
+}
+
 void QSvgNode::setDisplayMode(DisplayMode mode)
 {
     m_displayMode = mode;

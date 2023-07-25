@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "qsvggraphics_p.h"
-
+#include "qsvgstructure_p.h"
 #include "qsvgfont_p.h"
 
 #include <qabstracttextdocumentlayout.h>
@@ -98,16 +98,19 @@ void QSvgLine::drawCommand(QPainter *p, QSvgExtraStates &states)
         p->drawLine(m_line);
         p->setOpacity(oldOpacity);
     }
+    QSvgMarker::drawMarkersForNode(this, p, states);
 }
 
 QSvgPath::QSvgPath(QSvgNode *parent, const QPainterPath &qpath)
     : QSvgNode(parent), m_path(qpath)
 {
 }
+
 void QSvgPath::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
     m_path.setFillRule(states.fillRule);
     p->drawPath(m_path);
+    QSvgMarker::drawMarkersForNode(this, p, states);
 }
 
 bool QSvgPath::separateFillStroke() const
@@ -152,6 +155,7 @@ QRectF QSvgPolygon::bounds(QPainter *p, QSvgExtraStates &) const
 void QSvgPolygon::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
     p->drawPolygon(m_poly, states.fillRule);
+    QSvgMarker::drawMarkersForNode(this, p, states);
 }
 
 bool QSvgPolygon::separateFillStroke() const
@@ -167,10 +171,12 @@ QSvgPolyline::QSvgPolyline(QSvgNode *parent, const QPolygonF &poly)
 
 void QSvgPolyline::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
-    if (p->brush().style() != Qt::NoBrush)
+    if (p->brush().style() != Qt::NoBrush) {
         p->drawPolygon(m_poly, states.fillRule);
-    else
+    } else {
         p->drawPolyline(m_poly);
+        QSvgMarker::drawMarkersForNode(this, p, states);
+    }
 }
 
 bool QSvgPolyline::separateFillStroke() const
@@ -502,6 +508,8 @@ void QSvgUse::drawCommand(QPainter *p, QSvgExtraStates &states)
         qCDebug(lcSvgDraw, "Too many nested use nodes at #%s!", qPrintable(m_linkId));
         return;
     }
+
+    QScopedValueRollback<bool> inUseGuard(states.inUse, true);
 
     if (!m_start.isNull()) {
         p->translate(m_start);
