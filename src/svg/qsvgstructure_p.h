@@ -157,6 +157,21 @@ private:
     MarkerUnits m_markerUnits;
 };
 
+class Q_SVG_PRIVATE_EXPORT QSvgFilterContainer : public QSvgStructureNode
+{
+public:
+
+    QSvgFilterContainer(QSvgNode *parent, const QSvgRectF &bounds, QSvg::UnitTypes filterUnits, QSvg::UnitTypes primitiveUnits);
+    void drawCommand(QPainter *, QSvgExtraStates &) override {};
+    Type type() const override;
+    QImage applyFilter(QSvgNode *referenceNode, const QImage &buffer, QPainter *p, QRectF bounds) const;
+private:
+    QSvgRectF m_rect;
+    QSvg::UnitTypes m_filterUnits;
+    QSvg::UnitTypes m_primitiveUnits;
+};
+
+
 class Q_SVG_PRIVATE_EXPORT QSvgSwitch : public QSvgStructureNode
 {
 public:

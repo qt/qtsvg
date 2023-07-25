@@ -43,13 +43,29 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
 
     if (shouldDrawNode(p, states)) {
         applyStyle(p, states);
-        if (this->hasMask()) {
-            QSvgNode *maskNode = document()->namedNode(this->maskId());
+        QSvgNode *maskNode = this->hasMask() ? document()->namedNode(this->maskId()) : nullptr;
+        QSvgNode *filterNode = this->hasFilter() ? document()->namedNode(this->filterId()) : nullptr;
+        if (filterNode && filterNode->type() == QSvgNode::Filter) {
+            QTransform xf = p->transform();
+            p->resetTransform();
+            QRectF localRect = bounds(p, states);
+            QRectF boundsRect = xf.mapRect(localRect);
+            p->setTransform(xf);
+            QImage proxy = drawIntoBuffer(p, states, boundsRect.toRect());
+            proxy = static_cast<QSvgFilterContainer*>(filterNode)->applyFilter(this, proxy, p, localRect);
+
+            boundsRect = QRectF(proxy.offset(), proxy.size());
+            localRect = p->transform().inverted().mapRect(boundsRect);
             if (maskNode && maskNode->type() == QSvgNode::Mask) {
-                QRectF boundsRect;
-                QImage mask = static_cast<QSvgMask*>(maskNode)->createMask(p, states, this, &boundsRect);
-                drawWithMask(p, states, mask, boundsRect.toRect());
+                QImage mask = static_cast<QSvgMask*>(maskNode)->createMask(p, states, localRect, &boundsRect);
+                applyMaskToBuffer(&proxy, mask);
             }
+            applyBufferToCanvas(p, proxy);
+
+        } else if (maskNode && maskNode->type() == QSvgNode::Mask) {
+            QRectF boundsRect;
+            QImage mask = static_cast<QSvgMask*>(maskNode)->createMask(p, states, this, &boundsRect);
+            drawWithMask(p, states, mask, boundsRect.toRect());
         } else {
             if (separateFillStroke())
                 fillThenStroke(p, states);
@@ -114,6 +130,7 @@ QImage QSvgNode::drawIntoBuffer(QPainter *p, QSvgExtraStates &states, const QRec
     QPainter proxyPainter(&proxy);
     proxyPainter.setPen(p->pen());
     proxyPainter.setBrush(p->brush());
+    proxyPainter.setFont(p->font());
     proxyPainter.translate(-boundsRect.topLeft());
     proxyPainter.setTransform(p->transform(), true);
     proxyPainter.setRenderHints(p->renderHints());
@@ -132,12 +149,12 @@ void QSvgNode::applyMaskToBuffer(QImage *proxy, QImage mask) const
     proxyPainter.drawImage(QRect(0, 0, mask.width(), mask.height()), mask);
 }
 
-void QSvgNode::applyBufferToCanvas(QPainter *p, QImage proxy, QRect boundsRect) const
+void QSvgNode::applyBufferToCanvas(QPainter *p, QImage proxy) const
 {
-    QTransform t = p->transform();
+    QTransform xf = p->transform();
     p->resetTransform();
-    p->drawImage(boundsRect, proxy);
-    p->setTransform(t);
+    p->drawImage(QRect(proxy.offset(), proxy.size()), proxy);
+    p->setTransform(xf);
 }
 
 bool QSvgNode::isDescendantOf(const QSvgNode *parent) const
@@ -481,6 +498,23 @@ bool QSvgNode::hasMask() const
     if (document()->featureSet() == QSvg::FeatureSet::StaticTiny1_2)
         return false;
     return !m_maskId.isEmpty();
+}
+
+QString QSvgNode::filterId() const
+{
+    return m_filterId;
+}
+
+void QSvgNode::setFilterId(const QString &str)
+{
+    m_filterId = str;
+}
+
+bool QSvgNode::hasFilter() const
+{
+    if (document()->featureSet() == QSvg::FeatureSet::StaticTiny1_2)
+        return false;
+    return !m_filterId.isEmpty();
 }
 
 QString QSvgNode::markerStartId() const

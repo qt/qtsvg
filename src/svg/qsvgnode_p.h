@@ -94,7 +94,7 @@ public:
     QImage drawIntoBuffer(QPainter *p, QSvgExtraStates &states, const QRect &boundsRect);
     void applyMaskToBuffer(QImage *proxy, QImage mask) const;
     void drawWithMask(QPainter *p, QSvgExtraStates &states, const QImage &mask, const QRect &boundsRect);
-    void applyBufferToCanvas(QPainter *p, QImage proxy, QRect boundsRect) const;
+    void applyBufferToCanvas(QPainter *p, QImage proxy) const;
 
     QSvgNode *parent() const;
     bool isDescendantOf(const QSvgNode *parent) const;
@@ -145,6 +145,10 @@ public:
     void setMaskId(const QString &str);
     bool hasMask() const;
 
+    QString filterId() const;
+    void setFilterId(const QString &str);
+    bool hasFilter() const;
+
     QString markerStartId() const;
     void setMarkerStartId(const QString &str);
     bool hasMarkerStart() const;
@@ -179,6 +183,7 @@ private:
     QString m_id;
     QString m_class;
     QString m_maskId;
+    QString m_filterId;
     QString m_markerStartId;
     QString m_markerMidId;
     QString m_markerEndId;

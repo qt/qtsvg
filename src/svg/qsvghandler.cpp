@@ -8,6 +8,7 @@
 #include "qsvgtinydocument_p.h"
 #include "qsvgstructure_p.h"
 #include "qsvggraphics_p.h"
+#include "qsvgfilter_p.h"
 #include "qsvgnode_p.h"
 #include "qsvgfont_p.h"
 
@@ -191,6 +192,7 @@ struct QSvgAttributes
     QStringView markerStart;
     QStringView markerMid;
     QStringView markerEnd;
+    QStringView filter;
 
 
 #ifndef QT_NO_CSSPARSER
@@ -240,6 +242,9 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
                 fontWeight = value;
             else if (name == QLatin1String("font-variant"))
                 fontVariant = value;
+            else if (name == QLatin1String("filter") &&
+                     handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                filter = value;
             break;
 
         case 'i':
@@ -366,6 +371,9 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
                     fontWeight = value;
                 else if (name == QLatin1String("font-variant"))
                     fontVariant = value;
+                else if (name == QLatin1String("filter") &&
+                         handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                    filter = value;
                 break;
 
             case 'i':
@@ -2334,6 +2342,19 @@ static void parseExtendedAttributes(QSvgNode *node,
             markerId.remove(0, 1);
         node->setMarkerEndId(markerId);
     }
+
+    if (!attributes.filter.isEmpty() &&
+        handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2) {
+        QString filterStr = attributes.filter.toString().trimmed();
+
+        if (filterStr.size() > 3 && filterStr.mid(0, 3) == QLatin1String("url"))
+            filterStr = filterStr.mid(3, filterStr.size() - 3);
+        QString filterId = idFromUrl(filterStr);
+        if (filterId.startsWith(QLatin1Char('#'))) //TODO: handle urls and ids in a single place
+            filterId.remove(0, 1);
+        node->setFilterId(filterId);
+    }
+
 }
 
 static void parseRenderingHints(QSvgNode *node,
@@ -3133,6 +3154,315 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
     return mask;
 }
 
+static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes,
+                              QSvgHandler *handler, QSvgRectF *rect)
+{
+    const QStringView xStr        = attributes.value(QLatin1String("x"));
+    const QStringView yStr        = attributes.value(QLatin1String("y"));
+    const QStringView widthStr    = attributes.value(QLatin1String("width"));
+    const QStringView heightStr   = attributes.value(QLatin1String("height"));
+
+    qreal x = 0;
+    if (!xStr.isEmpty()) {
+        QSvgHandler::LengthType type;
+        x = parseLength(xStr.toString(), &type, handler);
+        if (type != QSvgHandler::LT_PT)
+            x = convertToPixels(x, true, type);
+        rect->setX(x);
+    } else {
+        rect->setX(-0.1);
+        rect->setUnitX(QSvg::UnitTypes::objectBoundingBox);
+    }
+    qreal y = 0;
+    if (!yStr.isEmpty()) {
+        QSvgHandler::LengthType type;
+        y = parseLength(yStr.toString(), &type, handler);
+        if (type != QSvgHandler::LT_PT)
+            y = convertToPixels(y, false, type);
+        rect->setY(y);
+    } else {
+        rect->setY(-0.1);
+        rect->setUnitY(QSvg::UnitTypes::objectBoundingBox);
+    }
+    qreal width = 0;
+    if (!widthStr.isEmpty()) {
+        QSvgHandler::LengthType type;
+        width = parseLength(widthStr.toString(), &type, handler);
+        if (type != QSvgHandler::LT_PT)
+            width = convertToPixels(width, true, type);
+        rect->setWidth(width);
+    } else {
+        rect->setWidth(1.2);
+        rect->setUnitW(QSvg::UnitTypes::objectBoundingBox);
+    }
+    qreal height = 0;
+    if (!heightStr.isEmpty()) {
+        QSvgHandler::LengthType type;
+        height = parseLength(heightStr.toString(), &type, handler);
+        if (type != QSvgHandler::LT_PT)
+            height = convertToPixels(height, false, type);
+        rect->setHeight(height);
+    } else {
+        rect->setHeight(1.2);
+        rect->setUnitH(QSvg::UnitTypes::objectBoundingBox);
+    }
+}
+
+static QSvgNode *createFilterNode(QSvgNode *parent,
+                          const QXmlStreamAttributes &attributes,
+                          QSvgHandler *handler)
+{
+    QString fU = attributes.value(QLatin1String("filterUnits")).toString();
+    QString pU = attributes.value(QLatin1String("primitiveUnits")).toString();
+
+    QSvg::UnitTypes filterUnits = fU.contains(QLatin1String("userSpaceOnUse")) ?
+                QSvg::UnitTypes::userSpaceOnUse : QSvg::UnitTypes::objectBoundingBox;
+
+    QSvg::UnitTypes primitiveUnits = pU.contains(QLatin1String("objectBoundingBox")) ?
+                QSvg::UnitTypes::objectBoundingBox : QSvg::UnitTypes::userSpaceOnUse;
+
+    QSvgRectF rect;
+    parseFilterBounds(parent, attributes, handler, &rect);
+
+    QSvgNode *filter = new QSvgFilterContainer(parent, rect, filterUnits, primitiveUnits);
+    return filter;
+}
+
+static void parseFilterAttributes(QSvgNode *parent, const QXmlStreamAttributes &attributes,
+                                  QSvgHandler *handler, QString *inString, QString *outString,
+                                  QSvgRectF *rect)
+{
+    *inString = attributes.value(QLatin1String("in")).toString();
+    *outString = attributes.value(QLatin1String("result")).toString();
+
+    parseFilterBounds(parent, attributes, handler, rect);
+}
+
+static QSvgNode *createFeColorMatrixNode(QSvgNode *parent,
+                                        const QXmlStreamAttributes &attributes,
+                                        QSvgHandler *handler)
+{
+    const QString typeString = attributes.value(QLatin1String("type")).toString();
+    QString valuesString = attributes.value(QLatin1String("values")).toString();
+
+    QString inputString;
+    QString outputString;
+    QSvgRectF rect;
+
+    QSvgFeColorMatrix::ColorShiftType type;
+    QSvgFeColorMatrix::Matrix values;
+    values.fill(0);
+
+    parseFilterAttributes(parent, attributes, handler,
+                          &inputString, &outputString, &rect);
+
+    if (typeString.startsWith(QLatin1String("saturate")))
+        type = QSvgFeColorMatrix::ColorShiftType::Saturate;
+    else if (typeString.startsWith(QLatin1String("hueRotate")))
+        type = QSvgFeColorMatrix::ColorShiftType::HueRotate;
+    else if (typeString.startsWith(QLatin1String("luminanceToAlpha")))
+        type = QSvgFeColorMatrix::ColorShiftType::LuminanceToAlpha;
+    else
+        type = QSvgFeColorMatrix::ColorShiftType::Matrix;
+
+    if (!valuesString.isEmpty()) {
+        static QRegularExpression delimiterRE(QLatin1String("[,\\s]"));
+        const QStringList valueStringList = valuesString.split(delimiterRE, Qt::SkipEmptyParts);
+
+        for (int i = 0, j = 0; i < qMin(20, valueStringList.size()); i++) {
+            bool ok;
+            qreal v = toDouble(valueStringList.at(i), &ok);
+            if (ok) {
+                values.data()[j] = v;
+                j++;
+            }
+        }
+    } else {
+        values.setToIdentity();
+    }
+
+    QSvgNode *filter = new QSvgFeColorMatrix(parent, inputString, outputString, rect,
+                                             type, values);
+    return filter;
+}
+
+static QSvgNode *createFeGaussianBlurNode(QSvgNode *parent,
+                                          const QXmlStreamAttributes &attributes,
+                                          QSvgHandler *handler)
+{
+    const QString edgeModeString    = attributes.value(QLatin1String("edgeMode")).toString();
+    QString stdDeviationString  = attributes.value(QLatin1String("stdDeviation")).toString();
+
+    QString inputString;
+    QString outputString;
+    QSvgRectF rect;
+
+    QSvgFeGaussianBlur::EdgeMode edgemode = QSvgFeGaussianBlur::EdgeMode::Duplicate;
+
+    parseFilterAttributes(parent, attributes, handler,
+                          &inputString, &outputString, &rect);
+    qreal stdDeviationX = 0;
+    qreal stdDeviationY = 0;
+    if (stdDeviationString.contains(QStringLiteral(" "))){
+        stdDeviationX = qMax(0., toDouble(stdDeviationString.split(QStringLiteral(" ")).first()));
+        stdDeviationY = qMax(0., toDouble(stdDeviationString.split(QStringLiteral(" ")).last()));
+    } else {
+        stdDeviationY = stdDeviationX = qMax(0., toDouble(stdDeviationString));
+    }
+
+    if (edgeModeString.startsWith(QLatin1String("wrap")))
+        edgemode = QSvgFeGaussianBlur::EdgeMode::Wrap;
+    else if (edgeModeString.startsWith(QLatin1String("none")))
+        edgemode = QSvgFeGaussianBlur::EdgeMode::None;
+
+    QSvgNode *filter = new QSvgFeGaussianBlur(parent, inputString, outputString, rect,
+                                              stdDeviationX, stdDeviationY, edgemode);
+    return filter;
+}
+
+static QSvgNode *createFeOffsetNode(QSvgNode *parent,
+                                    const QXmlStreamAttributes &attributes,
+                                    QSvgHandler *handler)
+{
+    QStringView dxString = attributes.value(QLatin1String("dx"));
+    QStringView dyString = attributes.value(QLatin1String("dy"));
+
+    QString inputString;
+    QString outputString;
+    QSvgRectF rect;
+
+    parseFilterAttributes(parent, attributes, handler,
+                          &inputString, &outputString, &rect);
+
+    qreal dx = 0;
+    if (!dxString.isEmpty()) {
+        QSvgHandler::LengthType type;
+        dx = parseLength(dxString.toString(), &type, handler);
+        if (type != QSvgHandler::LT_PT)
+            dx = convertToPixels(dx, true, type);
+    }
+
+    qreal dy = 0;
+    if (!dyString.isEmpty()) {
+        QSvgHandler::LengthType type;
+        dy = parseLength(dyString.toString(), &type, handler);
+        if (type != QSvgHandler::LT_PT)
+            dy = convertToPixels(dy, true, type);
+    }
+
+    QSvgNode *filter = new QSvgFeOffset(parent, inputString, outputString, rect,
+                                        dx, dy);
+    return filter;
+}
+
+static QSvgNode *createFeCompositeNode(QSvgNode *parent,
+                                  const QXmlStreamAttributes &attributes,
+                                  QSvgHandler *handler)
+{
+    QString in2String        = attributes.value(QLatin1String("in2")).toString();
+    QString operatorString   = attributes.value(QLatin1String("operator")).toString();
+    QString k1String         = attributes.value(QLatin1String("k1")).toString();
+    QString k2String         = attributes.value(QLatin1String("k2")).toString();
+    QString k3String         = attributes.value(QLatin1String("k3")).toString();
+    QString k4String         = attributes.value(QLatin1String("k4")).toString();
+
+    QString inputString;
+    QString outputString;
+    QSvgRectF rect;
+
+    parseFilterAttributes(parent, attributes, handler,
+                          &inputString, &outputString, &rect);
+
+    QSvgFeComposite::Operator op = QSvgFeComposite::Operator::Over;
+    if (operatorString.startsWith(QStringLiteral("in")))
+        op = QSvgFeComposite::Operator::In;
+    else if (operatorString.startsWith(QStringLiteral("out")))
+        op = QSvgFeComposite::Operator::Out;
+    else if (operatorString.startsWith(QStringLiteral("atop")))
+        op = QSvgFeComposite::Operator::Atop;
+    else if (operatorString.startsWith(QStringLiteral("xor")))
+        op = QSvgFeComposite::Operator::Xor;
+    else if (operatorString.startsWith(QStringLiteral("lighter")))
+        op = QSvgFeComposite::Operator::Lighter;
+    else if (operatorString.startsWith(QStringLiteral("arithmetic")))
+        op = QSvgFeComposite::Operator::Arithmetic;
+
+    QVector4D k(0, 0, 0, 0);
+
+    if (op == QSvgFeComposite::Operator::Arithmetic) {
+        bool ok;
+        qreal v = toDouble(k1String, &ok);
+        if (ok)
+            k.setX(v);
+        v = toDouble(k2String, &ok);
+        if (ok)
+            k.setY(v);
+        v = toDouble(k3String, &ok);
+        if (ok)
+            k.setZ(v);
+        v = toDouble(k4String, &ok);
+        if (ok)
+            k.setW(v);
+    }
+
+    QSvgNode *filter = new QSvgFeComposite(parent, inputString, outputString, rect,
+                                           in2String, op, k);
+    return filter;
+}
+
+
+static QSvgNode *createFeMergeNode(QSvgNode *parent,
+                                   const QXmlStreamAttributes &attributes,
+                                   QSvgHandler *handler)
+{
+    QString inputString;
+    QString outputString;
+    QSvgRectF rect;
+
+    parseFilterAttributes(parent, attributes, handler,
+                          &inputString, &outputString, &rect);
+
+    QSvgNode *filter = new QSvgFeMerge(parent, inputString, outputString, rect);
+    return filter;
+}
+
+static QSvgNode *createFeFloodNode(QSvgNode *parent,
+                                   const QXmlStreamAttributes &attributes,
+                                   QSvgHandler *handler)
+{
+    QStringView colorStr          = attributes.value(QLatin1String("flood-color"));
+    const QStringView opacityStr  = attributes.value(QLatin1String("flood-opacity"));
+
+    QColor color;
+    if (!constructColor(colorStr, opacityStr, color, handler))
+        color = QColor(Qt::black);
+
+    QString inputString;
+    QString outputString;
+    QSvgRectF rect;
+
+    parseFilterAttributes(parent, attributes, handler,
+                          &inputString, &outputString, &rect);
+
+    QSvgNode *filter = new QSvgFeFlood(parent, inputString, outputString, rect, color);
+    return filter;
+}
+
+static QSvgNode *createFeMergeNodeNode(QSvgNode *parent,
+                                       const QXmlStreamAttributes &attributes,
+                                       QSvgHandler *handler)
+{
+    QString inputString;
+    QString outputString;
+    QSvgRectF rect;
+
+    parseFilterAttributes(parent, attributes, handler,
+                          &inputString, &outputString, &rect);
+
+    QSvgNode *filter = new QSvgFeMergeNode(parent, inputString, outputString, rect);
+    return filter;
+}
+
 static bool parseSymbolLikeAttributes(const QXmlStreamAttributes &attributes, QSvgHandler *handler,
                                       QRectF *rect, QRectF *viewBox, QPointF *refPoint,
                                       QSvgSymbolLike::PreserveAspectRatios *aspect,
@@ -3899,6 +4229,9 @@ static FactoryMethod findGroupFactory(const QString &name, QSvg::FeatureSet feat
     case 'd':
         if (ref == QLatin1String("efs")) return createDefsNode;
         break;
+    case 'f':
+        if (ref == QLatin1String("ilter") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return createFilterNode;
+        break;
     case 'g':
         if (ref.isEmpty()) return createGNode;
         break;
@@ -3965,6 +4298,28 @@ static FactoryMethod findGraphicsFactory(const QString &name, QSvg::FeatureSet f
     default:
         break;
     }
+    return 0;
+}
+
+static FactoryMethod findFilterFtory(const QString &name, QSvg::FeatureSet featureSet)
+{
+    if (featureSet == QSvg::FeatureSet::StaticTiny1_2)
+        return 0;
+
+    if (name.isEmpty())
+        return 0;
+
+    if (!name.startsWith(QLatin1String("fe")))
+        return 0;
+
+    if (name == QLatin1String("feMerge")) return createFeMergeNode;
+    if (name == QLatin1String("feColorMatrix")) return createFeColorMatrixNode;
+    if (name == QLatin1String("feGaussianBlur")) return createFeGaussianBlurNode;
+    if (name == QLatin1String("feOffset")) return createFeOffsetNode;
+    if (name == QLatin1String("feMergeNode")) return createFeMergeNodeNode;
+    if (name == QLatin1String("feComposite")) return createFeCompositeNode;
+    if (name == QLatin1String("feFlood")) return createFeFloodNode;
+
     return 0;
 }
 
@@ -4377,6 +4732,23 @@ bool QSvgHandler::startElement(const QString &localName,
                     if (!useNode->isResolved())
                         m_toBeResolved.append(useNode);
                 }
+            }
+        }
+    } else if (FactoryMethod method = findFilterFtory(localName, featureSet())) {
+        //filter nodes to be aded to be filtercontainer
+        Q_ASSERT(!m_nodes.isEmpty());
+        node = method(m_nodes.top(), attributes, this);
+        if (node) {
+            if (m_nodes.top()->type() == QSvgNode::Filter ||
+                (m_nodes.top()->type() == QSvgNode::FeMerge && node->type() == QSvgNode::FeMergenode)) {
+                QSvgStructureNode *container =
+                    static_cast<QSvgStructureNode*>(m_nodes.top());
+                container->addChild(node, someId(attributes));
+            } else {
+                const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
+                qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
+                delete node;
+                node = 0;
             }
         }
     } else if (ParseMethod method = findUtilFactory(localName, featureSet())) {

@@ -72,6 +72,12 @@ private slots:
     void testMarker();
     void testPatternElement();
     void testCycles();
+    void testFeFlood();
+    void testFeOffset();
+    void testFeColorMatrix();
+    void testFeMerge();
+    void testFeComposite();
+    void testFeGaussian();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -1914,7 +1920,6 @@ void tst_QSvgRenderer::notAnimated()
     QVERIFY(!renderer.isAnimationEnabled());
 }
 
-
 void tst_QSvgRenderer::testPatternElement()
 {
     QByteArray svgDoc("<svg viewBox=\"0 0 200 200\">"
@@ -1966,6 +1971,196 @@ void tst_QSvgRenderer::testCycles()
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(!renderer.isValid());
+}
+
+void tst_QSvgRenderer::testFeFlood()
+{
+    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
+                      "<filter id=\"f1\">"
+                      "<feFlood flood-color=\"red\"/>"
+                      "</filter>"
+                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" fill=\"blue\" filter=\"url(#f1)\"/>"
+                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" fill=\"blue\"/>"
+                      "</svg>");
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(100, 100, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+    QImage refImage(100, 100, QImage::Format_ARGB32_Premultiplied);
+    refImage.fill(Qt::white);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    p.begin(&refImage);
+    p.fillRect(14, 14, 72, 72, Qt::red);
+    p.fillRect(20, 20, 60, 60, Qt::blue);
+    p.end();
+
+    QCOMPARE(refImage, image);
+}
+
+void tst_QSvgRenderer::testFeOffset()
+{
+    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
+                      "<defs>"
+                      "<filter id=\"f1\">"
+                      "<feOffset in=\"SourceGraphic\" dx=\"5\" dy=\"5\"/>"
+                      "</filter>"
+                      "</defs>"
+                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" stroke=\"none\" fill=\"blue\"/>"
+                      "</svg>"
+);
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(50, 50, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+    QImage refImage(50, 50, QImage::Format_ARGB32_Premultiplied);
+    refImage.fill(Qt::white);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    p.begin(&refImage);
+    p.fillRect(10, 10, 30, 30, Qt::blue);
+    p.end();
+
+    QCOMPARE(refImage, image);
+}
+
+void tst_QSvgRenderer::testFeColorMatrix()
+{
+    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
+                      "<defs>"
+                      "<filter id=\"f1\">"
+                      "<feColorMatrix in=\"SourceGraphic\" type=\"saturate\" values=\"0\"/>"
+                      "</filter>"
+                      "</defs>"
+                      "<rect x=\"0\" y=\"0\" width=\"50\" height=\"50\" stroke=\"none\" fill=\"red\" filter=\"url(#f1)\" />"
+                      "</svg>"
+);
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(50, 50, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+    QImage refImage(50, 50, QImage::Format_ARGB32_Premultiplied);
+    refImage.fill(Qt::white);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    QVERIFY(image.allGray());
+}
+
+void tst_QSvgRenderer::testFeMerge()
+{
+    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
+                      "<filter id=\"f1\">"
+                      "<feOffset in=\"SourceAlpha\" dx=\"2\" dy=\"2\"/>"
+                      "<feMerge>"
+                      "<feMergeNode/>"
+                      "<feMergeNode in=\"SourceGraphic\"/>"
+                      "</feMerge>"
+                      "</filter>"
+                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" fill=\"blue\" filter=\"url(#f1)\"/>"
+                      "</svg>"
+);
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(50, 50, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+    QImage refImage(50, 50, QImage::Format_ARGB32_Premultiplied);
+    refImage.fill(Qt::white);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    p.begin(&refImage);
+    p.fillRect(12, 12, 30, 30, Qt::black);
+    p.fillRect(10, 10, 30, 30, Qt::blue);
+    p.end();
+
+    QCOMPARE(refImage, image);
+}
+
+
+void tst_QSvgRenderer::testFeComposite()
+{
+    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
+                      "<filter id=\"f1\">"
+                      "<feOffset in=\"SourceAlpha\" dx=\"2\" dy=\"2\"/>"
+                      "<feComposite in2=\"SourceGraphic\" operator=\"over\"/>"
+                      "</filter>"
+                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" fill=\"blue\" filter=\"url(#f1)\"/>"
+                      "</svg>"
+);
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(50, 50, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+    QImage refImage(50, 50, QImage::Format_ARGB32_Premultiplied);
+    refImage.fill(Qt::white);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    p.begin(&refImage);
+    p.fillRect(10, 10, 30, 30, Qt::blue);
+    p.fillRect(12, 12, 30, 30, Qt::black);
+    p.end();
+
+    QCOMPARE(refImage, image);
+}
+
+void tst_QSvgRenderer::testFeGaussian()
+{
+    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
+                      "<filter id=\"f1\">"
+                      "<feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"5\"/>"
+                      "</filter>"
+                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" fill=\"black\" filter=\"url(#f1)\"/>"
+                      "</svg>"
+);
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(50, 50, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    QVERIFY(image.allGray());
+
+    QCOMPARE(qGray(image.pixel(QPoint(0, 25))), 255);
+    QCOMPARE(qGray(image.pixel(QPoint(5, 25))), 255);
+    QCOMPARE_LE(qGray(image.pixel(QPoint(10, 25))), 150);
+    QCOMPARE_GE(qGray(image.pixel(QPoint(10, 25))), 100);
+    QCOMPARE_LE(qGray(image.pixel(QPoint(25, 25))), 10);
+
 }
 
 QTEST_MAIN(tst_QSvgRenderer)

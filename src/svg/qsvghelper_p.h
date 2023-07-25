@@ -36,7 +36,7 @@ public:
         , m_unitH(unitH)
     {}
 
-    QRectF combineWithLocalRect(const QRectF &localRect) const {
+    QRectF combinedWithLocalRect(const QRectF &localRect) const {
         QRectF result;
         if (m_unitX == QSvg::UnitTypes::objectBoundingBox)
             result.setX(localRect.x() + x() * localRect.width());
@@ -57,27 +57,6 @@ public:
         return result;
     }
 
-    QRectF combineWithLocalRect(const QRectF &localRect, QSvg::UnitTypes units) const {
-        QRectF result;
-        if (m_unitX == QSvg::UnitTypes::objectBoundingBox || units == QSvg::UnitTypes::objectBoundingBox)
-            result.setX(localRect.x() + x() * localRect.width());
-        else
-            result.setX(x());
-        if (m_unitY == QSvg::UnitTypes::objectBoundingBox || units == QSvg::UnitTypes::objectBoundingBox)
-            result.setY(localRect.y() + y() * localRect.height());
-        else
-            result.setY(y());
-        if (m_unitW == QSvg::UnitTypes::objectBoundingBox || units == QSvg::UnitTypes::objectBoundingBox)
-            result.setWidth(localRect.width() * width());
-        else
-            result.setWidth(width());
-        if (m_unitH == QSvg::UnitTypes::objectBoundingBox || units == QSvg::UnitTypes::objectBoundingBox)
-            result.setHeight(localRect.height() * height());
-        else
-            result.setHeight(height());
-        return result;
-    }
-
     QPointF translationRelativeToBoundingBox(const QRectF &boundingBox) const {
         QPointF result;
 
@@ -89,6 +68,36 @@ public:
             result.setY(y() * boundingBox.height());
         else
             result.setY(y());
+        return result;
+    }
+
+    QRectF combinedWithLocalRect(const QRectF &localRect, const QRectF &canvasRect, QSvg::UnitTypes units) const {
+        QRectF result;
+        if (units == QSvg::UnitTypes::objectBoundingBox)
+            result.setX(localRect.x() + x() * localRect.width());
+        else if (m_unitX == QSvg::UnitTypes::objectBoundingBox)
+            result.setX(canvasRect.x() + x() * canvasRect.width());
+        else
+            result.setX(x());
+        if (units == QSvg::UnitTypes::objectBoundingBox)
+            result.setY(localRect.y() + y() * localRect.height());
+        else if (m_unitY == QSvg::UnitTypes::objectBoundingBox)
+            result.setY(canvasRect.y() + y() * canvasRect.height());
+        else
+            result.setY(y());
+        if (units == QSvg::UnitTypes::objectBoundingBox)
+            result.setWidth(localRect.width() * width());
+        else if (m_unitW == QSvg::UnitTypes::objectBoundingBox)
+            result.setWidth(canvasRect.width() * width());
+        else
+            result.setWidth(width());
+        if (units == QSvg::UnitTypes::objectBoundingBox)
+            result.setHeight(localRect.height() * height());
+        else if (m_unitH == QSvg::UnitTypes::objectBoundingBox)
+            result.setHeight(canvasRect.height() * height());
+        else
+            result.setHeight(height());
+
         return result;
     }
 

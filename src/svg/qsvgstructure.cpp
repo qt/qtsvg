@@ -6,7 +6,9 @@
 
 #include "qsvgstyle_p.h"
 #include "qsvgtinydocument_p.h"
-#include <QtGui/qimageiohandler.h>
+#include "qsvggraphics_p.h"
+#include "qsvgstyle_p.h"
+#include "qsvgfilter_p.h"
 
 #include "qpainter.h"
 #include "qlocale.h"
@@ -15,7 +17,6 @@
 #include <QLoggingCategory>
 #include <qscopedvaluerollback.h>
 #include <QtGui/qimageiohandler.h>
-#include <QLoggingCategory>
 
 QT_BEGIN_NAMESPACE
 
@@ -204,6 +205,16 @@ QSvgMarker::QSvgMarker(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF 
     appendStyleProperty(strokeProp, QStringLiteral(""));
 }
 
+QSvgFilterContainer::QSvgFilterContainer(QSvgNode *parent, const QSvgRectF &bounds,
+                                         QSvg::UnitTypes filterUnits, QSvg::UnitTypes primitiveUnits)
+    : QSvgStructureNode(parent)
+    , m_rect(bounds)
+    , m_filterUnits(filterUnits)
+    , m_primitiveUnits(primitiveUnits)
+{
+
+}
+
 void QSvgMarker::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
     if (!states.inUse) //Symbol is only drawn in combination with another node.
@@ -363,6 +374,52 @@ void QSvgMarker::drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates
 QSvgNode::Type QSvgMarker::type() const
 {
     return Marker;
+}
+
+QImage QSvgFilterContainer::applyFilter(QSvgNode *item, const QImage &buffer, QPainter *p, QRectF bounds) const
+{
+    QRectF filterBounds = m_rect.combinedWithLocalRect(bounds, document()->viewBox(), m_filterUnits);
+    QRect filterBoundsGlob = p->transform().mapRect(filterBounds).toRect();
+    QRect filterBoundsGlobRel = filterBoundsGlob.translated(-buffer.offset());
+
+    if (filterBoundsGlobRel.isEmpty())
+        return buffer;
+
+    QImage proxy = buffer.copy(filterBoundsGlobRel);
+    proxy.setOffset(filterBoundsGlob.topLeft());
+
+    QImage proxyAlpha = proxy.convertedTo(QImage::Format_Alpha8).convertedTo(proxy.format());
+    // ### TODO: allocation check
+    proxyAlpha.setOffset(proxy.offset());
+
+    QMap<QString, QImage> buffers;
+    buffers[QStringLiteral("")] = proxy;
+    buffers[QStringLiteral("SourceGraphic")] = proxy;
+    buffers[QStringLiteral("SourceAlpha")] = proxyAlpha;
+
+    QImage result;
+    for (int i = 0; i < renderers().size(); i++) {
+        QSvgNode *child = renderers().at(i);
+        if (child->type() == QSvgNode::FeMerge ||
+            child->type() == QSvgNode::FeColormatrix ||
+            child->type() == QSvgNode::FeGaussianblur ||
+            child->type() == QSvgNode::FeOffset ||
+            child->type() == QSvgNode::FeComposite ||
+            child->type() == QSvgNode::FeFlood ) {
+            QSvgFeFilterPrimitive *filter = reinterpret_cast<QSvgFeFilterPrimitive*>(child);
+            result = filter->apply(item, buffers, p, bounds, filterBounds, m_primitiveUnits, m_filterUnits);
+            if (result.size().isValid()) {
+                buffers[QStringLiteral("")] = result;
+                buffers[filter->result()] = result;
+            }
+        }
+    }
+    return result;
+}
+
+QSvgNode::Type QSvgFilterContainer::type() const
+{
+    return Filter;
 }
 
 /*
@@ -715,7 +772,7 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
     // This is required to apply a clip rectangle with transformations.
     // painter.setClipRect(clipRect) sounds like the obvious thing to do but
     // created artifacts due to antialiasing.
-    QRectF clipRect = m_rect.combineWithLocalRect(localRect);
+    QRectF clipRect = m_rect.combinedWithLocalRect(localRect);
     QPainterPath clipPath;
     clipPath.setFillRule(Qt::OddEvenFill);
     clipPath.addRect(mask.rect().adjusted(-10, -10, 20, 20));
@@ -789,7 +846,7 @@ QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSv
     }
 
     // Calculate the pattern bounding box depending on the used UnitTypes
-    QRectF patternBoundingBox = m_rect.combineWithLocalRect(peBoundingBox);
+    QRectF patternBoundingBox = m_rect.combinedWithLocalRect(peBoundingBox);
 
     QSize imageSize;
     imageSize.setWidth(qCeil(patternBoundingBox.width() * t.m11() * m_transform.m11()));
@@ -864,7 +921,7 @@ void QSvgPattern::calculateAppliedTransform(QTransform &worldTransform, QRectF p
     m_appliedTransform.scale(qIsFinite(imageDownScaleFactorX) ? imageDownScaleFactorX : 1.0,
                              qIsFinite(imageDownScaleFactorY) ? imageDownScaleFactorY : 1.0);
 
-    QRectF p = m_rect.combineWithLocalRect(peLocalBB);
+    QRectF p = m_rect.combinedWithLocalRect(peLocalBB);
     m_appliedTransform.scale((p.width() * worldTransform.m11() * m_transform.m11()) / imageSize.width(),
                              (p.height() * worldTransform.m22() * m_transform.m22()) / imageSize.height());
 
