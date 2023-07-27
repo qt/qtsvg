@@ -184,6 +184,28 @@ private:
     QSvg::UnitTypes m_contentUnits;
 };
 
+class Q_SVG_PRIVATE_EXPORT QSvgPattern : public QSvgStructureNode
+{
+public:
+    QSvgPattern(QSvgNode *parent, QSvgRectF bounds, QRectF viewBox,
+                QSvg::UnitTypes contentUnits, QTransform transform);
+    void drawCommand(QPainter *, QSvgExtraStates &) override {};
+    QImage patternImage(QPainter *p, QSvgExtraStates &states, const QSvgNode *patternElement);
+    Type type() const override;
+    const QTransform& appliedTransform() const { return m_appliedTransform; }
+
+private:
+    QImage renderPattern(QPainter *p, QSize size, qreal contentScaleX, qreal contentScaleY);
+    void calculateAppliedTransform(QTransform& worldTransform, QRectF peLocalBB, QSize imageSize);
+
+private:
+    QTransform m_appliedTransform;
+    QSvgRectF m_rect;
+    QRectF m_viewBox;
+    QSvg::UnitTypes m_contentUnits;
+    QTransform m_transform;
+};
+
 QT_END_NAMESPACE
 
 #endif // QSVGSTRUCTURE_P_H

@@ -126,7 +126,7 @@ void QSvgFillStyle::setBrush(QBrush brush)
     m_fillSet = 1;
 }
 
-void QSvgFillStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &states)
+void QSvgFillStyle::apply(QPainter *p, const QSvgNode *n, QSvgExtraStates &states)
 {
     m_oldFill = p->brush();
     m_oldFillRule = states.fillRule;
@@ -136,7 +136,7 @@ void QSvgFillStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &states
         states.fillRule = m_fillRule;
     if (m_fillSet) {
         if (m_style)
-            p->setBrush(m_style->brush(p, states));
+            p->setBrush(m_style->brush(p, n, states));
         else
             p->setBrush(m_fill);
     }
@@ -264,7 +264,7 @@ QSvgStrokeStyle::QSvgStrokeStyle()
 {
 }
 
-void QSvgStrokeStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &states)
+void QSvgStrokeStyle::apply(QPainter *p, const QSvgNode *n, QSvgExtraStates &states)
 {
     m_oldStroke = p->pen();
     m_oldStrokeOpacity = states.strokeOpacity;
@@ -289,7 +289,7 @@ void QSvgStrokeStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &stat
 
     if (m_strokeSet) {
         if (m_style)
-            pen.setBrush(m_style->brush(p, states));
+            pen.setBrush(m_style->brush(p, n, states));
         else
             pen.setBrush(m_stroke.brush());
     }
@@ -384,7 +384,7 @@ QSvgGradientStyle::QSvgGradientStyle(QGradient *grad)
 {
 }
 
-QBrush QSvgGradientStyle::brush(QPainter *, QSvgExtraStates &)
+QBrush QSvgGradientStyle::brush(QPainter *, const QSvgNode *, QSvgExtraStates &)
 {
     if (!m_link.isEmpty()) {
         resolveStops();
@@ -408,6 +408,20 @@ QBrush QSvgGradientStyle::brush(QPainter *, QSvgExtraStates &)
 void QSvgGradientStyle::setTransform(const QTransform &transform)
 {
     m_transform = transform;
+}
+
+QSvgPatternStyle::QSvgPatternStyle(QSvgPattern *pattern)
+    : m_pattern(pattern)
+{
+
+}
+
+QBrush QSvgPatternStyle::brush(QPainter *p, const QSvgNode *node, QSvgExtraStates &states)
+{
+    m_patternImage = m_pattern->patternImage(p, states, node);
+    QBrush b(m_patternImage);
+    b.setTransform(m_pattern->appliedTransform());
+    return b;
 }
 
 QSvgTransformStyle::QSvgTransformStyle(const QTransform &trans)
@@ -459,6 +473,11 @@ QSvgStyleProperty::Type QSvgSolidColorStyle::type() const
 QSvgStyleProperty::Type QSvgGradientStyle::type() const
 {
     return GRADIENT;
+}
+
+QSvgStyleProperty::Type QSvgPatternStyle::type() const
+{
+    return PATTERN;
 }
 
 QSvgStyleProperty::Type QSvgTransformStyle::type() const

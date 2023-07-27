@@ -14,6 +14,8 @@
 
 #include <QLoggingCategory>
 #include <qscopedvaluerollback.h>
+#include <QtGui/qimageiohandler.h>
+#include <QLoggingCategory>
 
 QT_BEGIN_NAMESPACE
 
@@ -727,6 +729,152 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
 QSvgNode::Type QSvgMask::type() const
 {
     return Mask;
+}
+
+QSvgPattern::QSvgPattern(QSvgNode *parent, QSvgRectF bounds, QRectF viewBox,
+                         QSvg::UnitTypes contentUnits, QTransform transform)
+    : QSvgStructureNode(parent),
+    m_rect(bounds),
+    m_viewBox(viewBox),
+    m_contentUnits(contentUnits),
+    m_transform(transform)
+
+{
+
+}
+
+static QImage& defaultPattern()
+{
+    static QImage checkerPattern;
+
+    if (checkerPattern.isNull()) {
+        checkerPattern = QImage(QSize(8, 8), QImage::Format_ARGB32);
+        QPainter p(&checkerPattern);
+        p.fillRect(QRect(0, 0, 4, 4), QColorConstants::Svg::white);
+        p.fillRect(QRect(4, 0, 4, 4), QColorConstants::Svg::black);
+        p.fillRect(QRect(0, 4, 4, 4), QColorConstants::Svg::black);
+        p.fillRect(QRect(4, 4, 4, 4), QColorConstants::Svg::white);
+    }
+
+    return checkerPattern;
+}
+
+QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSvgNode *patternElement)
+{
+    // pe stands for Pattern Element
+    QRectF peBoundingBox;
+    QRectF peWorldBoundingBox;
+
+    QTransform t = p->transform();
+    p->resetTransform();
+    peBoundingBox = patternElement->bounds(p, states);
+    peWorldBoundingBox = t.mapRect(peBoundingBox);
+    p->setTransform(t);
+
+    // This function renders the pattern into an Image, so we need to apply the correct
+    // scaling values when we draw the pattern. The scaling is affected by two factors :
+    //      - The "patternTransform" attribute which itself might contain a scaling
+    //      - The scaling applied globally.
+    // The first is obtained from m11 and m22 matrix elements,
+    // while the second is calculated by dividing the patternElement global size
+    // by its local size.
+    qreal contentScaleFactorX = m_transform.m11();
+    qreal contentScaleFactorY = m_transform.m22();
+    if (m_contentUnits == QSvg::UnitTypes::userSpaceOnUse) {
+        contentScaleFactorX *= t.m11();
+        contentScaleFactorY *= t.m22();
+    } else {
+        contentScaleFactorX *= peWorldBoundingBox.width();
+        contentScaleFactorY *= peWorldBoundingBox.height();
+    }
+
+    // Calculate the pattern bounding box depending on the used UnitTypes
+    QRectF patternBoundingBox = m_rect.combineWithLocalRect(peBoundingBox);
+
+    QSize imageSize;
+    imageSize.setWidth(qCeil(patternBoundingBox.width() * t.m11() * m_transform.m11()));
+    imageSize.setHeight(qCeil(patternBoundingBox.height() * t.m22() * m_transform.m22()));
+
+    calculateAppliedTransform(t, peBoundingBox, imageSize);
+    return renderPattern(p, imageSize, contentScaleFactorX, contentScaleFactorY);
+}
+
+QSvgNode::Type QSvgPattern::type() const
+{
+    return Pattern;
+}
+
+QImage QSvgPattern::renderPattern(QPainter *p, QSize size, qreal contentScaleX, qreal contentScaleY)
+{
+    if (size.isEmpty() || !qIsFinite(contentScaleX) || !qIsFinite(contentScaleY))
+        return defaultPattern();
+
+    // Allocate a QImage to draw the pattern in with the calculated size.
+    QImage pattern;
+    if (!QImageIOHandler::allocateImage(size, QImage::Format_ARGB32, &pattern)) {
+        qCWarning(lcSvgDraw) << "The requested pattern size is too big, ignoring";
+        return defaultPattern();
+    }
+    pattern.fill(Qt::transparent);
+
+    // Draw the pattern using our QPainter.
+    QPainter patternPainter(&pattern);
+    patternPainter.setRenderHints(p->renderHints());
+    QPen pen(Qt::NoBrush, 1, Qt::SolidLine, Qt::FlatCap, Qt::SvgMiterJoin);
+    pen.setMiterLimit(4);
+    patternPainter.setPen(pen);
+    patternPainter.setBrush(Qt::black);
+
+    // According to the <pattern> definition, if viewBox exists then patternContentUnits
+    // is ignored
+    if (m_viewBox.isNull())
+        patternPainter.scale(contentScaleX, contentScaleY);
+    else
+        patternPainter.setWindow(m_viewBox.toRect());
+
+    // Draw all this Pattern children nodes with our QPainter,
+    // no need to use any Extra States
+    QSvgExtraStates states2;
+    for (QSvgNode *node : m_renderers) {
+        node->draw(&patternPainter, states2);
+    }
+
+    return pattern;
+}
+
+void QSvgPattern::calculateAppliedTransform(QTransform &worldTransform, QRectF peLocalBB, QSize imageSize)
+{
+    // Calculate the required transform to be applied to the QBrush used for correct
+    // pattern drawing with the object being rendered.
+    // Scale : Apply inverse the scale used above because QBrush uses the transform used
+    //         by the QPainter and this function has already rendered the QImage with the
+    //         correct size. Moreover, take into account the difference between the required
+    //         ideal image size in float and the QSize given to image as an integer value.
+    //
+    // Translate : Apply translation depending on the calculated x and y values so that the
+    //             drawn pattern can be shifted inside the object.
+    // Pattern Transform : Apply the transform in the "patternTransform" attribute. This
+    //                     transform contains everything except scaling, because it is
+    //                     already applied above on the QImage and the QPainter while
+    //                     drawing the pattern tile.
+    m_appliedTransform.reset();
+    qreal imageDownScaleFactorX = 1 / worldTransform.m11();
+    qreal imageDownScaleFactorY = 1 / worldTransform.m22();
+
+    m_appliedTransform.scale(qIsFinite(imageDownScaleFactorX) ? imageDownScaleFactorX : 1.0,
+                             qIsFinite(imageDownScaleFactorY) ? imageDownScaleFactorY : 1.0);
+
+    QRectF p = m_rect.combineWithLocalRect(peLocalBB);
+    m_appliedTransform.scale((p.width() * worldTransform.m11() * m_transform.m11()) / imageSize.width(),
+                             (p.height() * worldTransform.m22() * m_transform.m22()) / imageSize.height());
+
+    QPointF translation = m_rect.translationRelativeToBoundingBox(peLocalBB);
+    m_appliedTransform.translate(translation.x() * worldTransform.m11(), translation.y() * worldTransform.m22());
+
+    QTransform scalelessTransform = m_transform;
+    scalelessTransform.scale(1 / m_transform.m11(), 1 / m_transform.m22());
+
+    m_appliedTransform = m_appliedTransform * scalelessTransform;
 }
 
 QT_END_NAMESPACE

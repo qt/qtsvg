@@ -30,6 +30,7 @@ class QPainter;
 class QSvgNode;
 class QSvgFont;
 class QSvgTinyDocument;
+class QSvgPattern;
 
 template <class T> class QSvgRefCounter
 {
@@ -130,6 +131,7 @@ public:
         STROKE,
         SOLID_COLOR,
         GRADIENT,
+        PATTERN,
         TRANSFORM,
         ANIMATE_TRANSFORM,
         ANIMATE_COLOR,
@@ -147,7 +149,7 @@ public:
 class Q_SVG_PRIVATE_EXPORT QSvgPaintStyleProperty : public QSvgStyleProperty
 {
 public:
-    virtual QBrush brush(QPainter *p, QSvgExtraStates &states) = 0;
+    virtual QBrush brush(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) = 0;
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
 };
@@ -535,7 +537,7 @@ public:
         return m_solidColor;
     }
 
-    QBrush brush(QPainter *, QSvgExtraStates &) override
+    QBrush brush(QPainter *, const QSvgNode *, QSvgExtraStates &) override
     {
         return m_solidColor;
     }
@@ -582,7 +584,7 @@ public:
         m_gradientStopsSet = set;
     }
 
-    QBrush brush(QPainter *, QSvgExtraStates &) override;
+    QBrush brush(QPainter *, const QSvgNode *, QSvgExtraStates &) override;
 private:
     QGradient      *m_gradient;
     QTransform m_transform;
@@ -591,6 +593,22 @@ private:
     QString           m_link;
     bool m_gradientStopsSet;
 };
+
+class Q_SVG_PRIVATE_EXPORT QSvgPatternStyle : public QSvgPaintStyleProperty
+{
+public:
+    QSvgPatternStyle(QSvgPattern *pattern);
+    ~QSvgPatternStyle() = default;
+    Type type() const override;
+
+    QBrush brush(QPainter *, const QSvgNode *, QSvgExtraStates &) override;
+    QSvgPattern *patternNode() { return m_pattern; }
+private:
+    QSvgPattern *m_pattern;
+    QImage m_patternImage;
+    QRectF m_parentBound;
+};
+
 
 class Q_SVG_PRIVATE_EXPORT QSvgTransformStyle : public QSvgStyleProperty
 {
@@ -739,6 +757,7 @@ public:
           stroke(0),
           solidColor(0),
           gradient(0),
+          pattern(0),
           transform(0),
           animateColor(0),
           opacity(0),
@@ -755,6 +774,7 @@ public:
     QSvgRefCounter<QSvgStrokeStyle>       stroke;
     QSvgRefCounter<QSvgSolidColorStyle>   solidColor;
     QSvgRefCounter<QSvgGradientStyle>     gradient;
+    QSvgRefCounter<QSvgPatternStyle>      pattern;
     QSvgRefCounter<QSvgTransformStyle>    transform;
     QSvgRefCounter<QSvgAnimateColor>      animateColor;
     QList<QSvgRefCounter<QSvgAnimateTransform> >   animateTransforms;

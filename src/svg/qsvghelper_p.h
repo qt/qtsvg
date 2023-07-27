@@ -78,6 +78,20 @@ public:
         return result;
     }
 
+    QPointF translationRelativeToBoundingBox(const QRectF &boundingBox) const {
+        QPointF result;
+
+        if (m_unitX == QSvg::UnitTypes::objectBoundingBox)
+            result.setX(x() * boundingBox.width());
+        else
+            result.setX(x());
+        if (m_unitY == QSvg::UnitTypes::objectBoundingBox)
+            result.setY(y() * boundingBox.height());
+        else
+            result.setY(y());
+        return result;
+    }
+
     QSvg::UnitTypes unitX() const {return m_unitX;}
     QSvg::UnitTypes unitY() const {return m_unitY;}
     QSvg::UnitTypes unitW() const {return m_unitW;}

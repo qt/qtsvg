@@ -1042,7 +1042,8 @@ static void parseBrush(QSvgNode *node,
                 QString value = attributes.fill.mid(3, attributes.fill.size() - 3).toString();
                 QSvgStyleProperty *style = styleFromUrl(node, value);
                 if (style) {
-                    if (style->type() == QSvgStyleProperty::SOLID_COLOR || style->type() == QSvgStyleProperty::GRADIENT)
+                    if (style->type() == QSvgStyleProperty::SOLID_COLOR || style->type() == QSvgStyleProperty::GRADIENT
+                            || style->type() == QSvgStyleProperty::PATTERN)
                         prop->setFillStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
                 } else {
                     QString id = idFromUrl(value);
@@ -1211,8 +1212,9 @@ static void parsePen(QSvgNode *node,
                  QString value = attributes.stroke.mid(3, attributes.stroke.size() - 3).toString();
                     QSvgStyleProperty *style = styleFromUrl(node, value);
                     if (style) {
-                        if (style->type() == QSvgStyleProperty::SOLID_COLOR || style->type() == QSvgStyleProperty::GRADIENT)
-                            prop->setStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
+                        if (style->type() == QSvgStyleProperty::SOLID_COLOR || style->type() == QSvgStyleProperty::GRADIENT
+                            || style->type() == QSvgStyleProperty::PATTERN)
+                        prop->setStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
                     } else {
                         QString id = idFromUrl(value);
                         prop->setPaintStyleId(id);
@@ -3668,6 +3670,108 @@ static QSvgNode *createSwitchNode(QSvgNode *parent,
     return node;
 }
 
+static QSvgNode *createPatternNode(QSvgNode *parent,
+                                   const QXmlStreamAttributes &attributes,
+                                   QSvgHandler *handler)
+{
+    const QStringView x      = attributes.value(QLatin1String("x"));
+    const QStringView y      = attributes.value(QLatin1String("y"));
+    const QStringView width  = attributes.value(QLatin1String("width"));
+    const QStringView height = attributes.value(QLatin1String("height"));
+    const QStringView patternUnits     = attributes.value(QLatin1String("patternUnits"));
+    const QStringView patternContentUnits    = attributes.value(QLatin1String("patternContentUnits"));
+    const QStringView patternTransform = attributes.value(QLatin1String("patternTransform"));
+
+    QSvg::UnitTypes nPatternUnits = patternUnits.contains(QLatin1String("userSpaceOnUse")) ?
+                                        QSvg::UnitTypes::userSpaceOnUse : QSvg::UnitTypes::objectBoundingBox;
+
+    QSvg::UnitTypes nPatternContentUnits = patternContentUnits.contains(QLatin1String("objectBoundingBox")) ?
+                                               QSvg::UnitTypes::objectBoundingBox : QSvg::UnitTypes::userSpaceOnUse;
+
+    QString viewBoxStr = attributes.value(QLatin1String("viewBox")).toString();
+
+    bool ok = false;
+    QSvgHandler::LengthType type;
+
+    qreal nx = parseLength(x.toString(), &type, handler, &ok);
+    nx = convertToPixels(nx, true, type);
+    if (!ok)
+        nx = 0.0;
+    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QSvg::UnitTypes::userSpaceOnUse)
+        nx = (nx / 100.) * handler->document()->viewBox().width();
+    else if (type == QSvgHandler::LT_PERCENT)
+        nx = nx / 100.;
+
+    qreal ny = parseLength(y.toString(), &type, handler, &ok);
+    ny = convertToPixels(ny, true, type);
+    if (!ok)
+        ny = 0.0;
+    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QSvg::UnitTypes::userSpaceOnUse)
+        ny = (ny / 100.) * handler->document()->viewBox().height();
+    else if (type == QSvgHandler::LT_PERCENT)
+        ny = ny / 100.;
+
+    qreal nwidth = parseLength(width.toString(), &type, handler, &ok);
+    nwidth = convertToPixels(nwidth, true, type);
+    if (!ok)
+        nwidth = 0.0;
+    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QSvg::UnitTypes::userSpaceOnUse)
+        nwidth = (nwidth / 100.) * handler->document()->viewBox().width();
+    else if (type == QSvgHandler::LT_PERCENT)
+        nwidth = nwidth / 100.;
+
+    qreal nheight = parseLength(height.toString(), &type, handler, &ok);
+    nheight = convertToPixels(nheight, true, type);
+    if (!ok)
+        nheight = 0.0;
+    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QSvg::UnitTypes::userSpaceOnUse)
+        nheight = (nheight / 100.) * handler->document()->viewBox().height();
+    else if (type == QSvgHandler::LT_PERCENT)
+        nheight = nheight / 100.;
+
+
+    QStringList viewBoxValues;
+    QRectF viewBox;
+    if (!viewBoxStr.isEmpty()) {
+        viewBoxStr = viewBoxStr.replace(QLatin1Char(' '), QLatin1Char(','));
+        viewBoxStr = viewBoxStr.replace(QLatin1Char('\r'), QLatin1Char(','));
+        viewBoxStr = viewBoxStr.replace(QLatin1Char('\n'), QLatin1Char(','));
+        viewBoxStr = viewBoxStr.replace(QLatin1Char('\t'), QLatin1Char(','));
+        viewBoxValues = viewBoxStr.split(QLatin1Char(','), Qt::SkipEmptyParts);
+    }
+    if (viewBoxValues.size() == 4) {
+        QString xStr      = viewBoxValues.at(0).trimmed();
+        QString yStr      = viewBoxValues.at(1).trimmed();
+        QString widthStr  = viewBoxValues.at(2).trimmed();
+        QString heightStr = viewBoxValues.at(3).trimmed();
+
+        qreal x = convertToNumber(xStr, handler);
+        qreal y = convertToNumber(yStr, handler);
+        qreal w = convertToNumber(widthStr, handler);
+        qreal h = convertToNumber(heightStr, handler);
+
+        if (w > 0 && h > 0)
+            viewBox.setRect(x, y, w, h);
+    }
+
+    QTransform matrix;
+    if (!patternTransform.isEmpty())
+        matrix = parseTransformationMatrix(patternTransform);
+
+    QRectF bounds(nx, ny, nwidth, nheight);
+    if (bounds.isEmpty())
+        return nullptr;
+
+    QSvgRectF patternRectF(bounds, nPatternUnits, nPatternUnits, nPatternUnits, nPatternUnits);
+    QSvgPattern *node = new QSvgPattern(parent, patternRectF, viewBox, nPatternContentUnits, matrix);
+
+    // Create a style node for the Pattern.
+    QSvgPatternStyle *prop = new QSvgPatternStyle(node);
+    node->appendStyleProperty(prop, someId(attributes));
+
+    return node;
+}
+
 static bool parseTbreakNode(QSvgNode *parent,
                             const QXmlStreamAttributes &,
                             QSvgHandler *)
@@ -3806,6 +3910,9 @@ static FactoryMethod findGroupFactory(const QString &name, QSvg::FeatureSet feat
         if (ref == QLatin1String("vg")) return createSvgNode;
         if (ref == QLatin1String("witch")) return createSwitchNode;
         if (ref == QLatin1String("ymbol")) return createSymbolNode;
+        break;
+    case 'p':
+        if (ref == QLatin1String("attern") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return createPatternNode;
         break;
     default:
         break;
@@ -4010,14 +4117,40 @@ void QSvgHandler::init()
     parse();
 }
 
-static bool detectCycles(const QSvgNode *node, QList<const QSvgUse *> active = {})
+static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> active = {})
+{
+    QSvgFillStyle *fillStyle = static_cast<QSvgFillStyle*>
+        (node->styleProperty(QSvgStyleProperty::FILL));
+    if (fillStyle && fillStyle->style() && fillStyle->style()->type() == QSvgStyleProperty::PATTERN) {
+        QSvgPatternStyle *patternStyle = static_cast<QSvgPatternStyle *>(fillStyle->style());
+        if (active.contains(patternStyle->patternNode()))
+            return true;
+    }
+
+    QSvgStrokeStyle *strokeStyle = static_cast<QSvgStrokeStyle*>
+        (node->styleProperty(QSvgStyleProperty::STROKE));
+    if (strokeStyle && strokeStyle->style() && strokeStyle->style()->type() == QSvgStyleProperty::PATTERN) {
+        QSvgPatternStyle *patternStyle = static_cast<QSvgPatternStyle *>(strokeStyle->style());
+        if (active.contains(patternStyle->patternNode()))
+            return true;
+    }
+
+    return false;
+}
+
+static bool detectCycles(const QSvgNode *node, QList<const QSvgNode *> active = {})
 {
     if (Q_UNLIKELY(!node))
         return false;
     switch (node->type()) {
     case QSvgNode::Doc:
     case QSvgNode::Group:
+    case QSvgNode::Defs:
+    case QSvgNode::Pattern:
     {
+        if (node->type() == QSvgNode::Pattern)
+            active.append(node);
+
         auto *g = static_cast<const QSvgStructureNode*>(node);
         for (auto *r : g->renderers()) {
             if (detectCycles(r, active))
@@ -4039,6 +4172,17 @@ static bool detectCycles(const QSvgNode *node, QList<const QSvgUse *> active = {
         }
     }
     break;
+    case QSvgNode::Rect:
+    case QSvgNode::Ellipse:
+    case QSvgNode::Circle:
+    case QSvgNode::Line:
+    case QSvgNode::Path:
+    case QSvgNode::Polygon:
+    case QSvgNode::Polyline:
+    case QSvgNode::Tspan:
+        if (detectPatternCycles(node, active))
+            return true;
+        break;
     default:
         break;
     }
@@ -4148,6 +4292,7 @@ bool QSvgHandler::startElement(const QString &localName,
                 case QSvgNode::Mask:
                 case QSvgNode::Symbol:
                 case QSvgNode::Marker:
+                case QSvgNode::Pattern:
                 {
                     QSvgStructureNode *group =
                         static_cast<QSvgStructureNode*>(m_nodes.top());
@@ -4184,6 +4329,7 @@ bool QSvgHandler::startElement(const QString &localName,
             case QSvgNode::Mask:
             case QSvgNode::Symbol:
             case QSvgNode::Marker:
+            case QSvgNode::Pattern:
             {
                 if (node->type() == QSvgNode::Tspan) {
                     const QByteArray msg = QByteArrayLiteral("\'tspan\' element in wrong context.");

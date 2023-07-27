@@ -183,6 +183,12 @@ void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop, const QString &id)
         if (doc && !id.isEmpty())
             doc->addNamedStyle(id, m_style.gradient);
         break;
+    case QSvgStyleProperty::PATTERN:
+        m_style.pattern = static_cast<QSvgPatternStyle*>(prop);
+        doc = document();
+        if (doc && !id.isEmpty())
+            doc->addNamedStyle(id, m_style.pattern);
+        break;
     case QSvgStyleProperty::TRANSFORM:
         m_style.transform = static_cast<QSvgTransformStyle*>(prop);
         break;
@@ -247,6 +253,10 @@ QSvgStyleProperty * QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
         case QSvgStyleProperty::GRADIENT:
             if (node->m_style.gradient)
                 return node->m_style.gradient;
+            break;
+        case QSvgStyleProperty::PATTERN:
+            if (node->m_style.pattern)
+                return node->m_style.pattern;
             break;
         case QSvgStyleProperty::TRANSFORM:
             if (node->m_style.transform)

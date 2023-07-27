@@ -70,6 +70,8 @@ private slots:
     void testMaskElement();
     void testSymbol();
     void testMarker();
+    void testPatternElement();
+    void testCycles();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -1910,6 +1912,60 @@ void tst_QSvgRenderer::notAnimated()
     renderer.setAnimationEnabled(false);
     QVERIFY(renderer.load(QByteArray(animatedSvgContents)));
     QVERIFY(!renderer.isAnimationEnabled());
+}
+
+
+void tst_QSvgRenderer::testPatternElement()
+{
+    QByteArray svgDoc("<svg viewBox=\"0 0 200 200\">"
+                        "<pattern id=\"pattern\" patternUnits=\"userSpaceOnUse\" width=\"20\" height=\"20\">"
+                            "<rect x=\"0\" y=\"0\" width=\"10\" height=\"10\" fill=\"red\"/>"
+                            "<rect x=\"10\" y=\"0\" width=\"10\" height=\"10\" fill=\"green\"/>"
+                            "<rect x=\"0\" y=\"10\" width=\"10\" height=\"10\" fill=\"blue\"/>"
+                            "<rect x=\"10\" y=\"10\" width=\"10\" height=\"10\" fill=\"yellow\"/>"
+                        "</pattern>"
+                        "<rect width=\"200\" height=\"200\" fill=\"url(#pattern)\"/>"
+                   "</svg>");
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(200, 200, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+    QImage refImage(200, 200, QImage::Format_ARGB32_Premultiplied);
+    refImage.fill(Qt::white);
+    QImage refPattern(20, 20, QImage::Format_ARGB32);
+    refPattern.fill(Qt::transparent);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    p.begin(&refPattern);
+    p.fillRect(0, 0, 10, 10, QColorConstants::Svg::red);
+    p.fillRect(10, 0, 10, 10, QColorConstants::Svg::green);
+    p.fillRect(0, 10, 10, 10, QColorConstants::Svg::blue);
+    p.fillRect(10, 10, 10, 10, QColorConstants::Svg::yellow);
+    p.end();
+
+    p.begin(&refImage);
+    p.fillRect(0, 0, 200, 200, QBrush(refPattern));
+    p.end();
+
+    QCOMPARE(refImage, image);
+}
+
+void tst_QSvgRenderer::testCycles()
+{
+    QByteArray svgDoc("<svg viewBox=\"0 0 200 200\">"
+                      "<pattern id=\"pattern\" patternUnits=\"userSpaceOnUse\" width=\"20\" height=\"20\">"
+                      "<rect x=\"0\" y=\"0\" width=\"10\" height=\"10\" fill=\"url(#pattern)\"/>"
+                      "</pattern>"
+                      "</svg>");
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(!renderer.isValid());
 }
 
 QTEST_MAIN(tst_QSvgRenderer)
