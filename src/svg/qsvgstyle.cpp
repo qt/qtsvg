@@ -34,12 +34,12 @@ QSvgStyleProperty::~QSvgStyleProperty()
 {
 }
 
-void QSvgFillStyleProperty::apply(QPainter *, const QSvgNode *, QSvgExtraStates &)
+void QSvgPaintStyleProperty::apply(QPainter *, const QSvgNode *, QSvgExtraStates &)
 {
     Q_ASSERT(!"This should not be called!");
 }
 
-void QSvgFillStyleProperty::revert(QPainter *, QSvgExtraStates &)
+void QSvgPaintStyleProperty::revert(QPainter *, QSvgExtraStates &)
 {
     Q_ASSERT(!"This should not be called!");
 }
@@ -94,7 +94,7 @@ QSvgFillStyle::QSvgFillStyle()
     , m_oldFillRule(Qt::WindingFill)
     , m_fillOpacity(1.0)
     , m_oldFillOpacity(0)
-    , m_gradientResolved(1)
+    , m_paintStyleResolved(1)
     , m_fillRuleSet(0)
     , m_fillOpacitySet(0)
     , m_fillSet(0)
@@ -113,7 +113,7 @@ void QSvgFillStyle::setFillOpacity(qreal opacity)
     m_fillOpacity = opacity;
 }
 
-void QSvgFillStyle::setFillStyle(QSvgFillStyleProperty* style)
+void QSvgFillStyle::setFillStyle(QSvgPaintStyleProperty* style)
 {
     m_style = style;
     m_fillSet = 1;
@@ -249,7 +249,7 @@ QSvgStrokeStyle::QSvgStrokeStyle()
     , m_strokeDashOffset(0)
     , m_oldStrokeDashOffset(0)
     , m_style(0)
-    , m_gradientResolved(1)
+    , m_paintStyleResolved(1)
     , m_vectorEffect(0)
     , m_oldVectorEffect(0)
     , m_strokeSet(0)

@@ -277,7 +277,7 @@ QSvgStyleProperty * QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
     return 0;
 }
 
-QSvgFillStyleProperty * QSvgNode::styleProperty(const QString &id) const
+QSvgPaintStyleProperty * QSvgNode::styleProperty(const QString &id) const
 {
     QString rid = id;
     if (rid.startsWith(QLatin1Char('#')))

@@ -144,7 +144,7 @@ public:
     bool isDefault() const { return false; } // [not virtual since called from templated class]
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgFillStyleProperty : public QSvgStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgPaintStyleProperty : public QSvgStyleProperty
 {
 public:
     virtual QBrush brush(QPainter *p, QSvgExtraStates &states) = 0;
@@ -219,7 +219,7 @@ public:
 
     void setFillRule(Qt::FillRule f);
     void setFillOpacity(qreal opacity);
-    void setFillStyle(QSvgFillStyleProperty* style);
+    void setFillStyle(QSvgPaintStyleProperty* style);
     void setBrush(QBrush brush);
 
     const QBrush & qbrush() const
@@ -237,29 +237,29 @@ public:
         return m_fillRule;
     }
 
-    QSvgFillStyleProperty* style() const
+    QSvgPaintStyleProperty* style() const
     {
         return m_style;
     }
 
-    void setGradientId(const QString &Id)
+    void setPaintStyleId(const QString &Id)
     {
-        m_gradientId = Id;
+        m_paintStyleId = Id;
     }
 
-    QString gradientId() const
+    QString paintStyleId() const
     {
-        return m_gradientId;
+        return m_paintStyleId;
     }
 
-    void setGradientResolved(bool resolved)
+    void setPaintStyleResolved(bool resolved)
     {
-        m_gradientResolved = resolved;
+        m_paintStyleResolved = resolved;
     }
 
-    bool isGradientResolved() const
+    bool isPaintStyleResolved() const
     {
-        return m_gradientResolved;
+        return m_paintStyleResolved;
     }
 
 private:
@@ -267,15 +267,15 @@ private:
     // fill-opacity    v 	v 	'inherit' | <OpacityValue.datatype>
     QBrush m_fill;
     QBrush m_oldFill;
-    QSvgFillStyleProperty *m_style;
+    QSvgPaintStyleProperty *m_style;
 
     Qt::FillRule m_fillRule;
     Qt::FillRule m_oldFillRule;
     qreal m_fillOpacity;
     qreal m_oldFillOpacity;
 
-    QString m_gradientId;
-    uint m_gradientResolved : 1;
+    QString m_paintStyleId;
+    uint m_paintStyleResolved : 1;
 
     uint m_fillRuleSet : 1;
     uint m_fillOpacitySet : 1;
@@ -399,7 +399,7 @@ public:
         m_strokeSet = 1;
     }
 
-    void setStyle(QSvgFillStyleProperty *style)
+    void setStyle(QSvgPaintStyleProperty *style)
     {
         m_style = style;
         m_strokeSet = 1;
@@ -461,29 +461,29 @@ public:
         m_vectorEffectSet = 1;
     }
 
-    QSvgFillStyleProperty* style() const
+    QSvgPaintStyleProperty* style() const
     {
         return m_style;
     }
 
-    void setGradientId(const QString &Id)
+    void setPaintStyleId(const QString &Id)
     {
-        m_gradientId = Id;
+        m_paintStyleId = Id;
     }
 
-    QString gradientId() const
+    QString paintStyleId() const
     {
-        return m_gradientId;
+        return m_paintStyleId;
     }
 
-    void setGradientResolved(bool resolved)
+    void setPaintStyleResolved(bool resolved)
     {
-        m_gradientResolved = resolved;
+        m_paintStyleResolved = resolved;
     }
 
-    bool isGradientResolved() const
+    bool isPaintStyleResolved() const
     {
-        return m_gradientResolved;
+        return m_paintStyleResolved;
     }
 
     QPen stroke() const
@@ -507,9 +507,9 @@ private:
     qreal m_strokeDashOffset;
     qreal m_oldStrokeDashOffset;
 
-    QSvgFillStyleProperty *m_style;
-    QString m_gradientId;
-    uint m_gradientResolved : 1;
+    QSvgPaintStyleProperty *m_style;
+    QString m_paintStyleId;
+    uint m_paintStyleResolved : 1;
     uint m_vectorEffect : 1;
     uint m_oldVectorEffect : 1;
 
@@ -524,7 +524,7 @@ private:
     uint m_vectorEffectSet : 1;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgSolidColorStyle : public QSvgFillStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgSolidColorStyle : public QSvgPaintStyleProperty
 {
 public:
     QSvgSolidColorStyle(const QColor &color);
@@ -549,7 +549,7 @@ private:
     QPen   m_oldStroke;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgGradientStyle : public QSvgFillStyleProperty
+class Q_SVG_PRIVATE_EXPORT QSvgGradientStyle : public QSvgPaintStyleProperty
 {
 public:
     QSvgGradientStyle(QGradient *grad);

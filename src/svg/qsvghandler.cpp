@@ -1043,11 +1043,11 @@ static void parseBrush(QSvgNode *node,
                 QSvgStyleProperty *style = styleFromUrl(node, value);
                 if (style) {
                     if (style->type() == QSvgStyleProperty::SOLID_COLOR || style->type() == QSvgStyleProperty::GRADIENT)
-                        prop->setFillStyle(reinterpret_cast<QSvgFillStyleProperty *>(style));
+                        prop->setFillStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
                 } else {
                     QString id = idFromUrl(value);
-                    prop->setGradientId(id);
-                    prop->setGradientResolved(false);
+                    prop->setPaintStyleId(id);
+                    prop->setPaintStyleResolved(false);
                 }
             } else if (attributes.fill != QLatin1String("none")) {
                 QColor color;
@@ -1212,11 +1212,11 @@ static void parsePen(QSvgNode *node,
                     QSvgStyleProperty *style = styleFromUrl(node, value);
                     if (style) {
                         if (style->type() == QSvgStyleProperty::SOLID_COLOR || style->type() == QSvgStyleProperty::GRADIENT)
-                            prop->setStyle(reinterpret_cast<QSvgFillStyleProperty *>(style));
+                            prop->setStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
                     } else {
                         QString id = idFromUrl(value);
-                        prop->setGradientId(id);
-                        prop->setGradientResolved(false);
+                        prop->setPaintStyleId(id);
+                        prop->setPaintStyleResolved(false);
                     }
             } else if (attributes.stroke != QLatin1String("none")) {
                 QColor color;
@@ -4093,7 +4093,7 @@ void QSvgHandler::parse()
             break;
         }
     }
-    resolveGradients(m_doc);
+    resolvePaintServers(m_doc);
     resolveNodes();
     if (detectCycles(m_doc)) {
         qCWarning(lcSvgHandler, "Cycles detected in SVG, document discarded.");
@@ -4294,7 +4294,7 @@ bool QSvgHandler::endElement(const QStringView localName)
     return true;
 }
 
-void QSvgHandler::resolveGradients(QSvgNode *node, int nestedDepth)
+void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)
 {
     if (!node || (node->type() != QSvgNode::Doc && node->type() != QSvgNode::Group
         && node->type() != QSvgNode::Defs && node->type() != QSvgNode::Switch)) {
@@ -4306,9 +4306,9 @@ void QSvgHandler::resolveGradients(QSvgNode *node, int nestedDepth)
     const QList<QSvgNode *> ren = structureNode->renderers();
     for (auto it = ren.begin(); it != ren.end(); ++it) {
         QSvgFillStyle *fill = static_cast<QSvgFillStyle *>((*it)->styleProperty(QSvgStyleProperty::FILL));
-        if (fill && !fill->isGradientResolved()) {
-            QString id = fill->gradientId();
-            QSvgFillStyleProperty *style = structureNode->styleProperty(id);
+        if (fill && !fill->isPaintStyleResolved()) {
+            QString id = fill->paintStyleId();
+            QSvgPaintStyleProperty *style = structureNode->styleProperty(id);
             if (style) {
                 fill->setFillStyle(style);
             } else {
@@ -4318,9 +4318,9 @@ void QSvgHandler::resolveGradients(QSvgNode *node, int nestedDepth)
         }
 
         QSvgStrokeStyle *stroke = static_cast<QSvgStrokeStyle *>((*it)->styleProperty(QSvgStyleProperty::STROKE));
-        if (stroke && !stroke->isGradientResolved()) {
-            QString id = stroke->gradientId();
-            QSvgFillStyleProperty *style = structureNode->styleProperty(id);
+        if (stroke && !stroke->isPaintStyleResolved()) {
+            QString id = stroke->paintStyleId();
+            QSvgPaintStyleProperty *style = structureNode->styleProperty(id);
             if (style) {
                 stroke->setStyle(style);
             } else {
@@ -4330,7 +4330,7 @@ void QSvgHandler::resolveGradients(QSvgNode *node, int nestedDepth)
         }
 
         if (nestedDepth < 2048)
-            resolveGradients(*it, nestedDepth + 1);
+            resolvePaintServers(*it, nestedDepth + 1);
     }
 }
 

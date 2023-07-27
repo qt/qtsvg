@@ -365,7 +365,7 @@ QSvgNode *QSvgTinyDocument::namedNode(const QString &id) const
     return m_namedNodes.value(id);
 }
 
-void QSvgTinyDocument::addNamedStyle(const QString &id, QSvgFillStyleProperty *style)
+void QSvgTinyDocument::addNamedStyle(const QString &id, QSvgPaintStyleProperty *style)
 {
     if (!m_namedStyles.contains(id))
         m_namedStyles.insert(id, style);
@@ -373,7 +373,7 @@ void QSvgTinyDocument::addNamedStyle(const QString &id, QSvgFillStyleProperty *s
         qCWarning(lcSvgHandler) << "Duplicate unique style id:" << id;
 }
 
-QSvgFillStyleProperty *QSvgTinyDocument::namedStyle(const QString &id) const
+QSvgPaintStyleProperty *QSvgTinyDocument::namedStyle(const QString &id) const
 {
     return m_namedStyles.value(id);
 }

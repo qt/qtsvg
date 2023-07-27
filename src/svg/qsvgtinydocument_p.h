@@ -75,8 +75,8 @@ public:
     QSvgFont *svgFont(const QString &family) const;
     void addNamedNode(const QString &id, QSvgNode *node);
     QSvgNode *namedNode(const QString &id) const;
-    void addNamedStyle(const QString &id, QSvgFillStyleProperty *style);
-    QSvgFillStyleProperty *namedStyle(const QString &id) const;
+    void addNamedStyle(const QString &id, QSvgPaintStyleProperty *style);
+    QSvgPaintStyleProperty *namedStyle(const QString &id) const;
 
     void restartAnimation();
     int currentElapsed() const;
@@ -99,7 +99,7 @@ private:
 
     QHash<QString, QSvgRefCounter<QSvgFont> > m_fonts;
     QHash<QString, QSvgNode *> m_namedNodes;
-    QHash<QString, QSvgRefCounter<QSvgFillStyleProperty> > m_namedStyles;
+    QHash<QString, QSvgRefCounter<QSvgPaintStyleProperty> > m_namedStyles;
 
     qint64 m_time;
     bool  m_animated;
