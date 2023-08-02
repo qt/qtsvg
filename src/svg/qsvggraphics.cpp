@@ -349,7 +349,8 @@ void QSvgText::draw(QPainter *p, QSvgExtraStates &states)
 void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundingRect) const
 {
     const bool isPainting = (boundingRect == nullptr);
-    applyStyle(p, states);
+    if (isPainting)
+        applyStyle(p, states);
     if (!isPainting || shouldDrawNode(p, states)) {
         qreal oldOpacity = p->opacity();
         p->setOpacity(oldOpacity * states.fillOpacity);
@@ -522,7 +523,8 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
         p->setWorldTransform(oldTransform, false);
         p->setOpacity(oldOpacity);
     }
-    revertStyle(p, states);
+    if (isPainting)
+        revertStyle(p, states);
 }
 
 void QSvgText::addText(const QString &text)
