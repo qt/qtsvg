@@ -143,13 +143,12 @@ QtSvg::FeatureSet QSvgWidget::featureSet() const
     \since 6.7
 
     Sets the widget's renderer QtSvg::FeatureSet to \a featureSet.
+    The \c featureset can be limited to SVG Tiny 1.2
+    or an \l{Extended Features}{extended featureset}. This
+    propety has to be set before calling the load function
+    to have any effect.
 
-    If this function is used to set the QtSvg::FeatureSet, it will
-    control how QSvgWidget::loadrenderer is going to load the SVG file.
-
-    The default value of QtSvg::FeatureSet in the renderer is
-    QtSvg::AllAvailable.
-
+    The default value is QtSvg::AllAvailable.
     \sa featureSet
  */
 void QSvgWidget::setFeatureSet(QtSvg::FeatureSet featureSet)
