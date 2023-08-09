@@ -329,6 +329,10 @@ qreal QSvgNode::strokeWidth(QPainter *p)
 bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
 {
     static bool alwaysDraw = qEnvironmentVariableIntValue("QT_SVG_DISABLE_SIZE_LIMIT");
+
+    if (m_displayMode == DisplayMode::NoneMode)
+        return false;
+
     if (alwaysDraw)
         return true;
 
