@@ -31,6 +31,12 @@
     \l{http://www.w3.org/TR/SVGMobile12}{SVG 1.2 Tiny}. ECMA scripts and DOM manipulation are currently not
     supported.
 
+    Since Qt 6.7, Qt supports some \l{Extended Features}{additional features} of
+    the \l{https://www.w3.org/TR/SVG11/}{SVG 1.1}
+
+    Since Qt 6.7, some \l{Extended Features}{additional features} of the
+    \l{https://www.w3.org/TR/SVG11/}{SVG 1.1} standard are supported.
+
     SVG drawings can be rendered onto any QPaintDevice subclass. This
     approach gives developers the flexibility to experiment, in order
     to find the best solution for each application.

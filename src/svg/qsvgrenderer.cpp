@@ -312,8 +312,11 @@ void QSvgRenderer::setAspectRatioMode(Qt::AspectRatioMode mode)
     \since 6.7
 
     This property holds the feature set that will be used to load and
-    render an SVG file. Set this propety before calling any of the load
-    functions to change the behavior of the QSvgRenderer.
+    render an SVG file. The \c featureset can be limited to SVG Tiny 1.2
+    or an \l{Extended Features}{extended featureset}.
+
+    Set this propety before calling any of the load functions to
+    change the behavior of the QSvgRenderer.
 
     The default value is QtSvg::AllAvailable.
  */
