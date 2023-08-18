@@ -2,5 +2,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 if(TARGET Qt::Widgets)
-    qt_internal_add_example(delayedencoding)
+    add_subdirectory(delayedencoding)
 endif()

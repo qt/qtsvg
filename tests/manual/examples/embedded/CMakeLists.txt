@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 if(TARGET Qt::Widgets)
-    qt_internal_add_example(desktopservices)
+    add_subdirectory(desktopservices)
 endif()
 if(QT_FEATURE_process AND TARGET Qt::Widgets)
-    qt_internal_add_example(fluidlauncher)
+    add_subdirectory(fluidlauncher)
 endif()
 if(TARGET Qt::Network AND TARGET Qt::Widgets)
-    qt_internal_add_example(weatherinfo)
+    add_subdirectory(weatherinfo)
 endif()
