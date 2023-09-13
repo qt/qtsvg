@@ -1578,6 +1578,8 @@ void tst_QSvgRenderer::testUseElement()
             }
         } else if (i > 7 && i < 10) {
             QCOMPARE(images[8], images[i]);
+        } else if (i == 12 || i == 13 || i == 17) {
+            QCOMPARE(images[10], images[i]);
         } else if (i > 11 && i < 15) {
             QCOMPARE(images[11], images[i]);
         } else if (i == 15) {
