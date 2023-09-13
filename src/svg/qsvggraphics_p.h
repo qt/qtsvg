@@ -222,6 +222,7 @@ public:
     bool isResolved() const { return m_link != nullptr; }
     QString linkId() const { return m_linkId; }
     void setLink(QSvgNode *link) { m_link = link; }
+    QSvgNode *link() const { return m_link; }
 
 private:
     QSvgNode *m_link;
