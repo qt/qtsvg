@@ -111,6 +111,8 @@ private:
     const QSvg::FeatureSet m_featureSet;
 };
 
+Q_SVG_PRIVATE_EXPORT QDebug operator<<(QDebug debug, const QSvgTinyDocument &doc);
+
 inline QSize QSvgTinyDocument::size() const
 {
     if (m_size.isEmpty())

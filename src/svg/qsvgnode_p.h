@@ -133,6 +133,7 @@ public:
     void setXmlClass(const QString &str);
 
     bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const;
+    const QSvgStyle &style() const { return m_style; }
 protected:
     mutable QSvgStyle m_style;
 

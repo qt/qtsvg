@@ -3089,9 +3089,7 @@ static QSvgNode *createRectNode(QSvgNode *parent,
     nrx *= (100/(bounds.width()/2));
     nry *= (100/(bounds.height()/2));
 
-    QSvgNode *rect = new QSvgRect(parent, bounds,
-                                  int(nrx),
-                                  int(nry));
+    QSvgNode *rect = new QSvgRect(parent, bounds, nrx, nry);
     return rect;
 }
 

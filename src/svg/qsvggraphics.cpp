@@ -250,7 +250,7 @@ void QSvgPolyline::draw(QPainter *p, QSvgExtraStates &states)
     QT_SVG_TIMING_EXIT("Polyline")
 }
 
-QSvgRect::QSvgRect(QSvgNode *node, const QRectF &rect, int rx, int ry)
+QSvgRect::QSvgRect(QSvgNode *node, const QRectF &rect, qreal rx, qreal ry)
     : QSvgNode(node),
       m_rect(rect), m_rx(rx), m_ry(ry)
 {

@@ -74,6 +74,8 @@ public:
     inline T *operator->() const { return t; }
     inline operator T*() const { return t; }
 
+    inline bool isDefault() const { return !t || t->isDefault(); }
+
 private:
     T *t;
 };
@@ -138,6 +140,7 @@ public:
     virtual void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) = 0;
     virtual void revert(QPainter *p, QSvgExtraStates &states) =0;
     virtual Type type() const=0;
+    bool isDefault() const { return false; } // [not virtual since called from templated class]
 };
 
 class Q_SVG_PRIVATE_EXPORT QSvgFillStyleProperty : public QSvgStyleProperty
@@ -197,6 +200,9 @@ public:
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
+    qreal opacity() const { return m_opacity; }
+    bool isDefault() const { return qFuzzyCompare(m_opacity, 1.0); }
+
 private:
     qreal m_opacity;
     qreal m_oldOpacity;
@@ -597,6 +603,7 @@ public:
     {
         return m_transform;
     }
+    bool isDefault() const { return m_transform.isIdentity(); }
 private:
     //7.6 The transform  attribute
     QTransform m_transform;
