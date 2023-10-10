@@ -3655,6 +3655,8 @@ void QSvgHandler::init()
 
 static bool detectCycles(const QSvgNode *node, QList<const QSvgUse *> active = {})
 {
+    if (Q_UNLIKELY(!node))
+        return false;
     switch (node->type()) {
     case QSvgNode::DOC:
     case QSvgNode::G:
