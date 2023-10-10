@@ -37,6 +37,9 @@ set(resources_resource_files
     "simple_Utf16BE.svg"
     "simple_Utf32LE.svg"
     "simple_Utf32BE.svg"
+    "invalid_xml.svg"
+    "xml_not_svg.svg"
+    "invalid_then_valid.svg"
 )
 
 qt_internal_add_resource(tst_qsvgplugin "resources"
