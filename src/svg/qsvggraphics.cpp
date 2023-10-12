@@ -324,8 +324,10 @@ QRectF QSvgText::fastBounds(QPainter *p, QSvgExtraStates &) const
     QFontMetricsF fm(font);
 
     int charCount = 0;
-    for (int i = 0; i < m_tspans.size(); ++i)
-        charCount += m_tspans.at(i)->text().size();
+    for (int i = 0; i < m_tspans.size(); ++i) {
+        if (m_tspans.at(i) != LINEBREAK)
+            charCount += m_tspans.at(i)->text().size();
+    }
 
     QRectF approxMaximumBrect(m_coord.x(),
                               m_coord.y(),
