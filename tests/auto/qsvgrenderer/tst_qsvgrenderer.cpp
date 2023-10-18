@@ -64,6 +64,7 @@ private slots:
     void imageRendering();
     void illegalAnimateTransform_data();
     void illegalAnimateTransform();
+    void tSpanLineBreak();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -1707,6 +1708,18 @@ void tst_QSvgRenderer::illegalAnimateTransform()
     QFETCH(QByteArray, svg);
     QSvgRenderer renderer;
     QVERIFY(!renderer.load(svg)); // also shouldn't assert
+}
+
+void tst_QSvgRenderer::tSpanLineBreak()
+{
+    QSvgRenderer renderer;
+    QVERIFY(renderer.load(QByteArray("<svg><textArea>Foo<tbreak/>Bar</textArea></svg>")));
+
+    QImage img(50, 50, QImage::Format_ARGB32);
+    {
+        QPainter p(&img);
+        renderer.render(&p); // Don't crash
+    }
 }
 
 QTEST_MAIN(tst_QSvgRenderer)
