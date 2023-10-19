@@ -26,23 +26,25 @@ QSvgStructureNode::~QSvgStructureNode()
     qDeleteAll(m_renderers);
 }
 
-void QSvgG::draw(QPainter *p, QSvgExtraStates &states)
+void QSvgG::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
     QList<QSvgNode*>::iterator itr = m_renderers.begin();
-    applyStyle(p, states);
-
     while (itr != m_renderers.end()) {
         QSvgNode *node = *itr;
         if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode))
             node->draw(p, states);
         ++itr;
     }
-    revertStyle(p, states);
+}
+
+bool QSvgG::shouldDrawNode(QPainter *, QSvgExtraStates &) const
+{
+    return true;
 }
 
 QSvgNode::Type QSvgG::type() const
 {
-    return G;
+    return Group;
 }
 
 QSvgStructureNode::QSvgStructureNode(QSvgNode *parent)
@@ -74,14 +76,14 @@ QSvgDefs::QSvgDefs(QSvgNode *parent)
 {
 }
 
-void QSvgDefs::draw(QPainter *, QSvgExtraStates &)
+bool QSvgDefs::shouldDrawNode(QPainter *, QSvgExtraStates &) const
 {
-    //noop
+    return false;
 }
 
 QSvgNode::Type QSvgDefs::type() const
 {
-    return DEFS;
+    return Defs;
 }
 
 /*
@@ -246,10 +248,9 @@ QSvgSwitch::QSvgSwitch(QSvgNode *parent)
     init();
 }
 
-void QSvgSwitch::draw(QPainter *p, QSvgExtraStates &states)
+void QSvgSwitch::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
     QList<QSvgNode*>::iterator itr = m_renderers.begin();
-    applyStyle(p, states);
 
     while (itr != m_renderers.end()) {
         QSvgNode *node = *itr;
@@ -307,12 +308,11 @@ void QSvgSwitch::draw(QPainter *p, QSvgExtraStates &states)
         }
         ++itr;
     }
-    revertStyle(p, states);
 }
 
 QSvgNode::Type QSvgSwitch::type() const
 {
-    return SWITCH;
+    return Switch;
 }
 
 void QSvgSwitch::init()

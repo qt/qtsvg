@@ -8,19 +8,19 @@ QT_BEGIN_NAMESPACE
 void QSvgVisitor::traverse(const QSvgStructureNode *node)
 {
     switch (node->type()) {
-    case QSvgNode::SWITCH:
+    case QSvgNode::Switch:
         if (!visitSwitchNodeStart(static_cast<const QSvgSwitch *>(node)))
             return;
         break;
-    case QSvgNode::DOC:
+    case QSvgNode::Doc:
         if (!visitDocumentNodeStart(static_cast<const QSvgTinyDocument *>(node)))
             return;
         break;
-    case QSvgNode::DEFS:
+    case QSvgNode::Defs:
         if (!visitDefsNodeStart(static_cast<const QSvgDefs *>(node)))
             return;
         break;
-    case QSvgNode::G:
+    case QSvgNode::Group:
         if (!visitGroupNodeStart(static_cast<const QSvgG *>(node)))
             return;
         break;
@@ -31,83 +31,79 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
 
     for (const auto *child : node->renderers()) {
         switch (child->type()) {
-        case QSvgNode::SWITCH:
-        case QSvgNode::DOC:
-        case QSvgNode::DEFS:
-        case QSvgNode::G:
+        case QSvgNode::Switch:
+        case QSvgNode::Doc:
+        case QSvgNode::Defs:
+        case QSvgNode::Group:
             traverse(static_cast<const QSvgStructureNode *>(child));
             break;
-        case QSvgNode::ANIMATION:
+        case QSvgNode::Animation:
             visitAnimationNode(static_cast<const QSvgAnimation *>(child));
             break;
-        case QSvgNode::CIRCLE:
-        case QSvgNode::ELLIPSE:
+        case QSvgNode::Circle:
+        case QSvgNode::Ellipse:
             visitEllipseNode(static_cast<const QSvgEllipse *>(child));
             break;
-        case QSvgNode::IMAGE:
+        case QSvgNode::Image:
             visitImageNode(static_cast<const QSvgImage *>(child));
             break;
-        case QSvgNode::LINE:
+        case QSvgNode::Line:
             visitLineNode(static_cast<const QSvgLine *>(child));
             break;
-        case QSvgNode::PATH:
+        case QSvgNode::Path:
             visitPathNode(static_cast<const QSvgPath *>(child));
             break;
-        case QSvgNode::POLYGON:
+        case QSvgNode::Polygon:
             visitPolygonNode(static_cast<const QSvgPolygon *>(child));
             break;
-        case QSvgNode::POLYLINE:
+        case QSvgNode::Polyline:
             visitPolylineNode(static_cast<const QSvgPolyline *>(child));
             break;
-        case QSvgNode::RECT:
+        case QSvgNode::Rect:
             visitRectNode(static_cast<const QSvgRect *>(child));
             break;
-        case QSvgNode::TEXT:
-        case QSvgNode::TEXTAREA:
+        case QSvgNode::Text:
+        case QSvgNode::Textarea:
             visitTextNode(static_cast<const QSvgText *>(child));
             break;
-        case QSvgNode::TSPAN:
+        case QSvgNode::Tspan:
             visitTspanNode(static_cast<const QSvgTspan *>(child));
             break;
-        case QSvgNode::USE:
+        case QSvgNode::Use:
             visitUseNode(static_cast<const QSvgUse *>(child));
             break;
-        case QSvgNode::VIDEO:
+        case QSvgNode::Video:
             visitVideoNode(static_cast<const QSvgVideo *>(child));
             break;
 
         // Enum values that don't have any QSvgNode classes yet:
-           case QSvgNode::MASK:
-           case QSvgNode::SYMBOL:
-           case QSvgNode::MARKER:
-           case QSvgNode::PATTERN:
-           case QSvgNode::FILTER:
-           case QSvgNode::FEMERGE:
-           case QSvgNode::FEMERGENODE:
-           case QSvgNode::FECOLORMATRIX:
-           case QSvgNode::FEGAUSSIANBLUR:
-           case QSvgNode::FEOFFSET:
-           case QSvgNode::FECOMPOSITE:
-           case QSvgNode::FEFLOOD:
+           case QSvgNode::Mask:
+           case QSvgNode::Symbol:
+           case QSvgNode::Marker:
+           case QSvgNode::Pattern:
+           case QSvgNode::Filter:
+           case QSvgNode::FeMerge:
+           case QSvgNode::FeMergenode:
+           case QSvgNode::FeColormatrix:
+           case QSvgNode::FeGaussianblur:
+           case QSvgNode::FeOffset:
+           case QSvgNode::FeComposite:
+           case QSvgNode::FeFlood:
             qDebug() << "Unhandled type in switch" << child->type();
-            break;
-
-           case QSvgNode::ARC: // Not used: to be removed
-            Q_UNREACHABLE();
             break;
         }
     }
     switch (node->type()) {
-    case QSvgNode::SWITCH:
+    case QSvgNode::Switch:
         visitSwitchNodeEnd(static_cast<const QSvgSwitch *>(node));
         break;
-    case QSvgNode::DOC:
+    case QSvgNode::Doc:
         visitDocumentNodeEnd(static_cast<const QSvgTinyDocument *>(node));
         break;
-    case QSvgNode::DEFS:
+    case QSvgNode::Defs:
         visitDefsNodeEnd(static_cast<const QSvgDefs *>(node));
         break;
-    case QSvgNode::G:
+    case QSvgNode::Group:
         visitGroupNodeEnd(static_cast<const QSvgG *>(node));
         break;
     default:

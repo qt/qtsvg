@@ -31,27 +31,16 @@ class QTextCharFormat;
 class Q_SVG_PRIVATE_EXPORT QSvgAnimation : public QSvgNode
 {
 public:
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    void drawCommand(QPainter *, QSvgExtraStates &) override;
     Type type() const override;
-};
-
-class Q_SVG_PRIVATE_EXPORT QSvgArc : public QSvgNode
-{
-public:
-    QSvgArc(QSvgNode *parent, const QPainterPath &path);
-    void draw(QPainter *p, QSvgExtraStates &states) override;
-    Type type() const override;
-    QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
-    QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
-private:
-    QPainterPath m_path;
 };
 
 class Q_SVG_PRIVATE_EXPORT QSvgEllipse : public QSvgNode
 {
 public:
     QSvgEllipse(QSvgNode *parent, const QRectF &rect);
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    bool separateFillStroke() const override;
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
@@ -72,7 +61,7 @@ class Q_SVG_PRIVATE_EXPORT QSvgImage : public QSvgNode
 public:
     QSvgImage(QSvgNode *parent, const QImage &image,
               const QRectF &bounds);
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
 
@@ -87,7 +76,7 @@ class Q_SVG_PRIVATE_EXPORT QSvgLine : public QSvgNode
 {
 public:
     QSvgLine(QSvgNode *parent, const QLineF &line);
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
@@ -100,7 +89,8 @@ class Q_SVG_PRIVATE_EXPORT QSvgPath : public QSvgNode
 {
 public:
     QSvgPath(QSvgNode *parent, const QPainterPath &qpath);
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    bool separateFillStroke() const override;
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
@@ -117,7 +107,8 @@ class Q_SVG_PRIVATE_EXPORT QSvgPolygon : public QSvgNode
 {
 public:
     QSvgPolygon(QSvgNode *parent, const QPolygonF &poly);
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    bool separateFillStroke() const override;
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
@@ -132,7 +123,8 @@ class Q_SVG_PRIVATE_EXPORT QSvgPolyline : public QSvgNode
 {
 public:
     QSvgPolyline(QSvgNode *parent, const QPolygonF &poly);
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    bool separateFillStroke() const override;
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
@@ -148,7 +140,8 @@ class Q_SVG_PRIVATE_EXPORT QSvgRect : public QSvgNode
 public:
     QSvgRect(QSvgNode *paren, const QRectF &rect, qreal rx=0, qreal ry=0);
     Type type() const override;
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    bool separateFillStroke() const override;
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF rect() const { return m_rect; }
@@ -173,7 +166,8 @@ public:
     ~QSvgText();
     void setTextArea(const QSizeF &size);
 
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
+    bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const override;
     Type type() const override;
 
     void addTspan(QSvgTspan *tspan) {m_tspans.append(tspan);}
@@ -189,7 +183,6 @@ public:
     QSizeF size() const { return m_size; }
 
 private:
-    bool precheck(QPainter *p) const;
     void draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundingRect = nullptr) const;
 
     static QSvgTspan * const LINEBREAK;
@@ -214,8 +207,8 @@ public:
     {
     }
     ~QSvgTspan() { };
-    Type type() const override { return TSPAN; }
-    void draw(QPainter *, QSvgExtraStates &) override { Q_ASSERT(!"Tspans should be drawn through QSvgText::draw()."); }
+    Type type() const override { return Tspan; }
+    void drawCommand(QPainter *, QSvgExtraStates &) override { Q_ASSERT(!"Tspans should be drawn through QSvgText::draw()."); }
     void addText(const QString &text) {m_text += text;}
     const QString &text() const {return m_text;}
     bool isTspan() const {return m_isTspan;}
@@ -234,7 +227,7 @@ public:
     QSvgUse(const QPointF &start, QSvgNode *parent, const QString &linkId)
         : QSvgUse(start, parent, nullptr)
     { m_linkId = linkId; }
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
     bool isResolved() const { return m_link != nullptr; }
@@ -252,7 +245,7 @@ private:
 class QSvgVideo : public QSvgNode
 {
 public:
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    void drawCommand(QPainter *, QSvgExtraStates &) override {};
     Type type() const override;
 };
 

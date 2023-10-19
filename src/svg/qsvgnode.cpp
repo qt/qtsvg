@@ -5,19 +5,22 @@
 #include "qsvgtinydocument_p.h"
 
 #include <QLoggingCategory>
+#include<QElapsedTimer>
 
 #include "qdebug.h"
 #include "qstack.h"
 
 #include <QtGui/private/qoutlinemapper_p.h>
 
-#if !defined(QT_SVG_SIZE_LIMIT)
-#  define QT_SVG_SIZE_LIMIT QT_RASTER_COORD_LIMIT
-#endif
-
 QT_BEGIN_NAMESPACE
 
 Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw)
+
+Q_LOGGING_CATEGORY(lcSvgTiming, "qt.svg.timing")
+
+#if !defined(QT_SVG_SIZE_LIMIT)
+#  define QT_SVG_SIZE_LIMIT QT_RASTER_COORD_LIMIT
+#endif
 
 QSvgNode::QSvgNode(QSvgNode *parent)
     : m_parent(parent),
@@ -29,6 +32,52 @@ QSvgNode::QSvgNode(QSvgNode *parent)
 QSvgNode::~QSvgNode()
 {
 
+}
+
+
+void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
+{
+#ifndef QT_NO_DEBUG
+    QElapsedTimer qtSvgTimer; qtSvgTimer.start();
+#endif
+
+    if (shouldDrawNode(p, states)) {
+        applyStyle(p, states);
+        if (separateFillStroke())
+            fillThenStroke(p, states);
+        else
+            drawCommand(p, states);
+        revertStyle(p, states);
+    }
+
+#ifndef QT_NO_DEBUG
+    if (Q_UNLIKELY(lcSvgTiming().isDebugEnabled()))
+        qCDebug(lcSvgTiming) << "Drawing" << typeName() << "took" << (qtSvgTimer.nsecsElapsed() / 1000000.0f) << "ms";
+#endif
+}
+
+void QSvgNode::fillThenStroke(QPainter *p, QSvgExtraStates &states)
+{
+    qreal oldOpacity = p->opacity();
+    if (p->brush().style() != Qt::NoBrush) {
+        QPen oldPen = p->pen();
+        p->setPen(Qt::NoPen);
+        p->setOpacity(oldOpacity * states.fillOpacity);
+
+        drawCommand(p, states);
+
+        p->setPen(oldPen);
+    }
+    if (p->pen() != Qt::NoPen && p->pen().brush() != Qt::NoBrush && p->pen().widthF() != 0) {
+        QBrush oldBrush = p->brush();
+        p->setOpacity(oldOpacity * states.strokeOpacity);
+        p->setBrush(Qt::NoBrush);
+
+        drawCommand(p, states);
+
+        p->setBrush(oldBrush);
+    }
+    p->setOpacity(oldOpacity);
 }
 
 bool QSvgNode::isDescendantOf(const QSvgNode *parent) const
@@ -220,12 +269,51 @@ QSvgTinyDocument * QSvgNode::document() const
 {
     QSvgTinyDocument *doc = nullptr;
     QSvgNode *node = const_cast<QSvgNode*>(this);
-    while (node && node->type() != QSvgNode::DOC) {
+    while (node && node->type() != QSvgNode::Doc) {
         node = node->parent();
     }
     doc = static_cast<QSvgTinyDocument*>(node);
 
     return doc;
+}
+
+QString QSvgNode::typeName() const
+{
+    #define stringForType(type) case type: return QStringLiteral(#type);
+    switch (type()) {
+    stringForType(Doc)
+    stringForType(Group)
+    stringForType(Defs)
+    stringForType(Switch)
+    stringForType(Animation)
+    stringForType(Circle)
+    stringForType(Ellipse)
+    stringForType(Image)
+    stringForType(Line)
+    stringForType(Path)
+    stringForType(Polygon)
+    stringForType(Polyline)
+    stringForType(Rect)
+    stringForType(Text)
+    stringForType(Textarea)
+    stringForType(Tspan)
+    stringForType(Use)
+    stringForType(Video)
+    stringForType(Mask)
+    stringForType(Symbol)
+    stringForType(Marker)
+    stringForType(Pattern)
+    stringForType(Filter)
+    stringForType(FeMerge)
+    stringForType(FeMergenode)
+    stringForType(FeColormatrix)
+    stringForType(FeGaussianblur)
+    stringForType(FeOffset)
+    stringForType(FeComposite)
+    stringForType(FeFlood)
+    }
+    #undef stringForType
+    return QStringLiteral("unknown");
 }
 
 void QSvgNode::setRequiredFeatures(const QStringList &lst)

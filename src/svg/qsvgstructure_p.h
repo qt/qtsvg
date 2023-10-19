@@ -16,7 +16,6 @@
 //
 
 #include "qsvgnode_p.h"
-#include "qtsvgglobal_p.h"
 
 #include "QtCore/qlist.h"
 #include "QtCore/qhash.h"
@@ -49,7 +48,8 @@ class Q_SVG_PRIVATE_EXPORT QSvgG : public QSvgStructureNode
 {
 public:
     QSvgG(QSvgNode *parent);
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    void drawCommand(QPainter *, QSvgExtraStates &) override;
+    bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const override;
     Type type() const override;
 };
 
@@ -57,7 +57,8 @@ class Q_SVG_PRIVATE_EXPORT QSvgDefs : public QSvgStructureNode
 {
 public:
     QSvgDefs(QSvgNode *parent);
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    void drawCommand(QPainter *, QSvgExtraStates &) override {};
+    bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const override;
     Type type() const override;
 };
 
@@ -65,7 +66,7 @@ class Q_SVG_PRIVATE_EXPORT QSvgSwitch : public QSvgStructureNode
 {
 public:
     QSvgSwitch(QSvgNode *parent);
-    void draw(QPainter *p, QSvgExtraStates &states) override;
+    void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
 private:
     void init();

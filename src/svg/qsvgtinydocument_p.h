@@ -60,7 +60,7 @@ public:
 
     QSvg::FeatureSet featureSet() const;
 
-    void draw(QPainter *p, QSvgExtraStates &) override; //from the QSvgNode
+    void drawCommand(QPainter *, QSvgExtraStates &) override;
 
     void draw(QPainter *p);
     void draw(QPainter *p, const QRectF &bounds);

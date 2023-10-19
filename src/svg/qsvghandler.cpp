@@ -455,10 +455,10 @@ public:
     inline QSvgStructureNode *nodeToStructure(QSvgNode *n) const
     {
         if (n &&
-            (n->type() == QSvgNode::DOC ||
-             n->type() == QSvgNode::G ||
-             n->type() == QSvgNode::DEFS ||
-             n->type() == QSvgNode::SWITCH)) {
+            (n->type() == QSvgNode::Doc ||
+             n->type() == QSvgNode::Group ||
+             n->type() == QSvgNode::Defs ||
+             n->type() == QSvgNode::Switch)) {
             return (QSvgStructureNode*)n;
         }
         return 0;
@@ -2603,7 +2603,7 @@ static QSvgStyleProperty *createFontNode(QSvgNode *parent,
 
     qreal horizAdvX = toDouble(hax);
 
-    while (parent && parent->type() != QSvgNode::DOC) {
+    while (parent && parent->type() != QSvgNode::Doc) {
         parent = parent->parent();
     }
 
@@ -2905,7 +2905,7 @@ static QSvgStyleProperty *createLinearGradientNode(QSvgNode *node,
         ny2 =  convertToNumber(y2, handler);
 
     QSvgNode *itr = node;
-    while (itr && itr->type() != QSvgNode::DOC) {
+    while (itr && itr->type() != QSvgNode::Doc) {
         itr = itr->parent();
     }
 
@@ -3285,7 +3285,7 @@ static bool parseTbreakNode(QSvgNode *parent,
                             const QXmlStreamAttributes &,
                             QSvgHandler *)
 {
-    if (parent->type() != QSvgNode::TEXTAREA)
+    if (parent->type() != QSvgNode::Textarea)
         return false;
     static_cast<QSvgText*>(parent)->addLineBreak();
     return true;
@@ -3349,10 +3349,10 @@ static QSvgNode *createUseNode(QSvgNode *parent,
     if (linkId.isEmpty())
         linkId = attributes.value(QLatin1String("href")).toString().remove(0, 1);
     switch (parent->type()) {
-    case QSvgNode::DOC:
-    case QSvgNode::DEFS:
-    case QSvgNode::G:
-    case QSvgNode::SWITCH:
+    case QSvgNode::Doc:
+    case QSvgNode::Defs:
+    case QSvgNode::Group:
+    case QSvgNode::Switch:
         group = static_cast<QSvgStructureNode*>(parent);
         break;
     default:
@@ -3621,8 +3621,8 @@ static bool detectCycles(const QSvgNode *node, QList<const QSvgUse *> active = {
     if (Q_UNLIKELY(!node))
         return false;
     switch (node->type()) {
-    case QSvgNode::DOC:
-    case QSvgNode::G:
+    case QSvgNode::Doc:
+    case QSvgNode::Group:
     {
         auto *g = static_cast<const QSvgStructureNode*>(node);
         for (auto *r : g->renderers()) {
@@ -3631,7 +3631,7 @@ static bool detectCycles(const QSvgNode *node, QList<const QSvgUse *> active = {
         }
     }
     break;
-    case QSvgNode::USE:
+    case QSvgNode::Use:
     {
         if (active.contains(node))
             return true;
@@ -3742,14 +3742,14 @@ bool QSvgHandler::startElement(const QString &localName,
         node = method(m_doc ? m_nodes.top() : 0, attributes, this);
         Q_ASSERT(node);
         if (!m_doc) {
-            Q_ASSERT(node->type() == QSvgNode::DOC);
+            Q_ASSERT(node->type() == QSvgNode::Doc);
             m_doc = static_cast<QSvgTinyDocument*>(node);
         } else {
             switch (m_nodes.top()->type()) {
-            case QSvgNode::DOC:
-            case QSvgNode::G:
-            case QSvgNode::DEFS:
-            case QSvgNode::SWITCH:
+            case QSvgNode::Doc:
+            case QSvgNode::Group:
+            case QSvgNode::Defs:
+            case QSvgNode::Switch:
             {
                 QSvgStructureNode *group =
                     static_cast<QSvgStructureNode*>(m_nodes.top());
@@ -3777,12 +3777,12 @@ bool QSvgHandler::startElement(const QString &localName,
         node = method(m_nodes.top(), attributes, this);
         if (node) {
             switch (m_nodes.top()->type()) {
-            case QSvgNode::DOC:
-            case QSvgNode::G:
-            case QSvgNode::DEFS:
-            case QSvgNode::SWITCH:
+            case QSvgNode::Doc:
+            case QSvgNode::Group:
+            case QSvgNode::Defs:
+            case QSvgNode::Switch:
             {
-                if (node->type() == QSvgNode::TSPAN) {
+                if (node->type() == QSvgNode::Tspan) {
                     const QByteArray msg = QByteArrayLiteral("\'tspan\' element in wrong context.");
                     qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
                     delete node;
@@ -3794,9 +3794,9 @@ bool QSvgHandler::startElement(const QString &localName,
                 group->addChild(node, someId(attributes));
             }
                 break;
-            case QSvgNode::TEXT:
-            case QSvgNode::TEXTAREA:
-                if (node->type() == QSvgNode::TSPAN) {
+            case QSvgNode::Text:
+            case QSvgNode::Textarea:
+                if (node->type() == QSvgNode::Tspan) {
                     static_cast<QSvgText *>(m_nodes.top())->addTspan(static_cast<QSvgTspan *>(node));
                 } else {
                     const QByteArray msg = QByteArrayLiteral("\'text\' or \'textArea\' element contains invalid element type.");
@@ -3819,11 +3819,11 @@ bool QSvgHandler::startElement(const QString &localName,
                 cssStyleLookup(node, this, m_selector);
 #endif
                 parseStyle(node, attributes, this);
-                if (node->type() == QSvgNode::TEXT || node->type() == QSvgNode::TEXTAREA) {
+                if (node->type() == QSvgNode::Text || node->type() == QSvgNode::Textarea) {
                     static_cast<QSvgText *>(node)->setWhitespaceMode(m_whitespaceMode.top());
-                } else if (node->type() == QSvgNode::TSPAN) {
+                } else if (node->type() == QSvgNode::Tspan) {
                     static_cast<QSvgTspan *>(node)->setWhitespaceMode(m_whitespaceMode.top());
-                } else if (node->type() == QSvgNode::USE) {
+                } else if (node->type() == QSvgNode::Use) {
                     auto useNode = static_cast<QSvgUse *>(node);
                     if (!useNode->isResolved())
                         m_toBeResolved.append(useNode);
@@ -3893,8 +3893,8 @@ bool QSvgHandler::endElement(const QStringView localName)
 
 void QSvgHandler::resolveGradients(QSvgNode *node, int nestedDepth)
 {
-    if (!node || (node->type() != QSvgNode::DOC && node->type() != QSvgNode::G
-        && node->type() != QSvgNode::DEFS && node->type() != QSvgNode::SWITCH)) {
+    if (!node || (node->type() != QSvgNode::Doc && node->type() != QSvgNode::Group
+        && node->type() != QSvgNode::Defs && node->type() != QSvgNode::Switch)) {
         return;
     }
 
@@ -3939,7 +3939,7 @@ void QSvgHandler::resolveNodes()
             continue;
 
         QSvgNode::Type t = parent->type();
-        if (t != QSvgNode::DOC && t != QSvgNode::DEFS && t != QSvgNode::G && t != QSvgNode::SWITCH)
+        if (t != QSvgNode::Doc && t != QSvgNode::Defs && t != QSvgNode::Group && t != QSvgNode::Switch)
             continue;
 
         QSvgStructureNode *group = static_cast<QSvgStructureNode *>(parent);
@@ -3971,9 +3971,9 @@ bool QSvgHandler::characters(const QStringView str)
     if (m_skipNodes.isEmpty() || m_skipNodes.top() == Unknown || m_nodes.isEmpty())
         return true;
 
-    if (m_nodes.top()->type() == QSvgNode::TEXT || m_nodes.top()->type() == QSvgNode::TEXTAREA) {
+    if (m_nodes.top()->type() == QSvgNode::Text || m_nodes.top()->type() == QSvgNode::Textarea) {
         static_cast<QSvgText*>(m_nodes.top())->addText(str.toString());
-    } else if (m_nodes.top()->type() == QSvgNode::TSPAN) {
+    } else if (m_nodes.top()->type() == QSvgNode::Tspan) {
         static_cast<QSvgTspan*>(m_nodes.top())->addText(str.toString());
     }
 

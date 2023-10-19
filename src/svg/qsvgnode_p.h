@@ -31,37 +31,36 @@ class Q_SVG_PRIVATE_EXPORT QSvgNode
 public:
     enum Type
     {
-        DOC,
-        G,
-        DEFS,
-        SWITCH,
-        ANIMATION,
-        ARC,
-        CIRCLE,
-        ELLIPSE,
-        IMAGE,
-        LINE,
-        PATH,
-        POLYGON,
-        POLYLINE,
-        RECT,
-        TEXT,
-        TEXTAREA,
-        TSPAN,
-        USE,
-        VIDEO,
-        MASK,
-        SYMBOL,
-        MARKER,
-        PATTERN,
-        FILTER,
-        FEMERGE,
-        FEMERGENODE,
-        FECOLORMATRIX,
-        FEGAUSSIANBLUR,
-        FEOFFSET,
-        FECOMPOSITE,
-        FEFLOOD
+        Doc,
+        Group,
+        Defs,
+        Switch,
+        Animation,
+        Circle,
+        Ellipse,
+        Image,
+        Line,
+        Path,
+        Polygon,
+        Polyline,
+        Rect,
+        Text,
+        Textarea,
+        Tspan,
+        Use,
+        Video,
+        Mask,
+        Symbol,
+        Marker,
+        Pattern,
+        Filter,
+        FeMerge,
+        FeMergenode,
+        FeColormatrix,
+        FeGaussianblur,
+        FeOffset,
+        FeComposite,
+        FeFlood
     };
     enum DisplayMode {
         InlineMode,
@@ -83,10 +82,14 @@ public:
         NoneMode,
         InheritMode
     };
+
 public:
     QSvgNode(QSvgNode *parent=0);
     virtual ~QSvgNode();
-    virtual void draw(QPainter *p, QSvgExtraStates &states) =0;
+    void draw(QPainter *p, QSvgExtraStates &states);
+    virtual bool separateFillStroke() const {return false;}
+    virtual void drawCommand(QPainter *p, QSvgExtraStates &states) = 0;
+    void fillThenStroke(QPainter *p, QSvgExtraStates &states);
 
     QSvgNode *parent() const;
     bool isDescendantOf(const QSvgNode *parent) const;
@@ -99,7 +102,8 @@ public:
 
     QSvgTinyDocument *document() const;
 
-    virtual Type type() const =0;
+    virtual Type type() const = 0;
+    QString typeName() const;
     virtual QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const;
     virtual QRectF bounds(QPainter *p, QSvgExtraStates &states) const;
     virtual QRectF transformedBounds(QPainter *p, QSvgExtraStates &states) const;
@@ -132,7 +136,7 @@ public:
     QString xmlClass() const;
     void setXmlClass(const QString &str);
 
-    bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const;
+    virtual bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const;
     const QSvgStyle &style() const { return m_style; }
 protected:
     mutable QSvgStyle m_style;

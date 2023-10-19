@@ -314,7 +314,7 @@ void QSvgTinyDocument::draw(QPainter *p, const QString &id,
 
 QSvgNode::Type QSvgTinyDocument::type() const
 {
-    return DOC;
+    return Doc;
 }
 
 void QSvgTinyDocument::setWidth(int len, bool percent)
@@ -398,7 +398,7 @@ void QSvgTinyDocument::draw(QPainter *p)
     draw(p, QRectF());
 }
 
-void QSvgTinyDocument::draw(QPainter *, QSvgExtraStates &)
+void QSvgTinyDocument::drawCommand(QPainter *, QSvgExtraStates &)
 {
     qCDebug(lcSvgHandler) << "SVG Tiny does not support nested <svg> elements: ignored.";
     return;
