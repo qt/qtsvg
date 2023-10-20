@@ -2013,11 +2013,6 @@ void QSvgHandler::parseCSStoXMLAttrs(const QString &css, QList<QSvgCssAttribute>
     }
 }
 
-QSvg::FeatureSet QSvgHandler::featureSet() const
-{
-    return m_featureSet;
-}
-
 static void cssStyleLookup(QSvgNode *node,
                            QSvgHandler *handler,
                            QSvgStyleSelector *selector,
@@ -2040,6 +2035,11 @@ static void cssStyleLookup(QSvgNode *node,
 }
 
 #endif // QT_NO_CSSPARSER
+
+QSvg::FeatureSet QSvgHandler::featureSet() const
+{
+    return m_featureSet;
+}
 
 static inline QStringList stringToList(const QString &str)
 {
