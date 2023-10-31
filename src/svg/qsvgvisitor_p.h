@@ -25,6 +25,8 @@ QT_BEGIN_NAMESPACE
 class Q_SVG_PRIVATE_EXPORT QSvgVisitor {
 public:
     void traverse(const QSvgStructureNode *node);
+    virtual ~QSvgVisitor() {}
+
 protected:
     virtual void visitNode(const QSvgNode *) {}
     virtual bool visitStructureNodeStart(const QSvgStructureNode *node) { visitNode(node); return true; }
