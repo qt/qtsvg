@@ -79,6 +79,25 @@ public:
         delete render;
     }
 
+    void startStopTimer()
+    {
+        if (render && render->animated() && fps > 0) {
+            ensureTimerCreated();
+            timer->start(1000 / fps);
+        } else if (timer) {
+            timer->stop();
+        }
+    }
+
+    void ensureTimerCreated()
+    {
+        Q_Q(QSvgRenderer);
+        if (!timer) {
+            timer = new QTimer(q);
+            q->connect(timer, &QTimer::timeout, q, &QSvgRenderer::repaintNeeded);
+        }
+    }
+
     static void callRepaintNeeded(QSvgRenderer *const q);
 
     QSvgTinyDocument *render;
@@ -218,6 +237,7 @@ void QSvgRenderer::setFramesPerSecond(int num)
         return;
     }
     d->fps = num;
+    d->startStopTimer();
 }
 
 /*!
@@ -318,17 +338,7 @@ static bool loadDocument(QSvgRenderer *const q,
         delete d->render;
         d->render = nullptr;
     }
-    if (d->render && d->render->animated() && d->fps > 0) {
-        if (!d->timer)
-            d->timer = new QTimer(q);
-        else
-            d->timer->stop();
-        q->connect(d->timer, SIGNAL(timeout()),
-                   q, SIGNAL(repaintNeeded()));
-        d->timer->start(1000/d->fps);
-    } else if (d->timer) {
-        d->timer->stop();
-    }
+    d->startStopTimer();
 
     //force first update
     QSvgRendererPrivate::callRepaintNeeded(q);
