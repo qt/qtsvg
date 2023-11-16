@@ -81,9 +81,9 @@ public:
         delete render;
     }
 
-    void startStopTimer()
+    void startOrStopTimer()
     {
-        if (render && render->animated() && fps > 0) {
+        if (animationEnabled && render && render->animated() && fps > 0) {
             ensureTimerCreated();
             timer->start(1000 / fps);
         } else if (timer) {
@@ -106,6 +106,7 @@ public:
     QTimer *timer;
     int fps;
     QSvg::FeatureSet featureSet;
+    bool animationEnabled = true;
 };
 
 /*!
@@ -219,6 +220,34 @@ bool QSvgRenderer::animated() const
 }
 
 /*!
+    \property QSvgRenderer::animationEnabled
+    \brief whether the animation should run, if the SVG is animated
+
+    Setting the property to false stops the animation timer.
+    Setting the property to false starts the animation timer,
+    provided that the SVG contains animated elements.
+
+    If the SVG is not animated, the property will have no effect.
+    Otherwise, the property defaults to true.
+
+    \sa animated()
+
+    \since 6.7
+*/
+bool QSvgRenderer::isAnimationEnabled() const
+{
+    Q_D(const QSvgRenderer);
+    return d->animationEnabled;
+}
+
+void QSvgRenderer::setAnimationEnabled(bool enable)
+{
+    Q_D(QSvgRenderer);
+    d->animationEnabled = enable;
+    d->startOrStopTimer();
+}
+
+/*!
     \property QSvgRenderer::framesPerSecond
     \brief the number of frames per second to be shown
 
@@ -240,7 +269,7 @@ void QSvgRenderer::setFramesPerSecond(int num)
         return;
     }
     d->fps = num;
-    d->startStopTimer();
+    d->startOrStopTimer();
 }
 
 /*!
@@ -363,7 +392,7 @@ static bool loadDocument(QSvgRenderer *const q,
         delete d->render;
         d->render = nullptr;
     }
-    d->startStopTimer();
+    d->startOrStopTimer();
 
     //force first update
     QSvgRendererPrivate::callRepaintNeeded(q);

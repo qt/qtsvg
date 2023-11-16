@@ -34,6 +34,9 @@ public Q_SLOTS:
     void load(const QByteArray &contents);
 protected:
     void paintEvent(QPaintEvent *event) override;
+    void showEvent(QShowEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
+
 private:
     Q_DISABLE_COPY(QSvgWidget)
     Q_DECLARE_PRIVATE(QSvgWidget)

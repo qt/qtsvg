@@ -147,12 +147,32 @@ void QSvgWidget::paintEvent(QPaintEvent *)
 }
 
 /*!
+    \reimp
+*/
+void QSvgWidget::showEvent(QShowEvent *)
+{
+    Q_D(QSvgWidget);
+    d->renderer->setAnimationEnabled(true);
+}
+
+/*!
+    \reimp
+*/
+void QSvgWidget::hideEvent(QHideEvent *)
+{
+    Q_D(QSvgWidget);
+    d->renderer->setAnimationEnabled(false);
+}
+
+/*!
     Loads the contents of the specified SVG \a file and updates the widget.
 */
 void QSvgWidget::load(const QString &file)
 {
     Q_D(const QSvgWidget);
     d->renderer->load(file);
+    if (!isVisible())
+        d->renderer->setAnimationEnabled(false);
 }
 
 /*!
@@ -162,6 +182,8 @@ void QSvgWidget::load(const QByteArray &contents)
 {
     Q_D(const QSvgWidget);
     d->renderer->load(contents);
+    if (!isVisible())
+        d->renderer->setAnimationEnabled(false);
 }
 
 QT_END_NAMESPACE
