@@ -4133,34 +4133,34 @@ bool QSvgHandler::startElement(const QString &localName,
     if (FactoryMethod method = findGroupFactory(localName, featureSet())) {
         //group
         node = method(m_doc ? m_nodes.top() : 0, attributes, this);
-        Q_ASSERT(node);
-        if (!m_doc) {
-            Q_ASSERT(node->type() == QSvgNode::Doc);
-            m_doc = static_cast<QSvgTinyDocument*>(node);
-        } else {
-            switch (m_nodes.top()->type()) {
-            case QSvgNode::Doc:
-            case QSvgNode::Group:
-            case QSvgNode::Defs:
-            case QSvgNode::Switch:
-            case QSvgNode::Mask:
-            case QSvgNode::Symbol:
-            case QSvgNode::Marker:
-            {
-                QSvgStructureNode *group =
-                    static_cast<QSvgStructureNode*>(m_nodes.top());
-                group->addChild(node, someId(attributes));
-            }
-                break;
-            default:
-                const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
-                qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
-                delete node;
-                node = 0;
-                break;
-            }
-        }
+
         if (node) {
+            if (!m_doc) {
+                Q_ASSERT(node->type() == QSvgNode::Doc);
+                m_doc = static_cast<QSvgTinyDocument*>(node);
+            } else {
+                switch (m_nodes.top()->type()) {
+                case QSvgNode::Doc:
+                case QSvgNode::Group:
+                case QSvgNode::Defs:
+                case QSvgNode::Switch:
+                case QSvgNode::Mask:
+                case QSvgNode::Symbol:
+                case QSvgNode::Marker:
+                {
+                    QSvgStructureNode *group =
+                        static_cast<QSvgStructureNode*>(m_nodes.top());
+                    group->addChild(node, someId(attributes));
+                }
+                    break;
+                default:
+                    const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
+                    qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
+                    delete node;
+                    node = 0;
+                    break;
+                }
+            }
             parseCoreNode(node, attributes);
 #ifndef QT_NO_CSSPARSER
             cssStyleLookup(node, this, m_selector);
