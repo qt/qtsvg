@@ -41,7 +41,6 @@ qt_internal_add_module(Svg
         Qt::CorePrivate
         Qt::GuiPrivate
     GENERATE_CPP_EXPORTS
-    GENERATE_PRIVATE_CPP_EXPORTS
 )
 
 ## Scopes:
