@@ -21,7 +21,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Q_SVG_PRIVATE_EXPORT QSvgRectF : public QRectF
+class Q_SVG_EXPORT QSvgRectF : public QRectF
 {
 public:
     QSvgRectF(const QRectF &r = QRectF(),

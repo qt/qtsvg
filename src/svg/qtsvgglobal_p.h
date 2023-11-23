@@ -16,7 +16,7 @@
 //
 
 #include "qtsvgglobal.h"
-#include <QtSvg/private/qtsvgexports_p.h>
+#include <QtSvg/qtsvgexports.h>
 
 QT_BEGIN_NAMESPACE
 

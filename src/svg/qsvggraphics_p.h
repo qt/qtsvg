@@ -28,14 +28,14 @@ QT_BEGIN_NAMESPACE
 
 class QTextCharFormat;
 
-class Q_SVG_PRIVATE_EXPORT QSvgAnimation : public QSvgNode
+class Q_SVG_EXPORT QSvgAnimation : public QSvgNode
 {
 public:
     void drawCommand(QPainter *, QSvgExtraStates &) override;
     Type type() const override;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgEllipse : public QSvgNode
+class Q_SVG_EXPORT QSvgEllipse : public QSvgNode
 {
 public:
     QSvgEllipse(QSvgNode *parent, const QRectF &rect);
@@ -49,14 +49,14 @@ private:
     QRectF m_bounds;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgCircle : public QSvgEllipse
+class Q_SVG_EXPORT QSvgCircle : public QSvgEllipse
 {
 public:
     QSvgCircle(QSvgNode *parent, const QRectF &rect) : QSvgEllipse(parent, rect) { }
     Type type() const override;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgImage : public QSvgNode
+class Q_SVG_EXPORT QSvgImage : public QSvgNode
 {
 public:
     QSvgImage(QSvgNode *parent, const QImage &image,
@@ -72,7 +72,7 @@ private:
     QRectF m_bounds;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgLine : public QSvgNode
+class Q_SVG_EXPORT QSvgLine : public QSvgNode
 {
 public:
     QSvgLine(QSvgNode *parent, const QLineF &line);
@@ -85,7 +85,7 @@ private:
     QLineF m_line;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgPath : public QSvgNode
+class Q_SVG_EXPORT QSvgPath : public QSvgNode
 {
 public:
     QSvgPath(QSvgNode *parent, const QPainterPath &qpath);
@@ -99,7 +99,7 @@ private:
     QPainterPath m_path;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgPolygon : public QSvgNode
+class Q_SVG_EXPORT QSvgPolygon : public QSvgNode
 {
 public:
     QSvgPolygon(QSvgNode *parent, const QPolygonF &poly);
@@ -113,7 +113,7 @@ private:
     QPolygonF m_poly;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgPolyline : public QSvgNode
+class Q_SVG_EXPORT QSvgPolyline : public QSvgNode
 {
 public:
     QSvgPolyline(QSvgNode *parent, const QPolygonF &poly);
@@ -127,7 +127,7 @@ private:
     QPolygonF m_poly;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgRect : public QSvgNode
+class Q_SVG_EXPORT QSvgRect : public QSvgNode
 {
 public:
     QSvgRect(QSvgNode *paren, const QRectF &rect, qreal rx=0, qreal ry=0);
@@ -145,7 +145,7 @@ private:
 
 class  QSvgTspan;
 
-class Q_SVG_PRIVATE_EXPORT QSvgText : public QSvgNode
+class Q_SVG_EXPORT QSvgText : public QSvgNode
 {
 public:
     enum WhitespaceMode
@@ -190,7 +190,7 @@ private:
     WhitespaceMode m_mode;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgTspan : public QSvgNode
+class Q_SVG_EXPORT QSvgTspan : public QSvgNode
 {
 public:
     // tspans are also used to store normal text, so the 'isProperTspan' is used to separate text from tspan.

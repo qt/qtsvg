@@ -33,7 +33,7 @@ class QByteArray;
 class QSvgFont;
 class QTransform;
 
-class Q_SVG_PRIVATE_EXPORT QSvgTinyDocument : public QSvgStructureNode
+class Q_SVG_EXPORT QSvgTinyDocument : public QSvgStructureNode
 {
 public:
     static QSvgTinyDocument * load(const QString &file, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
@@ -111,7 +111,7 @@ private:
     const QSvg::FeatureSet m_featureSet;
 };
 
-Q_SVG_PRIVATE_EXPORT QDebug operator<<(QDebug debug, const QSvgTinyDocument &doc);
+Q_SVG_EXPORT QDebug operator<<(QDebug debug, const QSvgTinyDocument &doc);
 
 inline QSize QSvgTinyDocument::size() const
 {

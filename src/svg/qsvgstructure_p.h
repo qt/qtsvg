@@ -27,7 +27,7 @@ class QSvgNode;
 class QPainter;
 class QSvgDefs;
 
-class Q_SVG_PRIVATE_EXPORT QSvgStructureNode : public QSvgNode
+class Q_SVG_EXPORT QSvgStructureNode : public QSvgNode
 {
 public:
     QSvgStructureNode(QSvgNode *parent);
@@ -44,7 +44,7 @@ protected:
     mutable bool              m_recursing = false;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgG : public QSvgStructureNode
+class Q_SVG_EXPORT QSvgG : public QSvgStructureNode
 {
 public:
     QSvgG(QSvgNode *parent);
@@ -53,7 +53,7 @@ public:
     Type type() const override;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgDefs : public QSvgStructureNode
+class Q_SVG_EXPORT QSvgDefs : public QSvgStructureNode
 {
 public:
     QSvgDefs(QSvgNode *parent);
@@ -62,7 +62,7 @@ public:
     Type type() const override;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgSymbolLike : public QSvgStructureNode
+class Q_SVG_EXPORT QSvgSymbolLike : public QSvgStructureNode
 {
     // Marker, Symbol and potentially other elements share a lot of common
     // attributes and functionality. By making a common base class we can
@@ -107,7 +107,7 @@ protected:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QSvgSymbolLike::PreserveAspectRatios)
 
-class Q_SVG_PRIVATE_EXPORT QSvgSymbol : public QSvgSymbolLike
+class Q_SVG_EXPORT QSvgSymbol : public QSvgSymbolLike
 {
 public:
     QSvgSymbol(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF refP,
@@ -116,7 +116,7 @@ public:
     Type type() const override;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgMarker : public QSvgSymbolLike
+class Q_SVG_EXPORT QSvgMarker : public QSvgSymbolLike
 {
 public:
     enum class Orientation : quint8 {
@@ -157,7 +157,7 @@ private:
     MarkerUnits m_markerUnits;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgFilterContainer : public QSvgStructureNode
+class Q_SVG_EXPORT QSvgFilterContainer : public QSvgStructureNode
 {
 public:
 
@@ -172,7 +172,7 @@ private:
 };
 
 
-class Q_SVG_PRIVATE_EXPORT QSvgSwitch : public QSvgStructureNode
+class Q_SVG_EXPORT QSvgSwitch : public QSvgStructureNode
 {
 public:
     QSvgSwitch(QSvgNode *parent);
@@ -185,7 +185,7 @@ private:
     QString m_systemLanguagePrefix;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgMask : public QSvgStructureNode
+class Q_SVG_EXPORT QSvgMask : public QSvgStructureNode
 {
 public:
     QSvgMask(QSvgNode *parent, QSvgRectF bounds,
@@ -199,7 +199,7 @@ private:
     QSvg::UnitTypes m_contentUnits;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgPattern : public QSvgStructureNode
+class Q_SVG_EXPORT QSvgPattern : public QSvgStructureNode
 {
 public:
     QSvgPattern(QSvgNode *parent, QSvgRectF bounds, QRectF viewBox,

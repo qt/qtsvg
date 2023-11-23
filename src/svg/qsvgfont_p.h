@@ -23,7 +23,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Q_SVG_PRIVATE_EXPORT QSvgGlyph
+class Q_SVG_EXPORT QSvgGlyph
 {
 public:
     QSvgGlyph(QChar unicode, const QPainterPath &path, qreal horizAdvX);
@@ -35,7 +35,7 @@ public:
 };
 
 
-class Q_SVG_PRIVATE_EXPORT QSvgFont : public QSvgRefCounted
+class Q_SVG_EXPORT QSvgFont : public QSvgRefCounted
 {
 public:
     static constexpr qreal DEFAULT_UNITS_PER_EM = 1000;

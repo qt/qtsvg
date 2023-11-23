@@ -27,7 +27,7 @@ QT_BEGIN_NAMESPACE
 class QPainter;
 class QSvgTinyDocument;
 
-class Q_SVG_PRIVATE_EXPORT QSvgNode
+class Q_SVG_EXPORT QSvgNode
 {
 public:
     enum Type

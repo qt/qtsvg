@@ -44,7 +44,7 @@ struct QSvgCssAttribute
 
 #endif
 
-class Q_SVG_PRIVATE_EXPORT QSvgHandler
+class Q_SVG_EXPORT QSvgHandler
 {
 public:
     enum LengthType {

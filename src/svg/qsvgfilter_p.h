@@ -26,7 +26,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Q_SVG_PRIVATE_EXPORT QSvgFeFilterPrimitive : public QSvgStructureNode
+class Q_SVG_EXPORT QSvgFeFilterPrimitive : public QSvgStructureNode
 {
 public:
     QSvgFeFilterPrimitive(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect);
@@ -57,7 +57,7 @@ protected:
 
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgFeColorMatrix : public QSvgFeFilterPrimitive
+class Q_SVG_EXPORT QSvgFeColorMatrix : public QSvgFeFilterPrimitive
 {
 public:
     enum class ColorShiftType : quint8 {
@@ -81,7 +81,7 @@ private:
     Matrix m_matrix;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgFeGaussianBlur : public QSvgFeFilterPrimitive
+class Q_SVG_EXPORT QSvgFeGaussianBlur : public QSvgFeFilterPrimitive
 {
 public:
     enum class EdgeMode : quint8 {
@@ -102,7 +102,7 @@ private:
     EdgeMode m_edgemode;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgFeOffset : public QSvgFeFilterPrimitive
+class Q_SVG_EXPORT QSvgFeOffset : public QSvgFeFilterPrimitive
 {
 public:
     QSvgFeOffset(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect,
@@ -116,7 +116,7 @@ private:
     qreal m_dy;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgFeMerge : public QSvgFeFilterPrimitive
+class Q_SVG_EXPORT QSvgFeMerge : public QSvgFeFilterPrimitive
 {
 public:
     QSvgFeMerge(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect);
@@ -126,7 +126,7 @@ public:
                  QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgFeMergeNode : public QSvgFeFilterPrimitive
+class Q_SVG_EXPORT QSvgFeMergeNode : public QSvgFeFilterPrimitive
 {
 public:
     QSvgFeMergeNode(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect);
@@ -136,7 +136,7 @@ public:
                  QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgFeComposite : public QSvgFeFilterPrimitive
+class Q_SVG_EXPORT QSvgFeComposite : public QSvgFeFilterPrimitive
 {
 public:
     enum class Operator : quint8 {
@@ -160,7 +160,7 @@ private:
     QVector4D m_k;
 };
 
-class Q_SVG_PRIVATE_EXPORT QSvgFeFlood : public QSvgFeFilterPrimitive
+class Q_SVG_EXPORT QSvgFeFlood : public QSvgFeFilterPrimitive
 {
 public:
     QSvgFeFlood(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect, const QColor &color);
