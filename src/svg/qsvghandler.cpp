@@ -376,16 +376,16 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
             case 'm':
                 if (name == QLatin1String("mask") &&
                     handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
-                    mask = value.toString();
+                    mask = value;
                 if (name == QLatin1String("marker-start") &&
                     handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
-                    markerStart = value.toString();
+                    markerStart = value;
                 if (name == QLatin1String("marker-mid") &&
                     handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
-                    markerMid = value.toString();
+                    markerMid = value;
                 if (name == QLatin1String("marker-end") &&
                     handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
-                    markerEnd = value.toString();
+                    markerEnd = value;
                 break;
 
             case 'o':
