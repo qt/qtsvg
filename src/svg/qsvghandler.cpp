@@ -4161,11 +4161,14 @@ bool QSvgHandler::startElement(const QString &localName,
                     break;
                 }
             }
-            parseCoreNode(node, attributes);
+
+            if (node) {
+                parseCoreNode(node, attributes);
 #ifndef QT_NO_CSSPARSER
-            cssStyleLookup(node, this, m_selector);
+                cssStyleLookup(node, this, m_selector);
 #endif
-            parseStyle(node, attributes, this);
+                parseStyle(node, attributes, this);
+            }
         }
     } else if (FactoryMethod method = findGraphicsFactory(localName, featureSet())) {
         //rendering element
