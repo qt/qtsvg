@@ -25,7 +25,6 @@ qt_internal_add_module(SvgWidgets
         Qt::CorePrivate
         Qt::GuiPrivate
         Qt::WidgetsPrivate
-    GENERATE_CPP_EXPORTS
 )
 
 qt_internal_extend_target(SvgWidgets CONDITION QT_FEATURE_graphicsview
