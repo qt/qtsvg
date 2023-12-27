@@ -43,12 +43,16 @@ public:
     virtual QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                          QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
                          QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const = 0;
+    virtual bool requiresSourceAlpha() const;
     QString input() const {
         return m_input;
     }
     QString result() const {
         return m_result;
     }
+
+    static const QSvgFeFilterPrimitive *castToFilterPrimitive(const QSvgNode *node);
+
 protected:
     QString m_input;
     QString m_result;
@@ -124,6 +128,7 @@ public:
     QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
                  QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
+    bool requiresSourceAlpha() const override;
 };
 
 class Q_SVG_PRIVATE_EXPORT QSvgFeMergeNode : public QSvgFeFilterPrimitive
@@ -154,6 +159,7 @@ public:
     QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
                  QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
+    bool requiresSourceAlpha() const override;
 private:
     QString m_input2;
     Operator m_operator;
