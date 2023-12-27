@@ -28,6 +28,7 @@
 #include "qtransform.h"
 #include "qvarlengtharray.h"
 #include "private/qmath_p.h"
+#include "qimagereader.h"
 
 #include "float.h"
 #include <cmath>
@@ -2873,7 +2874,9 @@ static QSvgNode *createImageNode(QSvgNode *parent,
                 filename = info.absoluteDir().absoluteFilePath(filename);
             }
         }
-        image = QImage(filename);
+
+        if (handler->trustedSourceMode() || !QImageReader::imageFormat(filename).startsWith("svg"))
+            image = QImage(filename);
     }
 
     if (image.isNull()) {
