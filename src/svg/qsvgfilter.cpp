@@ -61,6 +61,25 @@ void QSvgFeFilterPrimitive::clipToTransformedBounds(QImage *buffer, QPainter *p,
     painter.fillPath(clipPath, Qt::transparent);
 }
 
+bool QSvgFeFilterPrimitive::requiresSourceAlpha() const
+{
+    return m_input == QLatin1StringView("SourceAlpha");
+}
+
+const QSvgFeFilterPrimitive *QSvgFeFilterPrimitive::castToFilterPrimitive(const QSvgNode *node)
+{
+    if (node->type() == QSvgNode::FeMerge ||
+        node->type() == QSvgNode::FeColormatrix ||
+        node->type() == QSvgNode::FeGaussianblur ||
+        node->type() == QSvgNode::FeOffset ||
+        node->type() == QSvgNode::FeComposite ||
+        node->type() == QSvgNode::FeFlood ) {
+        return reinterpret_cast<const QSvgFeFilterPrimitive*>(node);
+    } else {
+        return nullptr;
+    }
+}
+
 QSvgFeColorMatrix::QSvgFeColorMatrix(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect,
                                      ColorShiftType type, Matrix matrix)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
@@ -449,6 +468,19 @@ QImage QSvgFeMerge::apply(QSvgNode *item, const QMap<QString, QImage> &sources, 
     return result;
 }
 
+bool QSvgFeMerge::requiresSourceAlpha() const
+{
+    for (int i = 0; i < renderers().size(); i++) {
+        QSvgNode *child = renderers().at(i);
+        if (child->type() == QSvgNode::FeMergenode) {
+            QSvgFeMergeNode *filter = static_cast<QSvgFeMergeNode *>(child);
+            if (filter->requiresSourceAlpha())
+                return true;
+        }
+    }
+    return false;
+}
+
 QSvgFeMergeNode::QSvgFeMergeNode(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
 {
@@ -600,6 +632,14 @@ QImage QSvgFeComposite::apply(QSvgNode *item, const QMap<QString, QImage> &sourc
     clipToTransformedBounds(&result, p, clipRect);
     return result;
 }
+
+bool QSvgFeComposite::requiresSourceAlpha() const
+{
+    if (QSvgFeFilterPrimitive::requiresSourceAlpha())
+        return true;
+    return m_input2 == QLatin1StringView("SourceAlpha");
+}
+
 
 QSvgFeFlood::QSvgFeFlood(QSvgNode *parent, QString input, QString result,
                          const QSvgRectF &rect, const QColor &color)

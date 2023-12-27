@@ -387,28 +387,38 @@ QImage QSvgFilterContainer::applyFilter(QSvgNode *item, const QImage &buffer, QP
 
     QImage proxy = buffer.copy(filterBoundsGlobRel);
     proxy.setOffset(filterBoundsGlob.topLeft());
-
-    QImage proxyAlpha = proxy.convertedTo(QImage::Format_Alpha8).convertedTo(proxy.format());
-    // ### TODO: allocation check
-    proxyAlpha.setOffset(proxy.offset());
+    if (proxy.isNull())
+        return buffer;
 
     QMap<QString, QImage> buffers;
     buffers[QStringLiteral("")] = proxy;
     buffers[QStringLiteral("SourceGraphic")] = proxy;
-    buffers[QStringLiteral("SourceAlpha")] = proxyAlpha;
+
+    bool requiresSourceAlpha = false;
+
+    const QList<QSvgNode *> children = renderers();
+    for (const QSvgNode *renderer : children) {
+        const QSvgFeFilterPrimitive *filter = QSvgFeFilterPrimitive::castToFilterPrimitive(renderer);
+        if (filter && filter->requiresSourceAlpha()) {
+            requiresSourceAlpha = true;
+            break;
+        }
+    }
+
+    if (requiresSourceAlpha) {
+        QImage proxyAlpha = proxy.convertedTo(QImage::Format_Alpha8).convertedTo(proxy.format());
+        proxyAlpha.setOffset(proxy.offset());
+        if (proxyAlpha.isNull())
+            return buffer;
+        buffers[QStringLiteral("SourceAlpha")] = proxyAlpha;
+    }
 
     QImage result;
-    for (int i = 0; i < renderers().size(); i++) {
-        QSvgNode *child = renderers().at(i);
-        if (child->type() == QSvgNode::FeMerge ||
-            child->type() == QSvgNode::FeColormatrix ||
-            child->type() == QSvgNode::FeGaussianblur ||
-            child->type() == QSvgNode::FeOffset ||
-            child->type() == QSvgNode::FeComposite ||
-            child->type() == QSvgNode::FeFlood ) {
-            QSvgFeFilterPrimitive *filter = reinterpret_cast<QSvgFeFilterPrimitive*>(child);
+    for (const QSvgNode *renderer : children) {
+        const QSvgFeFilterPrimitive *filter = QSvgFeFilterPrimitive::castToFilterPrimitive(renderer);
+        if (filter) {
             result = filter->apply(item, buffers, p, bounds, filterBounds, m_primitiveUnits, m_filterUnits);
-            if (result.size().isValid()) {
+            if (!result.isNull()) {
                 buffers[QStringLiteral("")] = result;
                 buffers[filter->result()] = result;
             }

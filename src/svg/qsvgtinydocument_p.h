@@ -86,6 +86,7 @@ public:
     int currentFrame() const;
     void setCurrentFrame(int);
     void setFramesPerSecond(int num);
+
 private:
     void mapSourceToTarget(QPainter *p, const QRectF &targetRect, const QRectF &sourceRect = QRectF());
 private:
