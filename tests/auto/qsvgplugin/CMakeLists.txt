@@ -25,6 +25,7 @@ qt_internal_add_test(tst_qsvgplugin
 set(resources_resource_files
     "imageInclude.svg"
     "imageIncludeA.svg"
+    "checkers.png"
     "square.svg"
     "square_size.svg"
     "square_size_viewbox.svg"
