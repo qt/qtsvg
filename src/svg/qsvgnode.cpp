@@ -366,40 +366,38 @@ QSvgTinyDocument * QSvgNode::document() const
 
 QString QSvgNode::typeName() const
 {
-    #define stringForType(type) case type: return QStringLiteral(#type);
     switch (type()) {
-    stringForType(Doc)
-    stringForType(Group)
-    stringForType(Defs)
-    stringForType(Switch)
-    stringForType(Animation)
-    stringForType(Circle)
-    stringForType(Ellipse)
-    stringForType(Image)
-    stringForType(Line)
-    stringForType(Path)
-    stringForType(Polygon)
-    stringForType(Polyline)
-    stringForType(Rect)
-    stringForType(Text)
-    stringForType(Textarea)
-    stringForType(Tspan)
-    stringForType(Use)
-    stringForType(Video)
-    stringForType(Mask)
-    stringForType(Symbol)
-    stringForType(Marker)
-    stringForType(Pattern)
-    stringForType(Filter)
-    stringForType(FeMerge)
-    stringForType(FeMergenode)
-    stringForType(FeColormatrix)
-    stringForType(FeGaussianblur)
-    stringForType(FeOffset)
-    stringForType(FeComposite)
-    stringForType(FeFlood)
+        case Doc: return QStringLiteral("svg");
+        case Group: return QStringLiteral("g");
+        case Defs: return QStringLiteral("defs");
+        case Switch: return QStringLiteral("switch");
+        case Animation: return QStringLiteral("animation");
+        case Circle: return QStringLiteral("circle");
+        case Ellipse: return QStringLiteral("ellipse");
+        case Image: return QStringLiteral("image");
+        case Line: return QStringLiteral("line");
+        case Path: return QStringLiteral("path");
+        case Polygon: return QStringLiteral("polygon");
+        case Polyline: return QStringLiteral("polyline");
+        case Rect: return QStringLiteral("rect");
+        case Text: return QStringLiteral("text");
+        case Textarea: return QStringLiteral("textarea");
+        case Tspan: return QStringLiteral("tspan");
+        case Use: return QStringLiteral("use");
+        case Video: return QStringLiteral("video");
+        case Mask: return QStringLiteral("mask");
+        case Symbol: return QStringLiteral("symbol");
+        case Marker: return QStringLiteral("marker");
+        case Pattern: return QStringLiteral("pattern");
+        case Filter: return QStringLiteral("filter");
+        case FeMerge: return QStringLiteral("feMerge");
+        case FeMergenode: return QStringLiteral("feMergeNode");
+        case FeColormatrix: return QStringLiteral("feColorMatrix");
+        case FeGaussianblur: return QStringLiteral("feGaussianBlur");
+        case FeOffset: return QStringLiteral("feOffset");
+        case FeComposite: return QStringLiteral("feComposite");
+        case FeFlood: return QStringLiteral("feFlood");
     }
-    #undef stringForType
     return QStringLiteral("unknown");
 }
 
