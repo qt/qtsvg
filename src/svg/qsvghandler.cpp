@@ -454,28 +454,6 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
 
 #ifndef QT_NO_CSSPARSER
 
-static const char * QSvgStyleSelector_nodeString[] = {
-    "svg",
-    "g",
-    "defs",
-    "switch",
-    "animation",
-    "arc",
-    "circle",
-    "ellipse",
-    "image",
-    "line",
-    "path",
-    "polygon",
-    "polyline",
-    "rect",
-    "text",
-    "textarea",
-    "tspan",
-    "use",
-    "video"
-};
-
 class QSvgStyleSelector : public QCss::StyleSelector
 {
 public:
@@ -489,7 +467,7 @@ public:
 
     inline QString nodeToName(QSvgNode *node) const
     {
-        return QLatin1String(QSvgStyleSelector_nodeString[node->type()]);
+        return node->typeName();
     }
 
     inline QSvgNode *svgNode(NodePtr node) const
