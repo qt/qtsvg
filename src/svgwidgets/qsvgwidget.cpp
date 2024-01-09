@@ -48,6 +48,32 @@ public:
     QSvgRenderer *renderer;
 };
 
+// Event listener for ShowEvent/HideEvent on QSvgWidget (which can't just
+// reimplement event() or showEvent()/hideEvent() or eventFilter() in case
+// a subclass doesn't call the base class in those methods)
+// ### Qt 7: remove the event filter; move this logic into showEvent/hideEvent; add event() override
+class QSvgWidgetListener : public QObject
+{
+public:
+    using QObject::QObject;
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override
+    {
+        if (event->type() == QEvent::Show)
+            renderer()->setAnimationEnabled(true);
+        else if (event->type() == QEvent::Hide)
+            renderer()->setAnimationEnabled(false);
+        return QObject::eventFilter(obj, event);
+    }
+
+private:
+    QSvgRenderer *renderer()
+    {
+        return static_cast<QSvgWidgetPrivate *>(QObjectPrivate::get(parent()))->renderer;
+    }
+};
+
 /*!
     Constructs a new SVG display widget with the given \a parent.
 */
@@ -57,6 +83,7 @@ QSvgWidget::QSvgWidget(QWidget *parent)
     d_func()->renderer = new QSvgRenderer(this);
     QObject::connect(d_func()->renderer, SIGNAL(repaintNeeded()),
                      this, SLOT(update()));
+    installEventFilter(new QSvgWidgetListener(this));
 }
 
 /*!
@@ -64,11 +91,9 @@ QSvgWidget::QSvgWidget(QWidget *parent)
     of the specified \a file.
 */
 QSvgWidget::QSvgWidget(const QString &file, QWidget *parent)
-    : QWidget(*new QSvgWidgetPrivate, parent, {})
+    : QSvgWidget(parent)
 {
-    d_func()->renderer = new QSvgRenderer(file, this);
-    QObject::connect(d_func()->renderer, SIGNAL(repaintNeeded()),
-                     this, SLOT(update()));
+    d_func()->renderer->load(file);
 }
 
 /*!
@@ -144,24 +169,6 @@ void QSvgWidget::paintEvent(QPaintEvent *)
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
     d->renderer->render(&p);
-}
-
-/*!
-    \reimp
-*/
-void QSvgWidget::showEvent(QShowEvent *)
-{
-    Q_D(QSvgWidget);
-    d->renderer->setAnimationEnabled(true);
-}
-
-/*!
-    \reimp
-*/
-void QSvgWidget::hideEvent(QHideEvent *)
-{
-    Q_D(QSvgWidget);
-    d->renderer->setAnimationEnabled(false);
 }
 
 /*!
