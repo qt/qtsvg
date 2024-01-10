@@ -65,7 +65,6 @@ set(fluidlauncher_resource_files
     "screenshots/spectrum.png"
     "screenshots/styledemo.png"
     "screenshots/styledemo_s60.png"
-    "screenshots/weatherinfo.png"
     "screenshots/wiggly.png"
     "screenshots/wiggly_s60.png"
     "slides/demo_1.png"
