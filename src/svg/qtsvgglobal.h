@@ -10,11 +10,12 @@
 
 QT_BEGIN_NAMESPACE
 
-namespace QSvg {
+namespace QtSvg {
 
-enum class FeatureSet : quint32{
+enum class FeatureSet : quint32
+{
     StaticTiny1_2,
-    AllAvailable
+    AllAvailable = 0xffffffff,
 };
 
 }

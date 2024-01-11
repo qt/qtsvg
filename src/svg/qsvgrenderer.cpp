@@ -73,7 +73,7 @@ public:
         : QObjectPrivate(),
           render(0), timer(0),
           fps(30),
-          featureSet(QSvg::FeatureSet::AllAvailable)
+          featureSet(QtSvg::FeatureSet::AllAvailable)
     {}
 
     ~QSvgRendererPrivate()
@@ -105,7 +105,7 @@ public:
     QSvgTinyDocument *render;
     QTimer *timer;
     int fps;
-    QSvg::FeatureSet featureSet;
+    QtSvg::FeatureSet featureSet;
     bool animationEnabled = true;
 };
 
@@ -315,16 +315,16 @@ void QSvgRenderer::setAspectRatioMode(Qt::AspectRatioMode mode)
     render an SVG file. Set this propety before calling any of the load
     functions to change the behavior of the QSvgRenderer.
 
-    The default value is QSvg::AllAvailable.
+    The default value is QtSvg::AllAvailable.
  */
-QSvg::FeatureSet QSvgRenderer::featureSet() const
+QtSvg::FeatureSet QSvgRenderer::featureSet() const
 {
     Q_D(const QSvgRenderer);
     return d->featureSet;
 }
 
 
-void QSvgRenderer::setFeatureSet(QSvg::FeatureSet flags)
+void QSvgRenderer::setFeatureSet(QtSvg::FeatureSet flags)
 {
     Q_D(QSvgRenderer);
     d->featureSet = flags;

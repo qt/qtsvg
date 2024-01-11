@@ -21,7 +21,7 @@
 
 QT_BEGIN_NAMESPACE
 
-QSvgTinyDocument::QSvgTinyDocument(QSvg::FeatureSet featureSet)
+QSvgTinyDocument::QSvgTinyDocument(QtSvg::FeatureSet featureSet)
     : QSvgStructureNode(0)
     , m_widthPercent(false)
     , m_heightPercent(false)
@@ -153,7 +153,7 @@ static QByteArray qt_inflateSvgzDataFrom(QIODevice *)
 }
 #endif
 
-QSvgTinyDocument * QSvgTinyDocument::load(const QString &fileName, QSvg::FeatureSet featureSet)
+QSvgTinyDocument * QSvgTinyDocument::load(const QString &fileName, QtSvg::FeatureSet featureSet)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly)) {
@@ -180,7 +180,7 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QString &fileName, QSvg::Feature
     return doc;
 }
 
-QSvgTinyDocument * QSvgTinyDocument::load(const QByteArray &contents, QSvg::FeatureSet featureSet)
+QSvgTinyDocument * QSvgTinyDocument::load(const QByteArray &contents, QtSvg::FeatureSet featureSet)
 {
     QByteArray svg;
     // Check for gzip magic number and inflate if appropriate
@@ -209,7 +209,7 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QByteArray &contents, QSvg::Feat
     return doc;
 }
 
-QSvgTinyDocument * QSvgTinyDocument::load(QXmlStreamReader *contents, QSvg::FeatureSet featureSet)
+QSvgTinyDocument * QSvgTinyDocument::load(QXmlStreamReader *contents, QtSvg::FeatureSet featureSet)
 {
     QSvgHandler handler(contents, featureSet);
 
@@ -340,7 +340,7 @@ void QSvgTinyDocument::setViewBox(const QRectF &rect)
     m_implicitViewBox = rect.isNull();
 }
 
-QSvg::FeatureSet QSvgTinyDocument::featureSet() const
+QtSvg::FeatureSet QSvgTinyDocument::featureSet() const
 {
     return m_featureSet;
 }

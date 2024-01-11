@@ -129,11 +129,11 @@ QSize QSvgWidget::sizeHint() const
 /*!
     \since 6.7
 
-    Returns the QSvg::FeatureSet of the widget's renderer.
+    Returns the QtSvg::FeatureSet of the widget's renderer.
 
     \sa setFeatureSet
  */
-QSvg::FeatureSet QSvgWidget::featureSet() const
+QtSvg::FeatureSet QSvgWidget::featureSet() const
 {
     Q_D(const QSvgWidget);
     return d->renderer->featureSet();
@@ -142,17 +142,17 @@ QSvg::FeatureSet QSvgWidget::featureSet() const
 /*!
     \since 6.7
 
-    Sets the widget's renderer QSvg::FeatureSet to \a featureSet.
+    Sets the widget's renderer QtSvg::FeatureSet to \a featureSet.
 
-    If this function is used to set the QSvg::FeatureSet, it will
+    If this function is used to set the QtSvg::FeatureSet, it will
     control how QSvgWidget::loadrenderer is going to load the SVG file.
 
-    The default value of QSvg::FeatureSet in the renderer is
-    QSvg::AllAvailable.
+    The default value of QtSvg::FeatureSet in the renderer is
+    QtSvg::AllAvailable.
 
     \sa featureSet
  */
-void QSvgWidget::setFeatureSet(QSvg::FeatureSet featureSet)
+void QSvgWidget::setFeatureSet(QtSvg::FeatureSet featureSet)
 {
     Q_D(QSvgWidget);
     d->renderer->setFeatureSet(featureSet);
