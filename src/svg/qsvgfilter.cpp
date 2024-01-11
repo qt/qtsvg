@@ -27,11 +27,11 @@ QSvgFeFilterPrimitive::QSvgFeFilterPrimitive(QSvgNode *parent, QString input, QS
 
 QRectF QSvgFeFilterPrimitive::localFilterBoundingBox(QSvgNode *node,
                                                      const QRectF &itemBounds, const QRectF &filterBounds,
-                                                     QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const
+                                                     QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
 
     QRectF localBounds;
-    if (filterUnits != QSvg::UnitTypes::userSpaceOnUse)
+    if (filterUnits != QtSvg::UnitTypes::userSpaceOnUse)
         localBounds = itemBounds;
     else
         localBounds = filterBounds;
@@ -43,7 +43,7 @@ QRectF QSvgFeFilterPrimitive::localFilterBoundingBox(QSvgNode *node,
 
 QRectF QSvgFeFilterPrimitive::globalFilterBoundingBox(QSvgNode *item, QPainter *p,
                                                       const QRectF &itemBounds, const QRectF &filterBounds,
-                                                      QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const
+                                                      QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
     return p->transform().mapRect(localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits));
 }
@@ -184,7 +184,7 @@ QSvgNode::Type QSvgFeColorMatrix::type() const
 
 QImage QSvgFeColorMatrix::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
                                 const QRectF &itemBounds, const QRectF &filterBounds,
-                                QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const
+                                QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
     if (!sources.contains(m_input))
         return QImage();
@@ -275,7 +275,7 @@ QSvgNode::Type QSvgFeGaussianBlur::type() const
 
 QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
                                  const QRectF &itemBounds, const QRectF &filterBounds,
-                                 QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const
+                                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
     if (!sources.contains(m_input))
         return QImage();
@@ -286,7 +286,7 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
             p->transform().map(QPointF(0, 0));
     qreal sigma_x = sigma_scaled.x();
     qreal sigma_y = sigma_scaled.y();
-    if (primitiveUnits == QSvg::UnitTypes::objectBoundingBox) {
+    if (primitiveUnits == QtSvg::UnitTypes::objectBoundingBox) {
         sigma_x *= itemBounds.width();
         sigma_y *= itemBounds.height();
     }
@@ -375,7 +375,7 @@ QSvgNode::Type QSvgFeOffset::type() const
 
 QImage QSvgFeOffset::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
                            const QRectF &itemBounds, const QRectF &filterBounds,
-                           QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const
+                           QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
     if (!sources.contains(m_input))
         return QImage();
@@ -386,7 +386,7 @@ QImage QSvgFeOffset::apply(QSvgNode *item, const QMap<QString, QImage> &sources,
     QRect clipRectGlob = p->transform().mapRect(clipRect).toRect();
 
     QPoint offset(m_dx, m_dy);
-    if (primitiveUnits == QSvg::UnitTypes::objectBoundingBox) {
+    if (primitiveUnits == QtSvg::UnitTypes::objectBoundingBox) {
         offset = QPoint(m_dx * itemBounds.width(),
                         m_dy * itemBounds.height());
     }
@@ -429,7 +429,7 @@ QSvgNode::Type QSvgFeMerge::type() const
 
 QImage QSvgFeMerge::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
                           const QRectF &itemBounds, const QRectF &filterBounds,
-                          QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const
+                          QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
     QList<QImage> mergeNodeResults;
     QRect requiredRect;
@@ -493,7 +493,7 @@ QSvgNode::Type QSvgFeMergeNode::type() const
 }
 
 QImage QSvgFeMergeNode::apply(QSvgNode *, const QMap<QString, QImage> &sources, QPainter *,
-                              const QRectF &, const QRectF &, QSvg::UnitTypes, QSvg::UnitTypes) const
+                              const QRectF &, const QRectF &, QtSvg::UnitTypes, QtSvg::UnitTypes) const
 {
     return sources.value(m_input);
 }
@@ -515,7 +515,7 @@ QSvgNode::Type QSvgFeComposite::type() const
 
 QImage QSvgFeComposite::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
                               const QRectF &itemBounds, const QRectF &filterBounds,
-                              QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const
+                              QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
     if (!sources.contains(m_input))
         return QImage();
@@ -656,7 +656,7 @@ QSvgNode::Type QSvgFeFlood::type() const
 
 QImage QSvgFeFlood::apply(QSvgNode *item, const QMap<QString, QImage> &,
                           QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
-                          QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const
+                          QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
 
     QRectF clipRect = localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits);

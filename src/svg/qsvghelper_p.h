@@ -25,10 +25,10 @@ class Q_SVG_PRIVATE_EXPORT QSvgRectF : public QRectF
 {
 public:
     QSvgRectF(const QRectF &r = QRectF(),
-              QSvg::UnitTypes unitX = QSvg::UnitTypes::userSpaceOnUse,
-              QSvg::UnitTypes unitY = QSvg::UnitTypes::userSpaceOnUse,
-              QSvg::UnitTypes unitW = QSvg::UnitTypes::userSpaceOnUse,
-              QSvg::UnitTypes unitH = QSvg::UnitTypes::userSpaceOnUse)
+              QtSvg::UnitTypes unitX = QtSvg::UnitTypes::userSpaceOnUse,
+              QtSvg::UnitTypes unitY = QtSvg::UnitTypes::userSpaceOnUse,
+              QtSvg::UnitTypes unitW = QtSvg::UnitTypes::userSpaceOnUse,
+              QtSvg::UnitTypes unitH = QtSvg::UnitTypes::userSpaceOnUse)
         : QRectF(r)
         , m_unitX(unitX)
         , m_unitY(unitY)
@@ -38,19 +38,19 @@ public:
 
     QRectF combinedWithLocalRect(const QRectF &localRect) const {
         QRectF result;
-        if (m_unitX == QSvg::UnitTypes::objectBoundingBox)
+        if (m_unitX == QtSvg::UnitTypes::objectBoundingBox)
             result.setX(localRect.x() + x() * localRect.width());
         else
             result.setX(x());
-        if (m_unitY == QSvg::UnitTypes::objectBoundingBox)
+        if (m_unitY == QtSvg::UnitTypes::objectBoundingBox)
             result.setY(localRect.y() + y() * localRect.height());
         else
             result.setY(y());
-        if (m_unitW == QSvg::UnitTypes::objectBoundingBox)
+        if (m_unitW == QtSvg::UnitTypes::objectBoundingBox)
             result.setWidth(localRect.width() * width());
         else
             result.setWidth(width());
-        if (m_unitH == QSvg::UnitTypes::objectBoundingBox)
+        if (m_unitH == QtSvg::UnitTypes::objectBoundingBox)
             result.setHeight(localRect.height() * height());
         else
             result.setHeight(height());
@@ -60,40 +60,40 @@ public:
     QPointF translationRelativeToBoundingBox(const QRectF &boundingBox) const {
         QPointF result;
 
-        if (m_unitX == QSvg::UnitTypes::objectBoundingBox)
+        if (m_unitX == QtSvg::UnitTypes::objectBoundingBox)
             result.setX(x() * boundingBox.width());
         else
             result.setX(x());
-        if (m_unitY == QSvg::UnitTypes::objectBoundingBox)
+        if (m_unitY == QtSvg::UnitTypes::objectBoundingBox)
             result.setY(y() * boundingBox.height());
         else
             result.setY(y());
         return result;
     }
 
-    QRectF combinedWithLocalRect(const QRectF &localRect, const QRectF &canvasRect, QSvg::UnitTypes units) const {
+    QRectF combinedWithLocalRect(const QRectF &localRect, const QRectF &canvasRect, QtSvg::UnitTypes units) const {
         QRectF result;
-        if (units == QSvg::UnitTypes::objectBoundingBox)
+        if (units == QtSvg::UnitTypes::objectBoundingBox)
             result.setX(localRect.x() + x() * localRect.width());
-        else if (m_unitX == QSvg::UnitTypes::objectBoundingBox)
+        else if (m_unitX == QtSvg::UnitTypes::objectBoundingBox)
             result.setX(canvasRect.x() + x() * canvasRect.width());
         else
             result.setX(x());
-        if (units == QSvg::UnitTypes::objectBoundingBox)
+        if (units == QtSvg::UnitTypes::objectBoundingBox)
             result.setY(localRect.y() + y() * localRect.height());
-        else if (m_unitY == QSvg::UnitTypes::objectBoundingBox)
+        else if (m_unitY == QtSvg::UnitTypes::objectBoundingBox)
             result.setY(canvasRect.y() + y() * canvasRect.height());
         else
             result.setY(y());
-        if (units == QSvg::UnitTypes::objectBoundingBox)
+        if (units == QtSvg::UnitTypes::objectBoundingBox)
             result.setWidth(localRect.width() * width());
-        else if (m_unitW == QSvg::UnitTypes::objectBoundingBox)
+        else if (m_unitW == QtSvg::UnitTypes::objectBoundingBox)
             result.setWidth(canvasRect.width() * width());
         else
             result.setWidth(width());
-        if (units == QSvg::UnitTypes::objectBoundingBox)
+        if (units == QtSvg::UnitTypes::objectBoundingBox)
             result.setHeight(localRect.height() * height());
-        else if (m_unitH == QSvg::UnitTypes::objectBoundingBox)
+        else if (m_unitH == QtSvg::UnitTypes::objectBoundingBox)
             result.setHeight(canvasRect.height() * height());
         else
             result.setHeight(height());
@@ -101,21 +101,21 @@ public:
         return result;
     }
 
-    QSvg::UnitTypes unitX() const {return m_unitX;}
-    QSvg::UnitTypes unitY() const {return m_unitY;}
-    QSvg::UnitTypes unitW() const {return m_unitW;}
-    QSvg::UnitTypes unitH() const {return m_unitH;}
+    QtSvg::UnitTypes unitX() const {return m_unitX;}
+    QtSvg::UnitTypes unitY() const {return m_unitY;}
+    QtSvg::UnitTypes unitW() const {return m_unitW;}
+    QtSvg::UnitTypes unitH() const {return m_unitH;}
 
-    void setUnitX(QSvg::UnitTypes unit) {m_unitX = unit;}
-    void setUnitY(QSvg::UnitTypes unit) {m_unitY = unit;}
-    void setUnitW(QSvg::UnitTypes unit) {m_unitW = unit;}
-    void setUnitH(QSvg::UnitTypes unit) {m_unitH = unit;}
+    void setUnitX(QtSvg::UnitTypes unit) {m_unitX = unit;}
+    void setUnitY(QtSvg::UnitTypes unit) {m_unitY = unit;}
+    void setUnitW(QtSvg::UnitTypes unit) {m_unitW = unit;}
+    void setUnitH(QtSvg::UnitTypes unit) {m_unitH = unit;}
 
 protected:
-    QSvg::UnitTypes m_unitX,
-                    m_unitY,
-                    m_unitW,
-                    m_unitH;
+    QtSvg::UnitTypes m_unitX,
+                     m_unitY,
+                     m_unitW,
+                     m_unitH;
 };
 
 QT_END_NAMESPACE

@@ -206,7 +206,7 @@ QSvgMarker::QSvgMarker(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF 
 }
 
 QSvgFilterContainer::QSvgFilterContainer(QSvgNode *parent, const QSvgRectF &bounds,
-                                         QSvg::UnitTypes filterUnits, QSvg::UnitTypes primitiveUnits)
+                                         QtSvg::UnitTypes filterUnits, QtSvg::UnitTypes primitiveUnits)
     : QSvgStructureNode(parent)
     , m_rect(bounds)
     , m_filterUnits(filterUnits)
@@ -694,7 +694,7 @@ QSvgNode* QSvgStructureNode::previousSiblingNode(QSvgNode *n) const
 }
 
 QSvgMask::QSvgMask(QSvgNode *parent, QSvgRectF bounds,
-                   QSvg::UnitTypes contentUnits)
+                   QtSvg::UnitTypes contentUnits)
     : QSvgStructureNode(parent)
     , m_rect(bounds)
     , m_contentUnits(contentUnits)
@@ -755,7 +755,7 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
     QSvgExtraStates states2; // Fake states so scopes do not propagate
 
     QTransform oldT = painter.transform();
-    if (m_contentUnits == QSvg::UnitTypes::objectBoundingBox){
+    if (m_contentUnits == QtSvg::UnitTypes::objectBoundingBox){
         painter.translate(localRect.topLeft());
         painter.scale(localRect.width(), localRect.height());
     }
@@ -799,7 +799,7 @@ QSvgNode::Type QSvgMask::type() const
 }
 
 QSvgPattern::QSvgPattern(QSvgNode *parent, QSvgRectF bounds, QRectF viewBox,
-                         QSvg::UnitTypes contentUnits, QTransform transform)
+                         QtSvg::UnitTypes contentUnits, QTransform transform)
     : QSvgStructureNode(parent),
     m_rect(bounds),
     m_viewBox(viewBox),
@@ -847,7 +847,7 @@ QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSv
     // by its local size.
     qreal contentScaleFactorX = m_transform.m11();
     qreal contentScaleFactorY = m_transform.m22();
-    if (m_contentUnits == QSvg::UnitTypes::userSpaceOnUse) {
+    if (m_contentUnits == QtSvg::UnitTypes::userSpaceOnUse) {
         contentScaleFactorX *= t.m11();
         contentScaleFactorY *= t.m22();
     } else {

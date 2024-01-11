@@ -161,14 +161,14 @@ class Q_SVG_PRIVATE_EXPORT QSvgFilterContainer : public QSvgStructureNode
 {
 public:
 
-    QSvgFilterContainer(QSvgNode *parent, const QSvgRectF &bounds, QSvg::UnitTypes filterUnits, QSvg::UnitTypes primitiveUnits);
+    QSvgFilterContainer(QSvgNode *parent, const QSvgRectF &bounds, QtSvg::UnitTypes filterUnits, QtSvg::UnitTypes primitiveUnits);
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
     Type type() const override;
     QImage applyFilter(QSvgNode *referenceNode, const QImage &buffer, QPainter *p, QRectF bounds) const;
 private:
     QSvgRectF m_rect;
-    QSvg::UnitTypes m_filterUnits;
-    QSvg::UnitTypes m_primitiveUnits;
+    QtSvg::UnitTypes m_filterUnits;
+    QtSvg::UnitTypes m_primitiveUnits;
 };
 
 
@@ -189,21 +189,21 @@ class Q_SVG_PRIVATE_EXPORT QSvgMask : public QSvgStructureNode
 {
 public:
     QSvgMask(QSvgNode *parent, QSvgRectF bounds,
-             QSvg::UnitTypes contentsUnits);
+             QtSvg::UnitTypes contentsUnits);
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
     Type type() const override;
     QImage createMask(QPainter *p, QSvgExtraStates &states, QSvgNode *targetNode, QRectF *globalRect) const;
     QImage createMask(QPainter *p, QSvgExtraStates &states, const QRectF &localRect, QRectF *globalRect) const;
 private:
     QSvgRectF m_rect;
-    QSvg::UnitTypes m_contentUnits;
+    QtSvg::UnitTypes m_contentUnits;
 };
 
 class Q_SVG_PRIVATE_EXPORT QSvgPattern : public QSvgStructureNode
 {
 public:
     QSvgPattern(QSvgNode *parent, QSvgRectF bounds, QRectF viewBox,
-                QSvg::UnitTypes contentUnits, QTransform transform);
+                QtSvg::UnitTypes contentUnits, QTransform transform);
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
     QImage patternImage(QPainter *p, QSvgExtraStates &states, const QSvgNode *patternElement);
     Type type() const override;
@@ -217,7 +217,7 @@ private:
     QTransform m_appliedTransform;
     QSvgRectF m_rect;
     QRectF m_viewBox;
-    QSvg::UnitTypes m_contentUnits;
+    QtSvg::UnitTypes m_contentUnits;
     QTransform m_transform;
 };
 

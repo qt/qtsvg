@@ -20,7 +20,7 @@
 
 QT_BEGIN_NAMESPACE
 
-namespace QSvg {
+namespace QtSvg {
 
 enum class UnitTypes : quint32 {
     unknown,

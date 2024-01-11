@@ -59,9 +59,9 @@ public:
     };
 
 public:
-    QSvgHandler(QIODevice *device, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
-    QSvgHandler(const QByteArray &data, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
-    QSvgHandler(QXmlStreamReader *const data, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
+    QSvgHandler(QIODevice *device, QtSvg::FeatureSet featureSet = QtSvg::FeatureSet::AllAvailable);
+    QSvgHandler(const QByteArray &data, QtSvg::FeatureSet featureSet = QtSvg::FeatureSet::AllAvailable);
+    QSvgHandler(QXmlStreamReader *const data, QtSvg::FeatureSet featureSet = QtSvg::FeatureSet::AllAvailable);
     ~QSvgHandler();
 
     QIODevice *device() const;
@@ -99,7 +99,7 @@ public:
     inline QPen defaultPen() const
     { return m_defaultPen; }
 
-    QSvg::FeatureSet featureSet() const;
+    QtSvg::FeatureSet featureSet() const;
 
 public:
     bool startElement(const QString &localName, const QXmlStreamAttributes &attributes);
@@ -156,7 +156,7 @@ private:
      */
     const bool m_ownsReader;
 
-    const QSvg::FeatureSet m_featureSet;
+    const QtSvg::FeatureSet m_featureSet;
 };
 
 Q_DECLARE_LOGGING_CATEGORY(lcSvgHandler)

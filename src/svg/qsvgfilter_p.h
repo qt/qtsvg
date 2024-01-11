@@ -35,14 +35,14 @@ public:
     QRectF bounds(QPainter *, QSvgExtraStates &) const override { return QRectF(); }
     QRectF localFilterBoundingBox(QSvgNode *item,
                                   const QRectF &itemBounds, const QRectF &filterBounds,
-                                  QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const;
+                                  QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const;
     QRectF globalFilterBoundingBox(QSvgNode *item, QPainter *p,
                                    const QRectF &itemBounds, const QRectF &filterBounds,
-                                   QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const;
+                                   QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const;
     void clipToTransformedBounds(QImage *buffer, QPainter *p, const QRectF &localRect) const;
     virtual QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                          QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
-                         QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const = 0;
+                         QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const = 0;
     virtual bool requiresSourceAlpha() const;
     QString input() const {
         return m_input;
@@ -79,7 +79,7 @@ public:
     Type type() const override;
     QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
-                 QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
+                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const override;
 private:
     ColorShiftType m_type;
     Matrix m_matrix;
@@ -99,7 +99,7 @@ public:
     Type type() const override;
     QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
-                 QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
+                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const override;
 private:
     qreal m_stdDeviationX;
     qreal m_stdDeviationY;
@@ -114,7 +114,7 @@ public:
     Type type() const override;
     QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
-                 QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
+                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const override;
 private:
     qreal m_dx;
     qreal m_dy;
@@ -127,7 +127,7 @@ public:
     Type type() const override;
     QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
-                 QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
+                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const override;
     bool requiresSourceAlpha() const override;
 };
 
@@ -138,7 +138,7 @@ public:
     Type type() const override;
     QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
-                 QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
+                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const override;
 };
 
 class Q_SVG_PRIVATE_EXPORT QSvgFeComposite : public QSvgFeFilterPrimitive
@@ -158,7 +158,7 @@ public:
     Type type() const override;
     QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
-                 QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
+                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const override;
     bool requiresSourceAlpha() const override;
 private:
     QString m_input2;
@@ -173,7 +173,7 @@ public:
     Type type() const override;
     QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
-                 QSvg::UnitTypes primitiveUnits, QSvg::UnitTypes filterUnits) const override;
+                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const override;
 private:
     QColor m_color;
 };

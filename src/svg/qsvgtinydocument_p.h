@@ -36,11 +36,11 @@ class QTransform;
 class Q_SVG_PRIVATE_EXPORT QSvgTinyDocument : public QSvgStructureNode
 {
 public:
-    static QSvgTinyDocument * load(const QString &file, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
-    static QSvgTinyDocument * load(const QByteArray &contents, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
-    static QSvgTinyDocument * load(QXmlStreamReader *contents, QSvg::FeatureSet featureSet = QSvg::FeatureSet::AllAvailable);
+    static QSvgTinyDocument * load(const QString &file, QtSvg::FeatureSet featureSet = QtSvg::FeatureSet::AllAvailable);
+    static QSvgTinyDocument * load(const QByteArray &contents, QtSvg::FeatureSet featureSet = QtSvg::FeatureSet::AllAvailable);
+    static QSvgTinyDocument * load(QXmlStreamReader *contents, QtSvg::FeatureSet featureSet = QtSvg::FeatureSet::AllAvailable);
 public:
-    QSvgTinyDocument(QSvg::FeatureSet featureSet);
+    QSvgTinyDocument(QtSvg::FeatureSet featureSet);
     ~QSvgTinyDocument();
     Type type() const override;
 
@@ -58,7 +58,7 @@ public:
     QRectF viewBox() const;
     void setViewBox(const QRectF &rect);
 
-    QSvg::FeatureSet featureSet() const;
+    QtSvg::FeatureSet featureSet() const;
 
     void drawCommand(QPainter *, QSvgExtraStates &) override;
 
@@ -109,7 +109,7 @@ private:
 
     QSvgExtraStates m_states;
 
-    const QSvg::FeatureSet m_featureSet;
+    const QtSvg::FeatureSet m_featureSet;
 };
 
 Q_SVG_PRIVATE_EXPORT QDebug operator<<(QDebug debug, const QSvgTinyDocument &doc);

@@ -243,7 +243,7 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
             else if (name == QLatin1String("font-variant"))
                 fontVariant = value;
             else if (name == QLatin1String("filter") &&
-                     handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                     handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
                 filter = value;
             break;
 
@@ -256,16 +256,16 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
 
         case 'm':
             if (name == QLatin1String("mask") &&
-                handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
                 mask = value;
             if (name == QLatin1String("marker-start") &&
-                handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
                 markerStart = value;
             if (name == QLatin1String("marker-mid") &&
-                handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
                 markerMid = value;
             if (name == QLatin1String("marker-end") &&
-                handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
                 markerEnd = value;
             break;
 
@@ -372,7 +372,7 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
                 else if (name == QLatin1String("font-variant"))
                     fontVariant = value;
                 else if (name == QLatin1String("filter") &&
-                         handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                         handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
                     filter = value;
                 break;
 
@@ -383,16 +383,16 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
 
             case 'm':
                 if (name == QLatin1String("mask") &&
-                    handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                    handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
                     mask = value;
                 if (name == QLatin1String("marker-start") &&
-                    handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                    handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
                     markerStart = value;
                 if (name == QLatin1String("marker-mid") &&
-                    handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                    handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
                     markerMid = value;
                 if (name == QLatin1String("marker-end") &&
-                    handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2)
+                    handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
                     markerEnd = value;
                 break;
 
@@ -2065,7 +2065,7 @@ static void cssStyleLookup(QSvgNode *node,
 
 #endif // QT_NO_CSSPARSER
 
-QSvg::FeatureSet QSvgHandler::featureSet() const
+QtSvg::FeatureSet QSvgHandler::featureSet() const
 {
     return m_featureSet;
 }
@@ -2276,7 +2276,7 @@ static void parseExtendedAttributes(QSvgNode *node,
                                     const QSvgAttributes &attributes,
                                     QSvgHandler *handler)
 {
-    if (handler->featureSet() == QSvg::FeatureSet::StaticTiny1_2)
+    if (handler->featureSet() == QtSvg::FeatureSet::StaticTiny1_2)
         return;
 
     if (!attributes.mask.isEmpty()) {
@@ -2291,7 +2291,7 @@ static void parseExtendedAttributes(QSvgNode *node,
     }
 
     if (!attributes.markerStart.isEmpty() &&
-        handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2) {
+        handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2) {
         QString markerStr = attributes.markerStart.toString().trimmed();
         if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
             markerStr = markerStr.mid(3, markerStr.size() - 3);
@@ -2301,7 +2301,7 @@ static void parseExtendedAttributes(QSvgNode *node,
         node->setMarkerStartId(markerId);
     }
     if (!attributes.markerMid.isEmpty() &&
-        handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2) {
+        handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2) {
         QString markerStr = attributes.markerMid.toString().trimmed();
         if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
             markerStr = markerStr.mid(3, markerStr.size() - 3);
@@ -2311,7 +2311,7 @@ static void parseExtendedAttributes(QSvgNode *node,
         node->setMarkerMidId(markerId);
     }
     if (!attributes.markerEnd.isEmpty() &&
-        handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2) {
+        handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2) {
         QString markerStr = attributes.markerEnd.toString().trimmed();
         if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
             markerStr = markerStr.mid(3, markerStr.size() - 3);
@@ -2322,7 +2322,7 @@ static void parseExtendedAttributes(QSvgNode *node,
     }
 
     if (!attributes.filter.isEmpty() &&
-        handler->featureSet() != QSvg::FeatureSet::StaticTiny1_2) {
+        handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2) {
         QString filterStr = attributes.filter.toString().trimmed();
 
         if (filterStr.size() > 3 && filterStr.mid(0, 3) == QLatin1String("url"))
@@ -3066,25 +3066,25 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
     const QStringView mU     = attributes.value(QLatin1String("maskUnits"));
     const QStringView mCU    = attributes.value(QLatin1String("maskContentUnits"));
 
-    QSvg::UnitTypes nmU = mU.contains(QLatin1String("userSpaceOnUse")) ?
-                QSvg::UnitTypes::userSpaceOnUse : QSvg::UnitTypes::objectBoundingBox;
+    QtSvg::UnitTypes nmU = mU.contains(QLatin1String("userSpaceOnUse")) ?
+                QtSvg::UnitTypes::userSpaceOnUse : QtSvg::UnitTypes::objectBoundingBox;
 
-    QSvg::UnitTypes nmCU = mCU.contains(QLatin1String("objectBoundingBox")) ?
-                QSvg::UnitTypes::objectBoundingBox : QSvg::UnitTypes::userSpaceOnUse;
+    QtSvg::UnitTypes nmCU = mCU.contains(QLatin1String("objectBoundingBox")) ?
+                QtSvg::UnitTypes::objectBoundingBox : QtSvg::UnitTypes::userSpaceOnUse;
 
     bool ok;
     QSvgHandler::LengthType type;
 
-    QSvg::UnitTypes nmUx = nmU;
-    QSvg::UnitTypes nmUy = nmU;
-    QSvg::UnitTypes nmUw = nmU;
-    QSvg::UnitTypes nmUh = nmU;
+    QtSvg::UnitTypes nmUx = nmU;
+    QtSvg::UnitTypes nmUy = nmU;
+    QtSvg::UnitTypes nmUw = nmU;
+    QtSvg::UnitTypes nmUh = nmU;
     qreal nx = parseLength(x.toString(), &type, handler, &ok);
     nx = convertToPixels(nx, true, type);
     if (x.isEmpty() || !ok) {
         nx = -0.1;
-        nmUx = QSvg::UnitTypes::objectBoundingBox;
-    } else if (type == QSvgHandler::LT_PERCENT && nmU == QSvg::UnitTypes::userSpaceOnUse) {
+        nmUx = QtSvg::UnitTypes::objectBoundingBox;
+    } else if (type == QSvgHandler::LT_PERCENT && nmU == QtSvg::UnitTypes::userSpaceOnUse) {
         nx = nx / 100. * parent->document()->viewBox().width();
     } else if (type == QSvgHandler::LT_PERCENT) {
         nx = nx / 100.;
@@ -3094,8 +3094,8 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
     ny = convertToPixels(ny, true, type);
     if (y.isEmpty() || !ok) {
         ny = -0.1;
-        nmUy = QSvg::UnitTypes::objectBoundingBox;
-    } else if (type == QSvgHandler::LT_PERCENT && nmU == QSvg::UnitTypes::userSpaceOnUse) {
+        nmUy = QtSvg::UnitTypes::objectBoundingBox;
+    } else if (type == QSvgHandler::LT_PERCENT && nmU == QtSvg::UnitTypes::userSpaceOnUse) {
         ny = ny / 100. * parent->document()->viewBox().height();
     } else if (type == QSvgHandler::LT_PERCENT) {
         ny = ny / 100.;
@@ -3105,8 +3105,8 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
     nwidth = convertToPixels(nwidth, true, type);
     if (width.isEmpty() || !ok) {
         nwidth = 1.2;
-        nmUw = QSvg::UnitTypes::objectBoundingBox;
-    } else if (type == QSvgHandler::LT_PERCENT && nmU == QSvg::UnitTypes::userSpaceOnUse) {
+        nmUw = QtSvg::UnitTypes::objectBoundingBox;
+    } else if (type == QSvgHandler::LT_PERCENT && nmU == QtSvg::UnitTypes::userSpaceOnUse) {
         nwidth = nwidth / 100. * parent->document()->viewBox().width();
     } else if (type == QSvgHandler::LT_PERCENT) {
         nwidth = nwidth / 100.;
@@ -3116,8 +3116,8 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
     nheight = convertToPixels(nheight, true, type);
     if (height.isEmpty() || !ok) {
         nheight = 1.2;
-        nmUh = QSvg::UnitTypes::objectBoundingBox;
-    } else if (type == QSvgHandler::LT_PERCENT && nmU == QSvg::UnitTypes::userSpaceOnUse) {
+        nmUh = QtSvg::UnitTypes::objectBoundingBox;
+    } else if (type == QSvgHandler::LT_PERCENT && nmU == QtSvg::UnitTypes::userSpaceOnUse) {
         nheight = nheight / 100. * parent->document()->viewBox().height();
     } else if (type == QSvgHandler::LT_PERCENT) {
         nheight = nheight / 100.;
@@ -3149,7 +3149,7 @@ static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes
         rect->setX(x);
     } else {
         rect->setX(-0.1);
-        rect->setUnitX(QSvg::UnitTypes::objectBoundingBox);
+        rect->setUnitX(QtSvg::UnitTypes::objectBoundingBox);
     }
     qreal y = 0;
     if (!yStr.isEmpty()) {
@@ -3160,7 +3160,7 @@ static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes
         rect->setY(y);
     } else {
         rect->setY(-0.1);
-        rect->setUnitY(QSvg::UnitTypes::objectBoundingBox);
+        rect->setUnitY(QtSvg::UnitTypes::objectBoundingBox);
     }
     qreal width = 0;
     if (!widthStr.isEmpty()) {
@@ -3171,7 +3171,7 @@ static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes
         rect->setWidth(width);
     } else {
         rect->setWidth(1.2);
-        rect->setUnitW(QSvg::UnitTypes::objectBoundingBox);
+        rect->setUnitW(QtSvg::UnitTypes::objectBoundingBox);
     }
     qreal height = 0;
     if (!heightStr.isEmpty()) {
@@ -3182,7 +3182,7 @@ static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes
         rect->setHeight(height);
     } else {
         rect->setHeight(1.2);
-        rect->setUnitH(QSvg::UnitTypes::objectBoundingBox);
+        rect->setUnitH(QtSvg::UnitTypes::objectBoundingBox);
     }
 }
 
@@ -3193,11 +3193,11 @@ static QSvgNode *createFilterNode(QSvgNode *parent,
     QString fU = attributes.value(QLatin1String("filterUnits")).toString();
     QString pU = attributes.value(QLatin1String("primitiveUnits")).toString();
 
-    QSvg::UnitTypes filterUnits = fU.contains(QLatin1String("userSpaceOnUse")) ?
-                QSvg::UnitTypes::userSpaceOnUse : QSvg::UnitTypes::objectBoundingBox;
+    QtSvg::UnitTypes filterUnits = fU.contains(QLatin1String("userSpaceOnUse")) ?
+                QtSvg::UnitTypes::userSpaceOnUse : QtSvg::UnitTypes::objectBoundingBox;
 
-    QSvg::UnitTypes primitiveUnits = pU.contains(QLatin1String("objectBoundingBox")) ?
-                QSvg::UnitTypes::objectBoundingBox : QSvg::UnitTypes::userSpaceOnUse;
+    QtSvg::UnitTypes primitiveUnits = pU.contains(QLatin1String("objectBoundingBox")) ?
+                QtSvg::UnitTypes::objectBoundingBox : QtSvg::UnitTypes::userSpaceOnUse;
 
     QSvgRectF rect;
     parseFilterBounds(parent, attributes, handler, &rect);
@@ -3990,11 +3990,11 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
     const QStringView patternContentUnits    = attributes.value(QLatin1String("patternContentUnits"));
     const QStringView patternTransform = attributes.value(QLatin1String("patternTransform"));
 
-    QSvg::UnitTypes nPatternUnits = patternUnits.contains(QLatin1String("userSpaceOnUse")) ?
-                                        QSvg::UnitTypes::userSpaceOnUse : QSvg::UnitTypes::objectBoundingBox;
+    QtSvg::UnitTypes nPatternUnits = patternUnits.contains(QLatin1String("userSpaceOnUse")) ?
+                                        QtSvg::UnitTypes::userSpaceOnUse : QtSvg::UnitTypes::objectBoundingBox;
 
-    QSvg::UnitTypes nPatternContentUnits = patternContentUnits.contains(QLatin1String("objectBoundingBox")) ?
-                                               QSvg::UnitTypes::objectBoundingBox : QSvg::UnitTypes::userSpaceOnUse;
+    QtSvg::UnitTypes nPatternContentUnits = patternContentUnits.contains(QLatin1String("objectBoundingBox")) ?
+                                               QtSvg::UnitTypes::objectBoundingBox : QtSvg::UnitTypes::userSpaceOnUse;
 
     QString viewBoxStr = attributes.value(QLatin1String("viewBox")).toString();
 
@@ -4005,7 +4005,7 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
     nx = convertToPixels(nx, true, type);
     if (!ok)
         nx = 0.0;
-    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QSvg::UnitTypes::userSpaceOnUse)
+    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QtSvg::UnitTypes::userSpaceOnUse)
         nx = (nx / 100.) * handler->document()->viewBox().width();
     else if (type == QSvgHandler::LT_PERCENT)
         nx = nx / 100.;
@@ -4014,7 +4014,7 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
     ny = convertToPixels(ny, true, type);
     if (!ok)
         ny = 0.0;
-    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QSvg::UnitTypes::userSpaceOnUse)
+    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QtSvg::UnitTypes::userSpaceOnUse)
         ny = (ny / 100.) * handler->document()->viewBox().height();
     else if (type == QSvgHandler::LT_PERCENT)
         ny = ny / 100.;
@@ -4023,7 +4023,7 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
     nwidth = convertToPixels(nwidth, true, type);
     if (!ok)
         nwidth = 0.0;
-    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QSvg::UnitTypes::userSpaceOnUse)
+    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QtSvg::UnitTypes::userSpaceOnUse)
         nwidth = (nwidth / 100.) * handler->document()->viewBox().width();
     else if (type == QSvgHandler::LT_PERCENT)
         nwidth = nwidth / 100.;
@@ -4032,7 +4032,7 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
     nheight = convertToPixels(nheight, true, type);
     if (!ok)
         nheight = 0.0;
-    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QSvg::UnitTypes::userSpaceOnUse)
+    else if (type == QSvgHandler::LT_PERCENT && nPatternUnits == QtSvg::UnitTypes::userSpaceOnUse)
         nheight = (nheight / 100.) * handler->document()->viewBox().height();
     else if (type == QSvgHandler::LT_PERCENT)
         nheight = nheight / 100.;
@@ -4196,7 +4196,7 @@ static QSvgNode *createVideoNode(QSvgNode *parent,
 
 typedef QSvgNode *(*FactoryMethod)(QSvgNode *, const QXmlStreamAttributes &, QSvgHandler *);
 
-static FactoryMethod findGroupFactory(const QString &name, QSvg::FeatureSet featureSet)
+static FactoryMethod findGroupFactory(const QString &name, QtSvg::FeatureSet featureSet)
 {
     Q_UNUSED(featureSet);
     if (name.isEmpty())
@@ -4208,14 +4208,14 @@ static FactoryMethod findGroupFactory(const QString &name, QSvg::FeatureSet feat
         if (ref == QLatin1String("efs")) return createDefsNode;
         break;
     case 'f':
-        if (ref == QLatin1String("ilter") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return createFilterNode;
+        if (ref == QLatin1String("ilter") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return createFilterNode;
         break;
     case 'g':
         if (ref.isEmpty()) return createGNode;
         break;
     case 'm':
-        if (ref == QLatin1String("ask") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return createMaskNode;
-        if (ref == QLatin1String("arker") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return createMarkerNode;
+        if (ref == QLatin1String("ask") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return createMaskNode;
+        if (ref == QLatin1String("arker") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return createMarkerNode;
         break;
     case 's':
         if (ref == QLatin1String("vg")) return createSvgNode;
@@ -4223,7 +4223,7 @@ static FactoryMethod findGroupFactory(const QString &name, QSvg::FeatureSet feat
         if (ref == QLatin1String("ymbol")) return createSymbolNode;
         break;
     case 'p':
-        if (ref == QLatin1String("attern") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return createPatternNode;
+        if (ref == QLatin1String("attern") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return createPatternNode;
         break;
     default:
         break;
@@ -4231,7 +4231,7 @@ static FactoryMethod findGroupFactory(const QString &name, QSvg::FeatureSet feat
     return 0;
 }
 
-static FactoryMethod findGraphicsFactory(const QString &name, QSvg::FeatureSet featureSet)
+static FactoryMethod findGraphicsFactory(const QString &name, QtSvg::FeatureSet featureSet)
 {
     Q_UNUSED(featureSet);
     if (name.isEmpty())
@@ -4279,9 +4279,9 @@ static FactoryMethod findGraphicsFactory(const QString &name, QSvg::FeatureSet f
     return 0;
 }
 
-static FactoryMethod findFilterFtory(const QString &name, QSvg::FeatureSet featureSet)
+static FactoryMethod findFilterFtory(const QString &name, QtSvg::FeatureSet featureSet)
 {
-    if (featureSet == QSvg::FeatureSet::StaticTiny1_2)
+    if (featureSet == QtSvg::FeatureSet::StaticTiny1_2)
         return 0;
 
     if (name.isEmpty())
@@ -4303,7 +4303,7 @@ static FactoryMethod findFilterFtory(const QString &name, QSvg::FeatureSet featu
 
 typedef bool (*ParseMethod)(QSvgNode *, const QXmlStreamAttributes &, QSvgHandler *);
 
-static ParseMethod findUtilFactory(const QString &name, QSvg::FeatureSet featureSet)
+static ParseMethod findUtilFactory(const QString &name, QtSvg::FeatureSet featureSet)
 {
     Q_UNUSED(featureSet);
     if (name.isEmpty())
@@ -4333,8 +4333,8 @@ static ParseMethod findUtilFactory(const QString &name, QSvg::FeatureSet feature
     case 'm':
         if (ref == QLatin1String("etadata")) return parseMetadataNode;
         if (ref == QLatin1String("path")) return parseMpathNode;
-        if (ref == QLatin1String("ask") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return parseMaskNode;
-        if (ref == QLatin1String("arker") && featureSet != QSvg::FeatureSet::StaticTiny1_2) return parseMarkerNode;
+        if (ref == QLatin1String("ask") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return parseMaskNode;
+        if (ref == QLatin1String("arker") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return parseMarkerNode;
         break;
     case 'p':
         if (ref == QLatin1String("refetch")) return parsePrefetchNode;
@@ -4415,7 +4415,7 @@ static StyleParseMethod findStyleUtilFactoryMethod(const QString &name)
     return 0;
 }
 
-QSvgHandler::QSvgHandler(QIODevice *device, QSvg::FeatureSet featureSet)
+QSvgHandler::QSvgHandler(QIODevice *device, QtSvg::FeatureSet featureSet)
     : xml(new QXmlStreamReader(device))
     , m_ownsReader(true)
     , m_featureSet(featureSet)
@@ -4423,7 +4423,7 @@ QSvgHandler::QSvgHandler(QIODevice *device, QSvg::FeatureSet featureSet)
     init();
 }
 
-QSvgHandler::QSvgHandler(const QByteArray &data, QSvg::FeatureSet featureSet)
+QSvgHandler::QSvgHandler(const QByteArray &data, QtSvg::FeatureSet featureSet)
     : xml(new QXmlStreamReader(data))
     , m_ownsReader(true)
     , m_featureSet(featureSet)
@@ -4431,7 +4431,7 @@ QSvgHandler::QSvgHandler(const QByteArray &data, QSvg::FeatureSet featureSet)
     init();
 }
 
-QSvgHandler::QSvgHandler(QXmlStreamReader *const reader, QSvg::FeatureSet featureSet)
+QSvgHandler::QSvgHandler(QXmlStreamReader *const reader, QtSvg::FeatureSet featureSet)
     : xml(reader)
     , m_ownsReader(false)
     , m_featureSet(featureSet)

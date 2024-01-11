@@ -27,8 +27,8 @@ public:
 
     QSize sizeHint() const override;
 
-    QSvg::FeatureSet featureSet() const;
-    void setFeatureSet(QSvg::FeatureSet featureSet);
+    QtSvg::FeatureSet featureSet() const;
+    void setFeatureSet(QtSvg::FeatureSet featureSet);
 public Q_SLOTS:
     void load(const QString &file);
     void load(const QByteArray &contents);
