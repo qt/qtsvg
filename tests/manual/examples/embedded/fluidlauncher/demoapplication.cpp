@@ -13,7 +13,7 @@ DemoApplication::DemoApplication(QString executableName, QString caption, QStrin
     imagePath = imageName;
     appCaption = caption;
 
-    if (executableName[0] == QLatin1Char('/'))
+    if (executableName.startsWith(QLatin1Char('/')))
         executablePath = executableName;
     else
         executablePath = QDir::cleanPath(QDir::currentPath() + QLatin1Char('/') + executableName);
@@ -27,13 +27,9 @@ DemoApplication::DemoApplication(QString executableName, QString caption, QStrin
 
     process.setProcessChannelMode(QProcess::ForwardedChannels);
 
-    QObject::connect( &process, SIGNAL(finished(int,QProcess::ExitStatus)), 
-                      this, SLOT(processFinished(int,QProcess::ExitStatus)));
-
-    QObject::connect( &process, SIGNAL(error(QProcess::ProcessError)), 
-                      this, SLOT(processError(QProcess::ProcessError)));
-
-    QObject::connect( &process, SIGNAL(started()), this, SLOT(processStarted()));
+    connect(&process, &QProcess::finished, this, &DemoApplication::processFinished);
+    connect(&process, &QProcess::errorOccurred, this, &DemoApplication::processError);
+    connect(&process, &QProcess::started, this, &DemoApplication::processStarted);
 }
 
 
@@ -69,8 +65,8 @@ void DemoApplication::processFinished(int exitCode, QProcess::ExitStatus exitSta
 
     emit demoFinished();
 
-    QObject::disconnect(this, SIGNAL(demoStarted()), 0, 0);
-    QObject::disconnect(this, SIGNAL(demoFinished()), 0, 0);
+    disconnect(this, &DemoApplication::demoStarted, 0, 0);
+    disconnect(this, &DemoApplication::demoFinished, 0, 0);
 }
 
 void DemoApplication::processError(QProcess::ProcessError err)

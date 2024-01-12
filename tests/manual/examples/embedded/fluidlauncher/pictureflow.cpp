@@ -387,7 +387,7 @@ PictureFlowPrivate::PictureFlowPrivate(PictureFlow* w)
 
   triggerTimer.setSingleShot(true);
   triggerTimer.setInterval(0);
-  QObject::connect(&triggerTimer, SIGNAL(timeout()), widget, SLOT(render()));
+  QObject::connect(&triggerTimer, &QTimer::timeout, widget, &PictureFlow::render);
 
   recalc(200, 200);
   resetSlides();
