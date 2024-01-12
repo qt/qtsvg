@@ -23,10 +23,10 @@ FluidLauncher::FluidLauncher(QStringList* args)
 
     QRect screen_size = QGuiApplication::primaryScreen()->geometry();
 
-    QObject::connect(pictureFlowWidget, SIGNAL(itemActivated(int)), this, SLOT(launchApplication(int)));
-    QObject::connect(pictureFlowWidget, SIGNAL(inputReceived()),    this, SLOT(resetInputTimeout()));
-    QObject::connect(slideShowWidget,   SIGNAL(inputReceived()),    this, SLOT(switchToLauncher()));
-    QObject::connect(inputTimer,        SIGNAL(timeout()),          this, SLOT(inputTimedout()));
+    connect(pictureFlowWidget, &PictureFlow::itemActivated, this, &FluidLauncher::launchApplication);
+    connect(pictureFlowWidget, &PictureFlow::inputReceived, this, &FluidLauncher::resetInputTimeout);
+    connect(slideShowWidget,   &SlideShow::inputReceived,   this, &FluidLauncher::switchToLauncher);
+    connect(inputTimer,        &QTimer::timeout,            this, &FluidLauncher::inputTimedout);
 
     inputTimer->setSingleShot(true);
     inputTimer->setInterval(DEFAULT_INPUT_TIMEOUT);
@@ -192,7 +192,7 @@ void FluidLauncher::launchApplication(int index)
 
     inputTimer->stop();
 
-    QObject::connect(demoList[index], SIGNAL(demoFinished()), this, SLOT(demoFinished()));
+    connect(demoList[index], &DemoApplication::demoFinished, this, &FluidLauncher::demoFinished);
 
     demoList[index]->launch();
 }
