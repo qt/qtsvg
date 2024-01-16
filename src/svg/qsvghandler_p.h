@@ -99,6 +99,8 @@ public:
     inline QPen defaultPen() const
     { return m_defaultPen; }
 
+    bool trustedSourceMode() const;
+
 public:
     bool startElement(const QString &localName, const QXmlStreamAttributes &attributes);
     bool endElement(QStringView localName);
