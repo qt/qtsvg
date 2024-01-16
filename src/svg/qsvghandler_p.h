@@ -100,6 +100,7 @@ public:
     { return m_defaultPen; }
 
     QtSvg::Options options() const;
+    bool trustedSourceMode() const;
 
 public:
     bool startElement(const QString &localName, const QXmlStreamAttributes &attributes);
