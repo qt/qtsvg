@@ -129,32 +129,34 @@ QSize QSvgWidget::sizeHint() const
 /*!
     \since 6.7
 
-    Returns the QtSvg::FeatureSet of the widget's renderer.
+    Returns the options of the widget's renderer.
 
-    \sa setFeatureSet
+    \sa setOptions
  */
-QtSvg::FeatureSet QSvgWidget::featureSet() const
+QtSvg::Options QSvgWidget::options() const
 {
     Q_D(const QSvgWidget);
-    return d->renderer->featureSet();
+    return d->renderer->options();
 }
 
 /*!
     \since 6.7
 
-    Sets the widget's renderer QtSvg::FeatureSet to \a featureSet.
-    The \c featureset can be limited to SVG Tiny 1.2
-    or an \l{Extended Features}{extended featureset}. This
-    propety has to be set before calling the load function
-    to have any effect.
+    Sets the widget's renderer options to \a options.
 
-    The default value is QtSvg::AllAvailable.
-    \sa featureSet
+    This property holds a set of QtSvg::Option flags that can be used
+    to enable or disable various features of the parsing and rendering
+    of SVG files. It must be set before calling the load function to
+    have any effect.
+
+    By default, no flags are set.
+
+    \sa options
  */
-void QSvgWidget::setFeatureSet(QtSvg::FeatureSet featureSet)
+void QSvgWidget::setOptions(QtSvg::Options options)
 {
     Q_D(QSvgWidget);
-    d->renderer->setFeatureSet(featureSet);
+    d->renderer->setOptions(options);
 }
 
 /*!

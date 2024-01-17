@@ -12,8 +12,8 @@
     The module also supports a few extra features which might be useful.
     The \l QSvgRenderer parses all features (including the extra feature
     set) by default. You can instruct the render to ignore these extra
-    features by setting \l QSvgRenderer::featureSet to
-    \l QSvg::FeatureSet::StaticTiny1_2.
+    features by passing the QtSvg::Tiny12FeaturesOnly flag in
+    \l QSvgRenderer::setOptions().
 
 
     \section1 Extended features

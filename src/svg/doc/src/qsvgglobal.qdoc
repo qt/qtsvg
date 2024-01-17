@@ -3,22 +3,20 @@
 
 /*!
     \namespace QtSvg
-    \brief The QtSvg namespace contains enums used by the svg classes.
+    \brief The QtSvg namespace contains types used by the svg classes.
     \inmodule QtSvg
 */
 
 /*!
-    \enum QtSvg::FeatureSet
+    \enum QtSvg::Option
+    \since 6.7
 
-    This enum is used to control the parsing and rendering of features
-    that go beyond the \l{http://www.w3.org/TR/SVGMobile12}{SVG 1.2 Tiny}
-    standard.
+    This enum holds flags that can be used to enable or disable
+    various features of the parsing and rendering of SVG
+    files. Multiple flags can be combined into the QFlags type
+    QtSvg::Options.
 
-    The following feature sets are available for the
-    renderer.
-
-    \value StaticTiny1_2    Strictly and exclusively parse only tags that are part
-                            of the SVG 1.2 Tiny Static Feature set.
-    \value AllAvailable     Parses the extra features supported by the renderer
-                            from the SVG 1.1 standard.
+    \value Tiny12FeaturesOnly  Strictly and exclusively parse only tags that are
+                               part of the \l{http://www.w3.org/TR/SVGMobile12}
+                               {SVG 1.2 Tiny} Static Feature set.
 */
