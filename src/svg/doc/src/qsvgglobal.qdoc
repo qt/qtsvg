@@ -10,14 +10,14 @@
 /*!
     \enum QtSvg::FeatureSet
 
-    This enum is used to control the parsing and renderering of features
+    This enum is used to control the parsing and rendering of features
     that go beyond the \l{http://www.w3.org/TR/SVGMobile12}{SVG 1.2 Tiny}
     standard.
 
     The following feature sets are available for the
     renderer.
 
-    \value StaticTiny1_2    Strictly and exclusivly parse only tags that are part
+    \value StaticTiny1_2    Strictly and exclusively parse only tags that are part
                             of the SVG 1.2 Tiny Static Feature set.
     \value AllAvailable     Parses the extra features supported by the renderer
                             from the SVG 1.1 standard.
