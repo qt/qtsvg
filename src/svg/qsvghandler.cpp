@@ -243,7 +243,7 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
             else if (name == QLatin1String("font-variant"))
                 fontVariant = value;
             else if (name == QLatin1String("filter") &&
-                     handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
+                     !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
                 filter = value;
             break;
 
@@ -256,16 +256,16 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
 
         case 'm':
             if (name == QLatin1String("mask") &&
-                handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
+                !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
                 mask = value;
             if (name == QLatin1String("marker-start") &&
-                handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
+                !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
                 markerStart = value;
             if (name == QLatin1String("marker-mid") &&
-                handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
+                !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
                 markerMid = value;
             if (name == QLatin1String("marker-end") &&
-                handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
+                !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
                 markerEnd = value;
             break;
 
@@ -372,7 +372,7 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
                 else if (name == QLatin1String("font-variant"))
                     fontVariant = value;
                 else if (name == QLatin1String("filter") &&
-                         handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
+                         !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
                     filter = value;
                 break;
 
@@ -383,16 +383,16 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
 
             case 'm':
                 if (name == QLatin1String("mask") &&
-                    handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
+                    !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
                     mask = value;
                 if (name == QLatin1String("marker-start") &&
-                    handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
+                    !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
                     markerStart = value;
                 if (name == QLatin1String("marker-mid") &&
-                    handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
+                    !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
                     markerMid = value;
                 if (name == QLatin1String("marker-end") &&
-                    handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2)
+                    !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
                     markerEnd = value;
                 break;
 
@@ -2065,9 +2065,9 @@ static void cssStyleLookup(QSvgNode *node,
 
 #endif // QT_NO_CSSPARSER
 
-QtSvg::FeatureSet QSvgHandler::featureSet() const
+QtSvg::Options QSvgHandler::options() const
 {
-    return m_featureSet;
+    return m_options;
 }
 
 static inline QStringList stringToList(const QString &str)
@@ -2276,7 +2276,7 @@ static void parseExtendedAttributes(QSvgNode *node,
                                     const QSvgAttributes &attributes,
                                     QSvgHandler *handler)
 {
-    if (handler->featureSet() == QtSvg::FeatureSet::StaticTiny1_2)
+    if (handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
         return;
 
     if (!attributes.mask.isEmpty()) {
@@ -2291,7 +2291,7 @@ static void parseExtendedAttributes(QSvgNode *node,
     }
 
     if (!attributes.markerStart.isEmpty() &&
-        handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2) {
+        !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly)) {
         QString markerStr = attributes.markerStart.toString().trimmed();
         if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
             markerStr = markerStr.mid(3, markerStr.size() - 3);
@@ -2301,7 +2301,7 @@ static void parseExtendedAttributes(QSvgNode *node,
         node->setMarkerStartId(markerId);
     }
     if (!attributes.markerMid.isEmpty() &&
-        handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2) {
+        !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly)) {
         QString markerStr = attributes.markerMid.toString().trimmed();
         if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
             markerStr = markerStr.mid(3, markerStr.size() - 3);
@@ -2311,7 +2311,7 @@ static void parseExtendedAttributes(QSvgNode *node,
         node->setMarkerMidId(markerId);
     }
     if (!attributes.markerEnd.isEmpty() &&
-        handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2) {
+        !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly)) {
         QString markerStr = attributes.markerEnd.toString().trimmed();
         if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
             markerStr = markerStr.mid(3, markerStr.size() - 3);
@@ -2322,7 +2322,7 @@ static void parseExtendedAttributes(QSvgNode *node,
     }
 
     if (!attributes.filter.isEmpty() &&
-        handler->featureSet() != QtSvg::FeatureSet::StaticTiny1_2) {
+        !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly)) {
         QString filterStr = attributes.filter.toString().trimmed();
 
         if (filterStr.size() > 3 && filterStr.mid(0, 3) == QLatin1String("url"))
@@ -3914,7 +3914,7 @@ static QSvgNode *createSvgNode(QSvgNode *parent,
 {
     Q_UNUSED(parent); Q_UNUSED(attributes);
 
-    QSvgTinyDocument *node = new QSvgTinyDocument(handler->featureSet());
+    QSvgTinyDocument *node = new QSvgTinyDocument(handler->options());
     const QStringView widthStr  = attributes.value(QLatin1String("width"));
     const QStringView heightStr = attributes.value(QLatin1String("height"));
     QString viewBoxStr = attributes.value(QLatin1String("viewBox")).toString();
@@ -4196,9 +4196,8 @@ static QSvgNode *createVideoNode(QSvgNode *parent,
 
 typedef QSvgNode *(*FactoryMethod)(QSvgNode *, const QXmlStreamAttributes &, QSvgHandler *);
 
-static FactoryMethod findGroupFactory(const QString &name, QtSvg::FeatureSet featureSet)
+static FactoryMethod findGroupFactory(const QString &name, QtSvg::Options options)
 {
-    Q_UNUSED(featureSet);
     if (name.isEmpty())
         return 0;
 
@@ -4208,14 +4207,14 @@ static FactoryMethod findGroupFactory(const QString &name, QtSvg::FeatureSet fea
         if (ref == QLatin1String("efs")) return createDefsNode;
         break;
     case 'f':
-        if (ref == QLatin1String("ilter") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return createFilterNode;
+        if (ref == QLatin1String("ilter") && !options.testFlag(QtSvg::Tiny12FeaturesOnly)) return createFilterNode;
         break;
     case 'g':
         if (ref.isEmpty()) return createGNode;
         break;
     case 'm':
-        if (ref == QLatin1String("ask") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return createMaskNode;
-        if (ref == QLatin1String("arker") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return createMarkerNode;
+        if (ref == QLatin1String("ask") && !options.testFlag(QtSvg::Tiny12FeaturesOnly)) return createMaskNode;
+        if (ref == QLatin1String("arker") && !options.testFlag(QtSvg::Tiny12FeaturesOnly)) return createMarkerNode;
         break;
     case 's':
         if (ref == QLatin1String("vg")) return createSvgNode;
@@ -4223,7 +4222,7 @@ static FactoryMethod findGroupFactory(const QString &name, QtSvg::FeatureSet fea
         if (ref == QLatin1String("ymbol")) return createSymbolNode;
         break;
     case 'p':
-        if (ref == QLatin1String("attern") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return createPatternNode;
+        if (ref == QLatin1String("attern") && !options.testFlag(QtSvg::Tiny12FeaturesOnly)) return createPatternNode;
         break;
     default:
         break;
@@ -4231,9 +4230,9 @@ static FactoryMethod findGroupFactory(const QString &name, QtSvg::FeatureSet fea
     return 0;
 }
 
-static FactoryMethod findGraphicsFactory(const QString &name, QtSvg::FeatureSet featureSet)
+static FactoryMethod findGraphicsFactory(const QString &name, QtSvg::Options options)
 {
-    Q_UNUSED(featureSet);
+    Q_UNUSED(options);
     if (name.isEmpty())
         return 0;
 
@@ -4279,9 +4278,9 @@ static FactoryMethod findGraphicsFactory(const QString &name, QtSvg::FeatureSet 
     return 0;
 }
 
-static FactoryMethod findFilterFtory(const QString &name, QtSvg::FeatureSet featureSet)
+static FactoryMethod findFilterFtory(const QString &name, QtSvg::Options options)
 {
-    if (featureSet == QtSvg::FeatureSet::StaticTiny1_2)
+    if (options.testFlag(QtSvg::Tiny12FeaturesOnly))
         return 0;
 
     if (name.isEmpty())
@@ -4303,9 +4302,8 @@ static FactoryMethod findFilterFtory(const QString &name, QtSvg::FeatureSet feat
 
 typedef bool (*ParseMethod)(QSvgNode *, const QXmlStreamAttributes &, QSvgHandler *);
 
-static ParseMethod findUtilFactory(const QString &name, QtSvg::FeatureSet featureSet)
+static ParseMethod findUtilFactory(const QString &name, QtSvg::Options options)
 {
-    Q_UNUSED(featureSet);
     if (name.isEmpty())
         return 0;
 
@@ -4333,8 +4331,8 @@ static ParseMethod findUtilFactory(const QString &name, QtSvg::FeatureSet featur
     case 'm':
         if (ref == QLatin1String("etadata")) return parseMetadataNode;
         if (ref == QLatin1String("path")) return parseMpathNode;
-        if (ref == QLatin1String("ask") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return parseMaskNode;
-        if (ref == QLatin1String("arker") && featureSet != QtSvg::FeatureSet::StaticTiny1_2) return parseMarkerNode;
+        if (ref == QLatin1String("ask") && !options.testFlag(QtSvg::Tiny12FeaturesOnly)) return parseMaskNode;
+        if (ref == QLatin1String("arker") && !options.testFlag(QtSvg::Tiny12FeaturesOnly)) return parseMarkerNode;
         break;
     case 'p':
         if (ref == QLatin1String("refetch")) return parsePrefetchNode;
@@ -4415,26 +4413,26 @@ static StyleParseMethod findStyleUtilFactoryMethod(const QString &name)
     return 0;
 }
 
-QSvgHandler::QSvgHandler(QIODevice *device, QtSvg::FeatureSet featureSet)
+QSvgHandler::QSvgHandler(QIODevice *device, QtSvg::Options options)
     : xml(new QXmlStreamReader(device))
     , m_ownsReader(true)
-    , m_featureSet(featureSet)
+    , m_options(options)
 {
     init();
 }
 
-QSvgHandler::QSvgHandler(const QByteArray &data, QtSvg::FeatureSet featureSet)
+QSvgHandler::QSvgHandler(const QByteArray &data, QtSvg::Options options)
     : xml(new QXmlStreamReader(data))
     , m_ownsReader(true)
-    , m_featureSet(featureSet)
+    , m_options(options)
 {
     init();
 }
 
-QSvgHandler::QSvgHandler(QXmlStreamReader *const reader, QtSvg::FeatureSet featureSet)
+QSvgHandler::QSvgHandler(QXmlStreamReader *const reader, QtSvg::Options options)
     : xml(reader)
     , m_ownsReader(false)
-    , m_featureSet(featureSet)
+    , m_options(options)
 {
     init();
 }
@@ -4608,7 +4606,7 @@ bool QSvgHandler::startElement(const QString &localName,
     if (!m_doc && localName != QLatin1String("svg"))
         return false;
 
-    if (FactoryMethod method = findGroupFactory(localName, featureSet())) {
+    if (FactoryMethod method = findGroupFactory(localName, options())) {
         //group
         node = method(m_doc ? m_nodes.top() : 0, attributes, this);
 
@@ -4649,7 +4647,7 @@ bool QSvgHandler::startElement(const QString &localName,
                 parseStyle(node, attributes, this);
             }
         }
-    } else if (FactoryMethod method = findGraphicsFactory(localName, featureSet())) {
+    } else if (FactoryMethod method = findGraphicsFactory(localName, options())) {
         //rendering element
         Q_ASSERT(!m_nodes.isEmpty());
         node = method(m_nodes.top(), attributes, this);
@@ -4712,7 +4710,7 @@ bool QSvgHandler::startElement(const QString &localName,
                 }
             }
         }
-    } else if (FactoryMethod method = findFilterFtory(localName, featureSet())) {
+    } else if (FactoryMethod method = findFilterFtory(localName, options())) {
         //filter nodes to be aded to be filtercontainer
         Q_ASSERT(!m_nodes.isEmpty());
         node = method(m_nodes.top(), attributes, this);
@@ -4729,7 +4727,7 @@ bool QSvgHandler::startElement(const QString &localName,
                 node = 0;
             }
         }
-    } else if (ParseMethod method = findUtilFactory(localName, featureSet())) {
+    } else if (ParseMethod method = findUtilFactory(localName, options())) {
         Q_ASSERT(!m_nodes.isEmpty());
         if (!method(m_nodes.top(), attributes, this))
             qCWarning(lcSvgHandler, "%s", msgProblemParsing(localName, xml).constData());

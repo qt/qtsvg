@@ -59,9 +59,9 @@ public:
     };
 
 public:
-    QSvgHandler(QIODevice *device, QtSvg::FeatureSet featureSet = QtSvg::FeatureSet::AllAvailable);
-    QSvgHandler(const QByteArray &data, QtSvg::FeatureSet featureSet = QtSvg::FeatureSet::AllAvailable);
-    QSvgHandler(QXmlStreamReader *const data, QtSvg::FeatureSet featureSet = QtSvg::FeatureSet::AllAvailable);
+    QSvgHandler(QIODevice *device, QtSvg::Options options = {});
+    QSvgHandler(const QByteArray &data, QtSvg::Options options = {});
+    QSvgHandler(QXmlStreamReader *const data, QtSvg::Options options = {});
     ~QSvgHandler();
 
     QIODevice *device() const;
@@ -99,7 +99,7 @@ public:
     inline QPen defaultPen() const
     { return m_defaultPen; }
 
-    QtSvg::FeatureSet featureSet() const;
+    QtSvg::Options options() const;
 
 public:
     bool startElement(const QString &localName, const QXmlStreamAttributes &attributes);
@@ -156,7 +156,7 @@ private:
      */
     const bool m_ownsReader;
 
-    const QtSvg::FeatureSet m_featureSet;
+    const QtSvg::Options m_options;
 };
 
 Q_DECLARE_LOGGING_CATEGORY(lcSvgHandler)

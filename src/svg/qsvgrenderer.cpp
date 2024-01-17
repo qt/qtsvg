@@ -72,8 +72,7 @@ public:
     explicit QSvgRendererPrivate()
         : QObjectPrivate(),
           render(0), timer(0),
-          fps(30),
-          featureSet(QtSvg::FeatureSet::AllAvailable)
+          fps(30)
     {}
 
     ~QSvgRendererPrivate()
@@ -105,7 +104,7 @@ public:
     QSvgTinyDocument *render;
     QTimer *timer;
     int fps;
-    QtSvg::FeatureSet featureSet;
+    QtSvg::Options options;
     bool animationEnabled = true;
 };
 
@@ -308,29 +307,27 @@ void QSvgRenderer::setAspectRatioMode(Qt::AspectRatioMode mode)
 }
 
 /*!
-    \property QSvgRenderer::featureSet
+    \property QSvgRenderer::options
     \since 6.7
 
-    This property holds the feature set that will be used to load and
-    render an SVG file. The feature set can be limited to SVG Tiny 1.2
-    or an \l{Extended Features}{extended feature set}.
+    This property holds a set of QtSvg::Option flags that can be used
+    to enable or disable various features of the parsing and rendering of SVG files.
 
     Set this property before calling any of the load functions to
     change the behavior of the QSvgRenderer.
 
-    The default value is QtSvg::AllAvailable.
+    By default, no flags are set.
  */
-QtSvg::FeatureSet QSvgRenderer::featureSet() const
+QtSvg::Options QSvgRenderer::options() const
 {
     Q_D(const QSvgRenderer);
-    return d->featureSet;
+    return d->options;
 }
 
-
-void QSvgRenderer::setFeatureSet(QtSvg::FeatureSet flags)
+void QSvgRenderer::setOptions(QtSvg::Options flags)
 {
     Q_D(QSvgRenderer);
-    d->featureSet = flags;
+    d->options = flags;
 }
 /*!
   \property QSvgRenderer::currentFrame
@@ -390,7 +387,7 @@ static bool loadDocument(QSvgRenderer *const q,
                          const TInputType &in)
 {
     delete d->render;
-    d->render = QSvgTinyDocument::load(in, d->featureSet);
+    d->render = QSvgTinyDocument::load(in, d->options);
     if (d->render && !d->render->size().isValid()) {
         delete d->render;
         d->render = nullptr;

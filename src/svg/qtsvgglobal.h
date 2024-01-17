@@ -12,11 +12,12 @@ QT_BEGIN_NAMESPACE
 
 namespace QtSvg {
 
-enum class FeatureSet : quint32
+enum Option
 {
-    StaticTiny1_2,
-    AllAvailable = 0xffffffff,
+    Tiny12FeaturesOnly = 0x01
 };
+Q_DECLARE_FLAGS(Options, Option)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Options)
 
 }
 

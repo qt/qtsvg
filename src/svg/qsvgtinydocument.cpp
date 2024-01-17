@@ -21,7 +21,7 @@
 
 QT_BEGIN_NAMESPACE
 
-QSvgTinyDocument::QSvgTinyDocument(QtSvg::FeatureSet featureSet)
+QSvgTinyDocument::QSvgTinyDocument(QtSvg::Options options)
     : QSvgStructureNode(0)
     , m_widthPercent(false)
     , m_heightPercent(false)
@@ -29,7 +29,7 @@ QSvgTinyDocument::QSvgTinyDocument(QtSvg::FeatureSet featureSet)
     , m_animated(false)
     , m_animationDuration(0)
     , m_fps(30)
-    , m_featureSet(featureSet)
+    , m_options(options)
 {
 }
 
@@ -153,7 +153,7 @@ static QByteArray qt_inflateSvgzDataFrom(QIODevice *)
 }
 #endif
 
-QSvgTinyDocument * QSvgTinyDocument::load(const QString &fileName, QtSvg::FeatureSet featureSet)
+QSvgTinyDocument *QSvgTinyDocument::load(const QString &fileName, QtSvg::Options options)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly)) {
@@ -168,7 +168,7 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QString &fileName, QtSvg::Featur
     }
 
     QSvgTinyDocument *doc = nullptr;
-    QSvgHandler handler(&file, featureSet);
+    QSvgHandler handler(&file, options);
     if (handler.ok()) {
         doc = handler.document();
         doc->m_animationDuration = handler.animationDuration();
@@ -180,7 +180,7 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QString &fileName, QtSvg::Featur
     return doc;
 }
 
-QSvgTinyDocument * QSvgTinyDocument::load(const QByteArray &contents, QtSvg::FeatureSet featureSet)
+QSvgTinyDocument *QSvgTinyDocument::load(const QByteArray &contents, QtSvg::Options options)
 {
     QByteArray svg;
     // Check for gzip magic number and inflate if appropriate
@@ -197,7 +197,7 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QByteArray &contents, QtSvg::Fea
     QBuffer buffer;
     buffer.setData(svg);
     buffer.open(QIODevice::ReadOnly);
-    QSvgHandler handler(&buffer, featureSet );
+    QSvgHandler handler(&buffer, options);
 
     QSvgTinyDocument *doc = nullptr;
     if (handler.ok()) {
@@ -209,9 +209,9 @@ QSvgTinyDocument * QSvgTinyDocument::load(const QByteArray &contents, QtSvg::Fea
     return doc;
 }
 
-QSvgTinyDocument * QSvgTinyDocument::load(QXmlStreamReader *contents, QtSvg::FeatureSet featureSet)
+QSvgTinyDocument *QSvgTinyDocument::load(QXmlStreamReader *contents, QtSvg::Options options)
 {
-    QSvgHandler handler(contents, featureSet);
+    QSvgHandler handler(contents, options);
 
     QSvgTinyDocument *doc = nullptr;
     if (handler.ok()) {
@@ -340,9 +340,9 @@ void QSvgTinyDocument::setViewBox(const QRectF &rect)
     m_implicitViewBox = rect.isNull();
 }
 
-QtSvg::FeatureSet QSvgTinyDocument::featureSet() const
+QtSvg::Options QSvgTinyDocument::options() const
 {
-    return m_featureSet;
+    return m_options;
 }
 
 void QSvgTinyDocument::addSvgFont(QSvgFont *font)
