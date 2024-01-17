@@ -2653,14 +2653,6 @@ static QSvgNode *createDefsNode(QSvgNode *parent,
     return defs;
 }
 
-static bool parseDescNode(QSvgNode *parent,
-                          const QXmlStreamAttributes &attributes,
-                          QSvgHandler *)
-{
-    Q_UNUSED(parent); Q_UNUSED(attributes);
-    return true;
-}
-
 static bool parseDiscardNode(QSvgNode *parent,
                              const QXmlStreamAttributes &attributes,
                              QSvgHandler *)
@@ -4128,14 +4120,6 @@ static QSvgNode *createTspanNode(QSvgNode *parent,
     return new QSvgTspan(parent);
 }
 
-static bool parseTitleNode(QSvgNode *parent,
-                           const QXmlStreamAttributes &attributes,
-                           QSvgHandler *)
-{
-    Q_UNUSED(parent); Q_UNUSED(attributes);
-    return true;
-}
-
 static QSvgNode *createUseNode(QSvgNode *parent,
                                const QXmlStreamAttributes &attributes,
                                QSvgHandler *handler)
@@ -4318,7 +4302,6 @@ static ParseMethod findUtilFactory(const QString &name, QtSvg::Options options)
         if (ref == QLatin1String("udio")) return parseAudioNode;
         break;
     case 'd':
-        if (ref == QLatin1String("esc")) return parseDescNode;
         if (ref == QLatin1String("iscard")) return parseDiscardNode;
         break;
     case 'f':
@@ -4344,7 +4327,6 @@ static ParseMethod findUtilFactory(const QString &name, QtSvg::Options options)
         break;
     case 't':
         if (ref == QLatin1String("break")) return parseTbreakNode;
-        if (ref == QLatin1String("itle")) return parseTitleNode;
         break;
     default:
         break;
@@ -4746,7 +4728,7 @@ bool QSvgHandler::startElement(const QString &localName,
                 qCWarning(lcSvgHandler, "%s", msgProblemParsing(localName, xml).constData());
         }
     } else {
-        //qCWarning(lcSvgHandler) <<"Skipping unknown element!"<<namespaceURI<<"::"<<localName;
+        qCDebug(lcSvgHandler) << "Skipping unknown element" << localName;
         m_skipNodes.push(Unknown);
         return true;
     }
