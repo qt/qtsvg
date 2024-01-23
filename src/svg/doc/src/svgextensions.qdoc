@@ -53,7 +53,7 @@
 
     \section1 Masking
 
-    Masking is supported in form of the \c{<mask>} element and the mask
+    Masking is supported in the form of the \c{<mask>} element and the mask
     attribute.
 
     \note <clipPath> is not supported.
@@ -184,7 +184,8 @@
         \li \c{y}
         \li \c{width}
         \li \c{height}
-        \li \c{in} (Supported are \c{SourceGraphic}, \c{SourceAlpha}, and all references to filters)
+        \li \c{in} (Supported are \c{SourceGraphic}, \c{SourceAlpha}, and all
+            references to filters)
         \li \c{result}
     \endlist
 
