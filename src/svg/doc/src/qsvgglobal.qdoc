@@ -16,6 +16,8 @@
     files. Multiple flags can be combined into the QFlags type
     QtSvg::Options.
 
+    \value NoOption            The null value. This is the default for QtSvg::Options.
+
     \value Tiny12FeaturesOnly  Strictly and exclusively parse only tags that are
                                part of the \l{http://www.w3.org/TR/SVGMobile12}
                                {SVG 1.2 Tiny} Static Feature set.

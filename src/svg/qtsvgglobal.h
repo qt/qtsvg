@@ -12,8 +12,8 @@ QT_BEGIN_NAMESPACE
 
 namespace QtSvg {
 
-enum Option
-{
+enum Option : quint32 {
+    NoOption           = 0x00,
     Tiny12FeaturesOnly = 0x01
 };
 Q_DECLARE_FLAGS(Options, Option)
