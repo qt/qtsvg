@@ -4547,9 +4547,8 @@ void QSvgHandler::parse()
             }
             break;
         case QXmlStreamReader::EndElement:
-            endElement(xml->name());
+            done = endElement(xml->name());
             ++remainingUnfinishedElements;
-            done = (xml->name() == QLatin1String("svg"));
             break;
         case QXmlStreamReader::Characters:
             characters(xml->text());
@@ -4598,6 +4597,15 @@ bool QSvgHandler::startElement(const QString &localName,
 
     if (!m_doc && localName != QLatin1String("svg"))
         return false;
+
+    if (m_doc && localName == QLatin1String("svg")) {
+        m_skipNodes.push(Doc);
+        qCWarning(lcSvgHandler) << "Skipping a nested svg element, because "
+                                   "SVG Document must not contain nested svg elements in Svg Tiny 1.2";
+    }
+
+    if (!m_skipNodes.isEmpty() && m_skipNodes.top() == Doc)
+        return true;
 
     if (FactoryMethod method = findGroupFactory(localName, options())) {
         //group
@@ -4757,14 +4765,17 @@ bool QSvgHandler::startElement(const QString &localName,
 bool QSvgHandler::endElement(const QStringView localName)
 {
     CurrentNode node = m_skipNodes.top();
+
+    if (node == Doc && localName != QLatin1String("svg"))
+        return false;
+
     m_skipNodes.pop();
     m_whitespaceMode.pop();
 
     popColor();
 
-    if (node == Unknown) {
-        return true;
-    }
+    if (node == Unknown)
+        return false;
 
 #ifdef QT_NO_CSSPARSER
     Q_UNUSED(localName);
@@ -4778,7 +4789,7 @@ bool QSvgHandler::endElement(const QStringView localName)
     else if (m_style && !m_skipNodes.isEmpty() && m_skipNodes.top() != Style)
         m_style = 0;
 
-    return true;
+    return ((localName == QLatin1String("svg")) && (node != Doc));
 }
 
 void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)

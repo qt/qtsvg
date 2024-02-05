@@ -121,7 +121,8 @@ private:
     {
         Unknown,
         Graphics,
-        Style
+        Style,
+        Doc
     };
     QStack<CurrentNode> m_skipNodes;
 
