@@ -895,6 +895,7 @@ static qreal parseLength(QStringView str, QSvgHandler::LengthType *type,
     if (numStr.isEmpty()) {
         if (ok)
             *ok = false;
+        *type = QSvgHandler::LT_OTHER;
         return false;
     }
     if (numStr.endsWith(QLatin1Char('%'))) {
