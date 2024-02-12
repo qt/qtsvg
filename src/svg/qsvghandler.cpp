@@ -4209,7 +4209,7 @@ static FactoryMethod findGroupFactory(const QString &name, QtSvg::Options option
     case 's':
         if (ref == QLatin1String("vg")) return createSvgNode;
         if (ref == QLatin1String("witch")) return createSwitchNode;
-        if (ref == QLatin1String("ymbol")) return createSymbolNode;
+        if (ref == QLatin1String("ymbol") && !options.testFlag(QtSvg::Tiny12FeaturesOnly)) return createSymbolNode;
         break;
     case 'p':
         if (ref == QLatin1String("attern") && !options.testFlag(QtSvg::Tiny12FeaturesOnly)) return createPatternNode;
