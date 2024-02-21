@@ -29,70 +29,9 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
         break;
     }
 
-    for (const auto *child : node->renderers()) {
-        switch (child->type()) {
-        case QSvgNode::Switch:
-        case QSvgNode::Doc:
-        case QSvgNode::Defs:
-        case QSvgNode::Group:
-            traverse(static_cast<const QSvgStructureNode *>(child));
-            break;
-        case QSvgNode::Animation:
-            visitAnimationNode(static_cast<const QSvgAnimation *>(child));
-            break;
-        case QSvgNode::Circle:
-        case QSvgNode::Ellipse:
-            visitEllipseNode(static_cast<const QSvgEllipse *>(child));
-            break;
-        case QSvgNode::Image:
-            visitImageNode(static_cast<const QSvgImage *>(child));
-            break;
-        case QSvgNode::Line:
-            visitLineNode(static_cast<const QSvgLine *>(child));
-            break;
-        case QSvgNode::Path:
-            visitPathNode(static_cast<const QSvgPath *>(child));
-            break;
-        case QSvgNode::Polygon:
-            visitPolygonNode(static_cast<const QSvgPolygon *>(child));
-            break;
-        case QSvgNode::Polyline:
-            visitPolylineNode(static_cast<const QSvgPolyline *>(child));
-            break;
-        case QSvgNode::Rect:
-            visitRectNode(static_cast<const QSvgRect *>(child));
-            break;
-        case QSvgNode::Text:
-        case QSvgNode::Textarea:
-            visitTextNode(static_cast<const QSvgText *>(child));
-            break;
-        case QSvgNode::Tspan:
-            visitTspanNode(static_cast<const QSvgTspan *>(child));
-            break;
-        case QSvgNode::Use:
-            visitUseNode(static_cast<const QSvgUse *>(child));
-            break;
-        case QSvgNode::Video:
-            visitVideoNode(static_cast<const QSvgVideo *>(child));
-            break;
+    for (const auto *child : node->renderers())
+        traverse(child);
 
-        // Enum values that don't have any QSvgNode classes yet:
-           case QSvgNode::Mask:
-           case QSvgNode::Symbol:
-           case QSvgNode::Marker:
-           case QSvgNode::Pattern:
-           case QSvgNode::Filter:
-           case QSvgNode::FeMerge:
-           case QSvgNode::FeMergenode:
-           case QSvgNode::FeColormatrix:
-           case QSvgNode::FeGaussianblur:
-           case QSvgNode::FeOffset:
-           case QSvgNode::FeComposite:
-           case QSvgNode::FeFlood:
-            qDebug() << "Unhandled type in switch" << child->type();
-            break;
-        }
-    }
     switch (node->type()) {
     case QSvgNode::Switch:
         visitSwitchNodeEnd(static_cast<const QSvgSwitch *>(node));
@@ -108,6 +47,72 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
         break;
     default:
         Q_UNREACHABLE();
+        break;
+    }
+}
+
+void QSvgVisitor::traverse(const QSvgNode *node)
+{
+    switch (node->type()) {
+    case QSvgNode::Switch:
+    case QSvgNode::Doc:
+    case QSvgNode::Defs:
+    case QSvgNode::Group:
+        traverse(static_cast<const QSvgStructureNode *>(node));
+        break;
+    case QSvgNode::Animation:
+        visitAnimationNode(static_cast<const QSvgAnimation *>(node));
+        break;
+    case QSvgNode::Circle:
+    case QSvgNode::Ellipse:
+        visitEllipseNode(static_cast<const QSvgEllipse *>(node));
+        break;
+    case QSvgNode::Image:
+        visitImageNode(static_cast<const QSvgImage *>(node));
+        break;
+    case QSvgNode::Line:
+        visitLineNode(static_cast<const QSvgLine *>(node));
+        break;
+    case QSvgNode::Path:
+        visitPathNode(static_cast<const QSvgPath *>(node));
+        break;
+    case QSvgNode::Polygon:
+        visitPolygonNode(static_cast<const QSvgPolygon *>(node));
+        break;
+    case QSvgNode::Polyline:
+        visitPolylineNode(static_cast<const QSvgPolyline *>(node));
+        break;
+    case QSvgNode::Rect:
+        visitRectNode(static_cast<const QSvgRect *>(node));
+        break;
+    case QSvgNode::Text:
+    case QSvgNode::Textarea:
+        visitTextNode(static_cast<const QSvgText *>(node));
+        break;
+    case QSvgNode::Tspan:
+        visitTspanNode(static_cast<const QSvgTspan *>(node));
+        break;
+    case QSvgNode::Use:
+        visitUseNode(static_cast<const QSvgUse *>(node));
+        break;
+    case QSvgNode::Video:
+        visitVideoNode(static_cast<const QSvgVideo *>(node));
+        break;
+
+        // Enum values that don't have any QSvgNode classes yet:
+    case QSvgNode::Mask:
+    case QSvgNode::Symbol:
+    case QSvgNode::Marker:
+    case QSvgNode::Pattern:
+    case QSvgNode::Filter:
+    case QSvgNode::FeMerge:
+    case QSvgNode::FeMergenode:
+    case QSvgNode::FeColormatrix:
+    case QSvgNode::FeGaussianblur:
+    case QSvgNode::FeOffset:
+    case QSvgNode::FeComposite:
+    case QSvgNode::FeFlood:
+        qDebug() << "Unhandled type in switch" << node->type();
         break;
     }
 }

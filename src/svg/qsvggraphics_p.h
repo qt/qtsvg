@@ -226,6 +226,7 @@ public:
     QString linkId() const { return m_linkId; }
     void setLink(QSvgNode *link) { m_link = link; }
     QSvgNode *link() const { return m_link; }
+    QPointF start() const { return m_start; }
 
 private:
     QSvgNode *m_link;
