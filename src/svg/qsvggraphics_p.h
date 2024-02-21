@@ -173,6 +173,7 @@ public:
 
     QPointF position() const { return m_coord; }
     QSizeF size() const { return m_size; }
+    WhitespaceMode whitespaceMode() const { return m_mode; }
 
 private:
     void draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundingRect = nullptr) const;
@@ -227,6 +228,7 @@ public:
     void setLink(QSvgNode *link) { m_link = link; }
     QSvgNode *link() const { return m_link; }
     QPointF start() const { return m_start; }
+    bool isRecursing() const { return m_recursing; }
 
 private:
     QSvgNode *m_link;
