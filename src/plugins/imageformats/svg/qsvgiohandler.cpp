@@ -6,6 +6,7 @@
 #ifndef QT_NO_SVGRENDERER
 
 #include "qsvgrenderer.h"
+#include "private/qsvgtinydocument_p.h"
 #include "qimage.h"
 #include "qpixmap.h"
 #include "qpainter.h"
@@ -84,25 +85,6 @@ QSvgIOHandler::~QSvgIOHandler()
     delete d;
 }
 
-static bool isPossiblySvg(QIODevice *device, bool *isCompressed = nullptr)
-{
-    constexpr int bufSize = 64;
-    char buf[bufSize];
-    const qint64 readLen = device->peek(buf, bufSize);
-    if (readLen < 8)
-        return false;
-#    ifndef QT_NO_COMPRESS
-    if (quint8(buf[0]) == 0x1f && quint8(buf[1]) == 0x8b) {
-        if (isCompressed)
-            *isCompressed = true;
-        return true;
-    }
-#    endif
-    QTextStream str(QByteArray::fromRawData(buf, readLen));
-    QByteArray ba = str.read(16).trimmed().toLatin1();
-    return ba.startsWith("<?xml") || ba.startsWith("<svg") || ba.startsWith("<!--") || ba.startsWith("<!DOCTYPE svg");
-}
-
 bool QSvgIOHandler::canRead() const
 {
     if (!device())
@@ -111,7 +93,7 @@ bool QSvgIOHandler::canRead() const
         return true;        // Will happen if we have been asked for the size
 
     bool isCompressed = false;
-    if (isPossiblySvg(device(), &isCompressed)) {
+    if (QSvgTinyDocument::isLikelySvg(device(), &isCompressed)) {
         setFormat(isCompressed ? "svgz" : "svg");
         return true;
     }
@@ -237,7 +219,7 @@ bool QSvgIOHandler::supportsOption(ImageOption option) const
 
 bool QSvgIOHandler::canRead(QIODevice *device)
 {
-    return isPossiblySvg(device);
+    return QSvgTinyDocument::isLikelySvg(device);
 }
 
 QT_END_NAMESPACE

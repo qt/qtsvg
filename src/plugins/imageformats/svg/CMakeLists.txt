@@ -14,5 +14,5 @@ qt_internal_add_plugin(QSvgPlugin
     LIBRARIES
         Qt::Core
         Qt::Gui
-        Qt::Svg
+        Qt::SvgPrivate
 )

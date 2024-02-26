@@ -21,6 +21,8 @@
 
 QT_BEGIN_NAMESPACE
 
+using namespace Qt::StringLiterals;
+
 QSvgTinyDocument::QSvgTinyDocument(QtSvg::Options options)
     : QSvgStructureNode(0)
     , m_widthPercent(false)
@@ -35,6 +37,19 @@ QSvgTinyDocument::QSvgTinyDocument(QtSvg::Options options)
 
 QSvgTinyDocument::~QSvgTinyDocument()
 {
+}
+
+static bool hasSvgHeader(const QByteArray &buf)
+{
+    QTextStream s(buf); // Handle multi-byte encodings
+    QString h = s.readAll();
+    QStringView th = QStringView(h).trimmed();
+    bool matched = false;
+    if (th.startsWith("<svg"_L1) || th.startsWith("<!DOCTYPE svg"_L1))
+        matched = true;
+    else if (th.startsWith("<?xml"_L1) || th.startsWith("<!--"_L1))
+        matched = th.contains("<!DOCTYPE svg"_L1) || th.contains("<svg"_L1);
+    return matched;
 }
 
 #ifndef QT_NO_COMPRESS
@@ -124,8 +139,7 @@ static QByteArray qt_inflateSvgzDataFrom(QIODevice *device, bool doCheckContent)
 
         if (doCheckContent) {
             // Quick format check, equivalent to QSvgIOHandler::canRead()
-            QByteArray buf = destination.left(16);
-            if (!buf.contains("<?xml") && !buf.contains("<svg") && !buf.contains("<!--") && !buf.contains("<!DOCTYPE svg")) {
+            if (!hasSvgHeader(destination)) {
                 inflateEnd(&zlibStream);
                 qCWarning(lcSvgHandler, "Error while inflating gzip file: SVG format check failed");
                 return QByteArray();
@@ -519,6 +533,41 @@ void QSvgTinyDocument::setCurrentFrame(int frame)
 void QSvgTinyDocument::setFramesPerSecond(int num)
 {
     m_fps = num;
+}
+
+bool QSvgTinyDocument::isLikelySvg(QIODevice *device, bool *isCompressed)
+{
+    constexpr int bufSize = 4096;
+    char buf[bufSize];
+    char inflateBuf[bufSize];
+    bool useInflateBuf = false;
+    int readLen = device->peek(buf, bufSize);
+    if (readLen < 8)
+        return false;
+#ifndef QT_NO_COMPRESS
+    if (quint8(buf[0]) == 0x1f && quint8(buf[1]) == 0x8b) {
+        // Indicates gzip compressed content, i.e. svgz
+        z_stream zlibStream;
+        zlibStream.avail_in = readLen;
+        zlibStream.next_out = reinterpret_cast<Bytef *>(inflateBuf);
+        zlibStream.avail_out = bufSize;
+        zlibStream.next_in = reinterpret_cast<Bytef *>(buf);
+        zlibStream.zalloc = Z_NULL;
+        zlibStream.zfree = Z_NULL;
+        zlibStream.opaque = Z_NULL;
+        if (inflateInit2(&zlibStream, MAX_WBITS + 16) != Z_OK)
+            return false;
+        int zlibResult = inflate(&zlibStream, Z_NO_FLUSH);
+        inflateEnd(&zlibStream);
+        if ((zlibResult != Z_OK && zlibResult != Z_STREAM_END) || zlibStream.total_out < 8)
+            return false;
+        readLen = zlibStream.total_out;
+        if (isCompressed)
+            *isCompressed = true;
+        useInflateBuf = true;
+    }
+#endif
+    return hasSvgHeader(QByteArray::fromRawData(useInflateBuf ? inflateBuf : buf, readLen));
 }
 
 QT_END_NAMESPACE

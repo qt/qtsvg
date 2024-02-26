@@ -138,10 +138,12 @@ void tst_QSvgPlugin::encodings_data()
     QTest::addColumn<QString>("filename");
 
     QTest::newRow("utf-8") << QFINDTESTDATA("simple_Utf8.svg");
+    QTest::newRow("utf-8_z") << QFINDTESTDATA("simple_Utf8.svgz");
     QTest::newRow("utf-16LE") << QFINDTESTDATA("simple_Utf16LE.svg");
     QTest::newRow("utf-16BE") << QFINDTESTDATA("simple_Utf16BE.svg");
     QTest::newRow("utf-32LE") << QFINDTESTDATA("simple_Utf32LE.svg");
     QTest::newRow("utf-32BE") << QFINDTESTDATA("simple_Utf32BE.svg");
+    QTest::newRow("utf-32BE_z") << QFINDTESTDATA("simple_Utf32BE.svg.gz");
 }
 
 void tst_QSvgPlugin::encodings()

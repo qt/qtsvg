@@ -17,7 +17,7 @@ qt_internal_add_test(tst_qsvgplugin
     LIBRARIES
         Qt::Gui
         Qt::GuiPrivate
-        Qt::Svg
+        Qt::SvgPrivate
         Qt::Widgets
 )
 
@@ -39,10 +39,12 @@ set(resources_resource_files
     "wide_size_viewbox.svg"
     "wide_viewbox.svg"
     "simple_Utf8.svg"
+    "simple_Utf8.svgz"
     "simple_Utf16LE.svg"
     "simple_Utf16BE.svg"
     "simple_Utf32LE.svg"
     "simple_Utf32BE.svg"
+    "simple_Utf32BE.svg.gz"
     "invalid_xml.svg"
     "xml_not_svg.svg"
     "invalid_then_valid.svg"
