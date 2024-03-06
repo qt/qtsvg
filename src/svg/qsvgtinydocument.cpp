@@ -235,12 +235,7 @@ void QSvgTinyDocument::draw(QPainter *p, const QRectF &bounds)
     //sets default style on the painter
     //### not the most optimal way
     mapSourceToTarget(p, bounds);
-    QPen pen(Qt::NoBrush, 1, Qt::SolidLine, Qt::FlatCap, Qt::SvgMiterJoin);
-    pen.setMiterLimit(4);
-    p->setPen(pen);
-    p->setBrush(Qt::black);
-    p->setRenderHint(QPainter::Antialiasing);
-    p->setRenderHint(QPainter::SmoothPixmapTransform);
+    initPainter(p);
     QList<QSvgNode*>::iterator itr = m_renderers.begin();
     applyStyle(p, m_states);
     while (itr != m_renderers.end()) {
@@ -310,7 +305,6 @@ void QSvgTinyDocument::draw(QPainter *p, const QString &id,
 
     p->restore();
 }
-
 
 QSvgNode::Type QSvgTinyDocument::type() const
 {

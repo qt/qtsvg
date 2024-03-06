@@ -743,16 +743,16 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
 
     mask.fill(Qt::transparent);
     QPainter painter(&mask);
+    initPainter(&painter);
 
-    painter.setRenderHints(p->renderHints());
+    QSvgExtraStates maskNodeStates;
+    applyStyleRecursive(&painter, maskNodeStates);
+
+    // The transformation of the mask node is not relevant. What matters are the contentUnits
+    // and the position/scale of the node that the mask is applied to.
+    painter.resetTransform();
     painter.translate(-imageBound.topLeft());
     painter.setTransform(p->transform(), true);
-
-    // This is required because the QPen is scaled if contentUnits is objectBoundingBox,
-    // which does not match Chrome and Firefox.
-    painter.setPen(Qt::NoPen);
-
-    QSvgExtraStates states2; // Fake states so scopes do not propagate
 
     QTransform oldT = painter.transform();
     if (m_contentUnits == QtSvg::UnitTypes::objectBoundingBox){
@@ -765,7 +765,7 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
     while (itr != m_renderers.end()) {
         QSvgNode *node = *itr;
         if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode))
-            node->draw(&painter, states2);
+            node->draw(&painter, maskNodeStates);
         ++itr;
     }
 
