@@ -233,6 +233,22 @@ void QSvgNode::applyStyle(QPainter *p, QSvgExtraStates &states) const
     m_style.apply(p, this, states);
 }
 
+/*!
+    \internal
+
+    Apply the styles of all parents to the painter and the states.
+    The styles are applied from the top level node to the current node.
+    This function can be used to set the correct style for a node
+    if it's draw function is triggered out of the ordinary draw context,
+    for example the mask node, that is cross-referenced.
+*/
+void QSvgNode::applyStyleRecursive(QPainter *p, QSvgExtraStates &states) const
+{
+    if (parent())
+        parent()->applyStyleRecursive(p, states);
+    applyStyle(p, states);
+}
+
 void QSvgNode::revertStyle(QPainter *p, QSvgExtraStates &states) const
 {
     m_style.revert(p, states);
@@ -589,6 +605,16 @@ qreal QSvgNode::strokeWidth(QPainter *p)
     if (pen.style() == Qt::NoPen || pen.brush().style() == Qt::NoBrush || pen.isCosmetic())
         return 0;
     return pen.widthF();
+}
+
+void QSvgNode::initPainter(QPainter *p)
+{
+    QPen pen(Qt::NoBrush, 1, Qt::SolidLine, Qt::FlatCap, Qt::SvgMiterJoin);
+    pen.setMiterLimit(4);
+    p->setPen(pen);
+    p->setBrush(Qt::black);
+    p->setRenderHint(QPainter::Antialiasing);
+    p->setRenderHint(QPainter::SmoothPixmapTransform);
 }
 
 bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
