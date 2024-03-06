@@ -101,6 +101,7 @@ public:
 
     void appendStyleProperty(QSvgStyleProperty *prop, const QString &id);
     void applyStyle(QPainter *p, QSvgExtraStates &states) const;
+    void applyStyleRecursive(QPainter *p, QSvgExtraStates &states) const;
     void revertStyle(QPainter *p, QSvgExtraStates &states) const;
     QSvgStyleProperty *styleProperty(QSvgStyleProperty::Type type) const;
     QSvgPaintStyleProperty *styleProperty(const QString &id) const;
@@ -169,6 +170,8 @@ protected:
     mutable QSvgStyle m_style;
 
     static qreal strokeWidth(QPainter *p);
+    static void initPainter(QPainter *p);
+
 private:
     QSvgNode   *m_parent;
 
