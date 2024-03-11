@@ -210,7 +210,7 @@ public:
     const QTransform& appliedTransform() const { return m_appliedTransform; }
 
 private:
-    QImage renderPattern(QPainter *p, QSize size, qreal contentScaleX, qreal contentScaleY);
+    QImage renderPattern(QSize size, qreal contentScaleX, qreal contentScaleY);
     void calculateAppliedTransform(QTransform& worldTransform, QRectF peLocalBB, QSize imageSize);
 
 private:
