@@ -240,6 +240,10 @@ void QSvgTinyDocument::draw(QPainter *p, const QRectF &bounds)
     p->setBrush(Qt::black);
     p->setRenderHint(QPainter::Antialiasing);
     p->setRenderHint(QPainter::SmoothPixmapTransform);
+    QFont font(p->font());
+    if (font.pointSize() < 0)
+        font.setPointSizeF(font.pixelSize() * 72.0 / p->device()->logicalDpiY());
+    p->setFont(font);
     QList<QSvgNode*>::iterator itr = m_renderers.begin();
     applyStyle(p, m_states);
     while (itr != m_renderers.end()) {
