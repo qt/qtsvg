@@ -863,7 +863,7 @@ QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSv
     imageSize.setHeight(qCeil(patternBoundingBox.height() * t.m22() * m_transform.m22()));
 
     calculateAppliedTransform(t, peBoundingBox, imageSize);
-    return renderPattern(p, imageSize, contentScaleFactorX, contentScaleFactorY);
+    return renderPattern(imageSize, contentScaleFactorX, contentScaleFactorY);
 }
 
 QSvgNode::Type QSvgPattern::type() const
@@ -871,7 +871,7 @@ QSvgNode::Type QSvgPattern::type() const
     return Pattern;
 }
 
-QImage QSvgPattern::renderPattern(QPainter *p, QSize size, qreal contentScaleX, qreal contentScaleY)
+QImage QSvgPattern::renderPattern(QSize size, qreal contentScaleX, qreal contentScaleY)
 {
     if (size.isEmpty() || !qIsFinite(contentScaleX) || !qIsFinite(contentScaleY))
         return defaultPattern();
@@ -886,11 +886,10 @@ QImage QSvgPattern::renderPattern(QPainter *p, QSize size, qreal contentScaleX, 
 
     // Draw the pattern using our QPainter.
     QPainter patternPainter(&pattern);
-    patternPainter.setRenderHints(p->renderHints());
-    QPen pen(Qt::NoBrush, 1, Qt::SolidLine, Qt::FlatCap, Qt::SvgMiterJoin);
-    pen.setMiterLimit(4);
-    patternPainter.setPen(pen);
-    patternPainter.setBrush(Qt::black);
+    QSvgExtraStates patternStates;
+    initPainter(&patternPainter);
+    applyStyleRecursive(&patternPainter, patternStates);
+    patternPainter.resetTransform();
 
     // According to the <pattern> definition, if viewBox exists then patternContentUnits
     // is ignored
@@ -901,10 +900,8 @@ QImage QSvgPattern::renderPattern(QPainter *p, QSize size, qreal contentScaleX, 
 
     // Draw all this Pattern children nodes with our QPainter,
     // no need to use any Extra States
-    QSvgExtraStates states2;
-    for (QSvgNode *node : m_renderers) {
-        node->draw(&patternPainter, states2);
-    }
+    for (QSvgNode *node : m_renderers)
+        node->draw(&patternPainter, patternStates);
 
     return pattern;
 }
