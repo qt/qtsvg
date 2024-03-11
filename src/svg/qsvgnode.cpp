@@ -615,6 +615,10 @@ void QSvgNode::initPainter(QPainter *p)
     p->setBrush(Qt::black);
     p->setRenderHint(QPainter::Antialiasing);
     p->setRenderHint(QPainter::SmoothPixmapTransform);
+    QFont font(p->font());
+    if (font.pointSize() < 0)
+        font.setPointSizeF(font.pixelSize() * 72.0 / p->device()->logicalDpiY());
+    p->setFont(font);
 }
 
 bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
