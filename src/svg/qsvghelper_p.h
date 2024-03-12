@@ -76,13 +76,13 @@ public:
         if (units == QtSvg::UnitTypes::objectBoundingBox)
             result.setX(localRect.x() + x() * localRect.width());
         else if (m_unitX == QtSvg::UnitTypes::objectBoundingBox)
-            result.setX(canvasRect.x() + x() * canvasRect.width());
+            result.setX(localRect.x() + x() * canvasRect.width());
         else
             result.setX(x());
         if (units == QtSvg::UnitTypes::objectBoundingBox)
             result.setY(localRect.y() + y() * localRect.height());
         else if (m_unitY == QtSvg::UnitTypes::objectBoundingBox)
-            result.setY(canvasRect.y() + y() * canvasRect.height());
+            result.setY(localRect.y() + y() * canvasRect.height());
         else
             result.setY(y());
         if (units == QtSvg::UnitTypes::objectBoundingBox)
