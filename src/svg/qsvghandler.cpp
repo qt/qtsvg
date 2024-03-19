@@ -1231,10 +1231,24 @@ static void parsePen(QSvgNode *node,
                 QString dashArray  = attributes.strokeDashArray.toString();
                 const QChar *s = dashArray.constData();
                 QList<qreal> dashes = parseNumbersList(s);
-                // if the dash count is odd the dashes should be duplicated
-                if ((dashes.size() & 1) != 0)
-                    dashes << QList<qreal>(dashes);
-                prop->setDashArray(dashes);
+                bool allZeroes = true;
+                for (qreal dash : dashes) {
+                    if (dash != 0.0) {
+                        allZeroes = false;
+                        break;
+                    }
+                }
+
+                // if the stroke dash array contains only zeros,
+                // force drawing of solid line.
+                if (allZeroes == false) {
+                    // if the dash count is odd the dashes should be duplicated
+                    if ((dashes.size() & 1) != 0)
+                        dashes << QList<qreal>(dashes);
+                    prop->setDashArray(dashes);
+                } else {
+                    prop->setDashArrayNone();
+                }
             }
         }
 
