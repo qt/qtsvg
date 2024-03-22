@@ -54,6 +54,8 @@ protected:
     virtual void visitDefsNodeEnd(const QSvgDefs *node)  { visitStructureNodeEnd(node); };
     virtual bool visitSwitchNodeStart(const QSvgSwitch *node) { return visitStructureNodeStart(node); }
     virtual void visitSwitchNodeEnd(const QSvgSwitch *node)  { visitStructureNodeEnd(node); };
+    virtual bool visitMaskNodeStart(const QSvgMask *node) { return visitStructureNodeStart(node); }
+    virtual void visitMaskNodeEnd(const QSvgMask *node) { visitStructureNodeEnd(node); }
 };
 
 QT_END_NAMESPACE

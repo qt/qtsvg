@@ -194,6 +194,17 @@ public:
     Type type() const override;
     QImage createMask(QPainter *p, QSvgExtraStates &states, QSvgNode *targetNode, QRectF *globalRect) const;
     QImage createMask(QPainter *p, QSvgExtraStates &states, const QRectF &localRect, QRectF *globalRect) const;
+
+    QSvgRectF rect() const
+    {
+        return m_rect;
+    }
+
+    QtSvg::UnitTypes contentUnits() const
+    {
+        return m_contentUnits;
+    }
+
 private:
     QSvgRectF m_rect;
     QtSvg::UnitTypes m_contentUnits;
