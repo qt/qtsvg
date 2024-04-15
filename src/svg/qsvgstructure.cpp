@@ -52,6 +52,11 @@ QSvgNode::Type QSvgG::type() const
     return Group;
 }
 
+bool QSvgG::requiresGroupRendering() const
+{
+    return m_renderers.count() > 1;
+}
+
 QSvgStructureNode::QSvgStructureNode(QSvgNode *parent)
     :QSvgNode(parent)
 {
@@ -101,6 +106,20 @@ QSvgSymbolLike::QSvgSymbolLike(QSvgNode *parent, QRectF bounds, QRectF viewBox, 
     , m_overflow(overflow)
 {
 
+}
+
+QRectF QSvgSymbolLike::decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const
+{
+    p->save();
+    setPainterToRectAndAdjustment(p);
+    QRectF rect = internalBounds(p, states);
+    p->restore();
+    return rect;
+}
+
+bool QSvgSymbolLike::requiresGroupRendering() const
+{
+    return m_renderers.count() > 1;
 }
 
 void QSvgSymbolLike::setPainterToRectAndAdjustment(QPainter *p) const
@@ -231,8 +250,6 @@ void QSvgMarker::drawCommand(QPainter *p, QSvgExtraStates &states)
     QList<QSvgNode*>::iterator itr = m_renderers.begin();
 
     p->save();
-    applyStyle(p, states);
-
     setPainterToRectAndAdjustment(p);
 
     while (itr != m_renderers.end()) {
@@ -241,7 +258,6 @@ void QSvgMarker::drawCommand(QPainter *p, QSvgExtraStates &states)
             node->draw(p, states);
         ++itr;
     }
-    revertStyle(p, states);
     p->restore();
 }
 
@@ -378,8 +394,27 @@ QList<PositionMarkerPair> markersForNode(const QSvgNode *node)
 
 void QSvgMarker::drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates &states)
 {
+    drawHelper(node, p, states);
+}
+
+QRectF QSvgMarker::markersBoundsForNode(const QSvgNode *node, QPainter *p, QSvgExtraStates &states)
+{
+    QRectF bounds;
+    drawHelper(node, p, states, &bounds);
+    return bounds;
+}
+
+QSvgNode::Type QSvgMarker::type() const
+{
+    return Marker;
+}
+
+void QSvgMarker::drawHelper(const QSvgNode *node, QPainter *p,
+                            QSvgExtraStates &states, QRectF *boundingRect)
+{
     QScopedValueRollback<bool> inUseGuard(states.inUse, true);
 
+    const bool isPainting = (boundingRect == nullptr);
     const auto markers = markersForNode(node);
     for (auto &i : markers) {
         QSvgMarker *markNode = static_cast<QSvgMarker*>(node->document()->namedNode(i.markerId));
@@ -394,7 +429,7 @@ void QSvgMarker::drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates
             p->rotate(-i.angle);
             if (i.isStartNode && markNode->orientation()
                         == QSvgMarker::Orientation::AutoStartReverse) {
-                p->rotate(-180);
+                p->scale(-1, -1);
             }
         }
         QRectF oldRect = markNode->m_rect;
@@ -402,15 +437,18 @@ void QSvgMarker::drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates
             markNode->m_rect.setWidth(markNode->m_rect.width() * p->pen().widthF());
             markNode->m_rect.setHeight(markNode->m_rect.height() * p->pen().widthF());
         }
-        markNode->draw(p, states);
+        if (isPainting)
+            markNode->draw(p, states);
+
+        if (boundingRect) {
+            QTransform xf = p->transform();
+            p->resetTransform();
+            *boundingRect |=  xf.mapRect(markNode->decoratedInternalBounds(p, states));
+        }
+
         markNode->m_rect = oldRect;
         p->restore();
     }
-}
-
-QSvgNode::Type QSvgMarker::type() const
-{
-    return Marker;
 }
 
 QImage QSvgFilterContainer::applyFilter(const QImage &buffer, QPainter *p, const QRectF &bounds) const
@@ -618,6 +656,17 @@ QRectF QSvgStructureNode::internalBounds(QPainter *p, QSvgExtraStates &states) c
         QScopedValueRollback<bool> guard(m_recursing, true);
         for (QSvgNode *node : std::as_const(m_renderers))
             bounds |= node->bounds(p, states);
+    }
+    return bounds;
+}
+
+QRectF QSvgStructureNode::decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const
+{
+    QRectF bounds;
+    if (!m_recursing) {
+        QScopedValueRollback<bool> guard(m_recursing, true);
+        for (QSvgNode *node : std::as_const(m_renderers))
+            bounds |= node->decoratedBounds(p, states);
     }
     return bounds;
 }

@@ -47,6 +47,7 @@ public:
     Type type() const override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF rect() const { return m_bounds; }
 private:
     QRectF m_bounds;
@@ -87,8 +88,11 @@ public:
     Type type() const override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    bool requiresGroupRendering() const override;
     QLineF line() const { return m_line; }
 private:
+    QRectF internalBounds(QPainter *p, QSvgExtraStates &states, BoundsMode mode) const;
     QLineF m_line;
 };
 
@@ -101,6 +105,8 @@ public:
     Type type() const override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    bool requiresGroupRendering() const override;
     const QPainterPath &path() const { return m_path; }
 private:
     QPainterPath m_path;
@@ -115,8 +121,11 @@ public:
     Type type() const override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    bool requiresGroupRendering() const override;
     const QPolygonF &polygon() const { return m_poly; }
 private:
+    QRectF internalBounds(QPainter *p, QSvgExtraStates &states, BoundsMode mode) const;
     QPolygonF m_poly;
 };
 
@@ -129,8 +138,11 @@ public:
     Type type() const override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    bool requiresGroupRendering() const override;
     const QPolygonF &polygon() const { return m_poly; }
 private:
+    QRectF internalBounds(QPainter *p, QSvgExtraStates &states, BoundsMode mode) const;
     QPolygonF m_poly;
 };
 
@@ -143,9 +155,11 @@ public:
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF rect() const { return m_rect; }
     QPointF radius() const { return { m_rx, m_ry }; }
 private:
+    QRectF internalBounds(QPainter *p, QSvgExtraStates &states, BoundsMode mode) const;
     QRectF m_rect;
     qreal m_rx, m_ry;
 };
@@ -230,6 +244,7 @@ public:
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
     bool isResolved() const { return m_link != nullptr; }
     QString linkId() const { return m_linkId; }
     void setLink(QSvgNode *link) { m_link = link; }

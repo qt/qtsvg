@@ -36,8 +36,25 @@ void QSvgFont::addGlyph(QChar unicode, const QPainterPath &path, qreal horizAdvX
 }
 
 
-void QSvgFont::draw(QPainter *p, const QPointF &point, const QString &str, qreal pixelSize, Qt::Alignment alignment) const
+void QSvgFont::draw(QPainter *p, const QPointF &point, const QString &str,
+                    qreal pixelSize, Qt::Alignment alignment) const
 {
+    draw_helper(p, point, str, pixelSize, alignment, nullptr);
+}
+
+QRectF QSvgFont::boundingRect(QPainter *p, const QPointF &point, const QString &str,
+                              qreal pixelSize, Qt::Alignment alignment) const
+{
+    QRectF bounds;
+    draw_helper(p, point, str, pixelSize, alignment, &bounds);
+    return bounds;
+}
+
+void QSvgFont::draw_helper(QPainter *p, const QPointF &point, const QString &str, qreal pixelSize,
+                           Qt::Alignment alignment, QRectF *boundingRect) const
+{
+    const bool isPainting = (boundingRect == nullptr);
+
     p->save();
     p->translate(point);
     p->scale(pixelSize / m_unitsPerEm, -pixelSize / m_unitsPerEm);
@@ -80,7 +97,19 @@ void QSvgFont::draw(QPainter *p, const QPointF &point, const QString &str, qreal
             if (!m_glyphs.contains(unicode))
                 continue;
         }
-        p->drawPath(m_glyphs[unicode].m_path);
+
+        if (isPainting)
+            p->drawPath(m_glyphs[unicode].m_path);
+
+        if (boundingRect) {
+            QPainterPathStroker stroker;
+            stroker.setWidth(penWidth);
+            stroker.setJoinStyle(p->pen().joinStyle());
+            stroker.setMiterLimit(p->pen().miterLimit());
+            QPainterPath stroke = stroker.createStroke(m_glyphs[unicode].m_path);
+            *boundingRect |= p->transform().map(stroke).boundingRect();
+        }
+
         p->translate(m_glyphs[unicode].m_horizAdvX, 0);
     }
 

@@ -67,11 +67,27 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
             QRectF boundsRect;
             QImage mask = static_cast<QSvgMask*>(maskNode)->createMask(p, states, this, &boundsRect);
             drawWithMask(p, states, mask, boundsRect.toRect());
+        } else if (!qFuzzyCompare(p->opacity(), 1.0) && requiresGroupRendering()) {
+            QTransform xf = p->transform();
+            p->resetTransform();
+
+            QRectF localRect = decoratedInternalBounds(p, states);
+            // adding safety border needed because of the antialiazing effects
+            QRectF boundsRect = xf.mapRect(localRect);
+            const int deltaX = boundsRect.width() * 0.1;
+            const int deltaY = boundsRect.height() * 0.1;
+            boundsRect = boundsRect.adjusted(-deltaX, -deltaY, deltaX, deltaY);
+
+            p->setTransform(xf);
+
+            QImage proxy = drawIntoBuffer(p, states, boundsRect.toAlignedRect());
+            applyBufferToCanvas(p, proxy);
         } else {
             if (separateFillStroke())
                 fillThenStroke(p, states);
             else
                 drawCommand(p, states);
+
         }
         revertStyle(p, states);
     }
@@ -488,6 +504,19 @@ QRectF QSvgNode::bounds(QPainter *p, QSvgExtraStates &states) const
     return rect;
 }
 
+QRectF QSvgNode::decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const
+{
+    return filterRegion(internalBounds(p, states));
+}
+
+QRectF QSvgNode::decoratedBounds(QPainter *p, QSvgExtraStates &states) const
+{
+    applyStyle(p, states);
+    QRectF rect = decoratedInternalBounds(p, states);
+    revertStyle(p, states);
+    return rect;
+}
+
 void QSvgNode::setNodeId(const QString &i)
 {
     m_id = i;
@@ -590,6 +619,11 @@ bool QSvgNode::hasAnyMarker() const
     return hasMarkerStart() || hasMarkerMid() || hasMarkerEnd();
 }
 
+bool QSvgNode::requiresGroupRendering() const
+{
+    return false;
+}
+
 void QSvgNode::setDisplayMode(DisplayMode mode)
 {
     m_displayMode = mode;
@@ -623,6 +657,19 @@ void QSvgNode::initPainter(QPainter *p)
     }
 }
 
+QRectF QSvgNode::boundsOnStroke(QPainter *p, const QPainterPath &path,
+                                qreal width, BoundsMode mode)
+{
+    QPainterPathStroker stroker;
+    stroker.setWidth(width);
+    if (mode == BoundsMode::IncludeMiterLimit) {
+        stroker.setJoinStyle(p->pen().joinStyle());
+        stroker.setMiterLimit(p->pen().miterLimit());
+    }
+    QPainterPath stroke = stroker.createStroke(path);
+    return p->transform().map(stroke).boundingRect();
+}
+
 bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
 {
     if (m_displayMode == DisplayMode::NoneMode)
@@ -639,6 +686,18 @@ bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
                              << "Enable AssumeTrustedSource in QSvgHandler or set QT_SVG_DEFAULT_OPTIONS=2 to disable this check.";
         return false;
     }
+}
+
+QRectF QSvgNode::filterRegion(QRectF bounds) const
+{
+    QSvgFilterContainer *filterNode = hasFilter()
+            ? static_cast<QSvgFilterContainer*>(document()->namedNode(filterId()))
+            : nullptr;
+
+    if (filterNode && filterNode->type() == QSvgNode::Filter && filterNode->supported())
+        return filterNode->filterRegion(bounds);
+
+    return bounds;
 }
 
 QT_END_NAMESPACE
