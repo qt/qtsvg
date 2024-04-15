@@ -73,7 +73,9 @@ public:
         : QObjectPrivate(),
           render(0), timer(0),
           fps(30)
-    {}
+    {
+        options = defaultOptions();
+    }
 
     ~QSvgRendererPrivate()
     {
@@ -100,6 +102,14 @@ public:
     }
 
     static void callRepaintNeeded(QSvgRenderer *const q);
+
+    static QtSvg::Options defaultOptions()
+    {
+        static bool envOk = false;
+        static QtSvg::Options envOpts = QtSvg::Options::fromInt(
+                qEnvironmentVariableIntValue("QT_SVG_DEFAULT_OPTIONS", &envOk));
+        return envOk ? envOpts : QtSvg::Options{};
+    }
 
     QSvgTinyDocument *render;
     QTimer *timer;
