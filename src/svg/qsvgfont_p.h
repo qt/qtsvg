@@ -48,12 +48,20 @@ public:
 
     void addGlyph(QChar unicode, const QPainterPath &path, qreal horizAdvX = -1);
 
-    void draw(QPainter *p, const QPointF &point, const QString &str, qreal pixelSize, Qt::Alignment alignment) const;
+    void draw(QPainter *p, const QPointF &point, const QString &str,
+              qreal pixelSize, Qt::Alignment alignment) const;
+    QRectF boundingRect(QPainter *p, const QPointF &point, const QString &str,
+                        qreal pixelSize, Qt::Alignment alignment) const;
+
 public:
     QString m_familyName;
     qreal m_unitsPerEm = DEFAULT_UNITS_PER_EM;
     qreal m_horizAdvX;
     QHash<QChar, QSvgGlyph> m_glyphs;
+
+private:
+    void draw_helper(QPainter *p, const QPointF &point, const QString &str, qreal pixelSize,
+                     Qt::Alignment alignment, QRectF *boundingRect = nullptr) const;
 };
 
 QT_END_NAMESPACE

@@ -35,6 +35,7 @@ public:
     QSvgNode *scopeNode(const QString &id) const;
     void addChild(QSvgNode *child, const QString &id);
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QSvgNode *previousSiblingNode(QSvgNode *n) const;
     QList<QSvgNode*> renderers() const { return m_renderers; }
 protected:
@@ -51,6 +52,7 @@ public:
     void drawCommand(QPainter *, QSvgExtraStates &) override;
     bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const override;
     Type type() const override;
+    bool requiresGroupRendering() const override;
 };
 
 class Q_SVG_EXPORT QSvgDefs : public QSvgStructureNode
@@ -95,6 +97,8 @@ public:
     QSvgSymbolLike(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF refP,
                    QSvgSymbolLike::PreserveAspectRatios pAspectRatios, QSvgSymbolLike::Overflow overflow);
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
+    QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
+    bool requiresGroupRendering() const override;
 protected:
     void setPainterToRectAndAdjustment(QPainter *p) const;
 protected:
@@ -134,6 +138,8 @@ public:
                Orientation orientation, qreal orientationAngle, MarkerUnits markerUnits);
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     static void drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates &states);
+    static QRectF markersBoundsForNode(const QSvgNode *node, QPainter *p, QSvgExtraStates &states);
+
     Orientation orientation() const {
         return m_orientation;
     }
@@ -144,7 +150,11 @@ public:
         return m_markerUnits;
     }
     Type type() const override;
+
 private:
+    static void drawHelper(const QSvgNode *node, QPainter *p,
+                           QSvgExtraStates &states, QRectF *boundingRect = nullptr);
+
     Orientation m_orientation;
     qreal m_orientationAngle;
     MarkerUnits m_markerUnits;
