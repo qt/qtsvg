@@ -145,13 +145,6 @@ public:
     }
     Type type() const override;
 private:
-    struct PositionMarkerPair {
-        qreal x;
-        qreal y;
-        qreal angle;
-        QString markerId;
-        bool isStartNode = false;
-    };
     Orientation m_orientation;
     qreal m_orientationAngle;
     MarkerUnits m_markerUnits;
