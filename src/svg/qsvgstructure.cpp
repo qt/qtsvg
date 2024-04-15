@@ -245,9 +245,20 @@ void QSvgMarker::drawCommand(QPainter *p, QSvgExtraStates &states)
     p->restore();
 }
 
-void QSvgMarker::drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates &states)
+namespace {
+
+struct PositionMarkerPair {
+    qreal x;
+    qreal y;
+    qreal angle;
+    QString markerId;
+    bool isStartNode = false;
+};
+
+QList<PositionMarkerPair> markersForNode(const QSvgNode *node)
 {
-    QScopedValueRollback<bool> inUseGuard(states.inUse, true);
+    if (!node->hasAnyMarker())
+        return {};
 
     auto getMeanAngle = [](QPointF p0, QPointF p1, QPointF p2) -> qreal {
         QPointF t1 = p1 - p0;
@@ -266,112 +277,134 @@ void QSvgMarker::drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates
         return -atan2(tangent.y(), tangent.x()) / M_PI * 180.;
     };
 
-    if (node->hasAnyMarker()) {
-        QList<PositionMarkerPair> marks;
-        if (node->type() == Line) {
-            QSvgLine *line = static_cast<QSvgLine*>(node);
-            if (!line)
-                return;
-            if (node->hasMarkerStart())
-                marks << PositionMarkerPair { line->line().p1().x(), line->line().p1().y(),
-                                              line->line().angle(), line->markerStartId(),
-                                              true};
-            if (node->hasMarkerEnd())
-                marks << PositionMarkerPair { line->line().p2().x(), line->line().p2().y(),
-                                              line->line().angle(), line->markerEndId() };
-        } else if (node->type() == Polyline || node->type() == Polygon) {
-            QSvgPolyline *polyline = static_cast<QSvgPolyline*>(node);
-            QSvgPolygon *polygon = static_cast<QSvgPolygon*>(node);
+    QList<PositionMarkerPair> markers;
 
-            const QPolygonF &polyData = (node->type() == Polyline) ? polyline->polygon() : polygon->polygon();
+    switch (node->type()) {
+    case QSvgNode::Line: {
+        const QSvgLine *line = static_cast<const QSvgLine*>(node);
+        if (node->hasMarkerStart())
+            markers << PositionMarkerPair { line->line().p1().x(), line->line().p1().y(),
+                                            line->line().angle(), line->markerStartId(),
+                                            true};
+        if (node->hasMarkerEnd())
+            markers << PositionMarkerPair { line->line().p2().x(), line->line().p2().y(),
+                                            line->line().angle(), line->markerEndId() };
+        break;
+    }
+    case QSvgNode::Polyline:
+    case QSvgNode::Polygon: {
+        const QSvgPolyline *polyline = static_cast<const QSvgPolyline*>(node);
+        const QSvgPolygon *polygon = static_cast<const QSvgPolygon*>(node);
 
-            if (node->hasMarkerStart() && polyData.size() > 1) {
-                QLineF line(polyData.at(0), polyData.at(1));
-                marks << PositionMarkerPair { line.p1().x(),
-                                              line.p1().y(),
-                                              line.angle(),
-                                              node->markerStartId(),
-                                              true };
+        const QPolygonF &polyData = (node->type() == QSvgNode::Polyline)
+                ? polyline->polygon()
+                : polygon->polygon();
+
+        if (node->hasMarkerStart() && polyData.size() > 1) {
+            QLineF line(polyData.at(0), polyData.at(1));
+            markers << PositionMarkerPair { line.p1().x(),
+                                            line.p1().y(),
+                                            line.angle(),
+                                            node->markerStartId(),
+                                            true };
+        }
+        if (node->hasMarkerMid()) {
+            for (int i = 1; i < polyData.size() - 1; i++) {
+                QPointF p0 = polyData.at(i - 1);
+                QPointF p1 = polyData.at(i);
+                QPointF p2 = polyData.at(i + 1);
+
+                markers << PositionMarkerPair { p1.x(),
+                                                p1.y(),
+                                                getMeanAngle(p0, p1, p2),
+                                                node->markerStartId() };
             }
-            if (node->hasMarkerMid()) {
-                for (int i = 1; i < polyData.size() - 1; i++) {
-                    QPointF p0 = polyData.at(i-1);
-                    QPointF p1 = polyData.at(i);
-                    QPointF p2 = polyData.at(i+1);
+        }
+        if (node->hasMarkerEnd() && polyData.size() > 1) {
+            QLineF line(polyData.at(polyData.size() - 1), polyData.last());
+            markers << PositionMarkerPair { line.p2().x(),
+                                            line.p2().y(),
+                                            line.angle(),
+                                            node->markerEndId() };
+        }
+        break;
+    }
+    case QSvgNode::Path: {
+        const QSvgPath *path = static_cast<const QSvgPath*>(node);
+        if (node->hasMarkerStart())
+            markers << PositionMarkerPair { path->path().pointAtPercent(0.).x(),
+                                            path->path().pointAtPercent(0.).y(),
+                                            path->path().angleAtPercent(0.),
+                                            path->markerStartId(),
+                                            true };
+        if (node->hasMarkerMid()) {
+            for (int i = 1; i < path->path().elementCount() - 1; i++) {
+                if (path->path().elementAt(i).type == QPainterPath::MoveToElement)
+                    continue;
+                if (path->path().elementAt(i).type == QPainterPath::CurveToElement)
+                    continue;
+                if (( path->path().elementAt(i).type == QPainterPath::CurveToDataElement &&
+                      path->path().elementAt(i + 1).type != QPainterPath::CurveToDataElement ) ||
+                      path->path().elementAt(i).type == QPainterPath::LineToElement) {
 
-                    marks << PositionMarkerPair { p1.x(),
-                                                  p1.y(),
-                                                  getMeanAngle(p0, p1, p2),
-                                                  node->markerStartId() };
+                    QPointF p0(path->path().elementAt(i - 1).x, path->path().elementAt(i - 1).y);
+                    QPointF p1(path->path().elementAt(i).x, path->path().elementAt(i).y);
+                    QPointF p2(path->path().elementAt(i + 1).x, path->path().elementAt(i + 1).y);
+
+                    markers << PositionMarkerPair { p1.x(),
+                                                    p1.y(),
+                                                    getMeanAngle(p0, p1, p2),
+                                                    path->markerMidId() };
                 }
             }
-            if (node->hasMarkerEnd() && polyData.size() > 1) {
-                QLineF line(polyData.at(polyData.size()-1), polyData.last());
-                marks << PositionMarkerPair { line.p2().x(),
-                                              line.p2().y(),
-                                              line.angle(),
-                                              node->markerEndId() };
-            }
-        } else if (node->type() == Path) {
-            QSvgPath *path = static_cast<QSvgPath*>(node);
-            if (!path)
-                return;
-            if (node->hasMarkerStart())
-                marks << PositionMarkerPair { path->path().pointAtPercent(0.).x(),
-                                              path->path().pointAtPercent(0.).y(),
-                                              path->path().angleAtPercent(0.),
-                                              path->markerStartId(),
-                                              true };
-            if (node->hasMarkerMid()) {
-                for (int i = 1; i < path->path().elementCount() - 1; i++) {
-                    if (path->path().elementAt(i).type == QPainterPath::MoveToElement)
-                        continue;
-                    if (path->path().elementAt(i).type == QPainterPath::CurveToElement)
-                        continue;
-                    if (( path->path().elementAt(i).type == QPainterPath::CurveToDataElement &&
-                        path->path().elementAt(i+1).type != QPainterPath::CurveToDataElement ) ||
-                        path->path().elementAt(i).type == QPainterPath::LineToElement) {
-
-                        QPointF p0(path->path().elementAt(i-1).x, path->path().elementAt(i-1).y);
-                        QPointF p1(path->path().elementAt(i).x, path->path().elementAt(i).y);
-                        QPointF p2(path->path().elementAt(i+1).x, path->path().elementAt(i+1).y);
-
-                        marks << PositionMarkerPair { p1.x(),
-                                                      p1.y(),
-                                                      getMeanAngle(p0, p1, p2),
-                                                      path->markerMidId() };
-                    }
-                }
-            }
-            if (node->hasMarkerEnd())
-                marks << PositionMarkerPair { path->path().pointAtPercent(1.).x(),
-                                              path->path().pointAtPercent(1.).y(),
-                                              path->path().angleAtPercent(1.),
-                                              path->markerEndId() };
         }
-        for (auto &i : marks) {
-            QSvgMarker *markNode = static_cast<QSvgMarker*>(node->document()->namedNode(i.markerId));
-            if (!markNode) {
-                continue;
+        if (node->hasMarkerEnd())
+            markers << PositionMarkerPair { path->path().pointAtPercent(1.).x(),
+                                            path->path().pointAtPercent(1.).y(),
+                                            path->path().angleAtPercent(1.),
+                                            path->markerEndId() };
+        break;
+    }
+    default:
+        Q_UNREACHABLE();
+        break;
+    }
+
+    return markers;
+}
+
+} // anonymous namespace
+
+
+void QSvgMarker::drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates &states)
+{
+    QScopedValueRollback<bool> inUseGuard(states.inUse, true);
+
+    const auto markers = markersForNode(node);
+    for (auto &i : markers) {
+        QSvgMarker *markNode = static_cast<QSvgMarker*>(node->document()->namedNode(i.markerId));
+        if (!markNode)
+            continue;
+
+        p->save();
+        p->translate(i.x, i.y);
+        if (markNode->orientation() == QSvgMarker::Orientation::Value) {
+            p->rotate(markNode->orientationAngle());
+        } else {
+            p->rotate(-i.angle);
+            if (i.isStartNode && markNode->orientation()
+                        == QSvgMarker::Orientation::AutoStartReverse) {
+                p->rotate(-180);
             }
-            p->save();
-            p->translate(i.x, i.y);
-            if (markNode->orientation() == QSvgMarker::Orientation::Value)
-                p->rotate(markNode->orientationAngle());
-            else {
-                p->rotate(-i.angle);
-                if (i.isStartNode && markNode->orientation() == QSvgMarker::Orientation::AutoStartReverse)
-                    p->rotate(-180);
-            }
-            QRectF oldRect = markNode->m_rect;
-            if (markNode->markerUnits() == QSvgMarker::MarkerUnits::StrokeWidth) {
-                markNode->m_rect.setWidth(markNode->m_rect.width() * p->pen().widthF());
-                markNode->m_rect.setHeight(markNode->m_rect.height() * p->pen().widthF());
-            }
-            markNode->draw(p, states);
-            markNode->m_rect = oldRect;
-            p->restore();
         }
+        QRectF oldRect = markNode->m_rect;
+        if (markNode->markerUnits() == QSvgMarker::MarkerUnits::StrokeWidth) {
+            markNode->m_rect.setWidth(markNode->m_rect.width() * p->pen().widthF());
+            markNode->m_rect.setHeight(markNode->m_rect.height() * p->pen().widthF());
+        }
+        markNode->draw(p, states);
+        markNode->m_rect = oldRect;
+        p->restore();
     }
 }
 
