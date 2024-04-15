@@ -385,7 +385,12 @@ QImage QSvgFilterContainer::applyFilter(QSvgNode *item, const QImage &buffer, QP
     if (filterBoundsGlobRel.isEmpty())
         return buffer;
 
-    QImage proxy = buffer.copy(filterBoundsGlobRel);
+    QImage proxy;
+    if (!QImageIOHandler::allocateImage(filterBoundsGlobRel.size(), buffer.format(), &proxy)) {
+        qCWarning(lcSvgDraw) << "The requested filter is too big, ignoring";
+        return buffer;
+    }
+    proxy = buffer.copy(filterBoundsGlobRel);
     proxy.setOffset(filterBoundsGlob.topLeft());
     if (proxy.isNull())
         return buffer;
