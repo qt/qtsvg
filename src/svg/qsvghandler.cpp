@@ -3148,6 +3148,10 @@ static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes
         x = parseLength(xStr.toString(), &type, handler);
         if (type != QSvgHandler::LT_PT)
             x = convertToPixels(x, true, type);
+        if (type == QSvgHandler::LT_PERCENT) {
+            x /= 100.;
+            rect->setUnitX(QtSvg::UnitTypes::objectBoundingBox);
+        }
         rect->setX(x);
     } else {
         rect->setX(-0.1);
@@ -3159,6 +3163,10 @@ static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes
         y = parseLength(yStr.toString(), &type, handler);
         if (type != QSvgHandler::LT_PT)
             y = convertToPixels(y, false, type);
+        if (type == QSvgHandler::LT_PERCENT) {
+            y /= 100.;
+            rect->setUnitX(QtSvg::UnitTypes::objectBoundingBox);
+        }
         rect->setY(y);
     } else {
         rect->setY(-0.1);
@@ -3170,6 +3178,10 @@ static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes
         width = parseLength(widthStr.toString(), &type, handler);
         if (type != QSvgHandler::LT_PT)
             width = convertToPixels(width, true, type);
+        if (type == QSvgHandler::LT_PERCENT) {
+            width /= 100.;
+            rect->setUnitX(QtSvg::UnitTypes::objectBoundingBox);
+        }
         rect->setWidth(width);
     } else {
         rect->setWidth(1.2);
@@ -3181,6 +3193,10 @@ static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes
         height = parseLength(heightStr.toString(), &type, handler);
         if (type != QSvgHandler::LT_PT)
             height = convertToPixels(height, false, type);
+        if (type == QSvgHandler::LT_PERCENT) {
+            height /= 100.;
+            rect->setUnitX(QtSvg::UnitTypes::objectBoundingBox);
+        }
         rect->setHeight(height);
     } else {
         rect->setHeight(1.2);
