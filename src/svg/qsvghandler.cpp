@@ -2869,6 +2869,12 @@ static QSvgNode *createImageNode(QSvgNode *parent,
     }
 
     QImage image;
+    enum {
+        NotLoaded,
+        LoadedFromData,
+        LoadedFromFile
+    } filenameType = NotLoaded;
+
     if (filename.startsWith(QLatin1String("data"))) {
         int idx = filename.lastIndexOf(QLatin1String("base64,"));
         if (idx != -1) {
@@ -2876,6 +2882,7 @@ static QSvgNode *createImageNode(QSvgNode *parent,
             const QString dataStr = filename.mid(idx);
             QByteArray data = QByteArray::fromBase64(dataStr.toLatin1());
             image = QImage::fromData(data);
+            filenameType = LoadedFromData;
         }
     }
 
@@ -2889,8 +2896,10 @@ static QSvgNode *createImageNode(QSvgNode *parent,
             }
         }
 
-        if (handler->trustedSourceMode() || !QImageReader::imageFormat(filename).startsWith("svg"))
+        if (handler->trustedSourceMode() || !QImageReader::imageFormat(filename).startsWith("svg")) {
             image = QImage(filename);
+            filenameType = LoadedFromFile;
+        }
     }
 
     if (image.isNull()) {
@@ -2903,6 +2912,7 @@ static QSvgNode *createImageNode(QSvgNode *parent,
 
     QSvgNode *img = new QSvgImage(parent,
                                   image,
+                                  filenameType == LoadedFromFile ? filename : QString{},
                                   QRectF(nx,
                                          ny,
                                          nwidth,

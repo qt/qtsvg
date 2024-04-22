@@ -69,10 +69,14 @@ bool QSvgEllipse::separateFillStroke() const
     return true;
 }
 
-QSvgImage::QSvgImage(QSvgNode *parent, const QImage &image,
+QSvgImage::QSvgImage(QSvgNode *parent,
+                     const QImage &image,
+                     const QString &filename,
                      const QRectF &bounds)
-    : QSvgNode(parent), m_image(image),
-      m_bounds(bounds)
+    : QSvgNode(parent)
+    , m_filename(filename)
+    , m_image(image)
+    , m_bounds(bounds)
 {
     if (m_bounds.width() == 0.0)
         m_bounds.setWidth(static_cast<qreal>(m_image.width()));

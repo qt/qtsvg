@@ -59,7 +59,9 @@ public:
 class Q_SVG_EXPORT QSvgImage : public QSvgNode
 {
 public:
-    QSvgImage(QSvgNode *parent, const QImage &image,
+    QSvgImage(QSvgNode *parent,
+              const QImage &image,
+              const QString &filename,
               const QRectF &bounds);
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
@@ -67,7 +69,9 @@ public:
 
     QRectF rect() const { return m_bounds; }
     const QImage &image() const { return m_image; }
+    QString filename() const { return m_filename; }
 private:
+    QString m_filename;
     QImage m_image;
     QRectF m_bounds;
 };
