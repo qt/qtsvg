@@ -2876,10 +2876,10 @@ static QSvgNode *createImageNode(QSvgNode *parent,
             const QString dataStr = filename.mid(idx);
             QByteArray data = QByteArray::fromBase64(dataStr.toLatin1());
             image = QImage::fromData(data);
-        } else {
-            qCDebug(lcSvgHandler) << "QSvgHandler::createImageNode: Unrecognized inline image format!";
         }
-    } else {
+    }
+
+    if (image.isNull()) {
         const auto *file = qobject_cast<QFile *>(handler->device());
         if (file) {
             QUrl url(filename);
