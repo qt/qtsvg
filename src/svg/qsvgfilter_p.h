@@ -178,7 +178,15 @@ private:
     QColor m_color;
 };
 
-
+class Q_SVG_EXPORT QSvgFeUnsupported : public QSvgFeFilterPrimitive
+{
+public:
+    QSvgFeUnsupported(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect);
+    Type type() const override;
+    QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
+                 QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
+                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const override;
+};
 
 QT_END_NAMESPACE
 

@@ -44,15 +44,16 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
     if (shouldDrawNode(p, states)) {
         applyStyle(p, states);
         QSvgNode *maskNode = this->hasMask() ? document()->namedNode(this->maskId()) : nullptr;
-        QSvgNode *filterNode = this->hasFilter() ? document()->namedNode(this->filterId()) : nullptr;
-        if (filterNode && filterNode->type() == QSvgNode::Filter) {
+        QSvgFilterContainer *filterNode = this->hasFilter() ? static_cast<QSvgFilterContainer*>(document()->namedNode(this->filterId()))
+                                                            : nullptr;
+        if (filterNode && filterNode->supported()) {
             QTransform xf = p->transform();
             p->resetTransform();
             QRectF localRect = bounds(p, states);
             QRectF boundsRect = xf.mapRect(localRect);
             p->setTransform(xf);
             QImage proxy = drawIntoBuffer(p, states, boundsRect.toRect());
-            proxy = static_cast<QSvgFilterContainer*>(filterNode)->applyFilter(this, proxy, p, localRect);
+            proxy = filterNode->applyFilter(this, proxy, p, localRect);
 
             boundsRect = QRectF(proxy.offset(), proxy.size());
             localRect = p->transform().inverted().mapRect(boundsRect);
@@ -413,6 +414,7 @@ QString QSvgNode::typeName() const
         case FeOffset: return QStringLiteral("feOffset");
         case FeComposite: return QStringLiteral("feComposite");
         case FeFlood: return QStringLiteral("feFlood");
+        case FeUnsupported: return QStringLiteral("feUnsupported");
     }
     return QStringLiteral("unknown");
 }

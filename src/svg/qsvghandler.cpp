@@ -3483,6 +3483,21 @@ static QSvgNode *createFeMergeNodeNode(QSvgNode *parent,
     return filter;
 }
 
+static QSvgNode *createFeUnsupportedNode(QSvgNode *parent,
+                                         const QXmlStreamAttributes &attributes,
+                                         QSvgHandler *handler)
+{
+    QString inputString;
+    QString outputString;
+    QSvgRectF rect;
+
+    parseFilterAttributes(parent, attributes, handler,
+                          &inputString, &outputString, &rect);
+
+    QSvgNode *filter = new QSvgFeUnsupported(parent, inputString, outputString, rect);
+    return filter;
+}
+
 static bool parseSymbolLikeAttributes(const QXmlStreamAttributes &attributes, QSvgHandler *handler,
                                       QRectF *rect, QRectF *viewBox, QPointF *refPoint,
                                       QSvgSymbolLike::PreserveAspectRatios *aspect,
@@ -4313,7 +4328,7 @@ static FactoryMethod findGraphicsFactory(const QString &name, QtSvg::Options opt
     return 0;
 }
 
-static FactoryMethod findFilterFtory(const QString &name, QtSvg::Options options)
+static FactoryMethod findFilterFactory(const QString &name, QtSvg::Options options)
 {
     if (options.testFlag(QtSvg::Tiny12FeaturesOnly))
         return 0;
@@ -4331,6 +4346,27 @@ static FactoryMethod findFilterFtory(const QString &name, QtSvg::Options options
     if (name == QLatin1String("feMergeNode")) return createFeMergeNodeNode;
     if (name == QLatin1String("feComposite")) return createFeCompositeNode;
     if (name == QLatin1String("feFlood")) return createFeFloodNode;
+
+    static const QStringList unsupportedFilters = {
+        QStringLiteral("feBlend"),
+        QStringLiteral("feComponentTransfer"),
+        QStringLiteral("feConvolveMatrix"),
+        QStringLiteral("feDiffuseLighting"),
+        QStringLiteral("feDisplacementMap"),
+        QStringLiteral("feDropShadow"),
+        QStringLiteral("feFuncA"),
+        QStringLiteral("feFuncB"),
+        QStringLiteral("feFuncG"),
+        QStringLiteral("feFuncR"),
+        QStringLiteral("feImage"),
+        QStringLiteral("feMorphology"),
+        QStringLiteral("feSpecularLighting"),
+        QStringLiteral("feTile"),
+        QStringLiteral("feTurbulence")
+    };
+
+    if (unsupportedFilters.contains(name))
+        return createFeUnsupportedNode;
 
     return 0;
 }
@@ -4686,6 +4722,8 @@ bool QSvgHandler::startElement(const QString &localName,
                 cssStyleLookup(node, this, m_selector);
 #endif
                 parseStyle(node, attributes, this);
+                if (node->type() == QSvgNode::Filter)
+                    m_toBeResolved.append(node);
             }
         }
     } else if (FactoryMethod method = findGraphicsFactory(localName, options())) {
@@ -4751,7 +4789,7 @@ bool QSvgHandler::startElement(const QString &localName,
                 }
             }
         }
-    } else if (FactoryMethod method = findFilterFtory(localName, options())) {
+    } else if (FactoryMethod method = findFilterFactory(localName, options())) {
         //filter nodes to be aded to be filtercontainer
         Q_ASSERT(!m_nodes.isEmpty());
         node = method(m_nodes.top(), attributes, this);
@@ -4874,26 +4912,38 @@ void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)
 
 void QSvgHandler::resolveNodes()
 {
-    for (QSvgUse *useNode : std::as_const(m_toBeResolved)) {
-        const auto parent = useNode->parent();
-        if (!parent)
-            continue;
+    for (QSvgNode *node : std::as_const(m_toBeResolved)) {
+        if (node->type() == QSvgNode::Use) {
+            QSvgUse *useNode = static_cast<QSvgUse *>(node);
+            const auto parent = useNode->parent();
+            if (!parent)
+                continue;
 
-        QSvgNode::Type t = parent->type();
-        if (t != QSvgNode::Doc && t != QSvgNode::Defs && t != QSvgNode::Group && t != QSvgNode::Switch)
-            continue;
+            QSvgNode::Type t = parent->type();
+            if (t != QSvgNode::Doc && t != QSvgNode::Defs && t != QSvgNode::Group && t != QSvgNode::Switch)
+                continue;
 
-        QSvgStructureNode *group = static_cast<QSvgStructureNode *>(parent);
-        QSvgNode *link = group->scopeNode(useNode->linkId());
-        if (!link) {
-            qCWarning(lcSvgHandler, "link #%s is undefined!", qPrintable(useNode->linkId()));
-            continue;
+            QSvgStructureNode *group = static_cast<QSvgStructureNode *>(parent);
+            QSvgNode *link = group->scopeNode(useNode->linkId());
+            if (!link) {
+                qCWarning(lcSvgHandler, "link #%s is undefined!", qPrintable(useNode->linkId()));
+                continue;
+            }
+
+            if (useNode->parent()->isDescendantOf(link))
+                qCWarning(lcSvgHandler, "link #%s is recursive!", qPrintable(useNode->linkId()));
+
+            useNode->setLink(link);
+        } else if (node->type() == QSvgNode::Filter) {
+            QSvgFilterContainer *filter = static_cast<QSvgFilterContainer *>(node);
+            for (const QSvgNode *renderer : filter->renderers()) {
+                const QSvgFeFilterPrimitive *primitive = QSvgFeFilterPrimitive::castToFilterPrimitive(renderer);
+                if (!primitive || primitive->type() == QSvgNode::FeUnsupported) {
+                    filter->setSupported(false);
+                    break;
+                }
+            }
         }
-
-        if (useNode->parent()->isDescendantOf(link))
-            qCWarning(lcSvgHandler, "link #%s is recursive!", qPrintable(useNode->linkId()));
-
-        useNode->setLink(link);
     }
     m_toBeResolved.clear();
 }
