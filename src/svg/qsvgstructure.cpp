@@ -211,6 +211,7 @@ QSvgFilterContainer::QSvgFilterContainer(QSvgNode *parent, const QSvgRectF &boun
     , m_rect(bounds)
     , m_filterUnits(filterUnits)
     , m_primitiveUnits(primitiveUnits)
+    , m_supported(true)
 {
 
 }
@@ -430,6 +431,16 @@ QImage QSvgFilterContainer::applyFilter(QSvgNode *item, const QImage &buffer, QP
         }
     }
     return result;
+}
+
+void QSvgFilterContainer::setSupported(bool supported)
+{
+    m_supported = supported;
+}
+
+bool QSvgFilterContainer::supported() const
+{
+    return m_supported;
 }
 
 QSvgNode::Type QSvgFilterContainer::type() const

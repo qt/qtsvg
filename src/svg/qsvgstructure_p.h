@@ -165,10 +165,13 @@ public:
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
     Type type() const override;
     QImage applyFilter(QSvgNode *referenceNode, const QImage &buffer, QPainter *p, QRectF bounds) const;
+    void setSupported(bool supported);
+    bool supported() const;
 private:
     QSvgRectF m_rect;
     QtSvg::UnitTypes m_filterUnits;
     QtSvg::UnitTypes m_primitiveUnits;
+    bool m_supported;
 };
 
 

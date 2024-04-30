@@ -61,7 +61,8 @@ public:
         FeGaussianblur,
         FeOffset,
         FeComposite,
-        FeFlood
+        FeFlood,
+        FeUnsupported
     };
     enum DisplayMode {
         InlineMode,

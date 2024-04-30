@@ -89,6 +89,7 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
            case QSvgNode::FeOffset:
            case QSvgNode::FeComposite:
            case QSvgNode::FeFlood:
+           case QSvgNode::FeUnsupported:
             qDebug() << "Unhandled type in switch" << child->type();
             break;
         }

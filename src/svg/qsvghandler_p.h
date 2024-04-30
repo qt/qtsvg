@@ -114,8 +114,10 @@ private:
     QSvgTinyDocument *m_doc;
     QStack<QSvgNode *> m_nodes;
     // TODO: This is only needed during parsing, so it unnecessarily takes up space after that.
-    // Temporary container for <use> nodes which haven't been resolved yet.
-    QList<QSvgUse *> m_toBeResolved;
+    // Temporary container for :
+    // - <use> nodes which haven't been resolved yet.
+    // - <filter> nodes to be checked for unsupported filter primitives.
+    QList<QSvgNode *> m_toBeResolved;
 
     enum CurrentNode
     {

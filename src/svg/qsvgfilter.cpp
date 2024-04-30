@@ -674,5 +674,23 @@ QImage QSvgFeFlood::apply(QSvgNode *item, const QMap<QString, QImage> &,
     return result;
 }
 
+QSvgFeUnsupported::QSvgFeUnsupported(QSvgNode *parent, QString input, QString result,
+                         const QSvgRectF &rect)
+    : QSvgFeFilterPrimitive(parent, input, result, rect)
+{
+}
+
+QSvgNode::Type QSvgFeUnsupported::type() const
+{
+    return QSvgNode::FeUnsupported;
+}
+
+QImage QSvgFeUnsupported::apply(QSvgNode *, const QMap<QString, QImage> &,
+                          QPainter *, const QRectF &, const QRectF &,
+                          QtSvg::UnitTypes, QtSvg::UnitTypes) const
+{
+    qCDebug(lcSvgDraw) <<"Unsupported filter primitive should not be applied.";
+    return QImage();
+}
 
 QT_END_NAMESPACE
