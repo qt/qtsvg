@@ -282,25 +282,23 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
     QImage source = sources[m_input];
     Q_ASSERT(source.depth() == 32);
 
-    QPointF sigma_scaled = p->transform().map(QPointF(m_stdDeviationX, m_stdDeviationY)) -
-            p->transform().map(QPointF(0, 0));
-    qreal sigma_x = sigma_scaled.x();
-    qreal sigma_y = sigma_scaled.y();
+    const qreal scaleX = qHypot(p->transform().m11(), p->transform().m21());
+    const qreal scaleY = qHypot(p->transform().m12(), p->transform().m22());
+    const QTransform scaleXr = QTransform::fromScale(scaleX, scaleY);
+    const QTransform restXr = scaleXr.inverted() * p->transform();
+
+    qreal sigma_x = scaleX * m_stdDeviationX;
+    qreal sigma_y = scaleY * m_stdDeviationY;
     if (primitiveUnits == QtSvg::UnitTypes::objectBoundingBox) {
         sigma_x *= itemBounds.width();
         sigma_y *= itemBounds.height();
     }
 
-    // TODO: if p->transform contains anything other than translate and scale,
-    //       then the gaussian filter has to be applied in local coordinates
-    //       and the resulting image has to be transformed into global
-    //       coordinates
-
     int dx = qMax(1, int(floor(sigma_x * 3. * sqrt(2. * M_PI) / 4. + 0.5)));
     int dy = qMax(1, int(floor(sigma_y * 3. * sqrt(2. * M_PI) / 4. + 0.5)));
 
-    QRect clipRectGlob = globalFilterBoundingBox(item, p, itemBounds, filterBounds, primitiveUnits, filterUnits).toRect();
-    QRect requiredRect = p->transform().mapRect(itemBounds).toRect();
+    QRect clipRectGlob = scaleXr.mapRect(localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits)).toRect();
+    QRect requiredRect = scaleXr.mapRect(itemBounds).toRect();
     requiredRect.adjust(- 3 * dx, -3 * dy, 3 * dx, 3 * dy);
     clipRectGlob = clipRectGlob.intersected(requiredRect);
     if (clipRectGlob.isEmpty())
@@ -314,7 +312,9 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
     tempSource.setOffset(clipRectGlob.topLeft());
     tempSource.fill(Qt::transparent);
     QPainter copyPainter(&tempSource);
-    copyPainter.drawImage(source.offset() - clipRectGlob.topLeft(), source);
+    copyPainter.translate(-tempSource.offset());
+    copyPainter.setTransform(restXr.inverted(), true);
+    copyPainter.drawImage(source.offset(), source);
     copyPainter.end();
 
     QImage result = tempSource;
@@ -354,6 +354,23 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
         }
         tempSource = result;
     }
+
+    QRectF trueClipRectGlob = globalFilterBoundingBox(item, p, itemBounds, filterBounds, primitiveUnits, filterUnits);
+
+    result = QImage();
+    if (!QImageIOHandler::allocateImage(trueClipRectGlob.toRect().size(), QImage::Format_RGBA8888_Premultiplied, &result)) {
+        qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
+        return QImage();
+    }
+    result.setOffset(trueClipRectGlob.toRect().topLeft());
+    result.fill(Qt::transparent);
+    QPainter transformPainter(&result);
+    transformPainter.setRenderHint(QPainter::Antialiasing, true);
+
+    transformPainter.translate(-result.offset());
+    transformPainter.setTransform(restXr, true);
+    transformPainter.drawImage(clipRectGlob.topLeft(), tempSource);
+    transformPainter.end();
 
     clipToTransformedBounds(&result, p, localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits));
     return result;
