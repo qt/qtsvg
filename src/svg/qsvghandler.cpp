@@ -1336,9 +1336,11 @@ static void parseFont(QSvgNode *node,
     QSvgTinyDocument *doc = node->document();
     QSvgFontStyle *fontStyle = nullptr;
     if (!attributes.fontFamily.isEmpty()) {
-        QSvgFont *svgFont = doc->svgFont(attributes.fontFamily.toString());
-        if (svgFont)
-            fontStyle = new QSvgFontStyle(svgFont, doc);
+        if (doc) {
+            QSvgFont *svgFont = doc->svgFont(attributes.fontFamily.toString());
+            if (svgFont)
+                fontStyle = new QSvgFontStyle(svgFont, doc);
+        }
     }
     if (!fontStyle)
         fontStyle = new QSvgFontStyle;

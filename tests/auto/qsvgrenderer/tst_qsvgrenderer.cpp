@@ -61,6 +61,7 @@ private slots:
     void oss_fuzz_23731();
     void oss_fuzz_24131();
     void oss_fuzz_24738();
+    void oss_fuzz_61586();
     void imageRendering();
     void illegalAnimateTransform_data();
     void illegalAnimateTransform();
@@ -1666,6 +1667,12 @@ void tst_QSvgRenderer::oss_fuzz_24738()
     // when configured with "-sanitize undefined", this resulted in:
     // "runtime error: division by zero"
     QSvgRenderer().load(QByteArray("<svg><path d=\"a 2 1e-212.....\">"));
+}
+
+void tst_QSvgRenderer::oss_fuzz_61586()
+{
+    // resulted in null pointer deref
+    QSvgRenderer().load(QByteArray("<svg><style>*{font-family:q}<linearGradient><stop>"));
 }
 
 QByteArray image_data_url(QImage &image) {
