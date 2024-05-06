@@ -4,7 +4,7 @@
 
 #include <QtTest/QtTest>
 
-#include <qapplication.h>
+#include <qguiapplication.h>
 #include <qdebug.h>
 #include <qsvgrenderer.h>
 #include <qsvggenerator.h>

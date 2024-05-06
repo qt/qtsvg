@@ -18,7 +18,6 @@ qt_internal_add_test(tst_qsvgplugin
         Qt::Gui
         Qt::GuiPrivate
         Qt::SvgPrivate
-        Qt::Widgets
 )
 
 # Resources:

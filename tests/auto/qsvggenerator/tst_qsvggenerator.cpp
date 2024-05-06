@@ -8,7 +8,7 @@
 #include <QDomElement>
 #include <QDomNode>
 
-#include <qapplication.h>
+#include <qguiapplication.h>
 #include <qdebug.h>
 #include <qpainter.h>
 #include <qsvggenerator.h>

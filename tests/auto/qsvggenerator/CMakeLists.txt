@@ -18,7 +18,6 @@ qt_internal_add_test(tst_qsvggenerator
         Qt::Gui
         Qt::GuiPrivate
         Qt::Svg
-        Qt::Widgets
         Qt::Xml
 )
 

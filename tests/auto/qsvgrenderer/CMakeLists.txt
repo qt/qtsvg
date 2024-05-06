@@ -20,7 +20,6 @@ qt_internal_add_test(tst_qsvgrenderer
         Qt::Gui
         Qt::GuiPrivate
         Qt::Svg
-        Qt::Widgets
 )
 
 # Resources:
