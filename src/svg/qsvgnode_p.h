@@ -104,6 +104,7 @@ public:
     void applyStyle(QPainter *p, QSvgExtraStates &states) const;
     void applyStyleRecursive(QPainter *p, QSvgExtraStates &states) const;
     void revertStyle(QPainter *p, QSvgExtraStates &states) const;
+    void revertStyleRecursive(QPainter *p, QSvgExtraStates &states) const;
     QSvgStyleProperty *styleProperty(QSvgStyleProperty::Type type) const;
     QSvgPaintStyleProperty *styleProperty(const QString &id) const;
 

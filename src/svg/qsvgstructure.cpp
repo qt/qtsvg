@@ -805,7 +805,7 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
     clipPath.addPolygon(oldT.map(QPolygonF(clipRect)));
     painter.resetTransform();
     painter.fillPath(clipPath, Qt::black);
-
+    revertStyleRecursive(&painter, maskNodeStates);
     return mask;
 }
 
@@ -919,6 +919,7 @@ QImage QSvgPattern::renderPattern(QSize size, qreal contentScaleX, qreal content
     for (QSvgNode *node : m_renderers)
         node->draw(&patternPainter, patternStates);
 
+    revertStyleRecursive(&patternPainter, patternStates);
     return pattern;
 }
 
