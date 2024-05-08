@@ -196,8 +196,6 @@ QImage QSvgFeColorMatrix::apply(QSvgNode *item, const QMap<QString, QImage> &sou
     QImage source = sources[m_input];
 
     QRect clipRectGlob = globalFilterBoundingBox(item, p, itemBounds, filterBounds, primitiveUnits, filterUnits).toRect();
-    QRect requiredRect = p->transform().mapRect(itemBounds).toRect();
-    clipRectGlob = clipRectGlob.intersected(requiredRect);
     if (clipRectGlob.isEmpty())
         return QImage();
 
@@ -303,9 +301,6 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
     int dy = qMax(1, int(floor(sigma_y * 3. * sqrt(2. * M_PI) / 4. + 0.5)));
 
     QRect clipRectGlob = scaleXr.mapRect(localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits)).toRect();
-    QRect requiredRect = scaleXr.mapRect(itemBounds).toRect();
-    requiredRect.adjust(- 3 * dx, -3 * dy, 3 * dx, 3 * dy);
-    clipRectGlob = clipRectGlob.intersected(requiredRect);
     if (clipRectGlob.isEmpty())
         return QImage();
 
@@ -414,9 +409,6 @@ QImage QSvgFeOffset::apply(QSvgNode *item, const QMap<QString, QImage> &sources,
     }
     offset = p->transform().map(offset) - p->transform().map(QPoint(0, 0));
 
-    QRect requiredRect = QRect(source.offset(), source.size()).translated(offset);
-    clipRectGlob = clipRectGlob.intersected(requiredRect);
-
     if (clipRectGlob.isEmpty())
         return QImage();
 
@@ -454,21 +446,16 @@ QImage QSvgFeMerge::apply(QSvgNode *item, const QMap<QString, QImage> &sources, 
                           QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
     QList<QImage> mergeNodeResults;
-    QRect requiredRect;
-
     for (int i = 0; i < renderers().size(); i++) {
         QSvgNode *child = renderers().at(i);
         if (child->type() == QSvgNode::FeMergenode) {
             QSvgFeMergeNode *filter = static_cast<QSvgFeMergeNode*>(child);
             mergeNodeResults.append(filter->apply(item, sources, p, itemBounds, filterBounds, primitiveUnits, filterUnits));
-            requiredRect = requiredRect.united(QRect(mergeNodeResults.last().offset(),
-                                                     mergeNodeResults.last().size()));
         }
     }
 
     QRectF clipRect = localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits);
     QRect clipRectGlob = p->transform().mapRect(clipRect).toRect();
-    clipRectGlob = clipRectGlob.intersected(requiredRect);
     if (clipRectGlob.isEmpty())
         return QImage();
 
@@ -550,9 +537,6 @@ QImage QSvgFeComposite::apply(QSvgNode *item, const QMap<QString, QImage> &sourc
 
     QRectF clipRect = localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits);
     QRect clipRectGlob = globalFilterBoundingBox(item, p, itemBounds, filterBounds, primitiveUnits, filterUnits).toRect();
-    QRect requiredRect = QRect(source1.offset(), source1.size()).united(
-                         QRect(source2.offset(), source2.size()));
-    clipRectGlob = clipRectGlob.intersected(requiredRect);
     if (clipRectGlob.isEmpty())
         return QImage();
 
