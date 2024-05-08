@@ -46,7 +46,7 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
         QSvgNode *maskNode = this->hasMask() ? document()->namedNode(this->maskId()) : nullptr;
         QSvgFilterContainer *filterNode = this->hasFilter() ? static_cast<QSvgFilterContainer*>(document()->namedNode(this->filterId()))
                                                             : nullptr;
-        if (filterNode && filterNode->supported()) {
+        if (filterNode && filterNode->type() == QSvgNode::Filter && filterNode->supported()) {
             QTransform xf = p->transform();
             p->resetTransform();
             QRectF localRect = bounds(p, states);
