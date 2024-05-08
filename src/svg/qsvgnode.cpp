@@ -255,6 +255,13 @@ void QSvgNode::revertStyle(QPainter *p, QSvgExtraStates &states) const
     m_style.revert(p, states);
 }
 
+void QSvgNode::revertStyleRecursive(QPainter *p, QSvgExtraStates &states) const
+{
+    revertStyle(p, states);
+    if (parent())
+        parent()->revertStyleRecursive(p, states);
+}
+
 QSvgStyleProperty * QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
 {
     const QSvgNode *node = this;

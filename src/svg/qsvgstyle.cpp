@@ -431,13 +431,13 @@ QSvgTransformStyle::QSvgTransformStyle(const QTransform &trans)
 
 void QSvgTransformStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &)
 {
-    m_oldWorldTransform = p->worldTransform();
+    m_oldWorldTransform.push(p->worldTransform());
     p->setWorldTransform(m_transform, true);
 }
 
 void QSvgTransformStyle::revert(QPainter *p, QSvgExtraStates &)
 {
-    p->setWorldTransform(m_oldWorldTransform, false /* don't combine */);
+    p->setWorldTransform(m_oldWorldTransform.pop(), false /* don't combine */);
 }
 
 QSvgStyleProperty::Type QSvgQualityStyle::type() const
