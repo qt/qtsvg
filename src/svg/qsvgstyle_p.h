@@ -15,6 +15,7 @@
 // We mean it.
 //
 
+#include "QtCore/qstack.h"
 #include "QtGui/qpainter.h"
 #include "QtGui/qpen.h"
 #include "QtGui/qbrush.h"
@@ -626,7 +627,7 @@ public:
 private:
     //7.6 The transform  attribute
     QTransform m_transform;
-    QTransform m_oldWorldTransform;
+    QStack<QTransform> m_oldWorldTransform;
 };
 
 
