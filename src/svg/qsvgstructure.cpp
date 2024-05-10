@@ -382,22 +382,22 @@ QSvgNode::Type QSvgMarker::type() const
     return Marker;
 }
 
-QImage QSvgFilterContainer::applyFilter(QSvgNode *item, const QImage &buffer, QPainter *p, QRectF bounds) const
+QImage QSvgFilterContainer::applyFilter(const QImage &buffer, QPainter *p, const QRectF &bounds) const
 {
-    QRectF filterBounds = m_rect.combinedWithLocalRect(bounds, document()->viewBox(), m_filterUnits);
-    QRect filterBoundsGlob = p->transform().mapRect(filterBounds).toRect();
-    QRect filterBoundsGlobRel = filterBoundsGlob.translated(-buffer.offset());
+    QRectF localFilterRegion = m_rect.resolveRelativeLengths(bounds, m_filterUnits);
+    QRect globalFilterRegion = p->transform().mapRect(localFilterRegion).toRect();
+    QRect globalFilterRegionRel = globalFilterRegion.translated(-buffer.offset());
 
-    if (filterBoundsGlobRel.isEmpty())
+    if (globalFilterRegionRel.isEmpty())
         return buffer;
 
     QImage proxy;
-    if (!QImageIOHandler::allocateImage(filterBoundsGlobRel.size(), buffer.format(), &proxy)) {
+    if (!QImageIOHandler::allocateImage(globalFilterRegionRel.size(), buffer.format(), &proxy)) {
         qCWarning(lcSvgDraw) << "The requested filter is too big, ignoring";
         return buffer;
     }
-    proxy = buffer.copy(filterBoundsGlobRel);
-    proxy.setOffset(filterBoundsGlob.topLeft());
+    proxy = buffer.copy(globalFilterRegionRel);
+    proxy.setOffset(globalFilterRegion.topLeft());
     if (proxy.isNull())
         return buffer;
 
@@ -428,7 +428,7 @@ QImage QSvgFilterContainer::applyFilter(QSvgNode *item, const QImage &buffer, QP
     for (const QSvgNode *renderer : children) {
         const QSvgFeFilterPrimitive *filter = QSvgFeFilterPrimitive::castToFilterPrimitive(renderer);
         if (filter) {
-            result = filter->apply(item, buffers, p, bounds, filterBounds, m_primitiveUnits, m_filterUnits);
+            result = filter->apply(buffers, p, bounds, localFilterRegion, m_primitiveUnits, m_filterUnits);
             if (!result.isNull()) {
                 buffers[QStringLiteral("")] = result;
                 buffers[filter->result()] = result;
@@ -446,6 +446,11 @@ void QSvgFilterContainer::setSupported(bool supported)
 bool QSvgFilterContainer::supported() const
 {
     return m_supported;
+}
+
+QRectF QSvgFilterContainer::filterRegion(const QRectF &itemBounds) const
+{
+    return m_rect.resolveRelativeLengths(itemBounds, m_filterUnits);
 }
 
 QSvgNode::Type QSvgFilterContainer::type() const
@@ -575,13 +580,13 @@ void QSvgSwitch::init()
     m_systemLanguagePrefix = m_systemLanguage.mid(0, idx);
 }
 
-QRectF QSvgStructureNode::bounds(QPainter *p, QSvgExtraStates &states) const
+QRectF QSvgStructureNode::internalBounds(QPainter *p, QSvgExtraStates &states) const
 {
     QRectF bounds;
     if (!m_recursing) {
         QScopedValueRollback<bool> guard(m_recursing, true);
         for (QSvgNode *node : std::as_const(m_renderers))
-            bounds |= node->transformedBounds(p, states);
+            bounds |= node->bounds(p, states);
     }
     return bounds;
 }
@@ -616,7 +621,7 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, QSvgNode *targ
 {
     QTransform t = p->transform();
     p->resetTransform();
-    QRectF basicRect = targetNode->bounds(p, states);
+    QRectF basicRect = targetNode->internalBounds(p, states);
     *globalRect = t.mapRect(basicRect);
     p->setTransform(t);
     return createMask(p, states, basicRect, globalRect);
@@ -693,7 +698,7 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
     // This is required to apply a clip rectangle with transformations.
     // painter.setClipRect(clipRect) sounds like the obvious thing to do but
     // created artifacts due to antialiasing.
-    QRectF clipRect = m_rect.combinedWithLocalRect(localRect);
+    QRectF clipRect = m_rect.resolveRelativeLengths(localRect);
     QPainterPath clipPath;
     clipPath.setFillRule(Qt::OddEvenFill);
     clipPath.addRect(mask.rect().adjusted(-10, -10, 20, 20));
@@ -750,7 +755,7 @@ QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSv
 
     QTransform t = p->transform();
     p->resetTransform();
-    peBoundingBox = patternElement->bounds(p, states);
+    peBoundingBox = patternElement->internalBounds(p, states);
     peWorldBoundingBox = t.mapRect(peBoundingBox);
     p->setTransform(t);
 
@@ -772,7 +777,7 @@ QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSv
     }
 
     // Calculate the pattern bounding box depending on the used UnitTypes
-    QRectF patternBoundingBox = m_rect.combinedWithLocalRect(peBoundingBox);
+    QRectF patternBoundingBox = m_rect.resolveRelativeLengths(peBoundingBox);
 
     QSize imageSize;
     imageSize.setWidth(qCeil(patternBoundingBox.width() * t.m11() * m_transform.m11()));
@@ -845,7 +850,7 @@ void QSvgPattern::calculateAppliedTransform(QTransform &worldTransform, QRectF p
     m_appliedTransform.scale(qIsFinite(imageDownScaleFactorX) ? imageDownScaleFactorX : 1.0,
                              qIsFinite(imageDownScaleFactorY) ? imageDownScaleFactorY : 1.0);
 
-    QRectF p = m_rect.combinedWithLocalRect(peLocalBB);
+    QRectF p = m_rect.resolveRelativeLengths(peLocalBB);
     m_appliedTransform.scale((p.width() * worldTransform.m11() * m_transform.m11()) / imageSize.width(),
                              (p.height() * worldTransform.m22() * m_transform.m22()) / imageSize.height());
 

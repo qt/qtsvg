@@ -34,7 +34,7 @@ public:
     ~QSvgStructureNode();
     QSvgNode *scopeNode(const QString &id) const;
     void addChild(QSvgNode *child, const QString &id);
-    QRectF bounds(QPainter *p, QSvgExtraStates &states) const override;
+    QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QSvgNode *previousSiblingNode(QSvgNode *n) const;
     QList<QSvgNode*> renderers() const { return m_renderers; }
 protected:
@@ -165,9 +165,10 @@ public:
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
     bool shouldDrawNode(QPainter *, QSvgExtraStates &) const override;
     Type type() const override;
-    QImage applyFilter(QSvgNode *referenceNode, const QImage &buffer, QPainter *p, QRectF bounds) const;
+    QImage applyFilter(const QImage &buffer, QPainter *p, const QRectF &bounds) const;
     void setSupported(bool supported);
     bool supported() const;
+    QRectF filterRegion(const QRectF &itemBounds) const;
 private:
     QSvgRectF m_rect;
     QtSvg::UnitTypes m_filterUnits;

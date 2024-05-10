@@ -112,10 +112,10 @@ public:
 
     virtual Type type() const = 0;
     QString typeName() const;
-    virtual QRectF fastBounds(QPainter *p, QSvgExtraStates &states) const;
-    virtual QRectF bounds(QPainter *p, QSvgExtraStates &states) const;
-    virtual QRectF transformedBounds(QPainter *p, QSvgExtraStates &states) const;
-    QRectF transformedBounds() const;
+    virtual QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const;
+    virtual QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const;
+    QRectF bounds(QPainter *p, QSvgExtraStates &states) const;
+    QRectF bounds() const;
 
     void setRequiredFeatures(const QStringList &lst);
     const QStringList & requiredFeatures() const;

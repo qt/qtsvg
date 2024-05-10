@@ -49,15 +49,14 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
         if (filterNode && filterNode->type() == QSvgNode::Filter && filterNode->supported()) {
             QTransform xf = p->transform();
             p->resetTransform();
-            QRectF localRect = bounds(p, states);
-            QRectF boundsRect = xf.mapRect(localRect);
+            QRectF localRect = internalBounds(p, states);
             p->setTransform(xf);
+            QRectF boundsRect = xf.mapRect(filterNode->filterRegion(localRect));
             QImage proxy = drawIntoBuffer(p, states, boundsRect.toRect());
-            proxy = filterNode->applyFilter(this, proxy, p, localRect);
-
-            boundsRect = QRectF(proxy.offset(), proxy.size());
-            localRect = p->transform().inverted().mapRect(boundsRect);
+            proxy = filterNode->applyFilter(proxy, p, localRect);
             if (maskNode && maskNode->type() == QSvgNode::Mask) {
+                boundsRect = QRectF(proxy.offset(), proxy.size());
+                localRect = p->transform().inverted().mapRect(boundsRect);
                 QImage mask = static_cast<QSvgMask*>(maskNode)->createMask(p, states, localRect, &boundsRect);
                 applyMaskToBuffer(&proxy, mask);
             }
@@ -337,17 +336,17 @@ QSvgPaintStyleProperty * QSvgNode::styleProperty(const QString &id) const
     return doc ? doc->namedStyle(rid) : 0;
 }
 
-QRectF QSvgNode::fastBounds(QPainter *p, QSvgExtraStates &states) const
+QRectF QSvgNode::internalFastBounds(QPainter *p, QSvgExtraStates &states) const
 {
-    return bounds(p, states);
+    return internalBounds(p, states);
 }
 
-QRectF QSvgNode::bounds(QPainter *, QSvgExtraStates &) const
+QRectF QSvgNode::internalBounds(QPainter *, QSvgExtraStates &) const
 {
     return QRectF(0, 0, 0, 0);
 }
 
-QRectF QSvgNode::transformedBounds() const
+QRectF QSvgNode::bounds() const
 {
     if (!m_cachedBounds.isEmpty())
         return m_cachedBounds;
@@ -359,9 +358,8 @@ QRectF QSvgNode::transformedBounds() const
 
     if (parent())
         parent()->applyStyleRecursive(&p, states);
-    // ###TODO: If we reset the world transform we should not call this function transformedBounds
     p.setWorldTransform(QTransform());
-    m_cachedBounds = transformedBounds(&p, states);
+    m_cachedBounds = bounds(&p, states);
     if (parent()) // always revert the style to not store old transformations
         parent()->revertStyleRecursive(&p, states);
     return m_cachedBounds;
@@ -479,10 +477,10 @@ void QSvgNode::setVisible(bool visible)
     m_visible = visible;
 }
 
-QRectF QSvgNode::transformedBounds(QPainter *p, QSvgExtraStates &states) const
+QRectF QSvgNode::bounds(QPainter *p, QSvgExtraStates &states) const
 {
     applyStyle(p, states);
-    QRectF rect = bounds(p, states);
+    QRectF rect = internalBounds(p, states);
     revertStyle(p, states);
     return rect;
 }
@@ -629,7 +627,7 @@ bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
     if (document() && document()->options().testFlag(QtSvg::AssumeTrustedSource))
         return true;
 
-    QRectF brect = fastBounds(p, states);
+    QRectF brect = internalFastBounds(p, states);
     if (brect.width() <= QT_SVG_SIZE_LIMIT && brect.height() <= QT_SVG_SIZE_LIMIT) {
         return true;
     } else {
