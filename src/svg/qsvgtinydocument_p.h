@@ -150,7 +150,7 @@ inline bool QSvgTinyDocument::heightPercent() const
 inline QRectF QSvgTinyDocument::viewBox() const
 {
     if (m_viewBox.isNull()) {
-        m_viewBox = transformedBounds();
+        m_viewBox = bounds();
         m_implicitViewBox = true;
     }
 

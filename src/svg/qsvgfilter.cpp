@@ -29,27 +29,36 @@ bool QSvgFeFilterPrimitive::shouldDrawNode(QPainter *, QSvgExtraStates &) const
     return false;
 }
 
-QRectF QSvgFeFilterPrimitive::localFilterBoundingBox(QSvgNode *node,
-                                                     const QRectF &itemBounds, const QRectF &filterBounds,
-                                                     QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
+QRectF QSvgFeFilterPrimitive::localSubRegion(const QRectF &itemBounds, const QRectF &filterBounds,
+                                             QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes) const
 {
+    // 15.7.3 Filter primitive subregion
+    // https://www.w3.org/TR/SVG11/filters.html#FilterPrimitiveSubRegion
 
-    QRectF localBounds;
-    if (filterUnits != QtSvg::UnitTypes::userSpaceOnUse)
-        localBounds = itemBounds;
-    else
-        localBounds = filterBounds;
-    QRectF clipRect = m_rect.combinedWithLocalRect(localBounds, node->document()->viewBox(), primitiveUnits);
+    QRectF clipRect = m_rect.resolveRelativeLengths(itemBounds, primitiveUnits);
+
+    // the default subregion is 0%,0%,100%,100%, where as a special-case the percentages are
+    // relative to the dimensions of the filter region, thus making the the default filter primitive
+    // subregion equal to the filter region.
+    if (m_rect.unitX() == QtSvg::UnitTypes::unknown)
+        clipRect.setX(filterBounds.x());
+    if (m_rect.unitY() == QtSvg::UnitTypes::unknown)
+        clipRect.setY(filterBounds.y());
+    if (m_rect.unitW() == QtSvg::UnitTypes::unknown)
+        clipRect.setWidth(filterBounds.width());
+    if (m_rect.unitH() == QtSvg::UnitTypes::unknown)
+        clipRect.setHeight(filterBounds.height());
+
     clipRect = clipRect.intersected(filterBounds);
 
     return clipRect;
 }
 
-QRectF QSvgFeFilterPrimitive::globalFilterBoundingBox(QSvgNode *item, QPainter *p,
-                                                      const QRectF &itemBounds, const QRectF &filterBounds,
-                                                      QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
+QRectF QSvgFeFilterPrimitive::globalSubRegion(QPainter *p,
+                                              const QRectF &itemBounds, const QRectF &filterBounds,
+                                              QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
-    return p->transform().mapRect(localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits));
+    return p->transform().mapRect(localSubRegion(itemBounds, filterBounds, primitiveUnits, filterUnits));
 }
 
 void QSvgFeFilterPrimitive::clipToTransformedBounds(QImage *buffer, QPainter *p, const QRectF &localRect) const
@@ -186,7 +195,7 @@ QSvgNode::Type QSvgFeColorMatrix::type() const
     return QSvgNode::FeColormatrix;
 }
 
-QImage QSvgFeColorMatrix::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
+QImage QSvgFeColorMatrix::apply(const QMap<QString, QImage> &sources, QPainter *p,
                                 const QRectF &itemBounds, const QRectF &filterBounds,
                                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
@@ -194,7 +203,7 @@ QImage QSvgFeColorMatrix::apply(QSvgNode *item, const QMap<QString, QImage> &sou
         return QImage();
     QImage source = sources[m_input];
 
-    QRect clipRectGlob = globalFilterBoundingBox(item, p, itemBounds, filterBounds, primitiveUnits, filterUnits).toRect();
+    QRect clipRectGlob = globalSubRegion(p, itemBounds, filterBounds, primitiveUnits, filterUnits).toRect();
     if (clipRectGlob.isEmpty())
         return QImage();
 
@@ -256,7 +265,7 @@ QImage QSvgFeColorMatrix::apply(QSvgNode *item, const QMap<QString, QImage> &sou
         }
     }
 
-    clipToTransformedBounds(&result, p, localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits));
+    clipToTransformedBounds(&result, p, localSubRegion(itemBounds, filterBounds, primitiveUnits, filterUnits));
     return result;
 }
 
@@ -276,7 +285,7 @@ QSvgNode::Type QSvgFeGaussianBlur::type() const
     return QSvgNode::FeGaussianblur;
 }
 
-QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
+QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter *p,
                                  const QRectF &itemBounds, const QRectF &filterBounds,
                                  QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
@@ -304,7 +313,7 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
     const QTransform scaleXr = QTransform::fromScale(scaleX, scaleY);
     const QTransform restXr = scaleXr.inverted() * p->transform();
 
-    QRect clipRectGlob = scaleXr.mapRect(localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits)).toRect();
+    QRect clipRectGlob = scaleXr.mapRect(localSubRegion(itemBounds, filterBounds, primitiveUnits, filterUnits)).toRect();
     if (clipRectGlob.isEmpty())
         return QImage();
 
@@ -400,7 +409,7 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
         }
     }
 
-    QRectF trueClipRectGlob = globalFilterBoundingBox(item, p, itemBounds, filterBounds, primitiveUnits, filterUnits);
+    QRectF trueClipRectGlob = globalSubRegion(p, itemBounds, filterBounds, primitiveUnits, filterUnits);
 
     QImage result;
     if (!QImageIOHandler::allocateImage(trueClipRectGlob.toRect().size(), QImage::Format_RGBA8888_Premultiplied, &result)) {
@@ -417,7 +426,7 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
     transformPainter.drawImage(clipRectGlob.topLeft(), tempSource);
     transformPainter.end();
 
-    clipToTransformedBounds(&result, p, localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits));
+    clipToTransformedBounds(&result, p, localSubRegion(itemBounds, filterBounds, primitiveUnits, filterUnits));
     return result;
 }
 
@@ -435,7 +444,7 @@ QSvgNode::Type QSvgFeOffset::type() const
     return QSvgNode::FeOffset;
 }
 
-QImage QSvgFeOffset::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
+QImage QSvgFeOffset::apply(const QMap<QString, QImage> &sources, QPainter *p,
                            const QRectF &itemBounds, const QRectF &filterBounds,
                            QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
@@ -444,7 +453,7 @@ QImage QSvgFeOffset::apply(QSvgNode *item, const QMap<QString, QImage> &sources,
 
     const QImage &source = sources[m_input];
 
-    QRectF clipRect = localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits);
+    QRectF clipRect = localSubRegion(itemBounds, filterBounds, primitiveUnits, filterUnits);
     QRect clipRectGlob = p->transform().mapRect(clipRect).toRect();
 
     QPoint offset(m_dx, m_dy);
@@ -487,7 +496,7 @@ QSvgNode::Type QSvgFeMerge::type() const
     return QSvgNode::FeMerge;
 }
 
-QImage QSvgFeMerge::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
+QImage QSvgFeMerge::apply(const QMap<QString, QImage> &sources, QPainter *p,
                           const QRectF &itemBounds, const QRectF &filterBounds,
                           QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
@@ -496,11 +505,11 @@ QImage QSvgFeMerge::apply(QSvgNode *item, const QMap<QString, QImage> &sources, 
         QSvgNode *child = renderers().at(i);
         if (child->type() == QSvgNode::FeMergenode) {
             QSvgFeMergeNode *filter = static_cast<QSvgFeMergeNode*>(child);
-            mergeNodeResults.append(filter->apply(item, sources, p, itemBounds, filterBounds, primitiveUnits, filterUnits));
+            mergeNodeResults.append(filter->apply(sources, p, itemBounds, filterBounds, primitiveUnits, filterUnits));
         }
     }
 
-    QRectF clipRect = localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits);
+    QRectF clipRect = localSubRegion(itemBounds, filterBounds, primitiveUnits, filterUnits);
     QRect clipRectGlob = p->transform().mapRect(clipRect).toRect();
     if (clipRectGlob.isEmpty())
         return QImage();
@@ -548,7 +557,7 @@ QSvgNode::Type QSvgFeMergeNode::type() const
     return QSvgNode::FeMergenode;
 }
 
-QImage QSvgFeMergeNode::apply(QSvgNode *, const QMap<QString, QImage> &sources, QPainter *,
+QImage QSvgFeMergeNode::apply(const QMap<QString, QImage> &sources, QPainter *,
                               const QRectF &, const QRectF &, QtSvg::UnitTypes, QtSvg::UnitTypes) const
 {
     return sources.value(m_input);
@@ -570,7 +579,7 @@ QSvgNode::Type QSvgFeComposite::type() const
     return QSvgNode::FeComposite;
 }
 
-QImage QSvgFeComposite::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
+QImage QSvgFeComposite::apply(const QMap<QString, QImage> &sources, QPainter *p,
                               const QRectF &itemBounds, const QRectF &filterBounds,
                               QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
@@ -583,8 +592,9 @@ QImage QSvgFeComposite::apply(QSvgNode *item, const QMap<QString, QImage> &sourc
     Q_ASSERT(source1.depth() == 32);
     Q_ASSERT(source2.depth() == 32);
 
-    QRectF clipRect = localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits);
-    QRect clipRectGlob = globalFilterBoundingBox(item, p, itemBounds, filterBounds, primitiveUnits, filterUnits).toRect();
+    QRectF clipRect = localSubRegion(itemBounds, filterBounds, primitiveUnits, filterUnits);
+    QRect clipRectGlob = p->transform().mapRect(clipRect).toRect();
+
     if (clipRectGlob.isEmpty())
         return QImage();
 
@@ -708,12 +718,12 @@ QSvgNode::Type QSvgFeFlood::type() const
     return QSvgNode::FeFlood;
 }
 
-QImage QSvgFeFlood::apply(QSvgNode *item, const QMap<QString, QImage> &,
+QImage QSvgFeFlood::apply(const QMap<QString, QImage> &,
                           QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
                           QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
 
-    QRectF clipRect = localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits);
+    QRectF clipRect = localSubRegion(itemBounds, filterBounds, primitiveUnits, filterUnits);
     QRect clipRectGlob = p->transform().mapRect(clipRect).toRect();
 
     QImage result;
@@ -742,7 +752,7 @@ QSvgNode::Type QSvgFeBlend::type() const
     return QSvgNode::FeBlend;
 }
 
-QImage QSvgFeBlend::apply(QSvgNode *item, const QMap<QString, QImage> &sources, QPainter *p,
+QImage QSvgFeBlend::apply(const QMap<QString, QImage> &sources, QPainter *p,
                           const QRectF &itemBounds, const QRectF &filterBounds,
                           QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
@@ -755,8 +765,8 @@ QImage QSvgFeBlend::apply(QSvgNode *item, const QMap<QString, QImage> &sources, 
     Q_ASSERT(source1.depth() == 32);
     Q_ASSERT(source2.depth() == 32);
 
-    QRectF clipRect = localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits);
-    QRect clipRectGlob = globalFilterBoundingBox(item, p, itemBounds, filterBounds, primitiveUnits, filterUnits).toRect();
+    QRectF clipRect = localSubRegion(itemBounds, filterBounds, primitiveUnits, filterUnits);
+    QRect clipRectGlob = p->transform().mapRect(clipRect).toRect();
 
     QImage result;
     if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_RGBA8888, &result)) {
@@ -854,11 +864,11 @@ QSvgNode::Type QSvgFeUnsupported::type() const
     return QSvgNode::FeUnsupported;
 }
 
-QImage QSvgFeUnsupported::apply(QSvgNode *, const QMap<QString, QImage> &,
+QImage QSvgFeUnsupported::apply(const QMap<QString, QImage> &,
                           QPainter *, const QRectF &, const QRectF &,
                           QtSvg::UnitTypes, QtSvg::UnitTypes) const
 {
-    qCDebug(lcSvgDraw) <<"Unsupported filter primitive should not be applied.";
+    qCDebug(lcSvgDraw) << "Unsupported filter primitive should not be applied.";
     return QImage();
 }
 

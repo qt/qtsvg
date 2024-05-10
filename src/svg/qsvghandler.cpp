@@ -3173,61 +3173,57 @@ static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes
     if (!xStr.isEmpty()) {
         QSvgHandler::LengthType type;
         x = parseLength(xStr.toString(), &type, handler);
-        if (type != QSvgHandler::LT_PT)
+        if (type != QSvgHandler::LT_PT) {
             x = convertToPixels(x, true, type);
+            rect->setUnitX(QtSvg::UnitTypes::userSpaceOnUse);
+        }
         if (type == QSvgHandler::LT_PERCENT) {
             x /= 100.;
             rect->setUnitX(QtSvg::UnitTypes::objectBoundingBox);
         }
         rect->setX(x);
-    } else {
-        rect->setX(-0.1);
-        rect->setUnitX(QtSvg::UnitTypes::objectBoundingBox);
     }
     qreal y = 0;
     if (!yStr.isEmpty()) {
         QSvgHandler::LengthType type;
         y = parseLength(yStr.toString(), &type, handler);
-        if (type != QSvgHandler::LT_PT)
+        if (type != QSvgHandler::LT_PT) {
             y = convertToPixels(y, false, type);
+            rect->setUnitY(QtSvg::UnitTypes::userSpaceOnUse);
+        }
         if (type == QSvgHandler::LT_PERCENT) {
             y /= 100.;
             rect->setUnitX(QtSvg::UnitTypes::objectBoundingBox);
         }
         rect->setY(y);
-    } else {
-        rect->setY(-0.1);
-        rect->setUnitY(QtSvg::UnitTypes::objectBoundingBox);
     }
     qreal width = 0;
     if (!widthStr.isEmpty()) {
         QSvgHandler::LengthType type;
         width = parseLength(widthStr.toString(), &type, handler);
-        if (type != QSvgHandler::LT_PT)
+        if (type != QSvgHandler::LT_PT) {
             width = convertToPixels(width, true, type);
+            rect->setUnitW(QtSvg::UnitTypes::userSpaceOnUse);
+        }
         if (type == QSvgHandler::LT_PERCENT) {
             width /= 100.;
             rect->setUnitX(QtSvg::UnitTypes::objectBoundingBox);
         }
         rect->setWidth(width);
-    } else {
-        rect->setWidth(1.2);
-        rect->setUnitW(QtSvg::UnitTypes::objectBoundingBox);
     }
     qreal height = 0;
     if (!heightStr.isEmpty()) {
         QSvgHandler::LengthType type;
         height = parseLength(heightStr.toString(), &type, handler);
-        if (type != QSvgHandler::LT_PT)
+        if (type != QSvgHandler::LT_PT) {
             height = convertToPixels(height, false, type);
+            rect->setUnitH(QtSvg::UnitTypes::userSpaceOnUse);
+        }
         if (type == QSvgHandler::LT_PERCENT) {
             height /= 100.;
             rect->setUnitX(QtSvg::UnitTypes::objectBoundingBox);
         }
         rect->setHeight(height);
-    } else {
-        rect->setHeight(1.2);
-        rect->setUnitH(QtSvg::UnitTypes::objectBoundingBox);
     }
 }
 
@@ -3244,7 +3240,22 @@ static QSvgNode *createFilterNode(QSvgNode *parent,
     QtSvg::UnitTypes primitiveUnits = pU.contains(QLatin1String("objectBoundingBox")) ?
                 QtSvg::UnitTypes::objectBoundingBox : QtSvg::UnitTypes::userSpaceOnUse;
 
+    // https://www.w3.org/TR/SVG11/filters.html#FilterEffectsRegion
+    // If ‘x’ or ‘y’ is not specified, the effect is as if a value of -10% were specified.
+    // If ‘width’ or ‘height’ is not specified, the effect is as if a value of 120% were specified.
     QSvgRectF rect;
+    if (filterUnits == QtSvg::UnitTypes::userSpaceOnUse) {
+        qreal width = parent->document()->viewBox().width();
+        qreal height = parent->document()->viewBox().height();
+        rect = QSvgRectF(QRectF(-0.1 * width, -0.1 * height, 1.2 * width, 1.2 * height),
+                         QtSvg::UnitTypes::userSpaceOnUse, QtSvg::UnitTypes::userSpaceOnUse,
+                         QtSvg::UnitTypes::userSpaceOnUse, QtSvg::UnitTypes::userSpaceOnUse);
+    } else {
+        rect = QSvgRectF(QRectF(-0.1, -0.1, 1.2, 1.2),
+                         QtSvg::UnitTypes::objectBoundingBox, QtSvg::UnitTypes::objectBoundingBox,
+                         QtSvg::UnitTypes::objectBoundingBox, QtSvg::UnitTypes::objectBoundingBox);
+    }
+
     parseFilterBounds(parent, attributes, handler, &rect);
 
     QSvgNode *filter = new QSvgFilterContainer(parent, rect, filterUnits, primitiveUnits);
@@ -3257,6 +3268,16 @@ static void parseFilterAttributes(QSvgNode *parent, const QXmlStreamAttributes &
 {
     *inString = attributes.value(QLatin1String("in")).toString();
     *outString = attributes.value(QLatin1String("result")).toString();
+
+    // https://www.w3.org/TR/SVG11/filters.html#FilterPrimitiveSubRegion
+    // the default subregion is 0%,0%,100%,100%, where as a special-case the percentages are
+    // relative to the dimensions of the filter region, thus making the the default filter primitive
+    // subregion equal to the filter region.
+    *rect = QSvgRectF(QRectF(0, 0, 1.0, 1.0),
+                      QtSvg::UnitTypes::unknown, QtSvg::UnitTypes::unknown,
+                      QtSvg::UnitTypes::unknown, QtSvg::UnitTypes::unknown);
+    // if we recognize unit == unknown we use the filter as a reference instead of the item, see
+    // QSvgFeFilterPrimitive::localSubRegion
 
     parseFilterBounds(parent, attributes, handler, rect);
 }

@@ -46,12 +46,12 @@ QSvgEllipse::QSvgEllipse(QSvgNode *parent, const QRectF &rect)
 {
 }
 
-QRectF QSvgEllipse::fastBounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgEllipse::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
     return p->transform().mapRect(m_bounds);
 }
 
-QRectF QSvgEllipse::bounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgEllipse::internalBounds(QPainter *p, QSvgExtraStates &) const
 {
     QPainterPath path;
     path.addEllipse(m_bounds);
@@ -122,12 +122,12 @@ bool QSvgPath::separateFillStroke() const
     return true;
 }
 
-QRectF QSvgPath::fastBounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgPath::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
     return p->transform().mapRect(m_path.controlPointRect());
 }
 
-QRectF QSvgPath::bounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgPath::internalBounds(QPainter *p, QSvgExtraStates &) const
 {
     qreal sw = strokeWidth(p);
     return qFuzzyIsNull(sw) ? p->transform().map(m_path).boundingRect()
@@ -139,12 +139,12 @@ QSvgPolygon::QSvgPolygon(QSvgNode *parent, const QPolygonF &poly)
 {
 }
 
-QRectF QSvgPolygon::fastBounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgPolygon::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
     return p->transform().mapRect(m_poly.boundingRect());
 }
 
-QRectF QSvgPolygon::bounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgPolygon::internalBounds(QPainter *p, QSvgExtraStates &) const
 {
     qreal sw = strokeWidth(p);
     if (qFuzzyIsNull(sw)) {
@@ -194,12 +194,12 @@ QSvgRect::QSvgRect(QSvgNode *node, const QRectF &rect, qreal rx, qreal ry)
 {
 }
 
-QRectF QSvgRect::fastBounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgRect::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
     return p->transform().mapRect(m_rect);
 }
 
-QRectF QSvgRect::bounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgRect::internalBounds(QPainter *p, QSvgExtraStates &) const
 {
     qreal sw = strokeWidth(p);
     if (qFuzzyIsNull(sw)) {
@@ -249,7 +249,7 @@ void QSvgText::setTextArea(const QSizeF &size)
     m_type = Textarea;
 }
 
-QRectF QSvgText::fastBounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgText::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
     QFont font = m_style.font ? m_style.font->qfont() : p->font();
     QFontMetricsF fm(font);
@@ -267,7 +267,7 @@ QRectF QSvgText::fastBounds(QPainter *p, QSvgExtraStates &) const
     return p->transform().mapRect(approxMaximumBrect);
 }
 
-QRectF QSvgText::bounds(QPainter *p, QSvgExtraStates &states) const
+QRectF QSvgText::internalBounds(QPainter *p, QSvgExtraStates &states) const
 {
     QRectF boundingRect;
     if (shouldDrawNode(p, states))
@@ -587,24 +587,24 @@ QSvgNode::Type QSvgVideo::type() const
     return Video;
 }
 
-QRectF QSvgUse::bounds(QPainter *p, QSvgExtraStates &states) const
+QRectF QSvgUse::internalBounds(QPainter *p, QSvgExtraStates &states) const
 {
     QRectF bounds;
     if (Q_LIKELY(m_link && !isDescendantOf(m_link) && !m_recursing)) {
         QScopedValueRollback<bool> guard(m_recursing, true);
         p->translate(m_start);
-        bounds = m_link->transformedBounds(p, states);
+        bounds = m_link->bounds(p, states);
         p->translate(-m_start);
     }
     return bounds;
 }
 
-QRectF QSvgPolyline::fastBounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgPolyline::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
     return p->transform().mapRect(m_poly.boundingRect());
 }
 
-QRectF QSvgPolyline::bounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgPolyline::internalBounds(QPainter *p, QSvgExtraStates &) const
 {
     qreal sw = strokeWidth(p);
     if (qFuzzyIsNull(sw)) {
@@ -616,12 +616,12 @@ QRectF QSvgPolyline::bounds(QPainter *p, QSvgExtraStates &) const
     }
 }
 
-QRectF QSvgImage::bounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgImage::internalBounds(QPainter *p, QSvgExtraStates &) const
 {
     return p->transform().mapRect(m_bounds);
 }
 
-QRectF QSvgLine::fastBounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgLine::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
     QPointF p1 = p->transform().map(m_line.p1());
     QPointF p2 = p->transform().map(m_line.p2());
@@ -632,11 +632,11 @@ QRectF QSvgLine::fastBounds(QPainter *p, QSvgExtraStates &) const
     return QRectF(minX, minY, maxX - minX, maxY - minY);
 }
 
-QRectF QSvgLine::bounds(QPainter *p, QSvgExtraStates &s) const
+QRectF QSvgLine::internalBounds(QPainter *p, QSvgExtraStates &s) const
 {
     qreal sw = strokeWidth(p);
     if (qFuzzyIsNull(sw)) {
-        return fastBounds(p, s);
+        return internalFastBounds(p, s);
     } else {
         QPainterPath path;
         path.moveTo(m_line.p1());

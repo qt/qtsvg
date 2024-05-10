@@ -280,7 +280,7 @@ void QSvgTinyDocument::draw(QPainter *p, const QString &id,
 
     p->save();
 
-    const QRectF elementBounds = node->transformedBounds();
+    const QRectF elementBounds = node->bounds();
 
     mapSourceToTarget(p, bounds, elementBounds);
     QTransform originalTransform = p->worldTransform();
@@ -480,7 +480,7 @@ QRectF QSvgTinyDocument::boundsOnElement(const QString &id) const
     const QSvgNode *node = scopeNode(id);
     if (!node)
         node = this;
-    return node->transformedBounds();
+    return node->bounds();
 }
 
 bool QSvgTinyDocument::elementExists(const QString &id) const
