@@ -216,6 +216,11 @@ QSvgFilterContainer::QSvgFilterContainer(QSvgNode *parent, const QSvgRectF &boun
 
 }
 
+bool QSvgFilterContainer::shouldDrawNode(QPainter *, QSvgExtraStates &) const
+{
+    return false;
+}
+
 void QSvgMarker::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
     if (!states.inUse) //Symbol is only drawn in combination with another node.
@@ -596,6 +601,11 @@ QSvgMask::QSvgMask(QSvgNode *parent, QSvgRectF bounds,
 {
 }
 
+bool QSvgMask::shouldDrawNode(QPainter *, QSvgExtraStates &) const
+{
+    return false;
+}
+
 QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, QSvgNode *targetNode, QRectF *globalRect) const
 {
     QTransform t = p->transform();
@@ -703,6 +713,11 @@ QSvgPattern::QSvgPattern(QSvgNode *parent, QSvgRectF bounds, QRectF viewBox,
 
 {
 
+}
+
+bool QSvgPattern::shouldDrawNode(QPainter *, QSvgExtraStates &) const
+{
+    return false;
 }
 
 static QImage& defaultPattern()

@@ -31,6 +31,7 @@ class Q_SVG_EXPORT QSvgFeFilterPrimitive : public QSvgStructureNode
 public:
     QSvgFeFilterPrimitive(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect);
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
+    bool shouldDrawNode(QPainter *, QSvgExtraStates &) const override;
     QRectF fastBounds(QPainter *, QSvgExtraStates &) const override { return QRectF(); }
     QRectF bounds(QPainter *, QSvgExtraStates &) const override { return QRectF(); }
     QRectF localFilterBoundingBox(QSvgNode *item,

@@ -25,6 +25,11 @@ QSvgFeFilterPrimitive::QSvgFeFilterPrimitive(QSvgNode *parent, QString input, QS
 
 }
 
+bool QSvgFeFilterPrimitive::shouldDrawNode(QPainter *, QSvgExtraStates &) const
+{
+    return false;
+}
+
 QRectF QSvgFeFilterPrimitive::localFilterBoundingBox(QSvgNode *node,
                                                      const QRectF &itemBounds, const QRectF &filterBounds,
                                                      QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const

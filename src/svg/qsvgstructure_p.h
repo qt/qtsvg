@@ -163,6 +163,7 @@ public:
 
     QSvgFilterContainer(QSvgNode *parent, const QSvgRectF &bounds, QtSvg::UnitTypes filterUnits, QtSvg::UnitTypes primitiveUnits);
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
+    bool shouldDrawNode(QPainter *, QSvgExtraStates &) const override;
     Type type() const override;
     QImage applyFilter(QSvgNode *referenceNode, const QImage &buffer, QPainter *p, QRectF bounds) const;
     void setSupported(bool supported);
@@ -194,6 +195,7 @@ public:
     QSvgMask(QSvgNode *parent, QSvgRectF bounds,
              QtSvg::UnitTypes contentsUnits);
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
+    bool shouldDrawNode(QPainter *, QSvgExtraStates &) const override;
     Type type() const override;
     QImage createMask(QPainter *p, QSvgExtraStates &states, QSvgNode *targetNode, QRectF *globalRect) const;
     QImage createMask(QPainter *p, QSvgExtraStates &states, const QRectF &localRect, QRectF *globalRect) const;
@@ -219,6 +221,7 @@ public:
     QSvgPattern(QSvgNode *parent, QSvgRectF bounds, QRectF viewBox,
                 QtSvg::UnitTypes contentUnits, QTransform transform);
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
+    bool shouldDrawNode(QPainter *, QSvgExtraStates &) const override;
     QImage patternImage(QPainter *p, QSvgExtraStates &states, const QSvgNode *patternElement);
     Type type() const override;
     const QTransform& appliedTransform() const { return m_appliedTransform; }
