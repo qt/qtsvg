@@ -108,15 +108,18 @@ public:
         static bool envOk = false;
         static QtSvg::Options envOpts = QtSvg::Options::fromInt(
                 qEnvironmentVariableIntValue("QT_SVG_DEFAULT_OPTIONS", &envOk));
-        return envOk ? envOpts : QtSvg::Options{};
+        return envOk ? envOpts : appDefaultOptions;
     }
 
     QSvgTinyDocument *render;
     QTimer *timer;
     int fps;
     QtSvg::Options options;
+    static QtSvg::Options appDefaultOptions;
     bool animationEnabled = true;
 };
+
+QtSvg::Options QSvgRendererPrivate::appDefaultOptions;
 
 /*!
     Constructs a new renderer with the given \a parent.
@@ -323,10 +326,10 @@ void QSvgRenderer::setAspectRatioMode(Qt::AspectRatioMode mode)
     This property holds a set of QtSvg::Option flags that can be used
     to enable or disable various features of the parsing and rendering of SVG files.
 
-    Set this property before calling any of the load functions to
-    change the behavior of the QSvgRenderer.
+    In order to take effect, this property must be set \c before load() is executed. Note that the
+    constructors taking an SVG source parameter will perform loading during construction.
 
-    By default, no flags are set.
+    \sa setDefaultOptions
  */
 QtSvg::Options QSvgRenderer::options() const
 {
@@ -339,6 +342,19 @@ void QSvgRenderer::setOptions(QtSvg::Options flags)
     Q_D(QSvgRenderer);
     d->options = flags;
 }
+
+/*!
+    Sets the option flags that renderers will be created with to \a flags.
+    By default, no flags are set.
+
+    \since 6.8
+*/
+
+void QSvgRenderer::setDefaultOptions(QtSvg::Options flags)
+{
+    QSvgRendererPrivate::appDefaultOptions = flags;
+}
+
 /*!
   \property QSvgRenderer::currentFrame
   \brief the current frame of the document's animation, or 0 if the document is not animated

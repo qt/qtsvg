@@ -65,6 +65,8 @@ public:
     bool elementExists(const QString &id) const;
     QTransform transformForElement(const QString &id) const;
 
+    static void setDefaultOptions(QtSvg::Options flags);
+
 public Q_SLOTS:
     bool load(const QString &filename);
     bool load(const QByteArray &contents);
