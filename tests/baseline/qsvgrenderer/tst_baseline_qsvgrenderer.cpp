@@ -9,7 +9,6 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDirIterator>
 #include <QtCore/QDebug>
-#include <QtCore/QProcess>
 #include <QtGui/QImage>
 
 #include <algorithm>
