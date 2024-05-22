@@ -354,25 +354,16 @@ QRectF QSvgNode::transformedBounds() const
 
     QImage dummy(1, 1, QImage::Format_RGB32);
     QPainter p(&dummy);
+    initPainter(&p);
     QSvgExtraStates states;
 
-    QPen pen(Qt::NoBrush, 1, Qt::SolidLine, Qt::FlatCap, Qt::SvgMiterJoin);
-    pen.setMiterLimit(4);
-    p.setPen(pen);
-
-    QStack<QSvgNode*> parentApplyStack;
-    QSvgNode *parent = m_parent;
-    while (parent) {
-        parentApplyStack.push(parent);
-        parent = parent->parent();
-    }
-
-    for (int i = parentApplyStack.size() - 1; i >= 0; --i)
-        parentApplyStack[i]->applyStyle(&p, states);
-    
+    if (parent())
+        parent()->applyStyleRecursive(&p, states);
+    // ###TODO: If we reset the world transform we should not call this function transformedBounds
     p.setWorldTransform(QTransform());
-
     m_cachedBounds = transformedBounds(&p, states);
+    if (parent()) // always revert the style to not store old transformations
+        parent()->revertStyleRecursive(&p, states);
     return m_cachedBounds;
 }
 
