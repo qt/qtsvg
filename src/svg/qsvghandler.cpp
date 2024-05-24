@@ -2090,8 +2090,7 @@ QtSvg::Options QSvgHandler::options() const
 
 bool QSvgHandler::trustedSourceMode() const
 {
-    static const bool envAssumeTrusted = qEnvironmentVariableIsSet("QT_SVG_ASSUME_TRUSTED_SOURCE");
-    return envAssumeTrusted;
+    return m_options.testFlag(QtSvg::AssumeTrustedSource);
 }
 
 static inline QStringList stringToList(const QString &str)

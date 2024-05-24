@@ -21,4 +21,8 @@
     \value Tiny12FeaturesOnly  Strictly and exclusively parse only tags that are
                                part of the \l{http://www.w3.org/TR/SVGMobile12}
                                {SVG 1.2 Tiny} Static Feature set.
+
+    \value [since 6.8] AssumeTrustedSource
+                               Disable certain checks and restrictions on resource
+                               usage etc.
 */
