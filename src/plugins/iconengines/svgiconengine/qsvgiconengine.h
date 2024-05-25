@@ -23,6 +23,8 @@ public:
                      QIcon::State state) override;
     QPixmap pixmap(const QSize &size, QIcon::Mode mode,
                    QIcon::State state) override;
+    QPixmap scaledPixmap(const QSize &size, QIcon::Mode mode,
+                         QIcon::State state, qreal scale) override;
 
     void addPixmap(const QPixmap &pixmap, QIcon::Mode mode,
                    QIcon::State state) override;

@@ -33,14 +33,15 @@ public:
         return ((mode << 4) | state);
     }
 
-    QString pmcKey(const QSize &size, QIcon::Mode mode, QIcon::State state) const
+    QString pmcKey(const QSize &size, QIcon::Mode mode, QIcon::State state, qreal scale) const
     {
         return QLatin1String("$qt_svgicon_")
                 % HexString<int>(serialNum)
                 % HexString<qint8>(mode)
                 % HexString<qint8>(state)
                 % HexString<int>(size.width())
-                % HexString<int>(size.height());
+                % HexString<int>(size.height())
+                % HexString<qint16>(qRound(scale * 1000));
     }
 
     void stepSerialNum()
@@ -165,16 +166,22 @@ QIcon::Mode QSvgIconEnginePrivate::loadDataForModeAndState(QSvgRenderer *rendere
 QPixmap QSvgIconEngine::pixmap(const QSize &size, QIcon::Mode mode,
                                QIcon::State state)
 {
+    return scaledPixmap(size, mode, state, 1.0);
+}
+
+QPixmap QSvgIconEngine::scaledPixmap(const QSize &size, QIcon::Mode mode, QIcon::State state,
+                                     qreal scale)
+{
     QPixmap pm;
 
-    QString pmckey(d->pmcKey(size, mode, state));
+    QString pmckey(d->pmcKey(size, mode, state, scale));
     if (QPixmapCache::find(pmckey, &pm))
         return pm;
 
     if (!d->addedPixmaps.isEmpty()) {
         const auto key = d->hashKey(mode, state);
         pm = d->addedPixmaps.value(key);
-        if (!pm.isNull() && pm.size() == size)
+        if (!pm.isNull() && pm.size() == size * scale && pm.devicePixelRatio() == scale)
             return pm;
         if (pm.isNull())
             d->addedPixmaps.remove(key);
@@ -187,7 +194,7 @@ QPixmap QSvgIconEngine::pixmap(const QSize &size, QIcon::Mode mode,
 
     QSize actualSize = renderer.defaultSize();
     if (!actualSize.isNull())
-        actualSize.scale(size, Qt::KeepAspectRatio);
+        actualSize.scale(size * scale, Qt::KeepAspectRatio);
 
     if (actualSize.isEmpty())
         return pm;
@@ -205,8 +212,10 @@ QPixmap QSvgIconEngine::pixmap(const QSize &size, QIcon::Mode mode,
         }
     }
 
-    if (!pm.isNull())
+    if (!pm.isNull()) {
+        pm.setDevicePixelRatio(scale);
         QPixmapCache::insert(pmckey, pm);
+    }
 
     return pm;
 }
