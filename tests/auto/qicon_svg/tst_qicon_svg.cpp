@@ -70,11 +70,18 @@ void tst_QIcon_Svg::svg()
 
     QPixmap pm(prefix + "image.png");
     icon1.addPixmap(pm, QIcon::Normal, QIcon::On);
+    icon1.addPixmap(pm.scaled(QSize(32, 32)), QIcon::Normal, QIcon::On);
     QVERIFY(!icon1.pixmap(128, QIcon::Normal, QIcon::On).isNull());
     QImage img4 = icon1.pixmap(128, QIcon::Normal, QIcon::On).toImage();
-    QVERIFY(img4 != img3);
-    QVERIFY(img4 != img2);
-    QVERIFY(img4 != img1);
+    QCOMPARE_NE(img4, img3);
+    QCOMPARE_NE(img4, img2);
+    QCOMPARE_NE(img4, img1);
+    QVERIFY(!icon1.pixmap(32, QIcon::Normal, QIcon::On).isNull());
+    QImage img5 = icon1.pixmap(32, QIcon::Normal, QIcon::On).toImage();
+    QCOMPARE_NE(img5, img4);
+    QCOMPARE_NE(img5, img3);
+    QCOMPARE_NE(img5, img2);
+    QCOMPARE_NE(img5, img1);
 
     QIcon icon2;
     icon2.addFile(prefix + "heart.svg");
