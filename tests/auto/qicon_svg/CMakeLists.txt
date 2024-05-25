@@ -30,13 +30,15 @@ qt_internal_add_test(tst_qicon_svg
 
 # Resources:
 set(tst_qicon_svg_resource_files
-    "./icons/heart.svg"
-    "./icons/heart.svgz"
-    "./icons/image.png"
-    "./icons/rect.svg"
-    "./icons/rect_size_100percent.svg"
-    "./icons/trash.svg"
-    "./icons/triangle.svg"
+    "icons/heart.svg"
+    "icons/heart.svgz"
+    "icons/image.png"
+    "icons/rect.svg"
+    "icons/rect_size_100percent.svg"
+    "icons/trash.svg"
+    "icons/triangle.svg"
+    "icons/testtheme/svg/actions/heart.svg"
+    "icons/testtheme/index.theme"
 )
 
 qt_internal_add_resource(tst_qicon_svg "tst_qicon_svg"

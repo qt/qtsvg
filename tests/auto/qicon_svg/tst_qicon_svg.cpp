@@ -20,7 +20,8 @@ private slots:
     void availableSizes();
     void isNull();
     void sizeInPercent();
-
+    void fromTheme_data();
+    void fromTheme();
 
 private:
     QString prefix;
@@ -156,6 +157,50 @@ void tst_QIcon_Svg::sizeInPercent()
 
     QCOMPARE(icon.actualSize(QSize(8, 8)), QSize(8, 4));
     QCOMPARE(icon.pixmap(QSize(8, 8)).size(), QSize(8, 4));
+}
+
+void tst_QIcon_Svg::fromTheme_data()
+{
+    QTest::addColumn<int>("requestedSize");
+    QTest::addColumn<qreal>("requestedDpr");
+
+    QTest::newRow("22x22,dpr=1") << 22 << 1.0;
+    QTest::newRow("22x22,dpr=2") << 22 << 2.0;
+    QTest::newRow("22x22,dpr=3") << 22 << 3.0;
+
+    QTest::newRow("32x32,dpr=1") << 32 << 1.0;
+    QTest::newRow("32x32,dpr=2") << 32 << 2.0;
+    QTest::newRow("32x32,dpr=3") << 32 << 3.0;
+
+    QTest::newRow("40x40,dpr=1") << 40 << 1.0;
+    QTest::newRow("40x40,dpr=2") << 40 << 2.0;
+    QTest::newRow("40x40,dpr=3") << 40 << 3.0;
+}
+
+void tst_QIcon_Svg::fromTheme()
+{
+    QFETCH(int, requestedSize);
+    QFETCH(qreal, requestedDpr);
+
+    QString searchPath = QLatin1String(":/icons");
+    QIcon::setThemeSearchPaths(QStringList() << searchPath);
+    QCOMPARE(QIcon::themeSearchPaths().size(), 1);
+    QCOMPARE(searchPath, QIcon::themeSearchPaths()[0]);
+
+    QString themeName("testtheme");
+    QIcon::setThemeName(themeName);
+    QCOMPARE(QIcon::themeName(), themeName);
+
+    QIcon heartIcon = QIcon::fromTheme("heart");
+    QVERIFY(!heartIcon.isNull());
+    QVERIFY(!heartIcon.availableSizes(QIcon::Normal, QIcon::Off).isEmpty()); // 22x22
+
+    const QPixmap pixmap = heartIcon.pixmap(QSize(requestedSize, requestedSize), requestedDpr);
+    const auto width = pixmap.size().width();
+    const auto height = pixmap.size().height();
+    requestedSize *= requestedDpr;
+    QVERIFY(width == requestedSize || height == requestedSize);
+    QCOMPARE(pixmap.devicePixelRatio(), requestedDpr);
 }
 
 
