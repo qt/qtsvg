@@ -274,6 +274,11 @@ void QSvgIconEngine::paint(QPainter *painter, const QRect &rect,
     painter->drawPixmap(rect, pixmap(pixmapSize, mode, state));
 }
 
+bool QSvgIconEngine::isNull()
+{
+    return d->svgFiles.isEmpty() && d->addedPixmaps.isEmpty() && d->svgBuffers.isEmpty();
+}
+
 QString QSvgIconEngine::key() const
 {
     return QLatin1String("svg");
@@ -384,14 +389,6 @@ bool QSvgIconEngine::write(QDataStream &out) const
         out << (int)0;
     }
     return true;
-}
-
-void QSvgIconEngine::virtual_hook(int id, void *data)
-{
-    if (id == QIconEngine::IsNullHook) {
-        *reinterpret_cast<bool*>(data) = d->svgFiles.isEmpty() && d->addedPixmaps.isEmpty() && d->svgBuffers.isEmpty();
-    }
-    QIconEngine::virtual_hook(id, data);
 }
 
 QT_END_NAMESPACE
