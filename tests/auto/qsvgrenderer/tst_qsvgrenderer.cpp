@@ -32,13 +32,17 @@ private slots:
     void invalidUrl_data();
     void invalidUrl();
     void testStrokeWidth();
+#if QT_CONFIG(picture)
     void testMapViewBoxToTarget();
     void testRenderElement();
+#endif
     void testRenderElementToBounds();
     void testRenderDocumentWithSizeToBounds();
+#if QT_CONFIG(picture)
     void constructorQXmlStreamReader() const;
     void loadQXmlStreamReader() const;
     void nestedQXmlStreamReader() const;
+#endif
     void stylePropagation() const;
     void transformForElement() const;
     void boundsOnElement() const;
@@ -219,6 +223,7 @@ void tst_QSvgRenderer::testStrokeWidth()
     QCOMPARE(strokeRect.y(), topLeft - (strokeWidth / 2));
 }
 
+#if QT_CONFIG(picture)
 void tst_QSvgRenderer::testMapViewBoxToTarget()
 {
     const char *src = "<svg><g><rect x=\"250\" y=\"250\" width=\"500\" height=\"500\" /></g></svg>";
@@ -344,6 +349,7 @@ void tst_QSvgRenderer::testRenderElement()
     }
 
 }
+#endif
 
 void tst_QSvgRenderer::testRenderElementToBounds()
 {
@@ -410,6 +416,7 @@ void tst_QSvgRenderer::testRenderDocumentWithSizeToBounds()
     QCOMPARE(reference, rendering);
 }
 
+#if QT_CONFIG(picture)
 void tst_QSvgRenderer::constructorQXmlStreamReader() const
 {
     const QByteArray data(src);
@@ -438,7 +445,6 @@ void tst_QSvgRenderer::loadQXmlStreamReader() const
     QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
 }
 
-
 void tst_QSvgRenderer::nestedQXmlStreamReader() const
 {
     const QByteArray data(QByteArray("<bar>") + QByteArray(src) + QByteArray("</bar>"));
@@ -463,6 +469,7 @@ void tst_QSvgRenderer::nestedQXmlStreamReader() const
     QVERIFY(reader.atEnd());
     QVERIFY(!reader.hasError());
 }
+#endif
 
 void tst_QSvgRenderer::stylePropagation() const
 {
