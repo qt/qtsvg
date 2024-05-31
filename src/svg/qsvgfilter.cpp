@@ -15,8 +15,8 @@ QT_BEGIN_NAMESPACE
 
 Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw);
 
-QSvgFeFilterPrimitive::QSvgFeFilterPrimitive(QSvgNode *parent, QString input, QString result,
-                                             const QSvgRectF &rect)
+QSvgFeFilterPrimitive::QSvgFeFilterPrimitive(QSvgNode *parent, const QString &input,
+                                             const QString &result, const QSvgRectF &rect)
     : QSvgStructureNode(parent)
     , m_input(input)
     , m_result(result)
@@ -85,8 +85,9 @@ const QSvgFeFilterPrimitive *QSvgFeFilterPrimitive::castToFilterPrimitive(const 
     }
 }
 
-QSvgFeColorMatrix::QSvgFeColorMatrix(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect,
-                                     ColorShiftType type, Matrix matrix)
+QSvgFeColorMatrix::QSvgFeColorMatrix(QSvgNode *parent, const QString &input, const QString &result,
+                                     const QSvgRectF &rect, ColorShiftType type,
+                                     const Matrix &matrix)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
     , m_type(type)
     , m_matrix(matrix)
@@ -263,7 +264,8 @@ QImage QSvgFeColorMatrix::apply(QSvgNode *item, const QMap<QString, QImage> &sou
     return result;
 }
 
-QSvgFeGaussianBlur::QSvgFeGaussianBlur(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect,
+QSvgFeGaussianBlur::QSvgFeGaussianBlur(QSvgNode *parent, const QString &input,
+                                       const QString &result, const QSvgRectF &rect,
                                        qreal stdDeviationX, qreal stdDeviationY, EdgeMode edgemode)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
     , m_stdDeviationX(stdDeviationX)
@@ -380,8 +382,8 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
     return result;
 }
 
-QSvgFeOffset::QSvgFeOffset(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect,
-                           qreal dx, qreal dy)
+QSvgFeOffset::QSvgFeOffset(QSvgNode *parent, const QString &input, const QString &result,
+                           const QSvgRectF &rect, qreal dx, qreal dy)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
     , m_dx(dx)
     , m_dy(dy)
@@ -437,7 +439,8 @@ QImage QSvgFeOffset::apply(QSvgNode *item, const QMap<QString, QImage> &sources,
 }
 
 
-QSvgFeMerge::QSvgFeMerge(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect)
+QSvgFeMerge::QSvgFeMerge(QSvgNode *parent, const QString &input,
+                         const QString &result, const QSvgRectF &rect)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
 {
 
@@ -502,7 +505,8 @@ bool QSvgFeMerge::requiresSourceAlpha() const
     return false;
 }
 
-QSvgFeMergeNode::QSvgFeMergeNode(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect)
+QSvgFeMergeNode::QSvgFeMergeNode(QSvgNode *parent, const QString &input,
+                                 const QString &result, const QSvgRectF &rect)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
 {
 
@@ -519,8 +523,9 @@ QImage QSvgFeMergeNode::apply(QSvgNode *, const QMap<QString, QImage> &sources, 
     return sources.value(m_input);
 }
 
-QSvgFeComposite::QSvgFeComposite(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect,
-                                 QString input2, Operator op, QVector4D k)
+QSvgFeComposite::QSvgFeComposite(QSvgNode *parent, const QString &input, const QString &result,
+                                 const QSvgRectF &rect, const QString &input2, Operator op,
+                                 const QVector4D &k)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
     , m_input2(input2)
     , m_operator(op)
@@ -662,7 +667,7 @@ bool QSvgFeComposite::requiresSourceAlpha() const
 }
 
 
-QSvgFeFlood::QSvgFeFlood(QSvgNode *parent, QString input, QString result,
+QSvgFeFlood::QSvgFeFlood(QSvgNode *parent, const QString &input, const QString &result,
                          const QSvgRectF &rect, const QColor &color)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
     , m_color(color)
@@ -695,7 +700,7 @@ QImage QSvgFeFlood::apply(QSvgNode *item, const QMap<QString, QImage> &,
     return result;
 }
 
-QSvgFeUnsupported::QSvgFeUnsupported(QSvgNode *parent, QString input, QString result,
+QSvgFeUnsupported::QSvgFeUnsupported(QSvgNode *parent, const QString &input, const QString &result,
                          const QSvgRectF &rect)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
 {
