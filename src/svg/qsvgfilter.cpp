@@ -332,8 +332,7 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
         int d = (m % 2 == 0) ? dx : dy;
         int maxdim = (m % 2 == 0) ? tempSource.width() : tempSource.height();
 
-        if (d < 1)
-            continue;
+        Q_ASSERT(d >= 1);
 
         for (int i = 0; i < tempSource.width(); i++) {
             for (int j = 0; j < tempSource.height(); j++) {
