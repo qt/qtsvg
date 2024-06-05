@@ -92,7 +92,7 @@ QSvgFeColorMatrix::QSvgFeColorMatrix(QSvgNode *parent, const QString &input, con
 {
     //Magic numbers see SVG 1.1(Second edition)
     if (type == ColorShiftType::Saturate) {
-        qreal s = qBound(0., matrix.data()[0], 1.);
+        qreal s = qBound(0., m_matrix.data()[0], 1.);
 
         m_matrix.fill(0);
 
@@ -111,7 +111,7 @@ QSvgFeColorMatrix::QSvgFeColorMatrix(QSvgNode *parent, const QString &input, con
         m_matrix.data()[3+3*5] = 1;
 
     } else if (type == ColorShiftType::HueRotate){
-        qreal angle = matrix.data()[0]/180.*M_PI;
+        qreal angle = m_matrix.data()[0]/180.*M_PI;
         qreal s = sin(angle);
         qreal c = cos(angle);
 
