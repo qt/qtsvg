@@ -22,9 +22,12 @@
 #include "QtGui/qimage.h"
 #include "QtGui/qtextlayout.h"
 #include "QtGui/qtextoption.h"
+#include "QtCore/qloggingcategory.h"
 #include "QtCore/qstack.h"
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw);
 
 class QTextCharFormat;
 

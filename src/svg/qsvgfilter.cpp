@@ -3,6 +3,7 @@
 
 #include "qsvgfilter_p.h"
 
+#include "qsvggraphics_p.h"
 #include "qsvgnode_p.h"
 #include "qsvgtinydocument_p.h"
 #include "qpainter.h"
@@ -12,8 +13,6 @@
 #include <QVector4D>
 
 QT_BEGIN_NAMESPACE
-
-Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw);
 
 QSvgFeFilterPrimitive::QSvgFeFilterPrimitive(QSvgNode *parent, const QString &input,
                                              const QString &result, const QSvgRectF &rect)

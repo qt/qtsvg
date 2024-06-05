@@ -3,6 +3,7 @@
 
 #include "qsvgnode_p.h"
 #include "qsvgtinydocument_p.h"
+#include "qsvggraphics_p.h"
 
 #include <QLoggingCategory>
 #include<QElapsedTimer>
@@ -15,9 +16,9 @@
 
 QT_BEGIN_NAMESPACE
 
-Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw);
-
-Q_LOGGING_CATEGORY(lcSvgTiming, "qt.svg.timing")
+#ifndef QT_NO_DEBUG
+Q_STATIC_LOGGING_CATEGORY(lcSvgTiming, "qt.svg.timing")
+#endif
 
 #if !defined(QT_SVG_SIZE_LIMIT)
 #  define QT_SVG_SIZE_LIMIT QT_RASTER_COORD_LIMIT
