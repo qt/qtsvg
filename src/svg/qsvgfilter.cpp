@@ -89,10 +89,8 @@ QSvgFeColorMatrix::QSvgFeColorMatrix(QSvgNode *parent, const QString &input, con
                                      const QSvgRectF &rect, ColorShiftType type,
                                      const Matrix &matrix)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
-    , m_type(type)
     , m_matrix(matrix)
 {
-    (void)m_type;
     //Magic numbers see SVG 1.1(Second edition)
     if (type == ColorShiftType::Saturate) {
         qreal s = qBound(0., matrix.data()[0], 1.);

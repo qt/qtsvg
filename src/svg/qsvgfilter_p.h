@@ -83,7 +83,6 @@ public:
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
                  QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const override;
 private:
-    ColorShiftType m_type;
     Matrix m_matrix;
 };
 
