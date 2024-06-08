@@ -347,6 +347,8 @@ void QSvgRenderer::setOptions(QtSvg::Options flags)
     Sets the option flags that renderers will be created with to \a flags.
     By default, no flags are set.
 
+    At runtime, this can be overridden by the QT_SVG_DEFAULT_OPTIONS environment variable.
+
     \since 6.8
 */
 

@@ -625,12 +625,10 @@ void QSvgNode::initPainter(QPainter *p)
 
 bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
 {
-    static bool alwaysDraw = qEnvironmentVariableIntValue("QT_SVG_DISABLE_SIZE_LIMIT");
-
     if (m_displayMode == DisplayMode::NoneMode)
         return false;
 
-    if (alwaysDraw)
+    if (document() && document()->options().testFlag(QtSvg::AssumeTrustedSource))
         return true;
 
     QRectF brect = fastBounds(p, states);
@@ -638,7 +636,7 @@ bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
         return true;
     } else {
         qCWarning(lcSvgDraw) << "Shape of type" << type() << "ignored because it will take too long to rasterize (bounding rect=" << brect << ")."
-                             << "Set QT_SVG_DISABLE_SIZE_LIMIT=1 to disable this check.";
+                             << "Enable AssumeTrustedSource in QSvgHandler or set QT_SVG_DEFAULT_OPTIONS=2 to disable this check.";
         return false;
     }
 }
