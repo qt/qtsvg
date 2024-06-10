@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="210" height="300">
+<!--Testing different values of stroke-linejoin-->
+  <g transform="translate(5, 70)">
+    <text style="font-size: 60px; font-weight: bold; font-family: sans-serif; fill: black; stroke: red; stroke-width:3.1px;">Qt Svg</text>
+    <text y="70" stroke-opacity="0.7" style="font-size: 60px; font-weight: bold; font-family: sans-serif; fill: black; stroke: red; stroke-width:3.1px;">Qt Svg</text>
+    <text y="140" fill-opacity="0.7" style="font-size: 60px; font-weight: bold; font-family: sans-serif; fill: black; stroke: red; stroke-width:3.1px;">Qt Svg</text>
+    <text y="210" fill-opacity="0.7" stroke-opacity="0.7" style="font-size: 60px; font-weight: bold; font-family: sans-serif; fill: black; stroke: red; stroke-width:3.1px;">Qt Svg</text>
+  </g>
+  g&gt;
+</svg>
