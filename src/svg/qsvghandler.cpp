@@ -3432,8 +3432,13 @@ static QSvgNode *createFeFloodNode(QSvgNode *parent,
     const QStringView opacityStr  = attributes.value(QLatin1String("flood-opacity"));
 
     QColor color;
-    if (!constructColor(colorStr, opacityStr, color, handler))
+    if (!constructColor(colorStr, opacityStr, color, handler)) {
         color = QColor(Qt::black);
+        bool ok;
+        qreal op = qMin(qreal(1.0), qMax(qreal(0.0), toDouble(opacityStr, &ok)));
+        if (ok)
+            color.setAlphaF(op);
+    }
 
     QString inputString;
     QString outputString;
