@@ -2850,6 +2850,8 @@ static QSvgNode *createImageNode(QSvgNode *parent,
     const QStringView width  = attributes.value(QLatin1String("width"));
     const QStringView height = attributes.value(QLatin1String("height"));
     QString filename = attributes.value(QLatin1String("xlink:href")).toString();
+    if (filename.isEmpty() && !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
+        filename = attributes.value(QLatin1String("href")).toString();
     qreal nx = toDouble(x);
     qreal ny = toDouble(y);
     QSvgHandler::LengthType type;
