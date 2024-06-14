@@ -628,11 +628,11 @@ void tst_QSvgRenderer::boundsOnElement() const
     QVERIFY(!textBoundsA.isEmpty());
     QCOMPARE(renderer.boundsOnElement(QLatin1String("textB")), textBoundsA);
 
-    QRect cBounds = renderer.boundsOnElement(QLatin1String("textC")).toRect();
-    QRect dBounds = renderer.boundsOnElement(QLatin1String("textD")).toRect();
+    QRectF cBounds = renderer.boundsOnElement(QLatin1String("textC"));
+    QRectF dBounds = renderer.boundsOnElement(QLatin1String("textD"));
     QVERIFY(!cBounds.isEmpty());
     QCOMPARE(cBounds.size(), dBounds.size());
-    QRect groupBounds = renderer.boundsOnElement(QLatin1String("textGroup")).toRect();
+    QRectF groupBounds = renderer.boundsOnElement(QLatin1String("textGroup"));
     QCOMPARE(groupBounds, cBounds | dBounds);
 }
 
