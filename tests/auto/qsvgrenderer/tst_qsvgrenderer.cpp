@@ -83,6 +83,7 @@ private slots:
     void testFeMerge();
     void testFeComposite();
     void testFeGaussian();
+    void testFeBlend();
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
@@ -2181,6 +2182,38 @@ void tst_QSvgRenderer::testFeGaussian()
     QCOMPARE_GE(qGray(image.pixel(QPoint(10, 25))), 100);
     QCOMPARE_LE(qGray(image.pixel(QPoint(25, 25))), 10);
 
+}
+
+void tst_QSvgRenderer::testFeBlend()
+{
+    QByteArray svgDoc(R"(<svg width="50" height="50">
+                      <filter id="f1">
+                      <feOffset in="SourceAlpha" dx="2" dy="2"/>
+                      <feBlend in2="SourceGraphic" mode="normal"/>
+                      </filter>
+                      <rect x="10" y="10" width="30" height="30" fill="blue" filter="url(#f1) "/>
+                      </svg>)"
+);
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(50, 50, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::transparent);
+    QImage refImage(50, 50, QImage::Format_ARGB32_Premultiplied);
+    refImage.fill(Qt::transparent);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
+
+    p.begin(&refImage);
+    p.fillRect(10, 10, 30, 30, Qt::blue);
+    p.fillRect(12, 12, 30, 30, Qt::black);
+    p.end();
+
+    QCOMPARE(refImage, image);
 }
 
 QTEST_MAIN(tst_QSvgRenderer)

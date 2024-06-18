@@ -62,6 +62,7 @@ public:
         FeOffset,
         FeComposite,
         FeFlood,
+        FeBlend,
         FeUnsupported
     };
     enum DisplayMode {

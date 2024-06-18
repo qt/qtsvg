@@ -413,6 +413,7 @@ QString QSvgNode::typeName() const
         case FeOffset: return QStringLiteral("feOffset");
         case FeComposite: return QStringLiteral("feComposite");
         case FeFlood: return QStringLiteral("feFlood");
+        case FeBlend: return QStringLiteral("feBlend");
         case FeUnsupported: return QStringLiteral("feUnsupported");
     }
     return QStringLiteral("unknown");

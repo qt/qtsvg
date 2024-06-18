@@ -3491,6 +3491,35 @@ static QSvgNode *createFeMergeNodeNode(QSvgNode *parent,
     return filter;
 }
 
+static QSvgNode *createFeBlendNode(QSvgNode *parent,
+                                   const QXmlStreamAttributes &attributes,
+                                   QSvgHandler *handler)
+{
+    QString in2String = attributes.value(QLatin1String("in2")).toString();
+    QString modeString = attributes.value(QLatin1String("mode")).toString();
+
+    QString inputString;
+    QString outputString;
+    QSvgRectF rect;
+
+    parseFilterAttributes(parent, attributes, handler,
+                          &inputString, &outputString, &rect);
+
+    QSvgFeBlend::Mode mode = QSvgFeBlend::Mode::Normal;
+    if (modeString.startsWith(QStringLiteral("multiply")))
+        mode = QSvgFeBlend::Mode::Multiply;
+    else if (modeString.startsWith(QStringLiteral("screen")))
+        mode = QSvgFeBlend::Mode::Screen;
+    else if (modeString.startsWith(QStringLiteral("darken")))
+        mode = QSvgFeBlend::Mode::Darken;
+    else if (modeString.startsWith(QStringLiteral("lighten")))
+        mode = QSvgFeBlend::Mode::Lighten;
+
+    QSvgNode *filter = new QSvgFeBlend(parent, inputString, outputString, rect,
+                                       in2String, mode);
+    return filter;
+}
+
 static QSvgNode *createFeUnsupportedNode(QSvgNode *parent,
                                          const QXmlStreamAttributes &attributes,
                                          QSvgHandler *handler)
@@ -4354,9 +4383,9 @@ static FactoryMethod findFilterFactory(const QString &name, QtSvg::Options optio
     if (name == QLatin1String("feMergeNode")) return createFeMergeNodeNode;
     if (name == QLatin1String("feComposite")) return createFeCompositeNode;
     if (name == QLatin1String("feFlood")) return createFeFloodNode;
+    if (name == QLatin1String("feBlend")) return createFeBlendNode;
 
     static const QStringList unsupportedFilters = {
-        QStringLiteral("feBlend"),
         QStringLiteral("feComponentTransfer"),
         QStringLiteral("feConvolveMatrix"),
         QStringLiteral("feDiffuseLighting"),

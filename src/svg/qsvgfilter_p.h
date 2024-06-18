@@ -183,6 +183,29 @@ private:
     QColor m_color;
 };
 
+class Q_SVG_EXPORT QSvgFeBlend : public QSvgFeFilterPrimitive
+{
+public:
+    enum class Mode : quint8 {
+        Normal,
+        Multiply,
+        Screen,
+        Darken,
+        Lighten
+    };
+    QSvgFeBlend(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect,
+                QString input2, Mode mode);
+    Type type() const override;
+    QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
+                 QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
+                 QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const override;
+    bool requiresSourceAlpha() const override;
+private:
+    QString m_input2;
+    Mode m_mode;
+
+};
+
 class Q_SVG_EXPORT QSvgFeUnsupported : public QSvgFeFilterPrimitive
 {
 public:
