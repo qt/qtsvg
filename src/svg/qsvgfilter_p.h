@@ -105,7 +105,7 @@ public:
 private:
     qreal m_stdDeviationX;
     qreal m_stdDeviationY;
-    EdgeMode m_edgemode;
+    EdgeMode m_edgemode; // TODO: Unused. Start using it when there's a reference implementation.
 };
 
 class Q_SVG_EXPORT QSvgFeOffset : public QSvgFeFilterPrimitive

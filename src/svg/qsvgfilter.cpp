@@ -268,7 +268,7 @@ QSvgFeGaussianBlur::QSvgFeGaussianBlur(QSvgNode *parent, const QString &input,
     , m_stdDeviationY(stdDeviationY)
     , m_edgemode(edgemode)
 {
-    (void)m_edgemode;
+    Q_UNUSED(m_edgemode);
 }
 
 QSvgNode::Type QSvgFeGaussianBlur::type() const
