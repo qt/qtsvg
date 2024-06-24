@@ -153,19 +153,19 @@ void tst_QSvgRenderer::invalidUrl_data()
 {
     QTest::addColumn<QByteArray>("svg");
 
-    QTest::newRow("01") << QByteArray("<svg><linearGradient id=\"0\"/><circle fill=\"url0\" /></svg>");
-    QTest::newRow("02") << QByteArray("<svg><linearGradient id=\"0\"/><circle fill=\"url(0\" /></svg>");
-    QTest::newRow("03") << QByteArray("<svg><linearGradient id=\"0\"/><circle fill=\"url (0\" /></svg>");
-    QTest::newRow("04") << QByteArray("<svg><linearGradient id=\"0\"/><circle fill=\"url ( 0\" /></svg>");
-    QTest::newRow("05") << QByteArray("<svg><linearGradient id=\"0\"/><circle fill=\"url#\" /></svg>");
-    QTest::newRow("06") << QByteArray("<svg><linearGradient id=\"0\"/><circle fill=\"url#(\" /></svg>");
-    QTest::newRow("07") << QByteArray("<svg><linearGradient id=\"0\"/><circle fill=\"url(#\" /></svg>");
-    QTest::newRow("08") << QByteArray("<svg><linearGradient id=\"0\"/><circle fill=\"url(# \" /></svg>");
-    QTest::newRow("09") << QByteArray("<svg><linearGradient id=\"0\"/><circle fill=\"url(# 0\" /></svg>");
-    QTest::newRow("10") << QByteArray("<svg><linearGradient id=\"blabla\"/><circle fill=\"urlblabla\" /></svg>");
-    QTest::newRow("11") << QByteArray("<svg><linearGradient id=\"blabla\"/><circle fill=\"url(blabla\" /></svg>");
-    QTest::newRow("12") << QByteArray("<svg><linearGradient id=\"blabla\"/><circle fill=\"url(blabla)\" /></svg>");
-    QTest::newRow("13") << QByteArray("<svg><linearGradient id=\"blabla\"/><circle fill=\"url(#blabla\" /></svg>");
+    QTest::newRow("01") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url0" /></svg>)");
+    QTest::newRow("02") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url(0" /></svg>)");
+    QTest::newRow("03") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url (0" /></svg>)");
+    QTest::newRow("04") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url ( 0" /></svg>)");
+    QTest::newRow("05") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url#" /></svg>)");
+    QTest::newRow("06") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url#(" /></svg>)");
+    QTest::newRow("07") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url(#" /></svg>)");
+    QTest::newRow("08") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url(# " /></svg>)");
+    QTest::newRow("09") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url(# 0" /></svg>)");
+    QTest::newRow("10") << QByteArray(R"(<svg><linearGradient id="blabla"/><circle fill="urlblabla" /></svg>)");
+    QTest::newRow("11") << QByteArray(R"(<svg><linearGradient id="blabla"/><circle fill="url(blabla" /></svg>)");
+    QTest::newRow("12") << QByteArray(R"(<svg><linearGradient id="blabla"/><circle fill="url(blabla) "/></svg>)");
+    QTest::newRow("13") << QByteArray(R"(<svg><linearGradient id="blabla"/><circle fill="url(#blabla" /></svg>)");
 }
 
 void tst_QSvgRenderer::invalidUrl()
@@ -226,7 +226,7 @@ void tst_QSvgRenderer::testStrokeWidth()
 #if QT_CONFIG(picture)
 void tst_QSvgRenderer::testMapViewBoxToTarget()
 {
-    const char *src = "<svg><g><rect x=\"250\" y=\"250\" width=\"500\" height=\"500\" /></g></svg>";
+    const char *src = R"(<svg><g><rect x="250" y="250" width="500" height="500" /></g></svg>)";
     QByteArray data(src);
 
     { // No viewport, viewBox, targetRect, or deviceRect -> boundingRect
@@ -282,7 +282,7 @@ void tst_QSvgRenderer::testMapViewBoxToTarget()
 
     // Requires keep-aspectratio feature
     { // Viewport and viewBox specified -> scale 500x500 square to 1000x750 while preserving aspect ratio gives 750x750
-        data = "<svg width=\"1000\" height=\"750\" viewBox=\"-250 -250 500 500\"><g><rect x=\"0\" y=\"0\" width=\"500\" height=\"500\" /></g></svg>";
+        data = R"(<svg width="1000" height="750" viewBox="-250 -250 500 500"><g><rect x="0" y="0" width="500" height="500" /></g></svg>)";
         QPicture picture;
         QPainter painter(&picture);
         QSvgRenderer rend(data);
@@ -473,18 +473,18 @@ void tst_QSvgRenderer::nestedQXmlStreamReader() const
 
 void tst_QSvgRenderer::stylePropagation() const
 {
-    QByteArray data("<svg>"
-                      "<g id='foo' style='fill:#ffff00;'>"
-                        "<g id='bar' style='fill:#ff00ff;'>"
-                          "<g id='baz' style='fill:#00ffff;'>"
-                            "<rect id='alpha' x='0' y='0' width='100' height='100'/>"
-                          "</g>"
-                          "<rect id='beta' x='100' y='0' width='100' height='100'/>"
-                        "</g>"
-                        "<rect id='gamma' x='0' y='100' width='100' height='100'/>"
-                      "</g>"
-                      "<rect id='delta' x='100' y='100' width='100' height='100'/>"
-                    "</svg>"); // alpha=cyan, beta=magenta, gamma=yellow, delta=black
+    QByteArray data(R"(<svg>
+                      <g id="foo" style="fill:#ffff00;">
+                        <g id="bar" style="fill:#ff00ff;">
+                          <g id="baz" style="fill:#00ffff;">
+                            <rect id="alpha" x="0" y="0" width="100" height="100"/>
+                          </g>
+                          <rect id="beta" x="100" y="0" width="100" height="100"/>
+                        </g>
+                        <rect id="gamma" x="0" y="100" width="100" height="100"/>
+                      </g>
+                      <rect id="delta" x="100" y="100" width="100" height="100"/>
+                    </svg>)"); // alpha=cyan, beta=magenta, gamma=yellow, delta=black
 
     QImage image1(200, 200, QImage::Format_RGB32);
     QImage image2(200, 200, QImage::Format_RGB32);
@@ -562,17 +562,17 @@ static void compareTransforms(const QTransform &m1, const QTransform &m2)
 
 void tst_QSvgRenderer::transformForElement() const
 {
-    QByteArray data("<svg>"
-                      "<g id='ichi' transform='translate(-3,1)'>"
-                        "<g id='ni' transform='rotate(45)'>"
-                          "<g id='san' transform='scale(4,2)'>"
-                            "<g id='yon' transform='matrix(1,2,3,4,5,6)'>"
-                              "<rect id='firkant' x='-1' y='-1' width='2' height='2'/>"
-                            "</g>"
-                          "</g>"
-                        "</g>"
-                      "</g>"
-                    "</svg>");
+    QByteArray data(R"(<svg>
+                      <g id="ichi" transform="translate(-3,1) ">
+                        <g id="ni" transform="rotate(45) ">
+                          <g id="san" transform="scale(4,2) ">
+                            <g id="yon" transform="matrix(1,2,3,4,5,6) ">
+                              <rect id="firkant" x="-1" y="-1" width="2" height="2"/>
+                            </g>
+                          </g>
+                        </g>
+                      </g>
+                    </svg>)");
 
     QImage image(13, 37, QImage::Format_RGB32);
     QPainter painter(&image);
@@ -591,28 +591,28 @@ void tst_QSvgRenderer::transformForElement() const
 
 void tst_QSvgRenderer::boundsOnElement() const
 {
-    QByteArray data("<svg>"
-                      "<g id=\"prim\" transform=\"translate(-3,1)\">"
-                        "<g id=\"sjokade\" stroke=\"none\" stroke-width=\"10\">"
-                          "<rect id=\"kaviar\" transform=\"rotate(45)\" x=\"-10\" y=\"-10\" width=\"20\" height=\"20\"/>"
-                        "</g>"
-                        "<g id=\"nugatti\" stroke=\"black\" stroke-width=\"2\">"
-                          "<use x=\"0\" y=\"0\" transform=\"rotate(45)\" xlink:href=\"#kaviar\"/>"
-                        "</g>"
-                        "<g id=\"nutella\" stroke=\"none\" stroke-width=\"10\">"
-                          "<path id=\"baconost\" transform=\"rotate(45)\" d=\"M-10 -10 L10 -10 L10 10 L-10 10 Z\"/>"
-                        "</g>"
-                        "<g id=\"hapaa\" transform=\"translate(-2,2)\" stroke=\"black\" stroke-width=\"2\">"
-                          "<use x=\"0\" y=\"0\" transform=\"rotate(45)\" xlink:href=\"#baconost\"/>"
-                        "</g>"
-                      "</g>"
-                      "<text id=\"textA\" x=\"50\" y=\"100\">Lorem ipsum</text>"
-                      "<text id=\"textB\" transform=\"matrix(1 0 0 1 50 100)\">Lorem ipsum</text>"
-                      "<g id=\"textGroup\">"
-                        "<text id=\"textC\" transform=\"matrix(1 0 0 2 20 10)\">Lorem ipsum</text>"
-                        "<text id=\"textD\" transform=\"matrix(1 0 0 2 30 40)\">Lorem ipsum</text>"
-                      "</g>"
-                    "</svg>");
+    QByteArray data(R"(<svg>
+                      <g id="prim" transform="translate(-3,1) ">
+                        <g id="sjokade" stroke="none" stroke-width="10">
+                          <rect id="kaviar" transform="rotate(45) " x="-10" y="-10" width="20" height="20"/>
+                        </g>
+                        <g id="nugatti" stroke="black" stroke-width="2">
+                          <use x="0" y="0" transform="rotate(45) " xlink:href="#kaviar"/>
+                        </g>
+                        <g id="nutella" stroke="none" stroke-width="10">
+                          <path id="baconost" transform="rotate(45) " d="M-10 -10 L10 -10 L10 10 L-10 10 Z"/>
+                        </g>
+                        <g id="hapaa" transform="translate(-2,2) " stroke="black" stroke-width="2">
+                          <use x="0" y="0" transform="rotate(45) " xlink:href="#baconost"/>
+                        </g>
+                      </g>
+                      <text id="textA" x="50" y="100">Lorem ipsum</text>
+                      <text id="textB" transform="matrix(1 0 0 1 50 100) ">Lorem ipsum</text>
+                      <g id="textGroup">
+                        <text id="textC" transform="matrix(1 0 0 2 20 10) ">Lorem ipsum</text>
+                        <text id="textD" transform="matrix(1 0 0 2 30 40) ">Lorem ipsum</text>
+                      </g>
+                    </svg>)");
     
     qreal sqrt2 = qSqrt(2);
     QSvgRenderer renderer(data);
@@ -639,13 +639,13 @@ void tst_QSvgRenderer::boundsOnElement() const
 void tst_QSvgRenderer::gradientStops() const
 {
     {
-        QByteArray data("<svg>"
-                          "<defs>"
-                            "<linearGradient id=\"gradient\">"
-                            "</linearGradient>"
-                          "</defs>"
-                          "<rect fill=\"url(#gradient)\" height=\"64\" width=\"64\" x=\"0\" y=\"0\"/>"
-                        "</svg>");
+        QByteArray data(R"(<svg>
+                          <defs>
+                            <linearGradient id="gradient">
+                            </linearGradient>
+                          </defs>
+                          <rect fill="url(#gradient) " height="64" width="64" x="0" y="0"/>
+                        </svg>)");
         QSvgRenderer renderer(data);
 
         QImage image(64, 64, QImage::Format_ARGB32_Premultiplied), refImage(64, 64, QImage::Format_ARGB32_Premultiplied);
@@ -658,14 +658,14 @@ void tst_QSvgRenderer::gradientStops() const
     }
 
     {
-        QByteArray data("<svg>"
-                          "<defs>"
-                            "<linearGradient id=\"gradient\">"
-                              "<stop offset=\"1\" stop-color=\"cyan\"/>"
-                            "</linearGradient>"
-                          "</defs>"
-                          "<rect fill=\"url(#gradient)\" height=\"64\" width=\"64\" x=\"0\" y=\"0\"/>"
-                        "</svg>");
+        QByteArray data(R"(<svg>
+                          <defs>
+                            <linearGradient id="gradient">
+                              <stop offset="1" stop-color="cyan"/>
+                            </linearGradient>
+                          </defs>
+                          <rect fill="url(#gradient) " height="64" width="64" x="0" y="0"/>
+                        </svg>)");
         QSvgRenderer renderer(data);
 
         QImage image(64, 64, QImage::Format_ARGB32_Premultiplied), refImage(64, 64, QImage::Format_ARGB32_Premultiplied);
@@ -677,20 +677,20 @@ void tst_QSvgRenderer::gradientStops() const
     }
 
     {
-        QByteArray data("<svg>"
-                          "<defs>"
-                            "<linearGradient id=\"gradient\">"
-                              "<stop offset=\"0\" stop-color=\"red\"/>"
-                              "<stop offset=\"0\" stop-color=\"cyan\"/>"
-                              "<stop offset=\"0.5\" stop-color=\"cyan\"/>"
-                              "<stop offset=\"0.5\" stop-color=\"magenta\"/>"
-                              "<stop offset=\"0.5\" stop-color=\"yellow\"/>"
-                              "<stop offset=\"1\" stop-color=\"yellow\"/>"
-                              "<stop offset=\"1\" stop-color=\"blue\"/>"
-                            "</linearGradient>"
-                          "</defs>"
-                          "<rect fill=\"url(#gradient)\" height=\"64\" width=\"64\" x=\"0\" y=\"0\"/>"
-                        "</svg>");
+        QByteArray data(R"(<svg>
+                          <defs>
+                            <linearGradient id="gradient">
+                              <stop offset="0" stop-color="red"/>
+                              <stop offset="0" stop-color="cyan"/>
+                              <stop offset="0.5" stop-color="cyan"/>
+                              <stop offset="0.5" stop-color="magenta"/>
+                              <stop offset="0.5" stop-color="yellow"/>
+                              <stop offset="1" stop-color="yellow"/>
+                              <stop offset="1" stop-color="blue"/>
+                            </linearGradient>
+                          </defs>
+                          <rect fill="url(#gradient) " height="64" width="64" x="0" y="0"/>
+                        </svg>)");
         QSvgRenderer renderer(data);
 
         QImage image(64, 64, QImage::Format_ARGB32_Premultiplied), refImage(64, 64, QImage::Format_ARGB32_Premultiplied);
@@ -712,57 +712,57 @@ void tst_QSvgRenderer::gradientStops() const
 void tst_QSvgRenderer::gradientRefs()
 {
     const char *svgs[] = {
-        "<svg>"
-            "<defs>"
-                "<linearGradient id=\"gradient\">"
-                    "<stop offset=\"0\" stop-color=\"red\" stop-opacity=\"0\"/>"
-                    "<stop offset=\"1\" stop-color=\"blue\"/>"
-                "</linearGradient>"
-            "</defs>"
-            "<rect fill=\"url(#gradient)\" height=\"8\" width=\"256\" x=\"0\" y=\"0\"/>"
-        "</svg>",
-        "<svg>"
-            "<defs>"
-                "<linearGradient id=\"gradient\" xlink:href=\"#gradient0\">"
-                "</linearGradient>"
-                "<linearGradient id=\"gradient0\">"
-                    "<stop offset=\"0\" stop-color=\"red\" stop-opacity=\"0\"/>"
-                    "<stop offset=\"1\" stop-color=\"blue\"/>"
-                "</linearGradient>"
-            "</defs>"
-            "<rect fill=\"url(#gradient)\" height=\"8\" width=\"256\" x=\"0\" y=\"0\"/>"
-        "</svg>",
-        "<svg>"
-            "<defs>"
-                "<linearGradient id=\"gradient0\">"
-                    "<stop offset=\"0\" stop-color=\"red\" stop-opacity=\"0\"/>"
-                    "<stop offset=\"1\" stop-color=\"blue\"/>"
-                "</linearGradient>"
-                "<linearGradient id=\"gradient\" xlink:href=\"#gradient0\">"
-                "</linearGradient>"
-            "</defs>"
-            "<rect fill=\"url(#gradient)\" height=\"8\" width=\"256\" x=\"0\" y=\"0\"/>"
-        "</svg>",
-        "<svg>"
-            "<rect fill=\"url(#gradient)\" height=\"8\" width=\"256\" x=\"0\" y=\"0\"/>"
-            "<defs>"
-                "<linearGradient id=\"gradient0\">"
-                    "<stop offset=\"0\" stop-color=\"red\" stop-opacity=\"0\"/>"
-                    "<stop offset=\"1\" stop-color=\"blue\"/>"
-                "</linearGradient>"
-                "<linearGradient id=\"gradient\" xlink:href=\"#gradient0\">"
-                "</linearGradient>"
-            "</defs>"
-        "</svg>",
-        "<svg>"
-            "<defs>"
-                "<linearGradient xlink:href=\"#0\" id=\"0\">"
-                    "<stop offset=\"0\" stop-color=\"red\" stop-opacity=\"0\"/>"
-                    "<stop offset=\"1\" stop-color=\"blue\"/>"
-                "</linearGradient>"
-            "</defs>"
-            "<rect fill=\"url(#0)\" height=\"8\" width=\"256\" x=\"0\" y=\"0\"/>"
-        "</svg>"
+        R"(<svg>
+            <defs>
+                <linearGradient id="gradient">
+                    <stop offset="0" stop-color="red" stop-opacity="0"/>
+                    <stop offset="1" stop-color="blue"/>
+                </linearGradient>
+            </defs>
+            <rect fill="url(#gradient) " height="8" width="256" x="0" y="0"/>
+        </svg>)",
+        R"(<svg>
+            <defs>
+                <linearGradient id="gradient" xlink:href="#gradient0">
+                </linearGradient>
+                <linearGradient id="gradient0">
+                    <stop offset="0" stop-color="red" stop-opacity="0"/>
+                    <stop offset="1" stop-color="blue"/>
+                </linearGradient>
+            </defs>
+            <rect fill="url(#gradient) " height="8" width="256" x="0" y="0"/>
+        </svg>)",
+        R"(<svg>
+            <defs>
+                <linearGradient id="gradient0">
+                    <stop offset="0" stop-color="red" stop-opacity="0"/>
+                    <stop offset="1" stop-color="blue"/>
+                </linearGradient>
+                <linearGradient id="gradient" xlink:href="#gradient0">
+                </linearGradient>
+            </defs>
+            <rect fill="url(#gradient) " height="8" width="256" x="0" y="0"/>
+        </svg>)",
+        R"(<svg>
+            <rect fill="url(#gradient) " height="8" width="256" x="0" y="0"/>
+            <defs>
+                <linearGradient id="gradient0">
+                    <stop offset="0" stop-color="red" stop-opacity="0"/>
+                    <stop offset="1" stop-color="blue"/>
+                </linearGradient>
+                <linearGradient id="gradient" xlink:href="#gradient0">
+                </linearGradient>
+            </defs>
+        </svg>)",
+        R"(<svg>
+            <defs>
+                <linearGradient xlink:href="#0" id="0">
+                    <stop offset="0" stop-color="red" stop-opacity="0"/>
+                    <stop offset="1" stop-color="blue"/>
+                </linearGradient>
+            </defs>
+            <rect fill="url(#0) " height="8" width="256" x="0" y="0"/>
+        </svg>)"
     };
     for (size_t i = 0 ; i < sizeof(svgs) / sizeof(svgs[0]) ; ++i)
     {
@@ -790,23 +790,23 @@ void tst_QSvgRenderer::recursiveRefs_data()
 {
     QTest::addColumn<QByteArray>("svg");
 
-    QTest::newRow("single") << QByteArray("<svg>"
-                                          "<linearGradient id='0' xlink:href='#0'/>"
-                                          "<rect x='0' y='0' width='20' height='20' fill='url(#0)'/>"
-                                          "</svg>");
+    QTest::newRow("single") << QByteArray(R"(<svg>
+                                          <linearGradient id="0" xlink:href="#0"/>
+                                          <rect x="0" y="0" width="20" height="20" fill="url(#0) "/>
+                                          </svg>)");
 
-    QTest::newRow("double") << QByteArray("<svg>"
-                                          "<linearGradient id='0' xlink:href='#1'/>"
-                                          "<linearGradient id='1' xlink:href='#0'/>"
-                                          "<rect x='0' y='0' width='20' height='20' fill='url(#0)'/>"
-                                          "</svg>");
+    QTest::newRow("double") << QByteArray(R"(<svg>
+                                          <linearGradient id="0" xlink:href="#1"/>
+                                          <linearGradient id="1" xlink:href="#0"/>
+                                          <rect x="0" y="0" width="20" height="20" fill="url(#0) "/>
+                                          </svg>)");
 
-    QTest::newRow("triple") << QByteArray("<svg>"
-                                          "<linearGradient id='0' xlink:href='#1'/>"
-                                          "<linearGradient id='1' xlink:href='#2'/>"
-                                          "<linearGradient id='2' xlink:href='#0'/>"
-                                          "<rect x='0' y='0' width='20' height='20' fill='url(#0)'/>"
-                                          "</svg>");
+    QTest::newRow("triple") << QByteArray(R"(<svg>
+                                          <linearGradient id="0" xlink:href="#1"/>
+                                          <linearGradient id="1" xlink:href="#2"/>
+                                          <linearGradient id="2" xlink:href="#0"/>
+                                          <rect x="0" y="0" width="20" height="20" fill="url(#0) "/>
+                                          </svg>)");
 }
 
 void tst_QSvgRenderer::recursiveRefs()
@@ -894,37 +894,37 @@ void tst_QSvgRenderer::fillRule()
     static const char *svgs[] = {
         // Paths
         // Default fill-rule (nonzero)
-        "<svg>"
-        "   <rect x=\"0\" y=\"0\" height=\"30\" width=\"30\" fill=\"blue\" />"
-        "   <path d=\"M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z\" fill=\"red\" />"
-        "</svg>",
+        R"(<svg>
+           <rect x="0" y="0" height="30" width="30" fill="blue" />
+           <path d="M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z" fill="red" />
+        </svg>)",
         // nonzero
-        "<svg>"
-        "   <rect x=\"0\" y=\"0\" height=\"30\" width=\"30\" fill=\"blue\" />"
-        "   <path d=\"M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z\" fill=\"red\" fill-rule=\"nonzero\" />"
-        "</svg>",
+        R"(<svg>
+           <rect x="0" y="0" height="30" width="30" fill="blue" />
+           <path d="M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z" fill="red" fill-rule="nonzero" />
+        </svg>)",
         // evenodd
-        "<svg>"
-        "   <rect x=\"0\" y=\"0\" height=\"30\" width=\"30\" fill=\"blue\" />"
-        "   <path d=\"M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z\" fill=\"red\" fill-rule=\"evenodd\" />"
-        "</svg>",
+        R"(<svg>
+           <rect x="0" y="0" height="30" width="30" fill="blue" />
+           <path d="M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z" fill="red" fill-rule="evenodd" />
+        </svg>)",
 
         // Polygons
         // Default fill-rule (nonzero)
-        "<svg>"
-        "   <rect x=\"0\" y=\"0\" height=\"30\" width=\"30\" fill=\"blue\" />"
-        "   <polygon points=\"10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20\" fill=\"red\" />"
-        "</svg>",
+        R"(<svg>
+           <rect x="0" y="0" height="30" width="30" fill="blue" />
+           <polygon points="10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20" fill="red" />
+        </svg>)",
         // nonzero
-        "<svg>"
-        "   <rect x=\"0\" y=\"0\" height=\"30\" width=\"30\" fill=\"blue\" />"
-        "   <polygon points=\"10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20\" fill=\"red\" fill-rule=\"nonzero\" />"
-        "</svg>",
+        R"(<svg>
+           <rect x="0" y="0" height="30" width="30" fill="blue" />
+           <polygon points="10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20" fill="red" fill-rule="nonzero" />
+        </svg>)",
         // evenodd
-        "<svg>"
-        "   <rect x=\"0\" y=\"0\" height=\"30\" width=\"30\" fill=\"blue\" />"
-        "   <polygon points=\"10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20\" fill=\"red\" fill-rule=\"evenodd\" />"
-        "</svg>"
+        R"(<svg>
+           <rect x="0" y="0" height="30" width="30" fill="blue" />
+           <polygon points="10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20" fill="red" fill-rule="evenodd" />
+        </svg>)"
     };
 
     const int COUNT = sizeof(svgs) / sizeof(svgs[0]);
@@ -1079,9 +1079,9 @@ void tst_QSvgRenderer::paths()
 void tst_QSvgRenderer::paths2()
 {
     const char *svg =
-        "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\">"
-            "<path d=\"M 3 8 A 5 5 0 1013 8\" id=\"path1\"/>"
-        "</svg>";
+        R"(<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+            <path d="M 3 8 A 5 5 0 1013 8" id="path1"/>
+        </svg>)";
 
     QByteArray data(svg);
     QSvgRenderer renderer(data);
@@ -1093,47 +1093,47 @@ void tst_QSvgRenderer::displayMode()
 {
     static const char *svgs[] = {
         // All visible.
-        "<svg>"
-        "   <g>"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"red\" />"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"blue\" />"
-        "   </g>"
-        "</svg>",
+        R"(<svg>
+           <g>
+               <rect x="0" y="0" height="10" width="10" fill="red" />
+               <rect x="0" y="0" height="10" width="10" fill="blue" />
+           </g>
+        </svg>)",
         // Don't display svg element.
-        "<svg display=\"none\">"
-        "   <g>"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"red\" />"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"blue\" />"
-        "   </g>"
-        "</svg>",
+        R"(<svg display="none">
+           <g>
+               <rect x="0" y="0" height="10" width="10" fill="red" />
+               <rect x="0" y="0" height="10" width="10" fill="blue" />
+           </g>
+        </svg>)",
         // Don't display g element.
-        "<svg>"
-        "   <g display=\"none\">"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"red\" />"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"blue\" />"
-        "   </g>"
-        "</svg>",
+        R"(<svg>
+           <g display="none">
+               <rect x="0" y="0" height="10" width="10" fill="red" />
+               <rect x="0" y="0" height="10" width="10" fill="blue" />
+           </g>
+        </svg>)",
         // Don't display first rect element.
-        "<svg>"
-        "   <g>"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"red\" display=\"none\" />"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"blue\" />"
-        "   </g>"
-        "</svg>",
+        R"(<svg>
+           <g>
+               <rect x="0" y="0" height="10" width="10" fill="red" display="none" />
+               <rect x="0" y="0" height="10" width="10" fill="blue" />
+           </g>
+        </svg>)",
         // Don't display second rect element.
-        "<svg>"
-        "   <g>"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"red\" />"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"blue\" display=\"none\" />"
-        "   </g>"
-        "</svg>",
+        R"(<svg>
+           <g>
+               <rect x="0" y="0" height="10" width="10" fill="red" />
+               <rect x="0" y="0" height="10" width="10" fill="blue" display="none" />
+           </g>
+        </svg>)",
         // Don't display svg element, but set display mode to "inline" for other elements.
-        "<svg display=\"none\">"
-        "   <g display=\"inline\">"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"red\" display=\"inline\" />"
-        "       <rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"blue\" display=\"inline\" />"
-        "   </g>"
-        "</svg>"
+        R"(<svg display="none">
+           <g display="inline">
+               <rect x="0" y="0" height="10" width="10" fill="red" display="inline" />
+               <rect x="0" y="0" height="10" width="10" fill="blue" display="inline" />
+           </g>
+        </svg>)"
     };
 
     QRgb expectedColors[] = {0xff0000ff, 0xff00ff00, 0xff00ff00, 0xff0000ff, 0xffff0000, 0xff00ff00};
@@ -1158,104 +1158,104 @@ void tst_QSvgRenderer::strokeInherit()
 {
     static const char *svgs[] = {
         // Reference.
-        "<svg viewBox=\"0 0 200 30\">"
-        "   <g stroke=\"blue\" stroke-width=\"20\" stroke-linecap=\"butt\""
-        "       stroke-linejoin=\"miter\" stroke-miterlimit=\"1\" stroke-dasharray=\"20,10\""
-        "       stroke-dashoffset=\"10\" stroke-opacity=\"0.5\">"
-        "       <polyline fill=\"none\" points=\"10 10 100 10 100 20 190 20\"/>"
-        "   </g>"
-        "   <g stroke=\"green\" stroke-width=\"0\" stroke-dasharray=\"3,3,1\" stroke-dashoffset=\"4.5\">"
-        "       <polyline fill=\"none\" points=\"10 25 80 25\"/>"
-        "   </g>"
-        "</svg>",
+        R"(<svg viewBox="0 0 200 30">
+           <g stroke="blue" stroke-width="20" stroke-linecap="butt"
+               stroke-linejoin="miter" stroke-miterlimit="1" stroke-dasharray="20,10"
+               stroke-dashoffset="10" stroke-opacity="0.5">
+               <polyline fill="none" points="10 10 100 10 100 20 190 20"/>
+           </g>
+           <g stroke="green" stroke-width="0" stroke-dasharray="3,3,1" stroke-dashoffset="4.5">
+               <polyline fill="none" points="10 25 80 25"/>
+           </g>
+        </svg>)",
         // stroke
-        "<svg viewBox=\"0 0 200 30\">"
-        "   <g stroke=\"none\" stroke-width=\"20\" stroke-linecap=\"butt\""
-        "       stroke-linejoin=\"miter\" stroke-miterlimit=\"1\" stroke-dasharray=\"20,10\""
-        "       stroke-dashoffset=\"10\" stroke-opacity=\"0.5\">"
-        "       <polyline fill=\"none\" points=\"10 10 100 10 100 20 190 20\" stroke=\"blue\"/>"
-        "   </g>"
-        "   <g stroke=\"yellow\" stroke-width=\"0\" stroke-dasharray=\"3,3,1\" stroke-dashoffset=\"4.5\">"
-        "       <polyline fill=\"none\" points=\"10 25 80 25\" stroke=\"green\"/>"
-        "   </g>"
-        "</svg>",
+        R"(<svg viewBox="0 0 200 30">
+           <g stroke="none" stroke-width="20" stroke-linecap="butt"
+               stroke-linejoin="miter" stroke-miterlimit="1" stroke-dasharray="20,10"
+               stroke-dashoffset="10" stroke-opacity="0.5">
+               <polyline fill="none" points="10 10 100 10 100 20 190 20" stroke="blue"/>
+           </g>
+           <g stroke="yellow" stroke-width="0" stroke-dasharray="3,3,1" stroke-dashoffset="4.5">
+               <polyline fill="none" points="10 25 80 25" stroke="green"/>
+           </g>
+        </svg>)",
         // stroke-width
-        "<svg viewBox=\"0 0 200 30\">"
-        "   <g stroke=\"blue\" stroke-width=\"0\" stroke-linecap=\"butt\""
-        "       stroke-linejoin=\"miter\" stroke-miterlimit=\"1\" stroke-dasharray=\"20,10\""
-        "       stroke-dashoffset=\"10\" stroke-opacity=\"0.5\">"
-        "       <polyline fill=\"none\" points=\"10 10 100 10 100 20 190 20\" stroke-width=\"20\"/>"
-        "   </g>"
-        "   <g stroke=\"green\" stroke-width=\"10\" stroke-dasharray=\"3,3,1\" stroke-dashoffset=\"4.5\">"
-        "       <polyline fill=\"none\" points=\"10 25 80 25\" stroke-width=\"0\"/>"
-        "   </g>"
-        "</svg>",
+        R"(<svg viewBox="0 0 200 30">
+           <g stroke="blue" stroke-width="0" stroke-linecap="butt"
+               stroke-linejoin="miter" stroke-miterlimit="1" stroke-dasharray="20,10"
+               stroke-dashoffset="10" stroke-opacity="0.5">
+               <polyline fill="none" points="10 10 100 10 100 20 190 20" stroke-width="20"/>
+           </g>
+           <g stroke="green" stroke-width="10" stroke-dasharray="3,3,1" stroke-dashoffset="4.5">
+               <polyline fill="none" points="10 25 80 25" stroke-width="0"/>
+           </g>
+        </svg>)",
         // stroke-linecap
-        "<svg viewBox=\"0 0 200 30\">"
-        "   <g stroke=\"blue\" stroke-width=\"20\" stroke-linecap=\"round\""
-        "       stroke-linejoin=\"miter\" stroke-miterlimit=\"1\" stroke-dasharray=\"20,10\""
-        "       stroke-dashoffset=\"10\" stroke-opacity=\"0.5\">"
-        "       <polyline fill=\"none\" points=\"10 10 100 10 100 20 190 20\" stroke-linecap=\"butt\"/>"
-        "   </g>"
-        "   <g stroke=\"green\" stroke-width=\"0\" stroke-dasharray=\"3,3,1\" stroke-dashoffset=\"4.5\">"
-        "       <polyline fill=\"none\" points=\"10 25 80 25\"/>"
-        "   </g>"
-        "</svg>",
+        R"(<svg viewBox="0 0 200 30">
+           <g stroke="blue" stroke-width="20" stroke-linecap="round"
+               stroke-linejoin="miter" stroke-miterlimit="1" stroke-dasharray="20,10"
+               stroke-dashoffset="10" stroke-opacity="0.5">
+               <polyline fill="none" points="10 10 100 10 100 20 190 20" stroke-linecap="butt"/>
+           </g>
+           <g stroke="green" stroke-width="0" stroke-dasharray="3,3,1" stroke-dashoffset="4.5">
+               <polyline fill="none" points="10 25 80 25"/>
+           </g>
+        </svg>)",
         // stroke-linejoin
-        "<svg viewBox=\"0 0 200 30\">"
-        "   <g stroke=\"blue\" stroke-width=\"20\" stroke-linecap=\"butt\""
-        "       stroke-linejoin=\"round\" stroke-miterlimit=\"1\" stroke-dasharray=\"20,10\""
-        "       stroke-dashoffset=\"10\" stroke-opacity=\"0.5\">"
-        "       <polyline fill=\"none\" points=\"10 10 100 10 100 20 190 20\" stroke-linejoin=\"miter\"/>"
-        "   </g>"
-        "   <g stroke=\"green\" stroke-width=\"0\" stroke-dasharray=\"3,3,1\" stroke-dashoffset=\"4.5\">"
-        "       <polyline fill=\"none\" points=\"10 25 80 25\"/>"
-        "   </g>"
-        "</svg>",
+        R"(<svg viewBox="0 0 200 30">
+          <g stroke="blue" stroke-width="20" stroke-linecap="butt"
+               stroke-linejoin="round" stroke-miterlimit="1" stroke-dasharray="20,10"
+               stroke-dashoffset="10" stroke-opacity="0.5">
+               <polyline fill="none" points="10 10 100 10 100 20 190 20" stroke-linejoin="miter"/>
+           </g>
+           <g stroke="green" stroke-width="0" stroke-dasharray="3,3,1" stroke-dashoffset="4.5">
+               <polyline fill="none" points="10 25 80 25"/>
+           </g>
+        </svg>)",
         // stroke-miterlimit
-        "<svg viewBox=\"0 0 200 30\">"
-        "   <g stroke=\"blue\" stroke-width=\"20\" stroke-linecap=\"butt\""
-        "       stroke-linejoin=\"miter\" stroke-miterlimit=\"2\" stroke-dasharray=\"20,10\""
-        "       stroke-dashoffset=\"10\" stroke-opacity=\"0.5\">"
-        "       <polyline fill=\"none\" points=\"10 10 100 10 100 20 190 20\" stroke-miterlimit=\"1\"/>"
-        "   </g>"
-        "   <g stroke=\"green\" stroke-width=\"0\" stroke-dasharray=\"3,3,1\" stroke-dashoffset=\"4.5\">"
-        "       <polyline fill=\"none\" points=\"10 25 80 25\"/>"
-        "   </g>"
-        "</svg>",
+        R"(<svg viewBox="0 0 200 30">
+           <g stroke="blue" stroke-width="20" stroke-linecap="butt"
+               stroke-linejoin="miter" stroke-miterlimit="2" stroke-dasharray="20,10"
+               stroke-dashoffset="10" stroke-opacity="0.5">
+               <polyline fill="none" points="10 10 100 10 100 20 190 20" stroke-miterlimit="1"/>
+           </g>
+           <g stroke="green" stroke-width="0" stroke-dasharray="3,3,1" stroke-dashoffset="4.5">
+               <polyline fill="none" points="10 25 80 25"/>
+           </g>
+        </svg>)",
         // stroke-dasharray
-        "<svg viewBox=\"0 0 200 30\">"
-        "   <g stroke=\"blue\" stroke-width=\"20\" stroke-linecap=\"butt\""
-        "       stroke-linejoin=\"miter\" stroke-miterlimit=\"1\" stroke-dasharray=\"1,1,1,1,1,1,3,1,3,1,3,1,1,1,1,1,1,3\""
-        "       stroke-dashoffset=\"10\" stroke-opacity=\"0.5\">"
-        "       <polyline fill=\"none\" points=\"10 10 100 10 100 20 190 20\" stroke-dasharray=\"20,10\"/>"
-        "   </g>"
-        "   <g stroke=\"green\" stroke-width=\"0\" stroke-dasharray=\"none\" stroke-dashoffset=\"4.5\">"
-        "       <polyline fill=\"none\" points=\"10 25 80 25\" stroke-dasharray=\"3,3,1\"/>"
-        "   </g>"
-        "</svg>",
+        R"(<svg viewBox="0 0 200 30">
+           <g stroke="blue" stroke-width="20" stroke-linecap="butt"
+               stroke-linejoin="miter" stroke-miterlimit="1" stroke-dasharray="1,1,1,1,1,1,3,1,3,1,3,1,1,1,1,1,1,3"
+               stroke-dashoffset="10" stroke-opacity="0.5">
+               <polyline fill="none" points="10 10 100 10 100 20 190 20" stroke-dasharray="20,10"/>
+           </g>
+           <g stroke="green" stroke-width="0" stroke-dasharray="none" stroke-dashoffset="4.5">
+               <polyline fill="none" points="10 25 80 25" stroke-dasharray="3,3,1"/>
+           </g>
+        </svg>)",
         // stroke-dashoffset
-        "<svg viewBox=\"0 0 200 30\">"
-        "   <g stroke=\"blue\" stroke-width=\"20\" stroke-linecap=\"butt\""
-        "       stroke-linejoin=\"miter\" stroke-miterlimit=\"1\" stroke-dasharray=\"20,10\""
-        "       stroke-dashoffset=\"0\" stroke-opacity=\"0.5\">"
-        "       <polyline fill=\"none\" points=\"10 10 100 10 100 20 190 20\" stroke-dashoffset=\"10\"/>"
-        "   </g>"
-        "   <g stroke=\"green\" stroke-width=\"0\" stroke-dasharray=\"3,3,1\" stroke-dashoffset=\"0\">"
-        "       <polyline fill=\"none\" points=\"10 25 80 25\" stroke-dashoffset=\"4.5\"/>"
-        "   </g>"
-        "</svg>",
+        R"(<svg viewBox="0 0 200 30">
+           <g stroke="blue" stroke-width="20" stroke-linecap="butt"
+               stroke-linejoin="miter" stroke-miterlimit="1" stroke-dasharray="20,10"
+               stroke-dashoffset="0" stroke-opacity="0.5">
+               <polyline fill="none" points="10 10 100 10 100 20 190 20" stroke-dashoffset="10"/>
+           </g>
+           <g stroke="green" stroke-width="0" stroke-dasharray="3,3,1" stroke-dashoffset="0">
+               <polyline fill="none" points="10 25 80 25" stroke-dashoffset="4.5"/>
+           </g>
+        </svg>)",
         // stroke-opacity
-        "<svg viewBox=\"0 0 200 30\">"
-        "   <g stroke=\"blue\" stroke-width=\"20\" stroke-linecap=\"butt\""
-        "       stroke-linejoin=\"miter\" stroke-miterlimit=\"1\" stroke-dasharray=\"20,10\""
-        "       stroke-dashoffset=\"10\" stroke-opacity=\"0\">"
-        "       <polyline fill=\"none\" points=\"10 10 100 10 100 20 190 20\" stroke-opacity=\"0.5\"/>"
-        "   </g>"
-        "   <g stroke=\"green\" stroke-width=\"0\" stroke-dasharray=\"3,3,1\" stroke-dashoffset=\"4.5\">"
-        "       <polyline fill=\"none\" points=\"10 25 80 25\"/>"
-        "   </g>"
-        "</svg>"
+        R"(<svg viewBox="0 0 200 30">
+           <g stroke="blue" stroke-width="20" stroke-linecap="butt"
+               stroke-linejoin="miter" stroke-miterlimit="1" stroke-dasharray="20,10"
+               stroke-dashoffset="10" stroke-opacity="0">
+               <polyline fill="none" points="10 10 100 10 100 20 190 20" stroke-opacity="0.5"/>
+           </g>
+           <g stroke="green" stroke-width="0" stroke-dasharray="3,3,1" stroke-dashoffset="4.5">
+               <polyline fill="none" points="10 25 80 25"/>
+           </g>
+        </svg>)"
     };
 
     const int COUNT = sizeof(svgs) / sizeof(svgs[0]);
@@ -1281,49 +1281,49 @@ void tst_QSvgRenderer::testFillInheritance()
 {
     static const char *svgs[] = {
         //reference
-        "<svg viewBox = \"0 0 200 200\">"
-        "    <polygon points=\"20,20 50,120 100,10 40,80 50,80\" fill= \"red\" stroke = \"blue\" fill-opacity = \"0.5\" fill-rule = \"evenodd\"/>"
-        "</svg>",
-        "<svg viewBox = \"0 0 200 200\">"
-        "    <polygon points=\"20,20 50,120 100,10 40,80 50,80\" fill= \"red\" stroke = \"blue\" fill-opacity = \"0.5\" fill-rule = \"evenodd\"/>"
-        "    <rect x = \"40\" y = \"40\" width = \"70\" height =\"20\" fill = \"green\" fill-opacity = \"0\"/>"
-        "</svg>",
-        "<svg viewBox = \"0 0 200 200\">"
-        "   <g fill = \"red\" fill-opacity = \"0.5\" fill-rule = \"evenodd\">"
-        "       <polygon points=\"20,20 50,120 100,10 40,80 50,80\" stroke = \"blue\"/>"
-        "   </g>"
-        "    <rect x = \"40\" y = \"40\" width = \"70\" height =\"20\" fill = \"green\" fill-opacity = \"0\"/>"
-        "</svg>",
-        "<svg viewBox = \"0 0 200 200\">"
-        "   <g  fill = \"green\" fill-rule = \"nonzero\">"
-        "       <polygon points=\"20,20 50,120 100,10 40,80 50,80\" stroke = \"blue\" fill = \"red\" fill-opacity = \"0.5\" fill-rule = \"evenodd\"/>"
-        "   </g>"
-        "   <g fill-opacity = \"0.8\" fill = \"red\">"
-        "       <rect x = \"40\" y = \"40\" width = \"70\" height =\"20\" fill = \"green\" fill-opacity = \"0\"/>"
-        "   </g>"
-        "</svg>",
-        "<svg viewBox = \"0 0 200 200\">"
-        "   <g  fill = \"red\" >"
-        "      <g fill-opacity = \"0.5\">"
-        "         <g fill-rule = \"evenodd\">"
-        "            <g>"
-        "                <polygon points=\"20,20 50,120 100,10 40,80 50,80\" stroke = \"blue\"/>"
-        "            </g>"
-        "         </g>"
-        "      </g>"
-        "   </g>"
-        "   <g fill-opacity = \"0.8\" >"
-        "       <rect x = \"40\" y = \"40\" width = \"70\" height =\"20\" fill = \"none\"/>"
-        "   </g>"
-        "</svg>",
-        "<svg viewBox = \"0 0 200 200\">"
-        "   <g fill = \"none\" fill-opacity = \"0\">"
-        "       <polygon points=\"20,20 50,120 100,10 40,80 50,80\" stroke = \"blue\" fill = \"red\" fill-opacity = \"0.5\" fill-rule = \"evenodd\"/>"
-        "   </g>"
-        "   <g fill-opacity = \"0\" >"
-        "       <rect x = \"40\" y = \"40\" width = \"70\" height =\"20\" fill = \"green\"/>"
-        "   </g>"
-        "</svg>"
+        R"(<svg viewBox = "0 0 200 200">
+            <polygon points="20,20 50,120 100,10 40,80 50,80" fill= "red" stroke = "blue" fill-opacity = "0.5" fill-rule = "evenodd"/>
+        </svg>)",
+        R"(<svg viewBox = "0 0 200 200">
+            <polygon points="20,20 50,120 100,10 40,80 50,80" fill= "red" stroke = "blue" fill-opacity = "0.5" fill-rule = "evenodd"/>
+            <rect x = "40" y = "40" width = "70" height ="20" fill = "green" fill-opacity = "0"/>
+        </svg>)",
+        R"(<svg viewBox = "0 0 200 200">
+           <g fill = "red" fill-opacity = "0.5" fill-rule = "evenodd">
+               <polygon points="20,20 50,120 100,10 40,80 50,80" stroke = "blue"/>
+           </g>
+            <rect x = "40" y = "40" width = "70" height ="20" fill = "green" fill-opacity = "0"/>
+        </svg>)",
+        R"(<svg viewBox = "0 0 200 200">
+           <g  fill = "green" fill-rule = "nonzero">
+               <polygon points="20,20 50,120 100,10 40,80 50,80" stroke = "blue" fill = "red" fill-opacity = "0.5" fill-rule = "evenodd"/>
+           </g>
+           <g fill-opacity = "0.8" fill = "red">
+               <rect x = "40" y = "40" width = "70" height ="20" fill = "green" fill-opacity = "0"/>
+           </g>
+        </svg>)",
+        R"(<svg viewBox = "0 0 200 200">
+           <g  fill = "red" >
+              <g fill-opacity = "0.5">
+                 <g fill-rule = "evenodd">
+                    <g>
+                        <polygon points="20,20 50,120 100,10 40,80 50,80" stroke = "blue"/>
+                    </g>
+                 </g>
+              </g>
+           </g>
+           <g fill-opacity = "0.8" >
+               <rect x = "40" y = "40" width = "70" height ="20" fill = "none"/>
+           </g>
+        </svg>)",
+        R"(<svg viewBox = "0 0 200 200">
+           <g fill = "none" fill-opacity = "0">
+               <polygon points="20,20 50,120 100,10 40,80 50,80" stroke = "blue" fill = "red" fill-opacity = "0.5" fill-rule = "evenodd"/>
+           </g>
+           <g fill-opacity = "0" >
+               <rect x = "40" y = "40" width = "70" height ="20" fill = "green"/>
+           </g>
+        </svg>)"
     };
 
     const int COUNT = sizeof(svgs) / sizeof(svgs[0]);
@@ -1348,65 +1348,65 @@ void tst_QSvgRenderer::testStopOffsetOpacity()
 {
     static const char *svgs[] = {
         //reference
-        "<svg  viewBox=\"0 0 64 64\">"
-         "<radialGradient id=\"MyGradient1\" gradientUnits=\"userSpaceOnUse\" cx=\"50\" cy=\"50\" r=\"30\" fx=\"20\" fy=\"20\">"
-          "<stop offset=\"0.0\" style=\"stop-color:red\"  stop-opacity=\"0.3\"/>"
-          "<stop offset=\"0.5\" style=\"stop-color:green\"  stop-opacity=\"1\"/>"
-          "<stop offset=\"1\" style=\"stop-color:yellow\"  stop-opacity=\"1\"/>"
-         "</radialGradient>"
-         "<radialGradient id=\"MyGradient2\" gradientUnits=\"userSpaceOnUse\" cx=\"50\" cy=\"70\" r=\"70\" fx=\"20\" fy=\"20\">"
-          "<stop offset=\"0.0\" style=\"stop-color:blue\"  stop-opacity=\"0.3\"/>"
-          "<stop offset=\"0.5\" style=\"stop-color:violet\"  stop-opacity=\"1\"/>"
-          "<stop offset=\"1\" style=\"stop-color:orange\"  stop-opacity=\"1\"/>"
-         "</radialGradient>"
-         "<rect  x=\"5\" y=\"5\" width=\"55\" height=\"55\" fill=\"url(#MyGradient1)\" stroke=\"black\" />"
-         "<rect  x=\"20\" y=\"20\" width=\"35\" height=\"35\" fill=\"url(#MyGradient2)\"/>"
-        "</svg>",
+        R"(<svg  viewBox="0 0 64 64">
+         <radialGradient id="MyGradient1" gradientUnits="userSpaceOnUse" cx="50" cy="50" r="30" fx="20" fy="20">
+          <stop offset="0.0" style="stop-color:red"  stop-opacity="0.3"/>
+          <stop offset="0.5" style="stop-color:green"  stop-opacity="1"/>
+          <stop offset="1" style="stop-color:yellow"  stop-opacity="1"/>
+         </radialGradient>
+         <radialGradient id="MyGradient2" gradientUnits="userSpaceOnUse" cx="50" cy="70" r="70" fx="20" fy="20">
+          <stop offset="0.0" style="stop-color:blue"  stop-opacity="0.3"/>
+          <stop offset="0.5" style="stop-color:violet"  stop-opacity="1"/>
+          <stop offset="1" style="stop-color:orange"  stop-opacity="1"/>
+         </radialGradient>
+         <rect  x="5" y="5" width="55" height="55" fill="url(#MyGradient1) " stroke="black" />
+         <rect  x="20" y="20" width="35" height="35" fill="url(#MyGradient2) "/>
+        </svg>)",
         //Stop Offset
-        "<svg  viewBox=\"0 0 64 64\">"
-         "<radialGradient id=\"MyGradient1\" gradientUnits=\"userSpaceOnUse\" cx=\"50\" cy=\"50\" r=\"30\" fx=\"20\" fy=\"20\">"
-          "<stop offset=\"abc\" style=\"stop-color:red\"  stop-opacity=\"0.3\"/>"
-          "<stop offset=\"0.5\" style=\"stop-color:green\"  stop-opacity=\"1\"/>"
-          "<stop offset=\"1\" style=\"stop-color:yellow\"  stop-opacity=\"1\"/>"
-         "</radialGradient>"
-         "<radialGradient id=\"MyGradient2\" gradientUnits=\"userSpaceOnUse\" cx=\"50\" cy=\"70\" r=\"70\" fx=\"20\" fy=\"20\">"
-          "<stop offset=\"-3.bc\" style=\"stop-color:blue\"  stop-opacity=\"0.3\"/>"
-          "<stop offset=\"0.5\" style=\"stop-color:violet\"  stop-opacity=\"1\"/>"
-          "<stop offset=\"1\" style=\"stop-color:orange\"  stop-opacity=\"1\"/>"
-         "</radialGradient>"
-         "<rect  x=\"5\" y=\"5\" width=\"55\" height=\"55\" fill=\"url(#MyGradient1)\" stroke=\"black\" />"
-         "<rect  x=\"20\" y=\"20\" width=\"35\" height=\"35\" fill=\"url(#MyGradient2)\"/>"
-        "</svg>",
+        R"(<svg  viewBox="0 0 64 64">
+         <radialGradient id="MyGradient1" gradientUnits="userSpaceOnUse" cx="50" cy="50" r="30" fx="20" fy="20">
+          <stop offset="abc" style="stop-color:red"  stop-opacity="0.3"/>
+          <stop offset="0.5" style="stop-color:green"  stop-opacity="1"/>
+          <stop offset="1" style="stop-color:yellow"  stop-opacity="1"/>
+         </radialGradient>
+         <radialGradient id="MyGradient2" gradientUnits="userSpaceOnUse" cx="50" cy="70" r="70" fx="20" fy="20">
+          <stop offset="-3.bc" style="stop-color:blue"  stop-opacity="0.3"/>
+          <stop offset="0.5" style="stop-color:violet"  stop-opacity="1"/>
+          <stop offset="1" style="stop-color:orange"  stop-opacity="1"/>
+         </radialGradient>
+         <rect  x="5" y="5" width="55" height="55" fill="url(#MyGradient1) " stroke="black" />
+         <rect  x="20" y="20" width="35" height="35" fill="url(#MyGradient2) "/>
+        </svg>)",
         //Stop Opacity
-        "<svg  viewBox=\"0 0 64 64\">"
-         "<radialGradient id=\"MyGradient1\" gradientUnits=\"userSpaceOnUse\" cx=\"50\" cy=\"50\" r=\"30\" fx=\"20\" fy=\"20\">"
-          "<stop offset=\"0.0\" style=\"stop-color:red\"  stop-opacity=\"0.3\"/>"
-          "<stop offset=\"0.5\" style=\"stop-color:green\"  stop-opacity=\"x.45\"/>"
-          "<stop offset=\"1\" style=\"stop-color:yellow\"  stop-opacity=\"-3.abc\"/>"
-         "</radialGradient>"
-         "<radialGradient id=\"MyGradient2\" gradientUnits=\"userSpaceOnUse\" cx=\"50\" cy=\"70\" r=\"70\" fx=\"20\" fy=\"20\">"
-          "<stop offset=\"0.0\" style=\"stop-color:blue\"  stop-opacity=\"0.3\"/>"
-          "<stop offset=\"0.5\" style=\"stop-color:violet\"  stop-opacity=\"-0.xy\"/>"
-          "<stop offset=\"1\" style=\"stop-color:orange\"  stop-opacity=\"z.5\"/>"
-         "</radialGradient>"
-         "<rect  x=\"5\" y=\"5\" width=\"55\" height=\"55\" fill=\"url(#MyGradient1)\" stroke=\"black\" />"
-         "<rect  x=\"20\" y=\"20\" width=\"35\" height=\"35\" fill=\"url(#MyGradient2)\"/>"
-        "</svg>",
+        R"(<svg  viewBox="0 0 64 64">
+         <radialGradient id="MyGradient1" gradientUnits="userSpaceOnUse" cx="50" cy="50" r="30" fx="20" fy="20">
+          <stop offset="0.0" style="stop-color:red"  stop-opacity="0.3"/>
+          <stop offset="0.5" style="stop-color:green"  stop-opacity="x.45"/>
+          <stop offset="1" style="stop-color:yellow"  stop-opacity="-3.abc"/>
+         </radialGradient>
+         <radialGradient id="MyGradient2" gradientUnits="userSpaceOnUse" cx="50" cy="70" r="70" fx="20" fy="20">
+          <stop offset="0.0" style="stop-color:blue"  stop-opacity="0.3"/>
+          <stop offset="0.5" style="stop-color:violet"  stop-opacity="-0.xy"/>
+          <stop offset="1" style="stop-color:orange"  stop-opacity="z.5"/>
+         </radialGradient>
+         <rect  x="5" y="5" width="55" height="55" fill="url(#MyGradient1) " stroke="black" />
+         <rect  x="20" y="20" width="35" height="35" fill="url(#MyGradient2) "/>
+        </svg>)",
         //Stop offset and Stop opacity
-        "<svg  viewBox=\"0 0 64 64\">"
-         "<radialGradient id=\"MyGradient1\" gradientUnits=\"userSpaceOnUse\" cx=\"50\" cy=\"50\" r=\"30\" fx=\"20\" fy=\"20\">"
-          "<stop offset=\"abc\" style=\"stop-color:red\"  stop-opacity=\"0.3\"/>"
-          "<stop offset=\"0.5\" style=\"stop-color:green\"  stop-opacity=\"x.45\"/>"
-          "<stop offset=\"1\" style=\"stop-color:yellow\"  stop-opacity=\"-3.abc\"/>"
-         "</radialGradient>"
-         "<radialGradient id=\"MyGradient2\" gradientUnits=\"userSpaceOnUse\" cx=\"50\" cy=\"70\" r=\"70\" fx=\"20\" fy=\"20\">"
-          "<stop offset=\"-3.bc\" style=\"stop-color:blue\"  stop-opacity=\"0.3\"/>"
-          "<stop offset=\"0.5\" style=\"stop-color:violet\"  stop-opacity=\"-0.xy\"/>"
-          "<stop offset=\"1\" style=\"stop-color:orange\"  stop-opacity=\"z.5\"/>"
-         "</radialGradient>"
-         "<rect  x=\"5\" y=\"5\" width=\"55\" height=\"55\" fill=\"url(#MyGradient1)\" stroke=\"black\" />"
-         "<rect  x=\"20\" y=\"20\" width=\"35\" height=\"35\" fill=\"url(#MyGradient2)\"/>"
-        "</svg>"
+        R"(<svg  viewBox="0 0 64 64">
+         <radialGradient id="MyGradient1" gradientUnits="userSpaceOnUse" cx="50" cy="50" r="30" fx="20" fy="20">
+          <stop offset="abc" style="stop-color:red"  stop-opacity="0.3"/>
+          <stop offset="0.5" style="stop-color:green"  stop-opacity="x.45"/>
+          <stop offset="1" style="stop-color:yellow"  stop-opacity="-3.abc"/>
+         </radialGradient>
+         <radialGradient id="MyGradient2" gradientUnits="userSpaceOnUse" cx="50" cy="70" r="70" fx="20" fy="20">
+          <stop offset="-3.bc" style="stop-color:blue"  stop-opacity="0.3"/>
+          <stop offset="0.5" style="stop-color:violet"  stop-opacity="-0.xy"/>
+          <stop offset="1" style="stop-color:orange"  stop-opacity="z.5"/>
+         </radialGradient>
+         <rect  x="5" y="5" width="55" height="55" fill="url(#MyGradient1) " stroke="black" />
+         <rect  x="20" y="20" width="35" height="35" fill="url(#MyGradient2) "/>
+        </svg>)"
     };
 
     QImage images[4];
@@ -1431,131 +1431,131 @@ void tst_QSvgRenderer::testUseElement()
 {
     static const char *svgs[] = {
         // 0 - Use referring to non group node (1)
-        "<svg viewBox = \"0 0 200 200\">"
-        " <polygon points=\"20,20 50,120 100,10 40,80 50,80\"/>"
-        " <polygon points=\"20,80 50,180 100,70 40,140 50,140\" fill= \"red\" stroke = \"blue\" fill-opacity = \"0.7\" fill-rule = \"evenodd\" stroke-width = \"3\"/>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">"
+         <polygon points="20,20 50,120 100,10 40,80 50,80"/>"
+         <polygon points="20,80 50,180 100,70 40,140 50,140" fill= "red" stroke = "blue" fill-opacity = "0.7" fill-rule = "evenodd" stroke-width = "3"/>"
+        </svg>)",
         // 1
-        "<svg viewBox = \"0 0 200 200\">"
-        " <polygon id = \"usedPolyline\" points=\"20,20 50,120 100,10 40,80 50,80\"/>"
-        " <use y = \"60\" xlink:href = \"#usedPolyline\" fill= \"red\" stroke = \"blue\" fill-opacity = \"0.7\" fill-rule = \"evenodd\" stroke-width = \"3\"/>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">"
+         <polygon id = "usedPolyline" points="20,20 50,120 100,10 40,80 50,80"/>"
+         <use y = "60" xlink:href = "#usedPolyline" fill= "red" stroke = "blue" fill-opacity = "0.7" fill-rule = "evenodd" stroke-width = "3"/>"
+        </svg>)",
         // 2
-        "<svg viewBox = \"0 0 200 200\">"
-        " <polygon id = \"usedPolyline\" points=\"20,20 50,120 100,10 40,80 50,80\"/>"
-        " <g fill = \" red\" fill-opacity =\"0.2\">"
-        "<use y = \"60\" xlink:href = \"#usedPolyline\" stroke = \"blue\" fill-opacity = \"0.7\" fill-rule = \"evenodd\" stroke-width = \"3\"/>"
-        "</g>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">"
+         <polygon id = "usedPolyline" points="20,20 50,120 100,10 40,80 50,80"/>"
+         <g fill = " red" fill-opacity ="0.2">"
+        <use y = "60" xlink:href = "#usedPolyline" stroke = "blue" fill-opacity = "0.7" fill-rule = "evenodd" stroke-width = "3"/>"
+        </g>"
+        </svg>)",
         // 3
-        "<svg viewBox = \"0 0 200 200\">"
-        " <polygon id = \"usedPolyline\" points=\"20,20 50,120 100,10 40,80 50,80\"/>"
-        " <g stroke-width = \"3\" stroke = \"yellow\">"
-        "  <use y = \"60\" xlink:href = \"#usedPolyline\" fill = \" red\" stroke = \"blue\" fill-opacity = \"0.7\" fill-rule = \"evenodd\"/>"
-        " </g>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">
+         <polygon id = "usedPolyline" points="20,20 50,120 100,10 40,80 50,80"/>
+         <g stroke-width = "3" stroke = "yellow">
+          <use y = "60" xlink:href = "#usedPolyline" fill = " red" stroke = "blue" fill-opacity = "0.7" fill-rule = "evenodd"/>
+         </g>
+        </svg>)",
         // 4 - Use referring to non group node (2)
-        "<svg viewBox = \"0 0 200 200\">"
-        " <polygon points=\"20,20 50,120 100,10 40,80 50,80\" fill = \"green\" fill-rule = \"nonzero\" stroke = \"purple\" stroke-width = \"4\" stroke-dasharray = \"1,1,3,1\" stroke-offset = \"3\" stroke-miterlimit = \"6\" stroke-linecap = \"butt\" stroke-linejoin = \"round\"/>"
-        " <polygon points=\"20,80 50,180 100,70 40,140 50,140\" fill= \"red\" stroke = \"blue\" fill-opacity = \"0.7\" fill-rule = \"evenodd\" stroke-width = \"3\" stroke-dasharray = \"1,1,1,1\" stroke-offset = \"5\" stroke-miterlimit = \"3\" stroke-linecap = \"butt\" stroke-linejoin = \"square\"/>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">
+         <polygon points="20,20 50,120 100,10 40,80 50,80" fill = "green" fill-rule = "nonzero" stroke = "purple" stroke-width = "4" stroke-dasharray = "1,1,3,1" stroke-offset = "3" stroke-miterlimit = "6" stroke-linecap = "butt" stroke-linejoin = "round"/>
+         <polygon points="20,80 50,180 100,70 40,140 50,140" fill= "red" stroke = "blue" fill-opacity = "0.7" fill-rule = "evenodd" stroke-width = "3" stroke-dasharray = "1,1,1,1" stroke-offset = "5" stroke-miterlimit = "3" stroke-linecap = "butt" stroke-linejoin = "square"/>
+        </svg>)",
         // 5
-        "<svg viewBox = \"0 0 200 200\">"
-        " <g fill = \"green\" fill-rule = \"nonzero\" stroke = \"purple\" stroke-width = \"4\" stroke-dasharray = \"1,1,3,1\" stroke-offset = \"3\" stroke-miterlimit = \"6\" stroke-linecap = \"butt\" stroke-linejoin = \"round\">"
-        "  <polygon id = \"usedPolyline\" points=\"20,20 50,120 100,10 40,80 50,80\" />"
-        " </g>"
-        " <g stroke = \"blue\" stroke-width = \"3\" stroke-dasharray = \"1,1,1,1\" stroke-offset = \"5\" stroke-miterlimit = \"3\" stroke-linecap = \"butt\" stroke-linejoin = \"square\">"
-        "  <use y = \"60\" xlink:href = \"#usedPolyline\"  fill-opacity = \"0.7\" fill= \"red\" stroke = \"blue\" fill-rule = \"evenodd\"/>"
-        " </g>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">
+         <g fill = "green" fill-rule = "nonzero" stroke = "purple" stroke-width = "4" stroke-dasharray = "1,1,3,1" stroke-offset = "3" stroke-miterlimit = "6" stroke-linecap = "butt" stroke-linejoin = "round">
+          <polygon id = "usedPolyline" points="20,20 50,120 100,10 40,80 50,80" />
+         </g>
+         <g stroke = "blue" stroke-width = "3" stroke-dasharray = "1,1,1,1" stroke-offset = "5" stroke-miterlimit = "3" stroke-linecap = "butt" stroke-linejoin = "square">
+          <use y = "60" xlink:href = "#usedPolyline"  fill-opacity = "0.7" fill= "red" stroke = "blue" fill-rule = "evenodd"/>
+         </g>
+        </svg>)",
         // 6
-        "<svg viewBox = \"0 0 200 200\">"
-        " <g fill = \"green\" fill-rule = \"nonzero\" stroke = \"purple\" stroke-width = \"4\" stroke-dasharray = \"1,1,3,1\" stroke-offset = \"3\" stroke-miterlimit = \"6\" stroke-linecap = \"butt\" stroke-linejoin = \"round\">"
-        "  <polygon id = \"usedPolyline\" points=\"20,20 50,120 100,10 40,80 50,80\" />"
-        " </g>"
-        " <g stroke-width = \"3\" stroke-dasharray = \"1,1,1,1\" stroke-offset = \"5\" stroke-miterlimit = \"3\" stroke-linecap = \"butt\" stroke-linejoin = \"square\" >"
-        "  <use y = \"60\" xlink:href = \"#usedPolyline\" fill= \"red\" stroke = \"blue\" fill-opacity = \"0.7\" fill-rule = \"evenodd\" />"
-        " </g>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">
+         <g fill = "green" fill-rule = "nonzero" stroke = "purple" stroke-width = "4" stroke-dasharray = "1,1,3,1" stroke-offset = "3" stroke-miterlimit = "6" stroke-linecap = "butt" stroke-linejoin = "round">
+          <polygon id = "usedPolyline" points="20,20 50,120 100,10 40,80 50,80" />
+         </g>
+         <g stroke-width = "3" stroke-dasharray = "1,1,1,1" stroke-offset = "5" stroke-miterlimit = "3" stroke-linecap = "butt" stroke-linejoin = "square" >
+          <use y = "60" xlink:href = "#usedPolyline" fill= "red" stroke = "blue" fill-opacity = "0.7" fill-rule = "evenodd" />
+         </g>
+        </svg>)",
         // 7 - Use referring to group node
-        "<svg viewBox = \"0 0 200 200\">"
-        " <g>"
-        "  <circle cx=\"0\" cy=\"0\" r=\"100\" fill = \"red\" fill-opacity = \"0.6\"/>"
-        "  <rect x = \"10\" y = \"10\" width = \"30\" height = \"30\" fill = \"red\" fill-opacity = \"0.5\"/>"
-        "  <circle fill=\"#a6ce39\" cx=\"0\" cy=\"0\" r=\"33\" fill-opacity = \"0.5\"/>"
-        " </g>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">
+         <g>
+          <circle cx="0" cy="0" r="100" fill = "red" fill-opacity = "0.6"/>
+          <rect x = "10" y = "10" width = "30" height = "30" fill = "red" fill-opacity = "0.5"/>
+          <circle fill="#a6ce39" cx="0" cy="0" r="33" fill-opacity = "0.5"/>
+         </g>
+        </svg>)",
         // 8
-        "<svg viewBox = \"0 0 200 200\">"
-        " <defs>"
-        "  <g id=\"usedG\">"
-        "   <circle cx=\"0\" cy=\"0\" r=\"100\" fill-opacity = \"0.6\"/>"
-        "   <rect x = \"10\" y = \"10\" width = \"30\" height = \"30\"/>"
-        "   <circle fill=\"#a6ce39\" cx=\"0\" cy=\"0\" r=\"33\" />"
-        "  </g>"
-        " </defs>"
-        " <use xlink:href =\"#usedG\" fill = \"red\" fill-opacity =\"0.5\"/>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">
+         <defs>
+          <g id="usedG">
+           <circle cx="0" cy="0" r="100" fill-opacity = "0.6"/>
+           <rect x = "10" y = "10" width = "30" height = "30"/>
+           <circle fill="#a6ce39" cx="0" cy="0" r="33" />
+          </g>
+         </defs>
+         <use xlink:href ="#usedG" fill = "red" fill-opacity ="0.5"/>
+        </svg>)",
         // 9
-        "<svg viewBox = \"0 0 200 200\">"
-        " <defs>"
-        "  <g fill = \"blue\" fill-opacity = \"0.3\">"
-        "   <g id=\"usedG\">"
-        "    <circle cx=\"0\" cy=\"0\" r=\"100\" fill-opacity = \"0.6\"/>"
-        "    <rect x = \"10\" y = \"10\" width = \"30\" height = \"30\"/>"
-        "    <circle fill=\"#a6ce39\" cx=\"0\" cy=\"0\" r=\"33\" />"
-        "   </g>"
-        "  </g>"
-        " </defs>"
-        " <g fill = \"red\" fill-opacity =\"0.5\">"
-        "  <use xlink:href =\"#usedG\" />"
-        " </g>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">
+         <defs>
+          <g fill = "blue" fill-opacity = "0.3">
+           <g id="usedG">
+            <circle cx="0" cy="0" r="100" fill-opacity = "0.6"/>
+            <rect x = "10" y = "10" width = "30" height = "30"/>
+            <circle fill="#a6ce39" cx="0" cy="0" r="33" />
+           </g>
+          </g>
+         </defs>
+         <g fill = "red" fill-opacity ="0.5">
+          <use xlink:href ="#usedG" />
+         </g>
+        </svg>)",
         // 10 - Self referral, should be ignored
-        "<svg><g id=\"0\"><use xlink:href=\"#0\" /></g></svg>",
+        R"(<svg><g id="0"><use xlink:href="#0" /></g></svg>)",
         // 11
-        "<svg width=\"200\" height=\"200\">"
-        "  <rect width=\"100\" height=\"50\"/>"
-        "</svg>",
+        R"(<svg width="200" height="200">
+          <rect width="100" height="50"/>
+        </svg>)",
         // 12
-        "<svg width=\"200\" height=\"200\">"
-        "  <g id=\"0\"><use xlink:href=\"#0\" /><rect width=\"100\" height=\"50\"/></g>"
-        "</svg>",
+        R"(<svg width="200" height="200">
+          <g id="0"><use xlink:href="#0" /><rect width="100" height="50"/></g>
+        </svg>)",
         // 13
-        "<svg width=\"200\" height=\"200\">"
-        "  <g id=\"0\"><g><use xlink:href=\"#0\" /><rect width=\"100\" height=\"50\"/></g></g>"
-        "</svg>",
+        R"(<svg width="200" height="200">
+          <g id="0"><g><use xlink:href="#0" /><rect width="100" height="50"/></g></g>
+        </svg>)",
         // 14 (undefined)
-        "<svg width=\"200\" height=\"200\">"
-        "  <rect width=\"100\" height=\"50\"/>"
-        "  <use x=\"100\" y=\"100\" opacity=\"0.5\" xlink:href=\"#nosuch\" />"
-        "</svg>",
+        R"(<svg width="200" height="200">
+          <rect width="100" height="50"/>
+          <use x="100" y="100" opacity="0.5" xlink:href="#nosuch" />
+        </svg>)",
         // 15 - Forward references
-        "<svg viewBox = \"0 0 200 200\">"
-        " <use y = \"60\" xlink:href = \"#usedPolyline\" fill= \"red\" stroke = \"blue\" fill-opacity = \"0.7\" fill-rule = \"evenodd\" stroke-width = \"3\"/>"
-        " <polygon id = \"usedPolyline\" points=\"20,20 50,120 100,10 40,80 50,80\"/>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">
+         <use y = "60" xlink:href = "#usedPolyline" fill= "red" stroke = "blue" fill-opacity = "0.7" fill-rule = "evenodd" stroke-width = "3"/>
+         <polygon id = "usedPolyline" points="20,20 50,120 100,10 40,80 50,80"/>
+        </svg>)",
         // 16
-        "<svg viewBox = \"0 0 200 200\">"
-        " <use xlink:href =\"#usedG\" fill = \"red\" fill-opacity =\"0.5\"/>"
-        " <defs>"
-        "  <g id=\"usedG\">"
-        "   <circle cx=\"0\" cy=\"0\" r=\"100\" fill-opacity = \"0.6\"/>"
-        "   <rect x = \"10\" y = \"10\" width = \"30\" height = \"30\"/>"
-        "   <circle fill=\"#a6ce39\" cx=\"0\" cy=\"0\" r=\"33\" />"
-        "  </g>"
-        " </defs>"
-        "</svg>",
+        R"(<svg viewBox = "0 0 200 200">
+         <use xlink:href ="#usedG" fill = "red" fill-opacity ="0.5"/>
+         <defs>
+          <g id="usedG">
+           <circle cx="0" cy="0" r="100" fill-opacity = "0.6"/>
+           <rect x = "10" y = "10" width = "30" height = "30"/>
+           <circle fill="#a6ce39" cx="0" cy="0" r="33" />
+          </g>
+         </defs>
+        </svg>)",
         // 17 - Indirect self referral
-        "<svg>"
-        " <defs>"
-        "   <g id=\"g0\">"
-        "     <g id=\"g1\"><use href=\"#g2\"/></g>"
-        "     <g id=\"g2\"><use href=\"#g1\"/></g>"
-        "   </g>"
-        " </defs>"
-        " <use xlink:href=\"#g0\" fill=\"black\"/>"
-        "</svg>"
+        R"(<svg>
+         <defs>
+           <g id="g0">
+             <g id="g1"><use href="#g2"/></g>
+             <g id="g2"><use href="#g1"/></g>
+           </g>
+         </defs>
+         <use xlink:href="#g0" fill="black"/>
+        </svg>)"
     };
 
     const int COUNT = sizeof(svgs) / sizeof(svgs[0]);
@@ -1597,8 +1597,8 @@ void tst_QSvgRenderer::testUseElement()
 
 void tst_QSvgRenderer::smallFont()
 {
-    static const char *svgs[] = { "<svg width=\"50px\" height=\"50px\"><text x=\"10\" y=\"10\" font-size=\"0\">Hello world</text></svg>",
-                                  "<svg width=\"50px\" height=\"50px\"><text x=\"10\" y=\"10\" font-size=\"0.5\">Hello world</text></svg>"
+    static const char *svgs[] = { R"(<svg width="50px" height="50px"><text x="10" y="10" font-size="0">Hello world</text></svg>)",
+                                  R"(<svg width="50px" height="50px"><text x="10" y="10" font-size="0.5">Hello world</text></svg>)"
     };
     const int COUNT = sizeof(svgs) / sizeof(svgs[0]);
     QImage images[COUNT];
@@ -1620,8 +1620,8 @@ void tst_QSvgRenderer::smallFont()
 
 void tst_QSvgRenderer::styleSheet()
 {
-    static const char *svgs[] = { "<svg><style type=\"text/css\">.cls {fill:#ff0000;}</style><rect class=\"cls\" x = \"10\" y = \"10\" width = \"30\" height = \"30\"/></svg>",
-                                  "<svg><style>.cls {fill:#ff0000;}</style><rect class=\"cls\" x = \"10\" y = \"10\" width = \"30\" height = \"30\"/></svg>",
+    static const char *svgs[] = { R"(<svg><style type="text/css">.cls {fill:#ff0000;}</style><rect class="cls" x = "10" y = "10" width = "30" height = "30"/></svg>)",
+                                  R"(<svg><style>.cls {fill:#ff0000;}</style><rect class="cls" x = "10" y = "10" width = "30" height = "30"/></svg>)",
     };
     const int COUNT = sizeof(svgs) / sizeof(svgs[0]);
     QImage images[COUNT];
@@ -1641,10 +1641,10 @@ void tst_QSvgRenderer::styleSheet()
 
 void tst_QSvgRenderer::duplicateStyleId()
 {
-    QByteArray svg = QByteArrayLiteral("<svg><linearGradient id=\"a\"/>"
-                                       "<rect style=\"fill:url(#a)\"/>"
-                                       "<linearGradient id=\"a\"/></svg>");
-    QTest::ignoreMessage(QtWarningMsg, "Duplicate unique style id: \"a\"");
+    QByteArray svg = QByteArrayLiteral(R"(<svg><linearGradient id="a"/>
+                                       <rect style="fill:url(#a) "/>
+                                       <linearGradient id="a"/></svg>)");
+    QTest::ignoreMessage(QtWarningMsg, R"(Duplicate unique style id: "a")");
     QImage image(200, 200, QImage::Format_RGB32);
     QPainter painter(&image);
     QSvgRenderer renderer(svg);
@@ -1655,7 +1655,7 @@ void tst_QSvgRenderer::oss_fuzz_23731()
 {
     // when configured with "-sanitize undefined", this resulted in:
     // "runtime error: division by zero"
-    QSvgRenderer().load(QByteArray("<svg><path d=\"A4------\">"));
+    QSvgRenderer().load(QByteArray(R"(<svg><path d="A4------">)"));
 }
 
 void tst_QSvgRenderer::oss_fuzz_24131()
@@ -1665,7 +1665,7 @@ void tst_QSvgRenderer::oss_fuzz_24131()
     // runtime error: signed integer overflow: -2147483648 + -2147483648 cannot be represented in type 'int'
     QImage image(377, 233, QImage::Format_RGB32);
     QPainter painter(&image);
-    QSvgRenderer renderer(QByteArray("<svg><path d=\"M- 4 44044404444E-334-\"/></svg>"));
+    QSvgRenderer renderer(QByteArray(R"(<svg><path d="M- 4 44044404444E-334-"/></svg>)"));
     renderer.render(&painter);
 }
 
@@ -1732,10 +1732,10 @@ void tst_QSvgRenderer::illegalAnimateTransform_data()
 {
     QTest::addColumn<QByteArray>("svg");
 
-    QTest::newRow("case1") << QByteArray("<svg><animateTransform type=\"rotate\" begin=\"1\" dur=\"2\" values=\"8,0,5,0\">");
-    QTest::newRow("case2") << QByteArray("<svg><animateTransform type=\"rotate\" begin=\"1\" dur=\"2\" values=\"1,2\">");
-    QTest::newRow("case3") << QByteArray("<svg><animateTransform type=\"rotate\" begin=\"1\" dur=\"2\" from=\".. 5 2\" to=\"f\">");
-    QTest::newRow("case4") << QByteArray("<svg><animateTransform type=\"scale\" begin=\"1\" dur=\"2\" by=\"--,..\">");
+    QTest::newRow("case1") << QByteArray(R"(<svg><animateTransform type="rotate" begin="1" dur="2" values="8,0,5,0">)");
+    QTest::newRow("case2") << QByteArray(R"(<svg><animateTransform type="rotate" begin="1" dur="2" values="1,2">)");
+    QTest::newRow("case3") << QByteArray(R"(<svg><animateTransform type="rotate" begin="1" dur="2" from=".. 5 2" to="f">)");
+    QTest::newRow("case4") << QByteArray(R"(<svg><animateTransform type="scale" begin="1" dur="2" by="--,..">)");
 }
 
 void tst_QSvgRenderer::illegalAnimateTransform()
@@ -1747,19 +1747,20 @@ void tst_QSvgRenderer::illegalAnimateTransform()
 
 void tst_QSvgRenderer::testMaskElement()
 {
-    QByteArray svgDoc("<svg width=\"240\" height=\"240\">"
-                        "<defs>"
-                            "<radialGradient id=\"myGradient\">"
-                                "<stop offset=\"0\" stop-color=\"black\"/>"
-                                "<stop offset=\"1\" stop-color=\"white\"/>"
-                            "</radialGradient>"
-                            "<mask id=\"mask\" width=\"240\" height=\"240\">"
-                                "<rect width=\"240\" height=\"240\" fill=\"white\"/>"
-                                "<circle cx=\"120\" cy=\"120\" r=\"120\" fill=\"url(#myGradient)\"/>"
-                            "</mask>"
-                        "</defs>"
-                        "<rect width=\"240\" height=\"240\" fill=\"red\" mask=\"url(#mask)\"/>"
-                      "</svg>");
+    QByteArray svgDoc(R"(<svg width="240" height="240">
+                        <defs>
+                            <radialGradient id="myGradient">
+                                <stop offset="0" stop-color="black"/>
+                                <stop offset="1" stop-color="white"/>
+                            </radialGradient>
+                            <mask id="mask" width="240" height="240">
+                                <rect width="240" height="240" fill="white"/>
+                                <circle cx="120" cy="120" r="120" fill="url(#myGradient) "/>
+                            </mask>
+                        </defs>
+                        <rect width="240" height="240" fill="red" mask="url(#mask) "/>
+                      </svg>)"
+);
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -1806,12 +1807,13 @@ void tst_QSvgRenderer::testMaskElement()
 
 void tst_QSvgRenderer::testSymbol()
 {
-    QByteArray svgDoc("<svg width=\"100\" height=\"100\">"
-                      "<symbol id=\"dot\" width=\"100\" height=\"100\" viewBox=\"0 0 1 1\">"
-                      "<rect x=\"0.25\" y=\"0.25\" width=\"0.5\" height=\"0.5\" fill=\"red\"/>"
-                      "</symbol>"
-                      "<use href=\"#dot\" x=\"0\" y=\"0\" />"
-                      "</svg>");
+    QByteArray svgDoc(R"(<svg width="100" height="100">
+                      <symbol id="dot" width="100" height="100" viewBox="0 0 1 1">
+                      <rect x="0.25" y="0.25" width="0.5" height="0.5" fill="red"/>
+                      </symbol>
+                      <use href="#dot" x="0" y="0"/>
+                      </svg>)"
+);
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -1837,12 +1839,13 @@ void tst_QSvgRenderer::testSymbol()
 
 void tst_QSvgRenderer::testMarker()
 {
-    QByteArray svgDoc("<svg width=\"100\" height=\"100\">"
-                      "<marker id=\"mark\" markerWidth=\"10\" markerHeight=\"10\" viewBox=\"0 0 1 1\" refX=\"0\" refY=\"0.5\">"
-                      "<rect x=\"0\" y=\"0\" width=\"1\" height=\"1\" fill=\"red\"/>"
-                      "</marker>"
-                      "<line x1=\"10\" y1=\"50\" x2=\"90\" y2=\"50\" stroke=\"white\" marker-end=\"url(#mark)\" />"
-                      "</svg>");
+    QByteArray svgDoc(R"(<svg width="100" height="100">
+                      <marker id="mark" markerWidth="10" markerHeight="10" viewBox="0 0 1 1" refX="0" refY="0.5">
+                      <rect x="0" y="0" width="1" height="1" fill="red"/>
+                      </marker>
+                      <line x1="10" y1="50" x2="90" y2="50" stroke="white" marker-end="url(#mark) "/>
+                      </svg>)"
+);
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -1936,15 +1939,16 @@ void tst_QSvgRenderer::notAnimated()
 
 void tst_QSvgRenderer::testPatternElement()
 {
-    QByteArray svgDoc("<svg viewBox=\"0 0 200 200\">"
-                        "<pattern id=\"pattern\" patternUnits=\"userSpaceOnUse\" width=\"20\" height=\"20\">"
-                            "<rect x=\"0\" y=\"0\" width=\"10\" height=\"10\" fill=\"red\"/>"
-                            "<rect x=\"10\" y=\"0\" width=\"10\" height=\"10\" fill=\"green\"/>"
-                            "<rect x=\"0\" y=\"10\" width=\"10\" height=\"10\" fill=\"blue\"/>"
-                            "<rect x=\"10\" y=\"10\" width=\"10\" height=\"10\" fill=\"yellow\"/>"
-                        "</pattern>"
-                        "<rect width=\"200\" height=\"200\" fill=\"url(#pattern)\"/>"
-                   "</svg>");
+    QByteArray svgDoc(R"(<svg viewBox="0 0 200 200">
+                        <pattern id="pattern" patternUnits="userSpaceOnUse" width="20" height="20">
+                            <rect x="0" y="0" width="10" height="10" fill="red"/>
+                            <rect x="10" y="0" width="10" height="10" fill="green"/>
+                            <rect x="0" y="10" width="10" height="10" fill="blue"/>
+                            <rect x="10" y="10" width="10" height="10" fill="yellow"/>
+                        </pattern>
+                        <rect width="200" height="200" fill="url(#pattern) "/>
+                    </svg>)"
+);
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -1977,11 +1981,12 @@ void tst_QSvgRenderer::testPatternElement()
 
 void tst_QSvgRenderer::testCycles()
 {
-    QByteArray svgDoc("<svg viewBox=\"0 0 200 200\">"
-                      "<pattern id=\"pattern\" patternUnits=\"userSpaceOnUse\" width=\"20\" height=\"20\">"
-                      "<rect x=\"0\" y=\"0\" width=\"10\" height=\"10\" fill=\"url(#pattern)\"/>"
-                      "</pattern>"
-                      "</svg>");
+    QByteArray svgDoc(R"(<svg viewBox="0 0 200 200">
+                      <pattern id="pattern" patternUnits="userSpaceOnUse" width="20" height="20">
+                      <rect x="0" y="0" width="10" height="10" fill="url(#pattern) "/>
+                      </pattern>
+                      </svg>)"
+);
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(!renderer.isValid());
@@ -1989,13 +1994,14 @@ void tst_QSvgRenderer::testCycles()
 
 void tst_QSvgRenderer::testFeFlood()
 {
-    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
-                      "<filter id=\"f1\">"
-                      "<feFlood flood-color=\"red\"/>"
-                      "</filter>"
-                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" fill=\"blue\" filter=\"url(#f1)\"/>"
-                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" fill=\"blue\"/>"
-                      "</svg>");
+    QByteArray svgDoc(R"(<svg width="50" height="50">
+                      <filter id="f1">
+                      <feFlood flood-color="red"/>
+                      </filter>
+                      <rect x="10" y="10" width="30" height="30" fill="blue" filter="url(#f1) "/>
+                      <rect x="10" y="10" width="30" height="30" fill="blue"/>
+                      </svg>)"
+);
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -2020,14 +2026,14 @@ void tst_QSvgRenderer::testFeFlood()
 
 void tst_QSvgRenderer::testFeOffset()
 {
-    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
-                      "<defs>"
-                      "<filter id=\"f1\">"
-                      "<feOffset in=\"SourceGraphic\" dx=\"5\" dy=\"5\"/>"
-                      "</filter>"
-                      "</defs>"
-                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" stroke=\"none\" fill=\"blue\"/>"
-                      "</svg>"
+    QByteArray svgDoc(R"(<svg width="50" height="50">
+                      <defs>
+                      <filter id="f1">
+                      <feOffset in="SourceGraphic" dx="5" dy="5"/>
+                      </filter>
+                      </defs>
+                      <rect x="10" y="10" width="30" height="30" stroke="none" fill="blue"/>
+                      </svg>)"
 );
 
     QSvgRenderer renderer(svgDoc);
@@ -2052,14 +2058,14 @@ void tst_QSvgRenderer::testFeOffset()
 
 void tst_QSvgRenderer::testFeColorMatrix()
 {
-    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
-                      "<defs>"
-                      "<filter id=\"f1\">"
-                      "<feColorMatrix in=\"SourceGraphic\" type=\"saturate\" values=\"0\"/>"
-                      "</filter>"
-                      "</defs>"
-                      "<rect x=\"0\" y=\"0\" width=\"50\" height=\"50\" stroke=\"none\" fill=\"red\" filter=\"url(#f1)\" />"
-                      "</svg>"
+    QByteArray svgDoc(R"(<svg width="50" height="50">
+                      <defs>
+                      <filter id="f1">
+                      <feColorMatrix in="SourceGraphic" type="saturate" values="0"/>
+                      </filter>
+                      </defs>
+                      <rect x="0" y="0" width="50" height="50" stroke="none" fill="red" filter="url(#f1) "/>
+                      </svg>)"
 );
 
     QSvgRenderer renderer(svgDoc);
@@ -2080,16 +2086,16 @@ void tst_QSvgRenderer::testFeColorMatrix()
 
 void tst_QSvgRenderer::testFeMerge()
 {
-    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
-                      "<filter id=\"f1\">"
-                      "<feOffset in=\"SourceAlpha\" dx=\"2\" dy=\"2\"/>"
-                      "<feMerge>"
-                      "<feMergeNode/>"
-                      "<feMergeNode in=\"SourceGraphic\"/>"
-                      "</feMerge>"
-                      "</filter>"
-                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" fill=\"blue\" filter=\"url(#f1)\"/>"
-                      "</svg>"
+    QByteArray svgDoc(R"(<svg width="50" height="50">
+                      <filter id="f1">
+                      <feOffset in="SourceAlpha" dx="2" dy="2"/>
+                      <feMerge>
+                      <feMergeNode/>
+                      <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                      </filter>
+                      <rect x="10" y="10" width="30" height="30" fill="blue" filter="url(#f1) "/>
+                      </svg>)"
 );
 
     QSvgRenderer renderer(svgDoc);
@@ -2116,13 +2122,13 @@ void tst_QSvgRenderer::testFeMerge()
 
 void tst_QSvgRenderer::testFeComposite()
 {
-    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
-                      "<filter id=\"f1\">"
-                      "<feOffset in=\"SourceAlpha\" dx=\"2\" dy=\"2\"/>"
-                      "<feComposite in2=\"SourceGraphic\" operator=\"over\"/>"
-                      "</filter>"
-                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" fill=\"blue\" filter=\"url(#f1)\"/>"
-                      "</svg>"
+    QByteArray svgDoc(R"(<svg width="50" height="50">
+                      <filter id="f1">
+                      <feOffset in="SourceAlpha" dx="2" dy="2"/>
+                      <feComposite in2="SourceGraphic" operator="over"/>
+                      </filter>
+                      <rect x="10" y="10" width="30" height="30" fill="blue" filter="url(#f1) "/>
+                      </svg>)"
 );
 
     QSvgRenderer renderer(svgDoc);
@@ -2148,12 +2154,12 @@ void tst_QSvgRenderer::testFeComposite()
 
 void tst_QSvgRenderer::testFeGaussian()
 {
-    QByteArray svgDoc("<svg width=\"50\" height=\"50\">"
-                      "<filter id=\"f1\">"
-                      "<feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"5\"/>"
-                      "</filter>"
-                      "<rect x=\"10\" y=\"10\" width=\"30\" height=\"30\" fill=\"black\" filter=\"url(#f1)\"/>"
-                      "</svg>"
+    QByteArray svgDoc(R"(<svg width="50" height="50">
+                      <filter id="f1">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="5"/>
+                      </filter>
+                      <rect x="10" y="10" width="30" height="30" fill="black" filter="url(#f1) "/>
+                      </svg>)"
 );
 
     QSvgRenderer renderer(svgDoc);
