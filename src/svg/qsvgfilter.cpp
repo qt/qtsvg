@@ -285,10 +285,11 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
     QImage source = sources[m_input];
     Q_ASSERT(source.depth() == 32);
 
+    if (m_stdDeviationX == 0 && m_stdDeviationY == 0)
+        return source;
+
     const qreal scaleX = qHypot(p->transform().m11(), p->transform().m21());
     const qreal scaleY = qHypot(p->transform().m12(), p->transform().m22());
-    const QTransform scaleXr = QTransform::fromScale(scaleX, scaleY);
-    const QTransform restXr = scaleXr.inverted() * p->transform();
 
     qreal sigma_x = scaleX * m_stdDeviationX;
     qreal sigma_y = scaleY * m_stdDeviationY;
@@ -297,8 +298,11 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
         sigma_y *= itemBounds.height();
     }
 
-    int dx = qMax(1, int(floor(sigma_x * 3. * sqrt(2. * M_PI) / 4. + 0.5)));
-    int dy = qMax(1, int(floor(sigma_y * 3. * sqrt(2. * M_PI) / 4. + 0.5)));
+    int dx = int(floor(sigma_x * 3. * sqrt(2. * M_PI) / 4. + 0.5));
+    int dy = int(floor(sigma_y * 3. * sqrt(2. * M_PI) / 4. + 0.5));
+
+    const QTransform scaleXr = QTransform::fromScale(scaleX, scaleY);
+    const QTransform restXr = scaleXr.inverted() * p->transform();
 
     QRect clipRectGlob = scaleXr.mapRect(localFilterBoundingBox(item, itemBounds, filterBounds, primitiveUnits, filterUnits)).toRect();
     if (clipRectGlob.isEmpty())
@@ -317,47 +321,88 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
     copyPainter.drawImage(source.offset(), source);
     copyPainter.end();
 
-    QImage result = tempSource;
+    QVarLengthArray<uint64_t, 32 * 32> buffer(tempSource.width() * tempSource.height());
 
-    // Using the approximation of a boxblur applied 3 times. Decoupling vertical and horizontal
-    for (int m = 0; m < 6; m++) {
-        QRgb *rawSource = reinterpret_cast<QRgb *>(tempSource.bits());
-        QRgb *rawResult = reinterpret_cast<QRgb *>(result.bits());
+    const int sourceHeight = tempSource.height();
+    const int sourceWidth = tempSource.width();
+    QRgb *rawImage = reinterpret_cast<QRgb *>(tempSource.bits());
 
-        int d = (m % 2 == 0) ? dx : dy;
-        int maxdim = (m % 2 == 0) ? tempSource.width() : tempSource.height();
-
-        if (d < 1)
-            continue;
-
-        for (int i = 0; i < tempSource.width(); i++) {
-            for (int j = 0; j < tempSource.height(); j++) {
-
-                int iipos = (m % 2 == 0) ? i : j;
-
-                QVector4D val(0, 0, 0, 0);
-                for (int k = 0; k < d; k++) {
-                    int ii = iipos + k - d / 2;
-                    if (ii < 0 || ii >= maxdim)
-                        continue;
-                    QRgb rgbVal = (m % 2 == 0) ? rawSource[ii + j * tempSource.width()] : rawSource[i + ii * tempSource.width()];
-                    val += QVector4D(qBlue(rgbVal), //TODO: Why are values switched here???
-                                     qGreen(rgbVal),
-                                     qRed(rgbVal), //TODO: Why are values switched here???
-                                     qAlpha(rgbVal)) / d;
+    // https://www.w3.org/TR/SVG11/filters.html#feGaussianBlurElement:
+    // Three successive box-blurs build a piece-wise quadratic convolution kernel,
+    // which approximates the Gaussian kernel
+    for (int m = 0; m < 3; m++) {
+        for (int col = 0; col < 4 * 8; col += 8 ){
+            // Generating the partial sum of color values from the top left corner
+            // These sums can be combined to yield the partial sum of any rectangular subregion
+            for (int i = 0; i < sourceWidth; i++) {
+                for (int j = 0; j < sourceHeight; j++) {
+                    buffer[i + j * sourceWidth] = (rawImage[i + j * sourceWidth] >> col) & 0xff;
+                    if (i > 0)
+                        buffer[i + j * sourceWidth] += buffer[(i - 1) + j * sourceWidth];
+                    if (j > 0)
+                        buffer[i + j * sourceWidth] += buffer[i + (j - 1) * sourceWidth];
+                    if (i > 0 && j > 0)
+                        buffer[i + j * sourceWidth] -= buffer[(i - 1) + (j - 1) * sourceWidth];
                 }
-                rawResult[i + j * tempSource.width()] = qRgba(qBound(0, int(val[0]), 255),
-                                                              qBound(0, int(val[1]), 255),
-                                                              qBound(0, int(val[2]), 255),
-                                                              qBound(0, int(val[3]), 255));
+            }
+
+            // https://www.w3.org/TR/SVG11/filters.html#feGaussianBlurElement:
+            // if d is odd, use three box-blurs of size 'd', centered on the output pixel.
+            // if d is even, two box-blurs of size 'd' (the first one centered on the pixel boundary
+            // between the output pixel and the one to the left, the second one centered on the pixel
+            // boundary between the output pixel and the one to the right) and one box blur of size
+            // 'd+1' centered on the output pixel.
+            auto adjustD = [=](int d, int *dleft, int *dright) {
+                if (d == 0) {
+                    *dleft = 1;
+                    *dright = 0;
+                } else if (d % 2 == 1) {
+                    *dleft = d / 2 + 1;
+                    *dright = d / 2;
+                } else {
+                    if (m == 0) {
+                        *dleft = d / 2 + 1;
+                        *dright = d / 2 - 1;
+                    } else if (m == 1) {
+                        *dleft = d / 2;
+                        *dright = d / 2;
+                    } else {
+                        *dleft = d / 2 + 1;
+                        *dright = d / 2;
+                    }
+                }
+            };
+
+            int dxleft, dxright;
+            adjustD(dx, &dxleft, &dxright);
+            int dytop, dybottom;
+            adjustD(dy, &dytop, &dybottom);
+
+            for (int i = 0; i < sourceWidth; i++) {
+                for (int j = 0; j < sourceHeight; j++) {
+                    int i1 = qMax(0, i - dxleft);
+                    int i2 = qMin(sourceWidth - 1, i + dxright);
+                    int j1 = qMax(0, j - dytop);
+                    int j2 = qMin(sourceHeight - 1, j + dybottom);
+
+                    uint64_t colorValue64 = buffer[i2 + j2 * sourceWidth];
+                    colorValue64 -= buffer[i1 + j2 * sourceWidth];
+                    colorValue64 -= buffer[i2 + j1 * sourceWidth];
+                    colorValue64 += buffer[i1 + j1 * sourceWidth];
+                    colorValue64 /= (dxleft + dxright) * (dytop + dybottom);
+
+                    unsigned int colorValue = colorValue64;
+                    rawImage[i + j * sourceWidth] &= ~(0xff << col);
+                    rawImage[i + j * sourceWidth] |= colorValue << col;
+
+                }
             }
         }
-        tempSource = result;
     }
 
     QRectF trueClipRectGlob = globalFilterBoundingBox(item, p, itemBounds, filterBounds, primitiveUnits, filterUnits);
 
-    result = QImage();
+    QImage result;
     if (!QImageIOHandler::allocateImage(trueClipRectGlob.toRect().size(), QImage::Format_RGBA8888_Premultiplied, &result)) {
         qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
         return QImage();
