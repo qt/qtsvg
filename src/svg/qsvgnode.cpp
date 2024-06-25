@@ -122,7 +122,7 @@ void QSvgNode::drawWithMask(QPainter *p, QSvgExtraStates &states, const QImage &
 QImage QSvgNode::drawIntoBuffer(QPainter *p, QSvgExtraStates &states, const QRect &boundsRect)
 {
     QImage proxy;
-    if (!QImageIOHandler::allocateImage(boundsRect.size(), QImage::Format_RGBA8888, &proxy)) {
+    if (!QImageIOHandler::allocateImage(boundsRect.size(), QImage::Format_ARGB32_Premultiplied, &proxy)) {
         qCWarning(lcSvgDraw) << "The requested buffer size is too big, ignoring";
         return proxy;
     }

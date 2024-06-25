@@ -208,7 +208,7 @@ QImage QSvgFeColorMatrix::apply(const QMap<QString, QImage> &sources, QPainter *
         return QImage();
 
     QImage result;
-    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_RGBA8888, &result)) {
+    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_ARGB32_Premultiplied, &result)) {
         qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
         return QImage();
     }
@@ -232,10 +232,11 @@ QImage QSvgFeColorMatrix::apply(const QMap<QString, QImage> &sources, QPainter *
             if (sourceJ < 0 || sourceJ >= source.width())
                 continue;
 
-            qreal a = qAlpha(sourceLine[sourceJ]);
-            qreal r = qBlue(sourceLine[sourceJ]);
-            qreal g = qGreen(sourceLine[sourceJ]);
-            qreal b = qRed(sourceLine[sourceJ]);
+            QRgb sourceColor = qUnpremultiply(sourceLine[sourceJ]);
+            qreal a = qAlpha(sourceColor);
+            qreal r = qRed(sourceColor);
+            qreal g = qGreen(sourceColor);
+            qreal b = qBlue(sourceColor);
 
             qreal r2 = m_matrix.data()[0+0*5] * r +
                        m_matrix.data()[1+0*5] * g +
@@ -258,10 +259,11 @@ QImage QSvgFeColorMatrix::apply(const QMap<QString, QImage> &sources, QPainter *
                        m_matrix.data()[3+3*5] * a +
                        m_matrix.data()[4+3*5] * 255.;
 
-            resultLine[j] = qRgba(qBound(0, int(b2), 255),
-                                  qBound(0, int(g2), 255),
-                                  qBound(0, int(r2), 255),
-                                  qBound(0, int(a2), 255));
+            QRgb rgba = qRgba(qBound(0, int(r2), 255),
+                              qBound(0, int(g2), 255),
+                              qBound(0, int(b2), 255),
+                              qBound(0, int(a2), 255));
+            resultLine[j] = qPremultiply(rgba);
         }
     }
 
@@ -318,7 +320,7 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
         return QImage();
 
     QImage tempSource;
-    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_RGBA8888_Premultiplied, &tempSource)) {
+    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_ARGB32_Premultiplied, &tempSource)) {
         qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
         return QImage();
     }
@@ -412,7 +414,7 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
     QRectF trueClipRectGlob = globalSubRegion(p, itemBounds, filterBounds, primitiveUnits, filterUnits);
 
     QImage result;
-    if (!QImageIOHandler::allocateImage(trueClipRectGlob.toRect().size(), QImage::Format_RGBA8888_Premultiplied, &result)) {
+    if (!QImageIOHandler::allocateImage(trueClipRectGlob.toRect().size(), QImage::Format_ARGB32_Premultiplied, &result)) {
         qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
         return QImage();
     }
@@ -467,7 +469,7 @@ QImage QSvgFeOffset::apply(const QMap<QString, QImage> &sources, QPainter *p,
         return QImage();
 
     QImage result;
-    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_RGBA8888, &result)) {
+    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_ARGB32_Premultiplied, &result)) {
         qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
         return QImage();
     }
@@ -515,7 +517,7 @@ QImage QSvgFeMerge::apply(const QMap<QString, QImage> &sources, QPainter *p,
         return QImage();
 
     QImage result;
-    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_RGBA8888, &result)) {
+    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_ARGB32_Premultiplied, &result)) {
         qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
         return QImage();
     }
@@ -599,7 +601,7 @@ QImage QSvgFeComposite::apply(const QMap<QString, QImage> &sources, QPainter *p,
         return QImage();
 
     QImage result;
-    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_RGBA8888, &result)) {
+    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_ARGB32_Premultiplied, &result)) {
         qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
         return QImage();
     }
@@ -653,13 +655,11 @@ QImage QSvgFeComposite::apply(const QMap<QString, QImage> &sources, QPainter *p,
                 int b = k1 * s1.z() * s2.z() / 255. + k2 * s1.z() + k3 * s2.z() + k4 * 255.;
                 int a = k1 * s1.w() * s2.w() / 255. + k2 * s1.w() + k3 * s2.w() + k4 * 255.;
 
-                qreal alpha = qBound(0, a, 255) / 255.;
-                if (alpha == 0)
-                    alpha = 1;
-                resultLine[i] =  qRgba(qBound(0., r / alpha, 255.),
-                                       qBound(0., g / alpha, 255.),
-                                       qBound(0., b / alpha, 255.),
-                                       qBound(0, a, 255));
+                a = qBound(0, a, 255);
+                resultLine[i] =  qRgba(qBound(0, r, a),
+                                       qBound(0, g, a),
+                                       qBound(0, b, a),
+                                       a);
             }
         }
     } else {
@@ -727,7 +727,7 @@ QImage QSvgFeFlood::apply(const QMap<QString, QImage> &,
     QRect clipRectGlob = p->transform().mapRect(clipRect).toRect();
 
     QImage result;
-    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_RGBA8888, &result)) {
+    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_ARGB32_Premultiplied, &result)) {
         qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
         return QImage();
     }
@@ -769,7 +769,7 @@ QImage QSvgFeBlend::apply(const QMap<QString, QImage> &sources, QPainter *p,
     QRect clipRectGlob = p->transform().mapRect(clipRect).toRect();
 
     QImage result;
-    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_RGBA8888, &result)) {
+    if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_ARGB32_Premultiplied, &result)) {
         qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
         return QImage();
     }
@@ -836,10 +836,11 @@ QImage QSvgFeBlend::apply(const QMap<QString, QImage> &sources, QPainter *p,
                 b = qMax((1 - alpha1) * blue2 + blue1, (1 - alpha2) * blue1 + blue2);
                 break;
             }
-            resultLine[i] = qRgba(qBound(0., r, 255.),
-                                  qBound(0., g, 255.),
-                                  qBound(0., b, 255.),
-                                  qBound(0., a, 255.));
+            a = qBound(0., a, 255.);
+            resultLine[i] = qRgba(qBound(0., r, a),
+                                  qBound(0., g, a),
+                                  qBound(0., b, a),
+                                  a);
         }
     }
     clipToTransformedBounds(&result, p, clipRect);
