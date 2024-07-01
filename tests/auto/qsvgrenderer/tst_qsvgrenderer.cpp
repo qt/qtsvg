@@ -1771,6 +1771,9 @@ void tst_QSvgRenderer::ossFuzzRender_data()
             << R"(<svg><path d="M- 4 44044404444E-334-"/></svg>)"_ba;
     QTest::newRow("empty polygon") // id=399769595
             << R"-(<svg><linearGradient id="c"/><polygon stroke="url(#c)"/><polygon points="-- 7-" stroke="url(#c)"/></svg>)-"_ba;
+    // runtime error: signed integer overflow: -2147483648 + -1 cannot be represented in type 'int'
+    QTest::newRow("excessive moveto in path") // id=406541912
+            << R"(<svg><path stroke="#000" d="M- 7e8t9 ."/><marker id="c"/><use href=" c"/></svg>)"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzRender()
