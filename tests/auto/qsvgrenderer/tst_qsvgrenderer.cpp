@@ -62,10 +62,10 @@ private slots:
     void smallFont();
     void styleSheet();
     void duplicateStyleId();
-    void oss_fuzz_23731();
-    void oss_fuzz_24131();
-    void oss_fuzz_24738();
-    void oss_fuzz_61586();
+    void ossFuzzRender_data();
+    void ossFuzzRender();
+    void ossFuzzLoad_data();
+    void ossFuzzLoad();
     void imageRendering();
     void illegalAnimateTransform_data();
     void illegalAnimateTransform();
@@ -1652,35 +1652,41 @@ void tst_QSvgRenderer::duplicateStyleId()
     renderer.render(&painter);
 }
 
-void tst_QSvgRenderer::oss_fuzz_23731()
+void tst_QSvgRenderer::ossFuzzRender_data()
 {
-    // when configured with "-sanitize undefined", this resulted in:
-    // "runtime error: division by zero"
-    QSvgRenderer().load(QByteArray(R"(<svg><path d="A4------">)"));
-}
+    QTest::addColumn<QByteArray>("svg");
 
-void tst_QSvgRenderer::oss_fuzz_24131()
-{
     // when configured with "-sanitize undefined", this resulted in:
     // "runtime error: -nan is outside the range of representable values of type 'int'"
     // runtime error: signed integer overflow: -2147483648 + -2147483648 cannot be represented in type 'int'
+    QTest::newRow("24131") << QByteArray(R"(<svg><path d="M- 4 44044404444E-334-"/></svg>)");
+}
+
+void tst_QSvgRenderer::ossFuzzRender()
+{
+    QFETCH(QByteArray, svg);
     QImage image(377, 233, QImage::Format_RGB32);
     QPainter painter(&image);
-    QSvgRenderer renderer(QByteArray(R"(<svg><path d="M- 4 44044404444E-334-"/></svg>)"));
+    QSvgRenderer renderer(svg);
     renderer.render(&painter);
 }
 
-void tst_QSvgRenderer::oss_fuzz_24738()
+void tst_QSvgRenderer::ossFuzzLoad_data()
 {
-    // when configured with "-sanitize undefined", this resulted in:
+    QTest::addColumn<QByteArray>("svg");
+
+    // when configured with "-sanitize undefined", these resulted in:
     // "runtime error: division by zero"
-    QSvgRenderer().load(QByteArray("<svg><path d=\"a 2 1e-212.....\">"));
+    QTest::newRow("23731") << QByteArray(R"(<svg><path d="A4------">)");
+    QTest::newRow("24738") << QByteArray(R"(<svg><path d="a 2 1e-212.....">)");
+    // resulted in null pointer deref
+    QTest::newRow("61586") << QByteArray(R"(<svg><style>*{font-family:q}<linearGradient><stop>)");
 }
 
-void tst_QSvgRenderer::oss_fuzz_61586()
+void tst_QSvgRenderer::ossFuzzLoad()
 {
-    // resulted in null pointer deref
-    QSvgRenderer().load(QByteArray("<svg><style>*{font-family:q}<linearGradient><stop>"));
+    QFETCH(QByteArray, svg);
+    QSvgRenderer().load(svg);
 }
 
 QByteArray image_data_url(QImage &image) {
