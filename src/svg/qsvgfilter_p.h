@@ -193,8 +193,8 @@ public:
         Darken,
         Lighten
     };
-    QSvgFeBlend(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect,
-                QString input2, Mode mode);
+    QSvgFeBlend(QSvgNode *parent, const QString &input, const QString &result,
+                const QSvgRectF &rect, const QString &input2, Mode mode);
     Type type() const override;
     QImage apply(QSvgNode *item, const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,

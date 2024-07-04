@@ -682,8 +682,8 @@ QImage QSvgFeFlood::apply(QSvgNode *item, const QMap<QString, QImage> &,
     return result;
 }
 
-QSvgFeBlend::QSvgFeBlend(QSvgNode *parent, QString input, QString result, const QSvgRectF &rect,
-                         QString input2, Mode mode)
+QSvgFeBlend::QSvgFeBlend(QSvgNode *parent, const QString &input, const QString &result,
+                         const QSvgRectF &rect, const QString &input2, Mode mode)
     : QSvgFeFilterPrimitive(parent, input, result, rect)
       , m_input2(input2)
       , m_mode(mode)
