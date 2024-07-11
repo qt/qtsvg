@@ -309,8 +309,9 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
         sigma_y *= itemBounds.height();
     }
 
-    int dx = int(floor(sigma_x * 3. * sqrt(2. * M_PI) / 4. + 0.5));
-    int dy = int(floor(sigma_y * 3. * sqrt(2. * M_PI) / 4. + 0.5));
+    constexpr double sd = 3. * M_SQRT1_2 / M_2_SQRTPI; // 3 * sqrt(2 * pi) / 4
+    const int dx = floor(sigma_x * sd + 0.5);
+    const int dy = floor(sigma_y * sd + 0.5);
 
     const QTransform scaleXr = QTransform::fromScale(scaleX, scaleY);
     const QTransform restXr = scaleXr.inverted() * p->transform();
@@ -363,38 +364,29 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
             // between the output pixel and the one to the left, the second one centered on the pixel
             // boundary between the output pixel and the one to the right) and one box blur of size
             // 'd+1' centered on the output pixel.
-            auto adjustD = [=](int d, int *dleft, int *dright) {
-                if (d == 0) {
-                    *dleft = 1;
-                    *dright = 0;
-                } else if (d % 2 == 1) {
-                    *dleft = d / 2 + 1;
-                    *dright = d / 2;
-                } else {
-                    if (m == 0) {
-                        *dleft = d / 2 + 1;
-                        *dright = d / 2 - 1;
-                    } else if (m == 1) {
-                        *dleft = d / 2;
-                        *dright = d / 2;
-                    } else {
-                        *dleft = d / 2 + 1;
-                        *dright = d / 2;
-                    }
-                }
+            auto adjustD = [](int d, int iteration) {
+                d = qMax(1, d);     // Treat d == 0 just like d == 1
+                std::pair<int, int> result;
+                if (d % 2 == 1)
+                    result = {d / 2 + 1, d / 2};
+                else if (iteration == 0)
+                    result = {d / 2 + 1, d / 2 - 1};
+                else if (iteration == 1)
+                    result = {d / 2, d / 2};
+                else
+                    result = {d / 2 + 1, d / 2};
+                Q_ASSERT(result.first + result.second > 0);
+                return result;
             };
 
-            int dxleft, dxright;
-            adjustD(dx, &dxleft, &dxright);
-            int dytop, dybottom;
-            adjustD(dy, &dytop, &dybottom);
-
+            const auto [dxleft, dxright] = adjustD(dx, m);
+            const auto [dytop, dybottom] = adjustD(dy, m);
             for (int i = 0; i < sourceWidth; i++) {
                 for (int j = 0; j < sourceHeight; j++) {
-                    int i1 = qMax(0, i - dxleft);
-                    int i2 = qMin(sourceWidth - 1, i + dxright);
-                    int j1 = qMax(0, j - dytop);
-                    int j2 = qMin(sourceHeight - 1, j + dybottom);
+                    const int i1 = qMax(0, i - dxleft);
+                    const int i2 = qMin(sourceWidth - 1, i + dxright);
+                    const int j1 = qMax(0, j - dytop);
+                    const int j2 = qMin(sourceHeight - 1, j + dybottom);
 
                     uint64_t colorValue64 = buffer[i2 + j2 * sourceWidth];
                     colorValue64 -= buffer[i1 + j2 * sourceWidth];
@@ -402,7 +394,7 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
                     colorValue64 += buffer[i1 + j1 * sourceWidth];
                     colorValue64 /= uint64_t(dxleft + dxright) * uint64_t(dytop + dybottom);
 
-                    unsigned int colorValue = colorValue64;
+                    const unsigned int colorValue = colorValue64;
                     rawImage[i + j * sourceWidth] &= ~(0xff << col);
                     rawImage[i + j * sourceWidth] |= colorValue << col;
 
