@@ -389,7 +389,7 @@ QImage QSvgFeGaussianBlur::apply(QSvgNode *item, const QMap<QString, QImage> &so
                     colorValue64 -= buffer[i1 + j2 * sourceWidth];
                     colorValue64 -= buffer[i2 + j1 * sourceWidth];
                     colorValue64 += buffer[i1 + j1 * sourceWidth];
-                    colorValue64 /= (dxleft + dxright) * (dytop + dybottom);
+                    colorValue64 /= uint64_t(dxleft + dxright) * uint64_t(dytop + dybottom);
 
                     unsigned int colorValue = colorValue64;
                     rawImage[i + j * sourceWidth] &= ~(0xff << col);
