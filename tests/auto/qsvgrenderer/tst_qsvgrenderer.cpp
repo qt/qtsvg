@@ -17,6 +17,8 @@
 #define SRCDIR
 #endif
 
+using namespace Qt::Literals::StringLiterals;
+
 class tst_QSvgRenderer : public QObject
 {
 Q_OBJECT
@@ -154,19 +156,32 @@ void tst_QSvgRenderer::invalidUrl_data()
 {
     QTest::addColumn<QByteArray>("svg");
 
-    QTest::newRow("01") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url0" /></svg>)");
-    QTest::newRow("02") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url(0" /></svg>)");
-    QTest::newRow("03") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url (0" /></svg>)");
-    QTest::newRow("04") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url ( 0" /></svg>)");
-    QTest::newRow("05") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url#" /></svg>)");
-    QTest::newRow("06") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url#(" /></svg>)");
-    QTest::newRow("07") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url(#" /></svg>)");
-    QTest::newRow("08") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url(# " /></svg>)");
-    QTest::newRow("09") << QByteArray(R"(<svg><linearGradient id="0"/><circle fill="url(# 0" /></svg>)");
-    QTest::newRow("10") << QByteArray(R"(<svg><linearGradient id="blabla"/><circle fill="urlblabla" /></svg>)");
-    QTest::newRow("11") << QByteArray(R"(<svg><linearGradient id="blabla"/><circle fill="url(blabla" /></svg>)");
-    QTest::newRow("12") << QByteArray(R"(<svg><linearGradient id="blabla"/><circle fill="url(blabla) "/></svg>)");
-    QTest::newRow("13") << QByteArray(R"(<svg><linearGradient id="blabla"/><circle fill="url(#blabla" /></svg>)");
+    QTest::newRow("url0")
+            << R"(<svg><linearGradient id="0"/><circle fill="url0" /></svg>)"_ba;
+    QTest::newRow("url(0")
+            << R"(<svg><linearGradient id="0"/><circle fill="url(0" /></svg>)"_ba;
+    QTest::newRow("url (0")
+            << R"(<svg><linearGradient id="0"/><circle fill="url (0" /></svg>)"_ba;
+    QTest::newRow("url ( 0")
+            << R"(<svg><linearGradient id="0"/><circle fill="url ( 0" /></svg>)"_ba;
+    QTest::newRow("url#")
+            << R"(<svg><linearGradient id="0"/><circle fill="url#" /></svg>)"_ba;
+    QTest::newRow("url#(")
+            << R"(<svg><linearGradient id="0"/><circle fill="url#(" /></svg>)"_ba;
+    QTest::newRow("url(#")
+            << R"(<svg><linearGradient id="0"/><circle fill="url(#" /></svg>)"_ba;
+    QTest::newRow("url(# ")
+            << R"(<svg><linearGradient id="0"/><circle fill="url(# " /></svg>)"_ba;
+    QTest::newRow("url(# 0")
+            << R"(<svg><linearGradient id="0"/><circle fill="url(# 0" /></svg>)"_ba;
+    QTest::newRow("urlblabla")
+            << R"(<svg><linearGradient id="blabla"/><circle fill="urlblabla" /></svg>)"_ba;
+    QTest::newRow("url(blabla")
+            << R"(<svg><linearGradient id="blabla"/><circle fill="url(blabla" /></svg>)"_ba;
+    QTest::newRow("url(blabla) ")
+            << R"(<svg><linearGradient id="blabla"/><circle fill="url(blabla) "/></svg>)"_ba;
+    QTest::newRow("url(#blabla")
+            << R"(<svg><linearGradient id="blabla"/><circle fill="url(#blabla" /></svg>)"_ba;
 }
 
 void tst_QSvgRenderer::invalidUrl()
@@ -302,7 +317,7 @@ void tst_QSvgRenderer::testRenderElement()
         QPicture picture;
         QPainter painter(&picture);
         QSvgRenderer rend(data);
-        rend.render(&painter, QLatin1String("foo"));
+        rend.render(&painter, "foo"_L1);
         painter.end();
         QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
     }
@@ -312,7 +327,7 @@ void tst_QSvgRenderer::testRenderElement()
         picture.setBoundingRect(QRect(100, 100, 200, 200));
         QPainter painter(&picture);
         QSvgRenderer rend(data);
-        rend.render(&painter, QLatin1String("foo"));
+        rend.render(&painter, "foo"_L1);
         painter.end();
         QCOMPARE(picture.boundingRect(), QRect(100, 100, 200, 200));
     }
@@ -321,7 +336,7 @@ void tst_QSvgRenderer::testRenderElement()
         QPicture picture;
         QPainter painter(&picture);
         QSvgRenderer rend(data);
-        rend.render(&painter, QLatin1String("foo"), QRectF(50, 50, 250, 250));
+        rend.render(&painter, "foo"_L1, QRectF(50, 50, 250, 250));
         painter.end();
         QCOMPARE(picture.boundingRect(), QRect(50, 50, 250, 250));
 
@@ -333,7 +348,7 @@ void tst_QSvgRenderer::testRenderElement()
         QPicture picture;
         QPainter painter(&picture);
         QSvgRenderer rend(data);
-        rend.render(&painter, QLatin1String("foo"));
+        rend.render(&painter, "foo"_L1);
         painter.end();
         QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
     }
@@ -344,7 +359,7 @@ void tst_QSvgRenderer::testRenderElement()
         QPicture picture;
         QPainter painter(&picture);
         QSvgRenderer rend(data);
-        rend.render(&painter, QLatin1String("foo"));
+        rend.render(&painter, "foo"_L1);
         painter.end();
         QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
     }
@@ -427,7 +442,7 @@ void tst_QSvgRenderer::constructorQXmlStreamReader() const
     QPicture picture;
     QPainter painter(&picture);
     QSvgRenderer rend(&reader);
-    rend.render(&painter, QLatin1String("foo"));
+    rend.render(&painter, "foo"_L1);
     painter.end();
     QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
 }
@@ -441,7 +456,7 @@ void tst_QSvgRenderer::loadQXmlStreamReader() const
     QPainter painter(&picture);
     QSvgRenderer rend;
     rend.load(&reader);
-    rend.render(&painter, QLatin1String("foo"));
+    rend.render(&painter, "foo"_L1);
     painter.end();
     QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
 }
@@ -454,17 +469,17 @@ void tst_QSvgRenderer::nestedQXmlStreamReader() const
 
     QCOMPARE(reader.readNext(), QXmlStreamReader::StartDocument);
     QCOMPARE(reader.readNext(), QXmlStreamReader::StartElement);
-    QCOMPARE(reader.name().toString(), QLatin1String("bar"));
+    QCOMPARE(reader.name().toString(), "bar"_L1);
 
     QPicture picture;
     QPainter painter(&picture);
     QSvgRenderer renderer(&reader);
-    renderer.render(&painter, QLatin1String("foo"));
+    renderer.render(&painter, "foo"_L1);
     painter.end();
     QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
 
     QCOMPARE(reader.readNext(), QXmlStreamReader::EndElement);
-    QCOMPARE(reader.name().toString(), QLatin1String("bar"));
+    QCOMPARE(reader.name().toString(), "bar"_L1);
     QCOMPARE(reader.readNext(), QXmlStreamReader::EndDocument);
 
     QVERIFY(reader.atEnd());
@@ -492,7 +507,7 @@ void tst_QSvgRenderer::stylePropagation() const
     QImage image3(200, 200, QImage::Format_RGB32);
     QPainter painter;
     QSvgRenderer renderer(data);
-    QLatin1String parts[4] = {QLatin1String("alpha"), QLatin1String("beta"), QLatin1String("gamma"), QLatin1String("delta")};
+    QLatin1StringView parts[4] = {"alpha"_L1, "beta"_L1, "gamma"_L1, "delta"_L1};
 
     QVERIFY(painter.begin(&image1));
     for (int i = 0; i < 4; ++i)
@@ -579,15 +594,15 @@ void tst_QSvgRenderer::transformForElement() const
     QPainter painter(&image);
     QSvgRenderer renderer(data);
 
-    compareTransforms(painter.worldTransform(), renderer.transformForElement(QLatin1String("ichi")));
+    compareTransforms(painter.worldTransform(), renderer.transformForElement("ichi"_L1));
     painter.translate(-3, 1);
-    compareTransforms(painter.worldTransform(), renderer.transformForElement(QLatin1String("ni")));
+    compareTransforms(painter.worldTransform(), renderer.transformForElement("ni"_L1));
     painter.rotate(45);
-    compareTransforms(painter.worldTransform(), renderer.transformForElement(QLatin1String("san")));
+    compareTransforms(painter.worldTransform(), renderer.transformForElement("san"_L1));
     painter.scale(4, 2);
-    compareTransforms(painter.worldTransform(), renderer.transformForElement(QLatin1String("yon")));
+    compareTransforms(painter.worldTransform(), renderer.transformForElement("yon"_L1));
     painter.setWorldTransform(QTransform(1, 2, 3, 4, 5, 6), true);
-    compareTransforms(painter.worldTransform(), renderer.transformForElement(QLatin1String("firkant")));
+    compareTransforms(painter.worldTransform(), renderer.transformForElement("firkant"_L1));
 }
 
 void tst_QSvgRenderer::boundsOnElement() const
@@ -614,26 +629,33 @@ void tst_QSvgRenderer::boundsOnElement() const
                         <text id="textD" transform="matrix(1 0 0 2 30 40) ">Lorem ipsum</text>
                       </g>
                     </svg>)");
-    
+
     qreal sqrt2 = qSqrt(2);
     QSvgRenderer renderer(data);
-    QCOMPARE(renderer.boundsOnElement(QLatin1String("sjokade")), QRectF(-10 * sqrt2, -10 * sqrt2, 20 * sqrt2, 20 * sqrt2));
-    QCOMPARE(renderer.boundsOnElement(QLatin1String("kaviar")), QRectF(-10 * sqrt2, -10 * sqrt2, 20 * sqrt2, 20 * sqrt2));
-    QCOMPARE(renderer.boundsOnElement(QLatin1String("nugatti")), QRectF(-11, -11, 22, 22));
-    QCOMPARE(renderer.boundsOnElement(QLatin1String("nutella")), QRectF(-10 * sqrt2, -10 * sqrt2, 20 * sqrt2, 20 * sqrt2));
-    QCOMPARE(renderer.boundsOnElement(QLatin1String("baconost")), QRectF(-10 * sqrt2, -10 * sqrt2, 20 * sqrt2, 20 * sqrt2));
-    QCOMPARE(renderer.boundsOnElement(QLatin1String("hapaa")), QRectF(-13, -9, 22, 22));
-    QCOMPARE(renderer.boundsOnElement(QLatin1String("prim")), QRectF(-10 * sqrt2 - 3, -10 * sqrt2 + 1, 20 * sqrt2, 20 * sqrt2));
+    QCOMPARE(renderer.boundsOnElement("sjokade"_L1),
+             QRectF(-10 * sqrt2, -10 * sqrt2, 20 * sqrt2, 20 * sqrt2));
+    QCOMPARE(renderer.boundsOnElement("kaviar"_L1),
+             QRectF(-10 * sqrt2, -10 * sqrt2, 20 * sqrt2, 20 * sqrt2));
+    QCOMPARE(renderer.boundsOnElement("nugatti"_L1),
+             QRectF(-11, -11, 22, 22));
+    QCOMPARE(renderer.boundsOnElement("nutella"_L1),
+             QRectF(-10 * sqrt2, -10 * sqrt2, 20 * sqrt2, 20 * sqrt2));
+    QCOMPARE(renderer.boundsOnElement("baconost"_L1),
+             QRectF(-10 * sqrt2, -10 * sqrt2, 20 * sqrt2, 20 * sqrt2));
+    QCOMPARE(renderer.boundsOnElement("hapaa"_L1),
+             QRectF(-13, -9, 22, 22));
+    QCOMPARE(renderer.boundsOnElement("prim"_L1),
+             QRectF(-10 * sqrt2 - 3, -10 * sqrt2 + 1, 20 * sqrt2, 20 * sqrt2));
 
-    QRectF textBoundsA = renderer.boundsOnElement(QLatin1String("textA"));
+    QRectF textBoundsA = renderer.boundsOnElement("textA"_L1);
     QVERIFY(!textBoundsA.isEmpty());
-    QCOMPARE(renderer.boundsOnElement(QLatin1String("textB")), textBoundsA);
+    QCOMPARE(renderer.boundsOnElement("textB"_L1), textBoundsA);
 
-    QRectF cBounds = renderer.boundsOnElement(QLatin1String("textC"));
-    QRectF dBounds = renderer.boundsOnElement(QLatin1String("textD"));
+    QRectF cBounds = renderer.boundsOnElement("textC"_L1);
+    QRectF dBounds = renderer.boundsOnElement("textD"_L1);
     QVERIFY(!cBounds.isEmpty());
     QCOMPARE(cBounds.size(), dBounds.size());
-    QRectF groupBounds = renderer.boundsOnElement(QLatin1String("textGroup"));
+    QRectF groupBounds = renderer.boundsOnElement("textGroup"_L1);
     QCOMPARE(groupBounds, cBounds | dBounds);
 }
 
@@ -649,7 +671,8 @@ void tst_QSvgRenderer::gradientStops() const
                         </svg>)");
         QSvgRenderer renderer(data);
 
-        QImage image(64, 64, QImage::Format_ARGB32_Premultiplied), refImage(64, 64, QImage::Format_ARGB32_Premultiplied);
+        QImage image(64, 64, QImage::Format_ARGB32_Premultiplied);
+        QImage refImage(64, 64, QImage::Format_ARGB32_Premultiplied);
         image.fill(0x87654321);
         refImage.fill(0x87654321);
 
@@ -669,7 +692,8 @@ void tst_QSvgRenderer::gradientStops() const
                         </svg>)");
         QSvgRenderer renderer(data);
 
-        QImage image(64, 64, QImage::Format_ARGB32_Premultiplied), refImage(64, 64, QImage::Format_ARGB32_Premultiplied);
+        QImage image(64, 64, QImage::Format_ARGB32_Premultiplied);
+        QImage refImage(64, 64, QImage::Format_ARGB32_Premultiplied);
         refImage.fill(0xff00ffff);
 
         QPainter painter(&image);
@@ -694,7 +718,8 @@ void tst_QSvgRenderer::gradientStops() const
                         </svg>)");
         QSvgRenderer renderer(data);
 
-        QImage image(64, 64, QImage::Format_ARGB32_Premultiplied), refImage(64, 64, QImage::Format_ARGB32_Premultiplied);
+        QImage image(64, 64, QImage::Format_ARGB32_Premultiplied);
+        QImage refImage(64, 64, QImage::Format_ARGB32_Premultiplied);
 
         QPainter painter;
         painter.begin(&refImage);
@@ -781,9 +806,11 @@ void tst_QSvgRenderer::gradientRefs()
         QRgb mid = line[127]; // semi transparent magenta
         QRgb right = line[255]; // opaque blue
 
-        QVERIFY((qAlpha(left) < 3) && (qRed(left) < 3) && (qGreen(left) == 0) && (qBlue(left) < 3));
-        QVERIFY((qAbs(qAlpha(mid) - 127) < 3) && (qAbs(qRed(mid) - 63) < 4) && (qGreen(mid) == 0) && (qAbs(qBlue(mid) - 63) < 4));
-        QVERIFY((qAlpha(right) > 253) && (qRed(right) < 3) && (qGreen(right) == 0) && (qBlue(right) > 251));
+        QVERIFY(qAlpha(left) < 3 && qRed(left) < 3 && qGreen(left) == 0 && qBlue(left) < 3);
+        QVERIFY(qAbs(qAlpha(mid) - 127) < 3 && qAbs(qRed(mid) - 63) < 4
+                && qGreen(mid) == 0 && qAbs(qBlue(mid) - 63) < 4);
+        QVERIFY(qAlpha(right) > 253 && qRed(right) < 3 && qGreen(right) == 0
+                && qBlue(right) > 251);
     }
 }
 
@@ -831,7 +858,7 @@ void tst_QSvgRenderer::testGzLoading()
     QSvgRenderer renderer(QFINDTESTDATA("heart.svgz"));
     QVERIFY(renderer.isValid());
 
-    QSvgRenderer resourceRenderer(QLatin1String(":/heart.svgz"));
+    QSvgRenderer resourceRenderer(":/heart.svgz"_L1);
     QVERIFY(resourceRenderer.isValid());
 
     QFile largeFileGz(QFINDTESTDATA("large.svgz"));
@@ -1087,7 +1114,7 @@ void tst_QSvgRenderer::paths2()
     QByteArray data(svg);
     QSvgRenderer renderer(data);
     QVERIFY(renderer.isValid());
-    QCOMPARE(renderer.boundsOnElement(QLatin1String("path1")).toRect(), QRect(3, 8, 10, 5));
+    QCOMPARE(renderer.boundsOnElement("path1"_L1).toRect(), QRect(3, 8, 10, 5));
 }
 
 void tst_QSvgRenderer::displayMode()
@@ -1656,10 +1683,13 @@ void tst_QSvgRenderer::ossFuzzRender_data()
 {
     QTest::addColumn<QByteArray>("svg");
 
+    // oss-fuzz's findings can be looked up by their respective id:
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=xxxxx
     // when configured with "-sanitize undefined", this resulted in:
     // "runtime error: -nan is outside the range of representable values of type 'int'"
     // runtime error: signed integer overflow: -2147483648 + -2147483648 cannot be represented in type 'int'
-    QTest::newRow("24131") << QByteArray(R"(<svg><path d="M- 4 44044404444E-334-"/></svg>)");
+    QTest::newRow("NaN-in-path") // id=24131
+            << R"(<svg><path d="M- 4 44044404444E-334-"/></svg>)"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzRender()
@@ -1674,13 +1704,17 @@ void tst_QSvgRenderer::ossFuzzRender()
 void tst_QSvgRenderer::ossFuzzLoad_data()
 {
     QTest::addColumn<QByteArray>("svg");
-
+    // oss-fuzz's findings can be looked up by their respective id:
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=xxxxx
     // when configured with "-sanitize undefined", these resulted in:
     // "runtime error: division by zero"
-    QTest::newRow("23731") << QByteArray(R"(<svg><path d="A4------">)");
-    QTest::newRow("24738") << QByteArray(R"(<svg><path d="a 2 1e-212.....">)");
+    QTest::newRow("missing-arc-data") // id=23731
+            << R"(<svg><path d="A4------">)"_ba;
+    QTest::newRow("subnormal-radius") // id=24738
+            << R"(<svg><path d="a 2 1e-212.....">)"_ba;
     // resulted in null pointer deref
-    QTest::newRow("61586") << QByteArray(R"(<svg><style>*{font-family:q}<linearGradient><stop>)");
+    QTest::newRow("badly-nested") // id=61586
+            << R"(<svg><style>*{font-family:q}<linearGradient><stop>)"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzLoad()
@@ -1725,9 +1759,9 @@ void tst_QSvgRenderer::imageRendering() {
         QImage img2(4, 4, QImage::Format_ARGB32);
         QPainter p2(&img2);
         p2.scale(2, 2);
-        if (QLatin1String(ir) == QLatin1String("optimizeSpeed"))
+        if (QLatin1String(ir) == "optimizeSpeed"_L1)
             p2.setRenderHint(QPainter::SmoothPixmapTransform, false);
-        else if (QLatin1String(ir) == QLatin1String("optimizeQuality"))
+        else if (QLatin1String(ir) == "optimizeQuality"_L1)
             p2.setRenderHint(QPainter::SmoothPixmapTransform, true);
         p2.drawImage(0, 0, img);
         p2.end();
@@ -1739,10 +1773,14 @@ void tst_QSvgRenderer::illegalAnimateTransform_data()
 {
     QTest::addColumn<QByteArray>("svg");
 
-    QTest::newRow("case1") << QByteArray(R"(<svg><animateTransform type="rotate" begin="1" dur="2" values="8,0,5,0">)");
-    QTest::newRow("case2") << QByteArray(R"(<svg><animateTransform type="rotate" begin="1" dur="2" values="1,2">)");
-    QTest::newRow("case3") << QByteArray(R"(<svg><animateTransform type="rotate" begin="1" dur="2" from=".. 5 2" to="f">)");
-    QTest::newRow("case4") << QByteArray(R"(<svg><animateTransform type="scale" begin="1" dur="2" by="--,..">)");
+    QTest::newRow("surplus-values")
+            << R"(<svg><animateTransform type="rotate" begin="1" dur="2" values="8,0,5,0">)"_ba;
+    QTest::newRow("missing-value")
+            << R"(<svg><animateTransform type="rotate" begin="1" dur="2" values="1,2">)"_ba;
+    QTest::newRow("from:..+to:f")
+            << R"(<svg><animateTransform type="rotate" begin="1" dur="2" from=".. 5 2" to="f">)"_ba;
+    QTest::newRow("by:--,..")
+            << R"(<svg><animateTransform type="scale" begin="1" dur="2" by="--,..">)"_ba;
 }
 
 void tst_QSvgRenderer::illegalAnimateTransform()
@@ -1878,7 +1916,7 @@ void tst_QSvgRenderer::testMarker()
 void tst_QSvgRenderer::tSpanLineBreak()
 {
     QSvgRenderer renderer;
-    QVERIFY(renderer.load(QByteArray("<svg><textArea>Foo<tbreak/>Bar</textArea></svg>")));
+    QVERIFY(renderer.load("<svg><textArea>Foo<tbreak/>Bar</textArea></svg>"_ba));
 
     QImage img(50, 50, QImage::Format_ARGB32);
     {
