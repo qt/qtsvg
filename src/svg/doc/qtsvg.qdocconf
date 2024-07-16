@@ -13,11 +13,16 @@ qhp.QtSvg.virtualFolder       = qtsvg
 qhp.QtSvg.indexTitle          = Qt SVG
 qhp.QtSvg.indexRoot           =
 
-qhp.QtSvg.subprojects         = classes
+qhp.QtSvg.subprojects = manual classes
+
 qhp.QtSvg.subprojects.classes.title = C++ Classes
 qhp.QtSvg.subprojects.classes.indexTitle = Qt SVG C++ Classes
 qhp.QtSvg.subprojects.classes.selectors = class fake:headerfile
 qhp.QtSvg.subprojects.classes.sortPages = true
+
+qhp.QtSvg.subprojects.manual.title = Qt SVG
+qhp.QtSvg.subprojects.manual.indexTitle = Qt SVG module topics
+qhp.QtSvg.subprojects.manual.type = manual
 
 depends += qtcore \
            qtwidgets \
@@ -49,6 +54,9 @@ imagedirs   += images
 
 navigation.landingpage = "Qt SVG"
 navigation.cppclassespage = "Qt SVG C++ Classes"
+# Auto-generate navigation linking based on "Qt SVG module topics":
+navigation.toctitles = "Qt SVG module topics"
+navigation.toctitles.inclusive = false
 
 # Fail the documentation build if there are more warnings than the limit
 warninglimit = 0
