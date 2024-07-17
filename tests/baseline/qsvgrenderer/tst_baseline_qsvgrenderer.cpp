@@ -157,15 +157,6 @@ quint16 tst_QSvgRenderer::checksumFileOrDir(const QString &path)
     return 0;
 }
 
-
-#define main _realmain
-QTEST_MAIN(tst_QSvgRenderer)
-#undef main
-
-int main(int argc, char *argv[])
-{
-    QBaselineTest::handleCmdLineArgs(&argc, &argv);
-    return _realmain(argc, argv);
-}
+QBASELINETEST_MAIN(tst_QSvgRenderer)
 
 #include "tst_baseline_qsvgrenderer.moc"
