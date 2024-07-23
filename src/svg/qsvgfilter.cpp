@@ -788,7 +788,7 @@ QImage QSvgFeBlend::apply(QSvgNode *item, const QMap<QString, QImage> &sources, 
             QRgb pixel2 = (ii2 >= 0 && ii2 < source2.size().width() && source2Line) ?
                     source2Line[ii2] : qRgba(0, 0, 0, 0);
 
-            qreal r, g, b;
+            qreal r = 0, g = 0, b = 0;
             qreal red1 = qRed(pixel1);
             qreal red2 = qRed(pixel2);
             qreal green1 = qGreen(pixel1);
