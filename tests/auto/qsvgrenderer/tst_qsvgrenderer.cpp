@@ -1766,8 +1766,7 @@ void tst_QSvgRenderer::testMaskElement()
                             </mask>
                         </defs>
                         <rect width="240" height="240" fill="red" mask="url(#mask) "/>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -1819,8 +1818,7 @@ void tst_QSvgRenderer::testSymbol()
                       <rect x="0.25" y="0.25" width="0.5" height="0.5" fill="red"/>
                       </symbol>
                       <use href="#dot" x="0" y="0"/>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -1851,8 +1849,7 @@ void tst_QSvgRenderer::testMarker()
                       <rect x="0" y="0" width="1" height="1" fill="red"/>
                       </marker>
                       <line x1="10" y1="50" x2="90" y2="50" stroke="white" marker-end="url(#mark) "/>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -1954,8 +1951,7 @@ void tst_QSvgRenderer::testPatternElement()
                             <rect x="10" y="10" width="10" height="10" fill="yellow"/>
                         </pattern>
                         <rect width="200" height="200" fill="url(#pattern) "/>
-                    </svg>)"
-);
+                    </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -1992,8 +1988,7 @@ void tst_QSvgRenderer::testCycles()
                       <pattern id="pattern" patternUnits="userSpaceOnUse" width="20" height="20">
                       <rect x="0" y="0" width="10" height="10" fill="url(#pattern) "/>
                       </pattern>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(!renderer.isValid());
@@ -2007,8 +2002,7 @@ void tst_QSvgRenderer::testFeFlood()
                       </filter>
                       <rect x="10" y="10" width="30" height="30" fill="blue" filter="url(#f1) "/>
                       <rect x="10" y="10" width="30" height="30" fill="blue"/>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -2040,8 +2034,7 @@ void tst_QSvgRenderer::testFeOffset()
                       </filter>
                       </defs>
                       <rect x="10" y="10" width="30" height="30" stroke="none" fill="blue"/>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -2072,8 +2065,7 @@ void tst_QSvgRenderer::testFeColorMatrix()
                       </filter>
                       </defs>
                       <rect x="0" y="0" width="50" height="50" stroke="none" fill="red" filter="url(#f1) "/>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -2102,8 +2094,7 @@ void tst_QSvgRenderer::testFeMerge()
                       </feMerge>
                       </filter>
                       <rect x="10" y="10" width="30" height="30" fill="blue" filter="url(#f1) "/>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -2135,8 +2126,7 @@ void tst_QSvgRenderer::testFeComposite()
                       <feComposite in2="SourceGraphic" operator="over"/>
                       </filter>
                       <rect x="10" y="10" width="30" height="30" fill="blue" filter="url(#f1) "/>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -2166,8 +2156,7 @@ void tst_QSvgRenderer::testFeGaussian()
                       <feGaussianBlur in="SourceGraphic" stdDeviation="5"/>
                       </filter>
                       <rect x="10" y="10" width="30" height="30" fill="black" filter="url(#f1) "/>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
@@ -2198,8 +2187,7 @@ void tst_QSvgRenderer::testFeBlend()
                       <feBlend in2="SourceGraphic" mode="normal"/>
                       </filter>
                       <rect x="10" y="10" width="30" height="30" fill="blue" filter="url(#f1) "/>
-                      </svg>)"
-);
+                      </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(renderer.isValid());
