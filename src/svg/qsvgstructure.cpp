@@ -497,9 +497,9 @@ QSvgSwitch::QSvgSwitch(QSvgNode *parent)
     init();
 }
 
-void QSvgSwitch::drawCommand(QPainter *p, QSvgExtraStates &states)
+QSvgNode *QSvgSwitch::childToRender() const
 {
-    QList<QSvgNode*>::iterator itr = m_renderers.begin();
+    auto itr = m_renderers.begin();
 
     while (itr != m_renderers.end()) {
         QSvgNode *node = *itr;
@@ -542,21 +542,27 @@ void QSvgSwitch::drawCommand(QPainter *p, QSvgExtraStates &states)
                 }
             }
 
-            if (okToRender && !formats.isEmpty()) {
+            if (okToRender && !formats.isEmpty())
                 okToRender = false;
-            }
 
-            if (okToRender && !fonts.isEmpty()) {
+            if (okToRender && !fonts.isEmpty())
                 okToRender = false;
-            }
 
-            if (okToRender) {
-                node->draw(p, states);
-                break;
-            }
+            if (okToRender)
+                return node;
         }
+
         ++itr;
     }
+
+    return nullptr;
+}
+
+void QSvgSwitch::drawCommand(QPainter *p, QSvgExtraStates &states)
+{
+    QSvgNode *node = childToRender();
+    if (node != nullptr)
+        node->draw(p, states);
 }
 
 QSvgNode::Type QSvgSwitch::type() const

@@ -183,6 +183,8 @@ public:
     QSvgSwitch(QSvgNode *parent);
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
+
+    QSvgNode *childToRender() const;
 private:
     void init();
 private:
