@@ -251,7 +251,7 @@ void QSvgMarker::drawMarkersForNode(QSvgNode *node, QPainter *p, QSvgExtraStates
 {
     QScopedValueRollback<bool> inUseGuard(states.inUse, true);
 
-    auto getMeanAngle = [] (QPointF p0, QPointF p1, QPointF p2) {
+    auto getMeanAngle = [](QPointF p0, QPointF p1, QPointF p2) -> qreal {
         QPointF t1 = p1 - p0;
         QPointF t2 = p2 - p1;
         qreal hyp1 =  hypot(t1.x(), t1.y());
