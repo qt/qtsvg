@@ -205,7 +205,7 @@ public:
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     qreal opacity() const { return m_opacity; }
-    bool isDefault() const { return qFuzzyCompare(m_opacity, 1.0); }
+    bool isDefault() const { return qFuzzyCompare(m_opacity, qreal(1.0)); }
 
 private:
     qreal m_opacity;
