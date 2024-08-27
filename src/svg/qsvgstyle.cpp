@@ -833,6 +833,11 @@ void QSvgAnimateColor::setFreeze(bool freeze)
 
 void QSvgAnimateColor::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &)
 {
+    if (m_fill)
+        m_oldBrush = p->brush();
+    else
+        m_oldPen = p->pen();
+
     qreal elapsedTime = node->document()->currentElapsed();
     if (elapsedTime < m_from || m_finished)
         return;
@@ -860,12 +865,10 @@ void QSvgAnimateColor::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates 
 
     if (m_fill) {
         QBrush b = p->brush();
-        m_oldBrush = b;
         b.setColor(color);
         p->setBrush(b);
     } else {
         QPen pen = p->pen();
-        m_oldPen = pen;
         pen.setColor(color);
         p->setPen(pen);
     }

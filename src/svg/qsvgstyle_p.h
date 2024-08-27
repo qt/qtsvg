@@ -637,6 +637,11 @@ public:
     void setRepeatCount(qreal repeatCount);
     void setRunningTime(int startMs, int durMs, int endMs, int by = 0);
 
+    qreal from() const { return m_from; }
+    qreal end() const { return m_end; }
+    qreal totalRunningTime() const { return m_totalRunningTime; }
+    qreal repeatCount() const { return m_repeatCount; }
+
 protected:
     qreal lerp(qreal a, qreal b, qreal t) const;
     qreal currentIterTimeFraction(qreal elapsedTime);
@@ -726,6 +731,11 @@ public:
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
+
+    QList<QColor> colors() const { return m_colors; }
+    bool fill() const { return m_fill; }
+    bool freeze() const { return m_freeze; }
+
 private:
     QList<QColor> m_colors;
     QBrush m_oldBrush;
