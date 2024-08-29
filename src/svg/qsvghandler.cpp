@@ -2467,6 +2467,39 @@ static int parseClockValue(QStringView str, bool *ok)
     return res;
 }
 
+static bool parseBaseAnimate(QSvgNode *parent,
+                             const QXmlStreamAttributes &attributes,
+                             QSvgAnimate *anim,
+                             QSvgHandler *handler)
+{
+    QString beginStr   = attributes.value(QLatin1String("begin")).toString();
+    QString durStr     = attributes.value(QLatin1String("dur")).toString();
+    QString endStr = attributes.value(QLatin1String("end")).toString();
+    QString repeatStr  = attributes.value(QLatin1String("repeatCount")).toString();
+
+    bool ok = true;
+    int begin = parseClockValue(beginStr, &ok);
+    if (!ok)
+        return false;
+    int dur = parseClockValue(durStr, &ok);
+    if (!ok)
+        return false;
+    int end = parseClockValue(endStr, &ok);
+    if (!ok)
+        return false;
+    qreal repeatCount = (repeatStr == QLatin1String("indefinite")) ? -1 :
+                            qMax(1.0, toDouble(repeatStr));
+
+    anim->setRunningTime(begin, dur, end, 0);
+    anim->setRepeatCount(repeatCount);
+
+    parent->appendStyleProperty(anim, QString());
+    parent->document()->setAnimated(true);
+
+    handler->setAnimPeriod(begin, end);
+    return true;
+}
+
 static bool parseAnimateColorNode(QSvgNode *parent,
                                   const QXmlStreamAttributes &attributes,
                                   QSvgHandler *handler)
@@ -2474,10 +2507,7 @@ static bool parseAnimateColorNode(QSvgNode *parent,
     QStringView fromStr    = attributes.value(QLatin1String("from"));
     QStringView toStr      = attributes.value(QLatin1String("to"));
     QString valuesStr  = attributes.value(QLatin1String("values")).toString();
-    QString beginStr   = attributes.value(QLatin1String("begin")).toString();
-    QString durStr     = attributes.value(QLatin1String("dur")).toString();
     QString targetStr  = attributes.value(QLatin1String("attributeName")).toString();
-    QString repeatStr  = attributes.value(QLatin1String("repeatCount")).toString();
     QString fillStr    = attributes.value(QLatin1String("fill")).toString();
 
     if (targetStr != QLatin1String("fill") && targetStr != QLatin1String("stroke"))
@@ -2502,24 +2532,12 @@ static bool parseAnimateColorNode(QSvgNode *parent,
         }
     }
 
-    bool ok = true;
-    int begin = parseClockValue(beginStr, &ok);
-    if (!ok)
-        return false;
-    int end = begin + parseClockValue(durStr, &ok);
-    if (!ok || end <= begin)
-        return false;
+    QSvgAnimateColor *anim = new QSvgAnimateColor();
+    parseBaseAnimate(parent, attributes, anim, handler);
 
-    QSvgAnimateColor *anim = new QSvgAnimateColor(begin, end, 0);
     anim->setArgs((targetStr == QLatin1String("fill")), colors);
     anim->setFreeze(fillStr == QLatin1String("freeze"));
-    anim->setRepeatCount(
-        (repeatStr == QLatin1String("indefinite")) ? -1 :
-            (repeatStr == QLatin1String("")) ? 1 : toDouble(repeatStr));
 
-    parent->appendStyleProperty(anim, someId(attributes));
-    parent->document()->setAnimated(true);
-    handler->setAnimPeriod(begin, end);
     return true;
 }
 
@@ -2545,9 +2563,6 @@ static bool parseAnimateTransformNode(QSvgNode *parent,
 {
     QString typeStr    = attributes.value(QLatin1String("type")).toString();
     QString values     = attributes.value(QLatin1String("values")).toString();
-    QString beginStr   = attributes.value(QLatin1String("begin")).toString();
-    QString durStr     = attributes.value(QLatin1String("dur")).toString();
-    QString repeatStr  = attributes.value(QLatin1String("repeatCount")).toString();
     QString fillStr    = attributes.value(QLatin1String("fill")).toString();
     QString fromStr    = attributes.value(QLatin1String("from")).toString();
     QString toStr      = attributes.value(QLatin1String("to")).toString();
@@ -2600,14 +2615,6 @@ static bool parseAnimateTransformNode(QSvgNode *parent,
     if (vals.size() % 3 != 0)
         return false;
 
-    bool ok = true;
-    int begin = parseClockValue(beginStr, &ok);
-    if (!ok)
-        return false;
-    int end = begin + parseClockValue(durStr, &ok);
-    if (!ok || end <= begin)
-        return false;
-
     QSvgAnimateTransform::TransformType type = QSvgAnimateTransform::Empty;
     if (typeStr == QLatin1String("translate")) {
         type = QSvgAnimateTransform::Translate;
@@ -2623,16 +2630,12 @@ static bool parseAnimateTransformNode(QSvgNode *parent,
         return false;
     }
 
-    QSvgAnimateTransform *anim = new QSvgAnimateTransform(begin, end, 0);
+    QSvgAnimateTransform *anim = new QSvgAnimateTransform();
+    parseBaseAnimate(parent, attributes, anim, handler);
+
     anim->setArgs(type, additive, vals);
     anim->setFreeze(fillStr == QLatin1String("freeze"));
-    anim->setRepeatCount(
-            (repeatStr == QLatin1String("indefinite"))? -1 :
-            (repeatStr == QLatin1String(""))? 1 : toDouble(repeatStr));
 
-    parent->appendStyleProperty(anim, someId(attributes));
-    parent->document()->setAnimated(true);
-    handler->setAnimPeriod(begin, end);
     return true;
 }
 

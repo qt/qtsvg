@@ -627,19 +627,55 @@ void QSvgStyle::revert(QPainter *p, QSvgExtraStates &states)
     }
 }
 
-QSvgAnimateTransform::QSvgAnimateTransform(int startMs, int endMs, int byMs )
+QSvgAnimate::QSvgAnimate()
     : QSvgStyleProperty(),
-      m_from(startMs),
-      m_totalRunningTime(endMs - startMs),
-      m_type(Empty),
+      m_from(-1),
+      m_totalRunningTime(0),
+      m_end(0),
+      m_repeatCount(-1.0),
+      m_finished(false)
+
+{}
+
+void QSvgAnimate::setRepeatCount(qreal repeatCount)
+{
+    m_repeatCount = repeatCount;
+}
+
+void QSvgAnimate::setRunningTime(int startMs, int durMs, int endMs, int by)
+{
+    Q_UNUSED(by)
+    m_from = startMs;
+    m_end = endMs;
+    m_totalRunningTime = startMs + durMs;
+}
+
+qreal QSvgAnimate::lerp(qreal a, qreal b, qreal t) const
+{
+    return a + (b - a) * t;
+}
+
+qreal QSvgAnimate::currentIterTimeFraction(qreal elpasedTime)
+{
+    qreal fractionOfTotalTime = 0;
+    if (m_totalRunningTime != 0) {
+        fractionOfTotalTime = (elpasedTime - m_from) / m_totalRunningTime;
+        if (m_repeatCount >= 0 && m_repeatCount < fractionOfTotalTime) {
+            m_finished = true;
+            fractionOfTotalTime = m_repeatCount;
+        }
+    }
+
+    return fractionOfTotalTime - std::trunc(fractionOfTotalTime);
+}
+
+QSvgAnimateTransform::QSvgAnimateTransform()
+    : m_type(Empty),
       m_additive(Replace),
       m_count(0),
-      m_finished(false),
       m_freeze(false),
-      m_repeatCount(-1.),
       m_transformApplied(false)
 {
-    Q_UNUSED(byMs);
 }
 
 void QSvgAnimateTransform::setArgs(TransformType type, Additive additive, const QList<qreal> &args)
@@ -667,22 +703,11 @@ void QSvgAnimateTransform::revert(QPainter *p, QSvgExtraStates &)
 
 void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
 {
-    qreal totalTimeElapsed = node->document()->currentElapsed();
-    if (totalTimeElapsed < m_from || m_finished)
+    qreal elapsedTime = node->document()->currentElapsed();
+    if (elapsedTime < m_from || m_finished)
         return;
 
-    qreal fractionOfTotalTime = 0;
-    if (m_totalRunningTime != 0) {
-        fractionOfTotalTime = (totalTimeElapsed - m_from) / m_totalRunningTime;
-
-        if (m_repeatCount >= 0 && m_repeatCount < fractionOfTotalTime) {
-            m_finished = true;
-            fractionOfTotalTime = m_repeatCount;
-        }
-    }
-
-    qreal fractionOfCurrentIterationTime = fractionOfTotalTime - std::trunc(fractionOfTotalTime);
-
+    qreal fractionOfCurrentIterationTime = currentIterTimeFraction(elapsedTime);
     qreal currentIndexPosition = fractionOfCurrentIterationTime * (m_count - 1);
     int endElem = qCeil(currentIndexPosition);
     int startElem = qMax(endElem - 1, 0);
@@ -701,10 +726,8 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         to1   = m_args[endElem++];
         to2   = m_args[endElem++];
 
-        qreal transXDiff = (to1 - from1) * fractionOfCurrentElement;
-        qreal transX = from1 + transXDiff;
-        qreal transYDiff = (to2 - from2) * fractionOfCurrentElement;
-        qreal transY = from2 + transYDiff;
+        qreal transX = lerp(from1, to1, fractionOfCurrentElement);
+        qreal transY = lerp(from2, to2, fractionOfCurrentElement);
         m_transform = QTransform();
         m_transform.translate(transX, transY);
         break;
@@ -719,14 +742,12 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         to1   = m_args[endElem++];
         to2   = m_args[endElem++];
 
-        qreal transXDiff = (to1 - from1) * fractionOfCurrentElement;
-        qreal transX = from1 + transXDiff;
-        qreal transYDiff = (to2 - from2) * fractionOfCurrentElement;
-        qreal transY = from2 + transYDiff;
-        if (transY == 0)
-            transY = transX;
+        qreal scaleX = lerp(from1, to1, fractionOfCurrentElement);
+        qreal scaleY = lerp(from2, to2, fractionOfCurrentElement);
+        if (scaleY == 0)
+            scaleY = scaleX;
         m_transform = QTransform();
-        m_transform.scale(transX, transY);
+        m_transform.scale(scaleX, scaleY);
         break;
     }
     case Rotate: {
@@ -742,12 +763,9 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         to3   = m_args[endElem++];
 
         qreal rotationDiff = (to1 - from1) * fractionOfCurrentElement;
-        //qreal rotation = from1 + rotationDiff;
 
-        qreal transXDiff = (to2 - from2) * fractionOfCurrentElement;
-        qreal transX = from2 + transXDiff;
-        qreal transYDiff = (to3 - from3) * fractionOfCurrentElement;
-        qreal transY = from3 + transYDiff;
+        qreal transX = lerp(from2, to2, fractionOfCurrentElement);
+        qreal transY = lerp(from3, to3, fractionOfCurrentElement);
         m_transform = QTransform();
         m_transform.translate(transX, transY);
         m_transform.rotate(rotationDiff);
@@ -762,10 +780,9 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         from1 = m_args[startElem++];
         to1   = m_args[endElem++];
 
-        qreal transXDiff = (to1 - from1) * fractionOfCurrentElement;
-        qreal transX = from1 + transXDiff;
+        qreal skewX = lerp(from1, to1, fractionOfCurrentElement);
         m_transform = QTransform();
-        m_transform.shear(qTan(qDegreesToRadians(transX)), 0);
+        m_transform.shear(qTan(qDegreesToRadians(skewX)), 0);
         break;
     }
     case SkewY: {
@@ -776,10 +793,9 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
         from1 = m_args[startElem++];
         to1   = m_args[endElem++];
 
-        qreal transYDiff = (to1 - from1) * fractionOfCurrentElement;
-        qreal transY = from1 + transYDiff;
+        qreal skewY = lerp(from1, to1, fractionOfCurrentElement);
         m_transform = QTransform();
-        m_transform.shear(0, qTan(qDegreesToRadians(transY)));
+        m_transform.shear(0, qTan(qDegreesToRadians(skewY)));
         break;
     }
     default:
@@ -797,21 +813,10 @@ void QSvgAnimateTransform::setFreeze(bool freeze)
     m_freeze = freeze;
 }
 
-void QSvgAnimateTransform::setRepeatCount(qreal repeatCount)
+QSvgAnimateColor::QSvgAnimateColor()
+    : m_fill(false),
+      m_freeze(false)
 {
-    m_repeatCount = repeatCount;
-}
-
-QSvgAnimateColor::QSvgAnimateColor(int startMs, int endMs, int byMs)
-    : QSvgStyleProperty(),
-      m_from(startMs),
-      m_totalRunningTime(endMs - startMs),
-      m_fill(false),
-      m_finished(false),
-      m_freeze(false),
-      m_repeatCount(-1.)
-{
-    Q_UNUSED(byMs);
 }
 
 void QSvgAnimateColor::setArgs(bool fill,
@@ -826,32 +831,15 @@ void QSvgAnimateColor::setFreeze(bool freeze)
     m_freeze = freeze;
 }
 
-void QSvgAnimateColor::setRepeatCount(qreal repeatCount)
-{
-    m_repeatCount = repeatCount;
-}
-
 void QSvgAnimateColor::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &)
 {
-    qreal totalTimeElapsed = node->document()->currentElapsed();
-    if (totalTimeElapsed < m_from || m_finished)
+    qreal elapsedTime = node->document()->currentElapsed();
+    if (elapsedTime < m_from || m_finished)
         return;
 
-    qreal animationFrame = 0;
-    if (m_totalRunningTime != 0)
-        animationFrame = (totalTimeElapsed - m_from) / m_totalRunningTime;
+    qreal fractionOfCurrentIterationTime = currentIterTimeFraction(elapsedTime);
 
-    if (m_repeatCount >= 0 && m_repeatCount < animationFrame) {
-        m_finished = true;
-        animationFrame = m_repeatCount;
-    }
-
-    qreal percentOfAnimation = animationFrame;
-    if (percentOfAnimation > 1) {
-        percentOfAnimation -= ((int)percentOfAnimation);
-    }
-
-    qreal currentPosition = percentOfAnimation * (m_colors.size() - 1);
+    qreal currentPosition = fractionOfCurrentIterationTime * (m_colors.size() - 1);
 
     int startElem = qFloor(currentPosition);
     int endElem   = qCeil(currentPosition);
@@ -863,16 +851,10 @@ void QSvgAnimateColor::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates 
         percentOfColorMorph -= ((int)percentOfColorMorph);
     }
 
-    // Interpolate between the two fixed colors start and end
-    qreal aDiff = (end.alpha() - start.alpha()) * percentOfColorMorph;
-    qreal rDiff = (end.red()   - start.red()) * percentOfColorMorph;
-    qreal gDiff = (end.green() - start.green()) * percentOfColorMorph;
-    qreal bDiff = (end.blue()  - start.blue()) * percentOfColorMorph;
-
-    int alpha  = int(start.alpha() + aDiff);
-    int red    = int(start.red() + rDiff);
-    int green  = int(start.green() + gDiff);
-    int blue   = int(start.blue() + bDiff);
+    int alpha  = lerp(start.alpha(), end.alpha(), percentOfColorMorph);
+    int red    = lerp(start.red(), end.red(), percentOfColorMorph);
+    int green  = lerp(start.green(), end.green(), percentOfColorMorph);
+    int blue   = lerp(start.blue(), end.blue(), percentOfColorMorph);;
 
     QColor color(red, green, blue, alpha);
 

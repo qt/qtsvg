@@ -630,8 +630,26 @@ private:
     QStack<QTransform> m_oldWorldTransform;
 };
 
+class Q_SVG_EXPORT QSvgAnimate : public QSvgStyleProperty
+{
+public:
+    QSvgAnimate();
+    void setRepeatCount(qreal repeatCount);
+    void setRunningTime(int startMs, int durMs, int endMs, int by = 0);
 
-class Q_SVG_EXPORT QSvgAnimateTransform : public QSvgStyleProperty
+protected:
+    qreal lerp(qreal a, qreal b, qreal t) const;
+    qreal currentIterTimeFraction(qreal elapsedTime);
+
+protected:
+    qreal m_from;
+    qreal m_totalRunningTime;
+    qreal m_end;
+    qreal m_repeatCount;
+    bool m_finished;
+};
+
+class Q_SVG_EXPORT QSvgAnimateTransform : public QSvgAnimate
 {
 public:
     enum TransformType
@@ -649,10 +667,9 @@ public:
         Replace
     };
 public:
-    QSvgAnimateTransform(int startMs, int endMs, int by = 0);
+    QSvgAnimateTransform();
     void setArgs(TransformType type, Additive additive, const QList<qreal> &args);
     void setFreeze(bool freeze);
-    void setRepeatCount(qreal repeatCount);
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
@@ -689,41 +706,32 @@ public:
 protected:
     void resolveMatrix(const QSvgNode *node);
 private:
-    qreal m_from;
-    qreal m_totalRunningTime;
     TransformType m_type;
     Additive m_additive;
     QList<qreal> m_args;
     int m_count;
     QTransform m_transform;
     QTransform m_oldWorldTransform;
-    bool m_finished;
     bool m_freeze;
-    qreal m_repeatCount;
     bool m_transformApplied;
 };
 
 
-class Q_SVG_EXPORT QSvgAnimateColor : public QSvgStyleProperty
+class Q_SVG_EXPORT QSvgAnimateColor : public QSvgAnimate
 {
 public:
-    QSvgAnimateColor(int startMs, int endMs, int by = 0);
+    QSvgAnimateColor();
     void setArgs(bool fill, const QList<QColor> &colors);
     void setFreeze(bool freeze);
-    void setRepeatCount(qreal repeatCount);
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
 private:
-    qreal m_from;
-    qreal m_totalRunningTime;
     QList<QColor> m_colors;
     QBrush m_oldBrush;
     QPen   m_oldPen;
     bool m_fill;
-    bool m_finished;
     bool m_freeze;
-    qreal m_repeatCount;
 };
 
 
