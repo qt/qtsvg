@@ -538,9 +538,8 @@ void QSvgStyle::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states
         transform->apply(p, node, states);
     }
 
-    if (animateColor) {
-        animateColor->apply(p, node, states);
-    }
+    for (auto it = animateColors.constBegin(); it != animateColors.constEnd(); ++it)
+        (*it)->apply(p, node, states);
 
     //animated transforms have to be applied
     //_after_ the original object transformations
@@ -616,9 +615,8 @@ void QSvgStyle::revert(QPainter *p, QSvgExtraStates &states)
         transform->revert(p, states);
     }
 
-    if (animateColor) {
-        animateColor->revert(p, states);
-    }
+    for (auto it = animateColors.constBegin(); it != animateColors.constEnd(); ++it)
+        (*it)->revert(p, states);
 
     if (opacity) {
         opacity->revert(p, states);

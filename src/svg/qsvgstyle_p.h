@@ -760,7 +760,6 @@ public:
           gradient(0),
           pattern(0),
           transform(0),
-          animateColor(0),
           opacity(0),
           compop(0)
     {}
@@ -777,7 +776,7 @@ public:
     QSvgRefCounter<QSvgGradientStyle>     gradient;
     QSvgRefCounter<QSvgPatternStyle>      pattern;
     QSvgRefCounter<QSvgTransformStyle>    transform;
-    QSvgRefCounter<QSvgAnimateColor>      animateColor;
+    QList<QSvgRefCounter<QSvgAnimateColor> >   animateColors;
     QList<QSvgRefCounter<QSvgAnimateTransform> >   animateTransforms;
     QSvgRefCounter<QSvgOpacityStyle>      opacity;
     QSvgRefCounter<QSvgCompOpStyle>       compop;
