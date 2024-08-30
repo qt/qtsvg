@@ -2480,6 +2480,9 @@ static bool parseAnimateColorNode(QSvgNode *parent,
     QString repeatStr  = attributes.value(QLatin1String("repeatCount")).toString();
     QString fillStr    = attributes.value(QLatin1String("fill")).toString();
 
+    if (targetStr != QLatin1String("fill") && targetStr != QLatin1String("stroke"))
+        return false;
+
     QList<QColor> colors;
     if (valuesStr.isEmpty()) {
         QColor startColor, endColor;
