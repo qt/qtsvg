@@ -81,10 +81,10 @@ public:
     bool trustedSourceMode() const;
 
 public:
-    bool startElement(const QString &localName, const QXmlStreamAttributes &attributes);
-    bool endElement(QStringView localName);
-    bool characters(QStringView str);
-    bool processingInstruction(const QString &target, const QString &data);
+    bool startElement(const QStringView localName, const QXmlStreamAttributes &attributes);
+    bool endElement(const QStringView localName);
+    bool characters(const QStringView str);
+    bool processingInstruction(const QStringView target, const QStringView data);
 
 private:
     void init();

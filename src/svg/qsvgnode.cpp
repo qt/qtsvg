@@ -343,13 +343,12 @@ QSvgStyleProperty * QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
     return 0;
 }
 
-QSvgPaintStyleProperty * QSvgNode::styleProperty(const QString &id) const
+QSvgPaintStyleProperty *QSvgNode::styleProperty(QStringView id) const
 {
-    QString rid = id;
-    if (rid.startsWith(QLatin1Char('#')))
-        rid.remove(0, 1);
+    if (id.startsWith(QLatin1Char('#')))
+        id.slice(1);
     QSvgTinyDocument *doc = document();
-    return doc ? doc->namedStyle(rid) : 0;
+    return doc ? doc->namedStyle(id.toString()) : 0;
 }
 
 QRectF QSvgNode::internalFastBounds(QPainter *p, QSvgExtraStates &states) const
