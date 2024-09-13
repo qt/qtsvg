@@ -546,7 +546,7 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
     }
 }
 
-void QSvgText::addText(const QString &text)
+void QSvgText::addText(QStringView text)
 {
     m_tspans.append(new QSvgTspan(this, false));
     m_tspans.back()->setWhitespaceMode(m_mode);

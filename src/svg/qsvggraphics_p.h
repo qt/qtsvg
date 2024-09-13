@@ -185,7 +185,7 @@ public:
 
     void addTspan(QSvgTspan *tspan) {m_tspans.append(tspan);}
     const QList<QSvgTspan *> tspans() const { return m_tspans; }
-    void addText(const QString &text);
+    void addText(QStringView text);
     void addLineBreak() {m_tspans.append(LINEBREAK);}
     void setWhitespaceMode(WhitespaceMode mode) {m_mode = mode;}
 
@@ -223,7 +223,7 @@ public:
     ~QSvgTspan() { };
     Type type() const override { return Tspan; }
     void drawCommand(QPainter *, QSvgExtraStates &) override { Q_ASSERT(!"Tspans should be drawn through QSvgText::draw()."); }
-    void addText(const QString &text) {m_text += text;}
+    void addText(QStringView text) {m_text += text;}
     const QString &text() const {return m_text;}
     bool isTspan() const {return m_isTspan;}
     void setWhitespaceMode(QSvgText::WhitespaceMode mode) {m_mode = mode;}
