@@ -708,9 +708,42 @@ public:
         m_transformApplied = false;
     }
 
+    int count() const
+    {
+        return m_count;
+    }
+
+    TransformType transformType() const
+    {
+        return m_type;
+    }
+
+    Additive additive() const
+    {
+        return m_additive;
+    }
+
+    QList<qreal> args() const
+    {
+        return m_args;
+    }
+
+    bool freeze() const
+    {
+        return m_freeze;
+    }
+
+    QPointF translationAtIndex(qreal index) const;
+    QPointF scaleAtIndex(qreal index) const;
+    qreal rotationAtIndex(qreal index, QPointF *origin) const;
+    qreal skewAtIndex(qreal index) const;
+
 protected:
     void resolveMatrix(const QSvgNode *node);
+
 private:
+    void extractArgs(qreal index, QVarLengthArray<qreal *> values) const;
+
     TransformType m_type;
     Additive m_additive;
     QList<qreal> m_args;

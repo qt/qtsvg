@@ -701,6 +701,69 @@ void QSvgAnimateTransform::revert(QPainter *p, QSvgExtraStates &)
     m_transformApplied = false;
 }
 
+void QSvgAnimateTransform::extractArgs(qreal index,
+                                       QVarLengthArray<qreal *> values) const
+{
+    const qreal fractionOfCurrentElement = index - std::trunc(index);
+    int endElem = qCeil(index);
+    int startElem = qMax(endElem - 1, 0);
+
+    startElem *= 3;
+    endElem *= 3;
+
+    for (int i = 0; i < values.size(); ++i) {
+        qreal from = m_args.at(startElem++);
+        qreal to = m_args.at(endElem++);
+        *values[i] = m_type == Rotate && i == 0
+                         ? (to - from) * fractionOfCurrentElement
+                         : lerp(from, to, fractionOfCurrentElement);
+    }
+}
+
+QPointF QSvgAnimateTransform::translationAtIndex(qreal index) const
+{
+    if (m_type != Translate)
+        return QPointF{};
+
+    qreal x, y;
+    extractArgs(index, { &x, &y });
+    return QPointF(x, y);
+}
+
+QPointF QSvgAnimateTransform::scaleAtIndex(qreal index) const
+{
+    if (m_type != Scale)
+        return QPointF{1, 1};
+
+    qreal x, y;
+    extractArgs(index, { &x, &y });
+    return QPointF(x, y);
+}
+
+qreal QSvgAnimateTransform::rotationAtIndex(qreal index, QPointF *origin) const
+{
+    if (m_type != Rotate)
+        return 0.0;
+
+    qreal originX, originY;
+    qreal rotation;
+    extractArgs(index, { &rotation, &originX, &originY });
+
+    *origin = QPointF(originX, originY);
+    return rotation;
+}
+
+qreal QSvgAnimateTransform::skewAtIndex(qreal index) const
+{
+    if (m_type != SkewX && m_type != SkewY)
+        return 0.0;
+
+    qreal skew;
+    extractArgs(index, { &skew });
+
+    return skew;
+}
+
 void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
 {
     qreal elapsedTime = node->document()->currentElapsed();
@@ -709,91 +772,39 @@ void QSvgAnimateTransform::resolveMatrix(const QSvgNode *node)
 
     qreal fractionOfCurrentIterationTime = currentIterTimeFraction(elapsedTime);
     qreal currentIndexPosition = fractionOfCurrentIterationTime * (m_count - 1);
-    int endElem = qCeil(currentIndexPosition);
-    int startElem = qMax(endElem - 1, 0);
-
-    qreal fractionOfCurrentElement = currentIndexPosition - std::trunc(currentIndexPosition);
 
     switch(m_type)
     {
     case Translate: {
-        startElem *= 3;
-        endElem   *= 3;
-        qreal from1, from2;
-        qreal to1, to2;
-        from1 = m_args[startElem++];
-        from2 = m_args[startElem++];
-        to1   = m_args[endElem++];
-        to2   = m_args[endElem++];
-
-        qreal transX = lerp(from1, to1, fractionOfCurrentElement);
-        qreal transY = lerp(from2, to2, fractionOfCurrentElement);
+        QPointF trans = translationAtIndex(currentIndexPosition);
         m_transform = QTransform();
-        m_transform.translate(transX, transY);
+        m_transform.translate(trans.x(), trans.y());
         break;
     }
     case Scale: {
-        startElem *= 3;
-        endElem   *= 3;
-        qreal from1, from2;
-        qreal to1, to2;
-        from1 = m_args[startElem++];
-        from2 = m_args[startElem++];
-        to1   = m_args[endElem++];
-        to2   = m_args[endElem++];
-
-        qreal scaleX = lerp(from1, to1, fractionOfCurrentElement);
-        qreal scaleY = lerp(from2, to2, fractionOfCurrentElement);
-        if (scaleY == 0)
-            scaleY = scaleX;
+        QPointF scale = translationAtIndex(currentIndexPosition);
         m_transform = QTransform();
-        m_transform.scale(scaleX, scaleY);
+        m_transform.scale(scale.x(), scale.y());
         break;
     }
     case Rotate: {
-        startElem *= 3;
-        endElem   *= 3;
-        qreal from1, from2, from3;
-        qreal to1, to2, to3;
-        from1 = m_args[startElem++];
-        from2 = m_args[startElem++];
-        from3 = m_args[startElem++];
-        to1   = m_args[endElem++];
-        to2   = m_args[endElem++];
-        to3   = m_args[endElem++];
+        QPointF origin;
+        qreal rotationDiff = rotationAtIndex(currentIndexPosition, &origin);
 
-        qreal rotationDiff = (to1 - from1) * fractionOfCurrentElement;
-
-        qreal transX = lerp(from2, to2, fractionOfCurrentElement);
-        qreal transY = lerp(from3, to3, fractionOfCurrentElement);
         m_transform = QTransform();
-        m_transform.translate(transX, transY);
+        m_transform.translate(origin.x(), origin.y());
         m_transform.rotate(rotationDiff);
-        m_transform.translate(-transX, -transY);
+        m_transform.translate(-origin.x(), -origin.y());
         break;
     }
     case SkewX: {
-        startElem *= 3;
-        endElem   *= 3;
-        qreal from1;
-        qreal to1;
-        from1 = m_args[startElem++];
-        to1   = m_args[endElem++];
-
-        qreal skewX = lerp(from1, to1, fractionOfCurrentElement);
+        qreal skewX = skewAtIndex(currentIndexPosition);
         m_transform = QTransform();
         m_transform.shear(qTan(qDegreesToRadians(skewX)), 0);
         break;
     }
     case SkewY: {
-        startElem *= 3;
-        endElem   *= 3;
-        qreal from1;
-        qreal to1;
-        from1 = m_args[startElem++];
-        to1   = m_args[endElem++];
-
-        qreal skewY = lerp(from1, to1, fractionOfCurrentElement);
+        qreal skewY = skewAtIndex(currentIndexPosition);
         m_transform = QTransform();
         m_transform.shear(0, qTan(qDegreesToRadians(skewY)));
         break;
