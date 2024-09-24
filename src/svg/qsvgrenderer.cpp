@@ -236,7 +236,7 @@ bool QSvgRenderer::animated() const
     \brief whether the animation should run, if the SVG is animated
 
     Setting the property to false stops the animation timer.
-    Setting the property to false starts the animation timer,
+    Setting the property to true starts the animation timer,
     provided that the SVG contains animated elements.
 
     If the SVG is not animated, the property will have no effect.
