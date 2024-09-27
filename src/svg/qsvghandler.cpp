@@ -194,6 +194,14 @@ struct QSvgAttributes
     QStringView markerMid;
     QStringView markerEnd;
     QStringView filter;
+    QStringView animationName;
+    QStringView animationDuration;
+    QStringView animationDelay;
+    QStringView animationIterationCount;
+    QStringView animationDirection;
+    QStringView animationTimingFunction;
+    QStringView animationFillMode;
+    QStringView animation;
 
 
 #ifndef QT_NO_CSSPARSER
@@ -211,6 +219,25 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
         QStringView value = attribute.value();
 
         switch (name.at(0).unicode()) {
+
+        case 'a':
+            if (name == QLatin1String("animation-name"))
+                animationName = value;
+            if (name == QLatin1String("animation-duration"))
+                animationDuration = value;
+            if (name == QLatin1String("animation-delay"))
+                animationDelay = value;
+            if (name == QLatin1String("animation-iteration-count"))
+                animationIterationCount = value;
+            if (name == QLatin1String("animation-direction"))
+                animationDirection = value;
+            if (name == QLatin1String("animation-timing-function"))
+                animationTimingFunction = value;
+            if (name == QLatin1String("animation-fill-mode"))
+                animationFillMode = value;
+            if (name == QLatin1String("animation"))
+                animation = value;
+            break;
 
         case 'c':
             if (name == QLatin1String("color"))
