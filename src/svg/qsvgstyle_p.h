@@ -742,7 +742,7 @@ protected:
     void resolveMatrix(const QSvgNode *node);
 
 private:
-    void extractArgs(qreal index, QVarLengthArray<qreal *> values) const;
+    void extractArgs(qreal index, qreal *out1, qreal *out2 = nullptr, qreal *out3 = nullptr) const;
 
     TransformType m_type;
     Additive m_additive;

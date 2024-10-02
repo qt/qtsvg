@@ -702,7 +702,9 @@ void QSvgAnimateTransform::revert(QPainter *p, QSvgExtraStates &)
 }
 
 void QSvgAnimateTransform::extractArgs(qreal index,
-                                       QVarLengthArray<qreal *> values) const
+                                       qreal *out1,
+                                       qreal *out2,
+                                       qreal *out3) const
 {
     const qreal fractionOfCurrentElement = index - std::trunc(index);
     int endElem = qCeil(index);
@@ -711,12 +713,24 @@ void QSvgAnimateTransform::extractArgs(qreal index,
     startElem *= 3;
     endElem *= 3;
 
-    for (int i = 0; i < values.size(); ++i) {
+    if (out1 != nullptr) {
         qreal from = m_args.at(startElem++);
         qreal to = m_args.at(endElem++);
-        *values[i] = m_type == Rotate && i == 0
-                         ? (to - from) * fractionOfCurrentElement
-                         : lerp(from, to, fractionOfCurrentElement);
+        *out1 = m_type == Rotate
+                    ? (to - from) * fractionOfCurrentElement
+                    : lerp(from, to, fractionOfCurrentElement);
+    }
+
+    if (out2 != nullptr) {
+        qreal from = m_args.at(startElem++);
+        qreal to = m_args.at(endElem++);
+        *out2 = lerp(from, to, fractionOfCurrentElement);
+    }
+
+    if (out3 != nullptr) {
+        qreal from = m_args.at(startElem++);
+        qreal to = m_args.at(endElem++);
+        *out3 = lerp(from, to, fractionOfCurrentElement);
     }
 }
 
@@ -726,7 +740,7 @@ QPointF QSvgAnimateTransform::translationAtIndex(qreal index) const
         return QPointF{};
 
     qreal x, y;
-    extractArgs(index, { &x, &y });
+    extractArgs(index, &x, &y);
     return QPointF(x, y);
 }
 
@@ -736,7 +750,7 @@ QPointF QSvgAnimateTransform::scaleAtIndex(qreal index) const
         return QPointF{1, 1};
 
     qreal x, y;
-    extractArgs(index, { &x, &y });
+    extractArgs(index, &x, &y);
     return QPointF(x, y);
 }
 
@@ -747,7 +761,7 @@ qreal QSvgAnimateTransform::rotationAtIndex(qreal index, QPointF *origin) const
 
     qreal originX, originY;
     qreal rotation;
-    extractArgs(index, { &rotation, &originX, &originY });
+    extractArgs(index, &rotation, &originX, &originY);
 
     *origin = QPointF(originX, originY);
     return rotation;
@@ -759,7 +773,7 @@ qreal QSvgAnimateTransform::skewAtIndex(qreal index) const
         return 0.0;
 
     qreal skew;
-    extractArgs(index, { &skew });
+    extractArgs(index, &skew);
 
     return skew;
 }
