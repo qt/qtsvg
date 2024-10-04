@@ -3653,6 +3653,39 @@ void QSvgHandler::init()
     parse();
 }
 
+static bool detectCycles(const QSvgNode *node, QList<const QSvgUse *> active = {})
+{
+    switch (node->type()) {
+    case QSvgNode::DOC:
+    case QSvgNode::G:
+    {
+        auto *g = static_cast<const QSvgStructureNode*>(node);
+        for (auto *r : g->renderers()) {
+            if (detectCycles(r, active))
+                return true;
+        }
+    }
+    break;
+    case QSvgNode::USE:
+    {
+        if (active.contains(node))
+            return true;
+
+        auto *u = static_cast<const QSvgUse*>(node);
+        auto *target = u->link();
+        if (target) {
+            active.append(u);
+            if (detectCycles(target, active))
+                return true;
+        }
+    }
+    break;
+    default:
+        break;
+    }
+    return false;
+}
+
 // Having too many unfinished elements will cause a stack overflow
 // in the dtor of QSvgTinyDocument, see oss-fuzz issue 24000.
 static const int unfinishedElementsLimit = 2048;
@@ -3703,6 +3736,11 @@ void QSvgHandler::parse()
     }
     resolveGradients(m_doc);
     resolveNodes();
+    if (detectCycles(m_doc)) {
+        qCWarning(lcSvgHandler, "Cycles detected in SVG, document discarded.");
+        delete m_doc;
+        m_doc = nullptr;
+    }
 }
 
 bool QSvgHandler::startElement(const QString &localName,

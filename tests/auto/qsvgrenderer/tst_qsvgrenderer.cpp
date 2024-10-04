@@ -603,6 +603,10 @@ void tst_QSvgRenderer::boundsOnElement() const
                       "</g>"
                       "<text id=\"textA\" x=\"50\" y=\"100\">Lorem ipsum</text>"
                       "<text id=\"textB\" transform=\"matrix(1 0 0 1 50 100)\">Lorem ipsum</text>"
+                      "<g id=\"textGroup\">"
+                        "<text id=\"textC\" transform=\"matrix(1 0 0 2 20 10)\">Lorem ipsum</text>"
+                        "<text id=\"textD\" transform=\"matrix(1 0 0 2 30 40)\">Lorem ipsum</text>"
+                      "</g>"
                     "</svg>");
     
     qreal sqrt2 = qSqrt(2);
@@ -618,6 +622,13 @@ void tst_QSvgRenderer::boundsOnElement() const
     QRectF textBoundsA = renderer.boundsOnElement(QLatin1String("textA"));
     QVERIFY(!textBoundsA.isEmpty());
     QCOMPARE(renderer.boundsOnElement(QLatin1String("textB")), textBoundsA);
+
+    QRect cBounds = renderer.boundsOnElement(QLatin1String("textC")).toRect();
+    QRect dBounds = renderer.boundsOnElement(QLatin1String("textD")).toRect();
+    QVERIFY(!cBounds.isEmpty());
+    QCOMPARE(cBounds.size(), dBounds.size());
+    QRect groupBounds = renderer.boundsOnElement(QLatin1String("textGroup")).toRect();
+    QCOMPARE(groupBounds, cBounds | dBounds);
 }
 
 void tst_QSvgRenderer::gradientStops() const
@@ -1567,6 +1578,8 @@ void tst_QSvgRenderer::testUseElement()
             }
         } else if (i > 7 && i < 10) {
             QCOMPARE(images[8], images[i]);
+        } else if (i == 12 || i == 13 || i == 17) {
+            QCOMPARE(images[10], images[i]);
         } else if (i > 11 && i < 15) {
             QCOMPARE(images[11], images[i]);
         } else if (i == 15) {
