@@ -422,6 +422,9 @@ static bool loadDocument(QSvgRenderer *const q,
     }
     d->startOrStopTimer();
 
+    if (d->render)
+        d->render->restartAnimation();
+
     //force first update
     QSvgRendererPrivate::callRepaintNeeded(q);
 
