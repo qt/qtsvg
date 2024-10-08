@@ -31,7 +31,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw);
 
 class QTextCharFormat;
 
-class Q_SVG_EXPORT QSvgAnimation : public QSvgNode
+class Q_SVG_EXPORT QSvgDummyNode : public QSvgNode
 {
 public:
     void drawCommand(QPainter *, QSvgExtraStates &) override;

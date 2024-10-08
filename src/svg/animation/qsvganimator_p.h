@@ -15,7 +15,9 @@
 // We mean it.
 //
 
-#include "private/qtsvgglobal_p.h"
+#include <QtSvg/private/qtsvgglobal_p.h>
+#include <QtSvg/private/qsvgnode_p.h>
+#include "qsvgabstractanimation_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -25,6 +27,10 @@ public:
     QSvgAnimator();
     ~QSvgAnimator();
 
+    void appendAnimation(QSvgNode *node, QSvgAbstractAnimation *anim);
+    QList<QSvgAbstractAnimation *> animationsForNode(QSvgNode *node) const;
+
+    void advanceAnimations();
     void restartAnimation();
     qint64 currentElapsed();
     void setAnimationDuration(qint64 dur);
@@ -32,6 +38,7 @@ public:
     void fastForwardAnimation(qint64 time);
 
 private:
+    QHash<QSvgNode *, QList<QSvgAbstractAnimation *>> m_animations;
     qint64 m_time;
     qint64 m_animationDuration;
 };

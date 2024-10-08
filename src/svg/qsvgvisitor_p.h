@@ -33,7 +33,7 @@ protected:
     virtual void visitNode(const QSvgNode *) {}
     virtual bool visitStructureNodeStart(const QSvgStructureNode *node) { visitNode(node); return true; }
     virtual void visitStructureNodeEnd(const QSvgStructureNode *) {}
-    virtual void visitAnimationNode(const QSvgAnimation *node) { visitNode(node); }
+    // virtual void visitAnimationNode(const QSvgAnimation *node) { visitNode(node); }
     virtual void visitEllipseNode(const QSvgEllipse *node) { visitNode(node); }
     virtual void visitImageNode(const QSvgImage *node) { visitNode(node); }
     virtual void visitLineNode(const QSvgLine *node) { visitNode(node); }

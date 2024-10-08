@@ -28,9 +28,9 @@ Q_LOGGING_CATEGORY(lcSvgDraw, "qt.svg.draw")
 #define QT_SVG_MAX_LAYOUT_SIZE (qint64(QFIXED_MAX / 2))
 #endif
 
-void QSvgAnimation::drawCommand(QPainter *, QSvgExtraStates &)
+void QSvgDummyNode::drawCommand(QPainter *, QSvgExtraStates &)
 {
-    qWarning("<animation> not implemented");
+    qWarning("Dummy node not meant to be drawn");
 }
 
 static inline QRectF boundsOnStroke(QPainter *p, const QPainterPath &path, qreal width)
@@ -527,9 +527,9 @@ void QSvgUse::drawCommand(QPainter *p, QSvgExtraStates &states)
     }
 }
 
-QSvgNode::Type QSvgAnimation::type() const
+QSvgNode::Type QSvgDummyNode::type() const
 {
-    return Animation;
+    return FeUnsupported;
 }
 
 QSvgNode::Type QSvgCircle::type() const

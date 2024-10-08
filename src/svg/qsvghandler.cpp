@@ -3985,16 +3985,16 @@ static bool parseStopNode(QSvgStyleProperty *parent,
     //    we force a dummy node with the same id and class into a rendering
     //    tree to figure out whether the selector has a style for it
     //    QSvgStyleSelector should be coded in a way that could avoid it
-    QSvgAnimation anim;
-    anim.setNodeId(nodeIdStr);
-    anim.setXmlClass(xmlClassStr);
+    QSvgDummyNode dummy;
+    dummy.setNodeId(nodeIdStr);
+    dummy.setXmlClass(xmlClassStr);
 
     QXmlStreamAttributes xmlAttr = attributes;
 
 #ifndef QT_NO_CSSPARSER
-    cssStyleLookup(&anim, handler, handler->selector(), xmlAttr);
+    cssStyleLookup(&dummy, handler, handler->selector(), xmlAttr);
 #endif
-    parseStyle(&anim, xmlAttr, handler);
+    parseStyle(&dummy, xmlAttr, handler);
 
     QSvgAttributes attrs(xmlAttr, handler);
 
