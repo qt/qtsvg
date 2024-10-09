@@ -68,8 +68,9 @@ void QSvgVisitor::traverse(const QSvgNode *node)
     case QSvgNode::Mask:
         traverse(static_cast<const QSvgStructureNode *>(node));
         break;
-    case QSvgNode::Animation:
-        // visitAnimationNode(static_cast<const QSvgAnimation *>(node));
+    case QSvgNode::AnimateColor:
+    case QSvgNode::AnimateTransform:
+        visitAnimateNode(static_cast<const QSvgAnimateNode *>(node));
         break;
     case QSvgNode::Circle:
     case QSvgNode::Ellipse:

@@ -11,6 +11,7 @@
 #include "qsvgfilter_p.h"
 #include "qsvgnode_p.h"
 #include "qsvgfont_p.h"
+#include "qsvganimate_p.h"
 
 #include "qpen.h"
 #include "qpainterpath.h"
@@ -2465,14 +2466,6 @@ static bool parseAnchorNode(QSvgNode *parent,
     return true;
 }
 
-static bool parseAnimateNode(QSvgNode *parent,
-                             const QXmlStreamAttributes &attributes,
-                             QSvgHandler *)
-{
-    Q_UNUSED(parent); Q_UNUSED(attributes);
-    return true;
-}
-
 static int parseClockValue(QStringView str, bool *ok)
 {
     int res = 0;
@@ -2496,13 +2489,15 @@ static int parseClockValue(QStringView str, bool *ok)
 
 static bool parseBaseAnimate(QSvgNode *parent,
                              const QXmlStreamAttributes &attributes,
-                             QSvgAnimate *anim,
+                             QSvgAnimateNode *anim,
                              QSvgHandler *handler)
 {
     QString beginStr   = attributes.value(QLatin1String("begin")).toString();
     QString durStr     = attributes.value(QLatin1String("dur")).toString();
     QString endStr = attributes.value(QLatin1String("end")).toString();
     QString repeatStr  = attributes.value(QLatin1String("repeatCount")).toString();
+    QString fillStr    = attributes.value(QLatin1String("fill")).toString();
+    QString addtv      = attributes.value(QLatin1String("additive")).toString();
 
     bool ok = true;
     int begin = parseClockValue(beginStr, &ok);
@@ -2517,28 +2512,34 @@ static bool parseBaseAnimate(QSvgNode *parent,
     qreal repeatCount = (repeatStr == QLatin1String("indefinite")) ? -1 :
                             qMax(1.0, toDouble(repeatStr));
 
+    QSvgAnimateNode::Fill fill = (fillStr == QLatin1String("freeze")) ? QSvgAnimateNode::Freeze :
+                                     QSvgAnimateNode::Remove;
+
+    QSvgAnimateNode::Additive additive = (addtv == QLatin1String("sum")) ? QSvgAnimateNode::Sum :
+                                             QSvgAnimateNode::Replace;
+
     anim->setRunningTime(begin, dur, end, 0);
     anim->setRepeatCount(repeatCount);
+    anim->setFill(fill);
+    anim->setAdditiveType(additive);
 
-    parent->appendStyleProperty(anim, QString());
     parent->document()->setAnimated(true);
 
     handler->setAnimPeriod(begin, end);
     return true;
 }
 
-static bool parseAnimateColorNode(QSvgNode *parent,
-                                  const QXmlStreamAttributes &attributes,
-                                  QSvgHandler *handler)
+static QSvgNode *createAnimateColorNode(QSvgNode *parent,
+                                        const QXmlStreamAttributes &attributes,
+                                        QSvgHandler *handler)
 {
     QStringView fromStr    = attributes.value(QLatin1String("from"));
     QStringView toStr      = attributes.value(QLatin1String("to"));
     QString valuesStr  = attributes.value(QLatin1String("values")).toString();
     QString targetStr  = attributes.value(QLatin1String("attributeName")).toString();
-    QString fillStr    = attributes.value(QLatin1String("fill")).toString();
 
     if (targetStr != QLatin1String("fill") && targetStr != QLatin1String("stroke"))
-        return false;
+        return nullptr;
 
     QList<QColor> colors;
     if (valuesStr.isEmpty()) {
@@ -2559,21 +2560,28 @@ static bool parseAnimateColorNode(QSvgNode *parent,
         }
     }
 
-    QSvgAnimateColor *anim = new QSvgAnimateColor();
+    QSvgAnimatedPropertyColor *prop = static_cast<QSvgAnimatedPropertyColor *>
+                                            (QSvgAbstractAnimatedProperty::createAnimatedProperty(targetStr));
+    if (!prop)
+        return nullptr;
+
+    prop->setColors(colors);
+    prop->setKeyFrames({0, 1});
+
+    QSvgAnimateColor *anim = new QSvgAnimateColor(parent);
+    anim->appendProperty(prop);
+
     parseBaseAnimate(parent, attributes, anim, handler);
 
-    anim->setArgs((targetStr == QLatin1String("fill")), colors);
-    anim->setFreeze(fillStr == QLatin1String("freeze"));
-
-    return true;
+    return anim;
 }
 
-static bool parseAimateMotionNode(QSvgNode *parent,
-                                  const QXmlStreamAttributes &attributes,
-                                  QSvgHandler *)
+static QSvgNode *createAimateMotionNode(QSvgNode *parent,
+                                        const QXmlStreamAttributes &attributes,
+                                        QSvgHandler *)
 {
     Q_UNUSED(parent); Q_UNUSED(attributes);
-    return true;
+    return nullptr;
 }
 
 static void parseNumberTriplet(QList<qreal> &values, const QChar *&s)
@@ -2584,36 +2592,28 @@ static void parseNumberTriplet(QList<qreal> &values, const QChar *&s)
         values.append(0.0);
 }
 
-static bool parseAnimateTransformNode(QSvgNode *parent,
-                                      const QXmlStreamAttributes &attributes,
-                                      QSvgHandler *handler)
+static QSvgNode *createAnimateTransformNode(QSvgNode *parent,
+                                            const QXmlStreamAttributes &attributes,
+                                            QSvgHandler *handler)
 {
     QString typeStr    = attributes.value(QLatin1String("type")).toString();
     QString values     = attributes.value(QLatin1String("values")).toString();
-    QString fillStr    = attributes.value(QLatin1String("fill")).toString();
     QString fromStr    = attributes.value(QLatin1String("from")).toString();
     QString toStr      = attributes.value(QLatin1String("to")).toString();
     QString byStr      = attributes.value(QLatin1String("by")).toString();
-    QString addtv      = attributes.value(QLatin1String("additive")).toString();
-
-    QSvgAnimateTransform::Additive additive = QSvgAnimateTransform::Replace;
-    if (addtv == QLatin1String("sum"))
-        additive = QSvgAnimateTransform::Sum;
 
     QList<qreal> vals;
     if (values.isEmpty()) {
         const QChar *s;
         if (fromStr.isEmpty()) {
             if (!byStr.isEmpty()) {
-                // By-animation.
-                additive = QSvgAnimateTransform::Sum;
                 vals.append(0.0);
                 vals.append(0.0);
                 vals.append(0.0);
                 parseNumberTriplet(vals, s = byStr.constData());
             } else {
                 // To-animation not defined.
-                return false;
+                return nullptr;
             }
         } else {
             if (!toStr.isEmpty()) {
@@ -2627,7 +2627,7 @@ static bool parseAnimateTransformNode(QSvgNode *parent,
                 for (int i = vals.size() - 3; i < vals.size(); ++i)
                     vals[i] += vals[i - 3];
             } else {
-                return false;
+                return nullptr;
             }
         }
     } else {
@@ -2640,38 +2640,70 @@ static bool parseAnimateTransformNode(QSvgNode *parent,
         }
     }
     if (vals.size() % 3 != 0)
-        return false;
+        return nullptr;
 
-    QSvgAnimateTransform::TransformType type = QSvgAnimateTransform::Empty;
-    if (typeStr == QLatin1String("translate")) {
-        type = QSvgAnimateTransform::Translate;
-    } else if (typeStr == QLatin1String("scale")) {
-        type = QSvgAnimateTransform::Scale;
-    } else if (typeStr == QLatin1String("rotate")) {
-        type = QSvgAnimateTransform::Rotate;
-    } else if (typeStr == QLatin1String("skewX")) {
-        type = QSvgAnimateTransform::SkewX;
-    } else if (typeStr == QLatin1String("skewY")) {
-        type = QSvgAnimateTransform::SkewY;
-    } else {
-        return false;
+    QList<QPointF> translations;
+    QList<QPointF> scales;
+    QList<qreal> rotations;
+    QList<QPointF> coRotations;
+    QList<QPointF> skews;
+    QList<qreal> keyFrames;
+
+    for (int i = 0; i < vals.size(); i+=3) {
+        if (typeStr == QLatin1String("translate")) {
+            translations.append(QPointF(vals.at(i), vals.at(i + 1)));
+        } else if (typeStr == QLatin1String("scale")) {
+            scales.append(QPointF(vals.at(i), vals.at(i + 1)));
+        } else if (typeStr == QLatin1String("rotate")) {
+            rotations.append(vals.at(i));
+            coRotations.append(QPointF(vals.at(i + 1), vals.at(i + 2)));
+        } else if (typeStr == QLatin1String("skewX")) {
+            skews.append(QPointF(vals.at(i), 0));
+        } else if (typeStr == QLatin1String("skewY")) {
+            skews.append(QPointF(i, vals.at(0)));
+        } else {
+            return nullptr;
+        }
     }
 
-    QSvgAnimateTransform *anim = new QSvgAnimateTransform();
+    QSvgAnimatedPropertyTransform *prop = static_cast<QSvgAnimatedPropertyTransform *>
+        (QSvgAbstractAnimatedProperty::createAnimatedProperty(QLatin1String("transform")));
+    if (!prop)
+        return nullptr;
+
+    prop->setTranslations(translations);
+    prop->setScales(scales);
+    prop->setRotations(rotations);
+    prop->setCentersOfRotation(coRotations);
+    prop->setSkews(skews);
+
+    auto generateKeyFrames = [](QList<qreal> &keyFrames, uint count)
+    {
+        if (count < 2)
+            return;
+
+        qreal spacing = 1.0f / (count - 1);
+        for (uint i = 0; i < count; i++) {
+            keyFrames.append(i * spacing);
+        }
+    };
+    generateKeyFrames(keyFrames, vals.size() / 3);
+    prop->setKeyFrames(keyFrames);
+
+    QSvgAnimateTransform *anim = new QSvgAnimateTransform(parent);
+    anim->appendProperty(prop);
+
     parseBaseAnimate(parent, attributes, anim, handler);
 
-    anim->setArgs(type, additive, vals);
-    anim->setFreeze(fillStr == QLatin1String("freeze"));
-
-    return true;
+    return anim;
 }
 
-static QSvgNode * createAnimationNode(QSvgNode *parent,
-                                      const QXmlStreamAttributes &attributes,
-                                      QSvgHandler *)
+static QSvgNode *createAnimateNode(QSvgNode *parent,
+                                   const QXmlStreamAttributes &attributes,
+                                   QSvgHandler *)
 {
     Q_UNUSED(parent); Q_UNUSED(attributes);
-    return 0;
+    return nullptr;
 }
 
 static bool parseAudioNode(QSvgNode *parent,
@@ -4379,9 +4411,6 @@ static FactoryMethod findGraphicsFactory(const QString &name, QtSvg::Options opt
 
     QStringView ref = QStringView{name}.mid(1, name.size() - 1);
     switch (name.at(0).unicode()) {
-    case 'a':
-        if (ref == QLatin1String("nimation")) return createAnimationNode;
-        break;
     case 'c':
         if (ref == QLatin1String("ircle")) return createCircleNode;
         break;
@@ -4462,6 +4491,30 @@ static FactoryMethod findFilterFactory(const QString &name, QtSvg::Options optio
     return 0;
 }
 
+typedef QSvgNode *(*AnimationMethod)(QSvgNode *, const QXmlStreamAttributes &, QSvgHandler *);
+
+static AnimationMethod findAnimationFactory(const QString &name, QtSvg::Options options)
+{
+    Q_UNUSED(options);
+    if (name.isEmpty())
+        return 0;
+
+    QStringView ref = QStringView{name}.mid(1, name.size() - 1);
+
+    switch (name.at(0).unicode()) {
+    case 'a':
+        if (ref == QLatin1String("nimate")) return createAnimateNode;
+        if (ref == QLatin1String("nimateColor")) return createAnimateColorNode;
+        if (ref == QLatin1String("nimateMotion")) return createAimateMotionNode;
+        if (ref == QLatin1String("nimateTransform")) return createAnimateTransformNode;
+        break;
+    default:
+        break;
+    }
+
+    return 0;
+}
+
 typedef bool (*ParseMethod)(QSvgNode *, const QXmlStreamAttributes &, QSvgHandler *);
 
 static ParseMethod findUtilFactory(const QString &name, QtSvg::Options options)
@@ -4473,10 +4526,6 @@ static ParseMethod findUtilFactory(const QString &name, QtSvg::Options options)
     switch (name.at(0).unicode()) {
     case 'a':
         if (ref.isEmpty()) return parseAnchorNode;
-        if (ref == QLatin1String("nimate")) return parseAnimateNode;
-        if (ref == QLatin1String("nimateColor")) return parseAnimateColorNode;
-        if (ref == QLatin1String("nimateMotion")) return parseAimateMotionNode;
-        if (ref == QLatin1String("nimateTransform")) return parseAnimateTransformNode;
         if (ref == QLatin1String("udio")) return parseAudioNode;
         break;
     case 'd':
@@ -4896,6 +4945,13 @@ bool QSvgHandler::startElement(const QString &localName,
                 delete node;
                 node = 0;
             }
+        }
+    } else if (AnimationMethod method = findAnimationFactory(localName, options())) {
+        Q_ASSERT(!m_nodes.isEmpty());
+        node = method(m_nodes.top(), attributes, this);
+        if (node) {
+            QSvgAnimateNode *anim = static_cast<QSvgAnimateNode *>(node);
+            m_doc->animator()->appendAnimation(m_nodes.top(), anim);
         }
     } else if (ParseMethod method = findUtilFactory(localName, options())) {
         Q_ASSERT(!m_nodes.isEmpty());

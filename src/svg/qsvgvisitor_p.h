@@ -19,6 +19,7 @@
 #include <private/qsvghandler_p.h>
 #include <private/qsvggraphics_p.h>
 #include <private/qsvgstructure_p.h>
+#include <private/qsvganimate_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -33,7 +34,7 @@ protected:
     virtual void visitNode(const QSvgNode *) {}
     virtual bool visitStructureNodeStart(const QSvgStructureNode *node) { visitNode(node); return true; }
     virtual void visitStructureNodeEnd(const QSvgStructureNode *) {}
-    // virtual void visitAnimationNode(const QSvgAnimation *node) { visitNode(node); }
+    virtual void visitAnimateNode(const QSvgAnimateNode *node) { visitNode(node); }
     virtual void visitEllipseNode(const QSvgEllipse *node) { visitNode(node); }
     virtual void visitImageNode(const QSvgImage *node) { visitNode(node); }
     virtual void visitLineNode(const QSvgLine *node) { visitNode(node); }

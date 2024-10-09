@@ -208,6 +208,7 @@ void QSvgAnimatedPropertyTransform::interpolate(uint index, qreal t)
         QPointF s1 = m_scales.at(index - 1);
         QPointF s2 = m_scales.at(index);
         QPointF scale = pointInterpolator(s1, s2, t);
+
         transform.scale(scale.x(), scale.y());
     }
 

@@ -44,6 +44,8 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
 
     if (shouldDrawNode(p, states)) {
         applyStyle(p, states);
+        if (document()->animated())
+            document()->animator()->applyAnimationsOnNode(this, p);
         QSvgNode *maskNode = this->hasMask() ? document()->namedNode(this->maskId()) : nullptr;
         QSvgFilterContainer *filterNode = this->hasFilter() ? static_cast<QSvgFilterContainer*>(document()->namedNode(this->filterId()))
                                                             : nullptr;
@@ -226,14 +228,6 @@ void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop, const QString &id)
     case QSvgStyleProperty::TRANSFORM:
         m_style.transform = static_cast<QSvgTransformStyle*>(prop);
         break;
-    case QSvgStyleProperty::ANIMATE_COLOR:
-        m_style.animateColors.append(
-            static_cast<QSvgAnimateColor*>(prop));
-        break;
-    case QSvgStyleProperty::ANIMATE_TRANSFORM:
-        m_style.animateTransforms.append(
-            static_cast<QSvgAnimateTransform*>(prop));
-        break;
     case QSvgStyleProperty::OPACITY:
         m_style.opacity = static_cast<QSvgOpacityStyle*>(prop);
         break;
@@ -320,14 +314,6 @@ QSvgStyleProperty * QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
             if (node->m_style.transform)
                 return node->m_style.transform;
             break;
-        case QSvgStyleProperty::ANIMATE_COLOR:
-            if (!node->m_style.animateColors.isEmpty())
-                return node->m_style.animateColors.first();
-            break;
-        case QSvgStyleProperty::ANIMATE_TRANSFORM:
-            if (!node->m_style.animateTransforms.isEmpty())
-                return node->m_style.animateTransforms.first();
-            break;
         case QSvgStyleProperty::OPACITY:
             if (node->m_style.opacity)
                 return node->m_style.opacity;
@@ -402,7 +388,8 @@ QString QSvgNode::typeName() const
         case Group: return QStringLiteral("g");
         case Defs: return QStringLiteral("defs");
         case Switch: return QStringLiteral("switch");
-        case Animation: return QStringLiteral("animation");
+        case AnimateColor: return QStringLiteral("animateColor");
+        case AnimateTransform: return QStringLiteral("animateTransform");
         case Circle: return QStringLiteral("circle");
         case Ellipse: return QStringLiteral("ellipse");
         case Image: return QStringLiteral("image");

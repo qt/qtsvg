@@ -16,13 +16,13 @@ QSvgAnimator::~QSvgAnimator()
 {
 }
 
-void QSvgAnimator::appendAnimation(QSvgNode *node, QSvgAbstractAnimation *anim)
+void QSvgAnimator::appendAnimation(const QSvgNode *node, QSvgAbstractAnimation *anim)
 {
     QList<QSvgAbstractAnimation *> &nodeAnimations = m_animations[node];
     nodeAnimations.append(anim);
 }
 
-QList<QSvgAbstractAnimation *> QSvgAnimator::animationsForNode(QSvgNode *node) const
+QList<QSvgAbstractAnimation *> QSvgAnimator::animationsForNode(const QSvgNode *node) const
 {
     return m_animations.value(node);
 }
@@ -64,6 +64,40 @@ qint64 QSvgAnimator::animationDuration() const
 void QSvgAnimator::fastForwardAnimation(qint64 time)
 {
     m_time += time;
+}
+
+void QSvgAnimator::applyAnimationsOnNode(const QSvgNode *node, QPainter *p)
+{
+    if (!node || !m_animations.contains(node))
+        return;
+
+    QTransform worldTransform = p->worldTransform();
+
+    QList<QSvgAbstractAnimation *> anims = m_animations.value(node);
+
+    for (auto anim : anims) {
+        QList<QSvgAbstractAnimatedProperty *> props = anim->properties();
+        for (auto prop : props) {
+            switch (prop->type()) {
+            case QSvgAbstractAnimatedProperty::Color:
+                if (prop->propertyName() == QLatin1String("fill")) {
+                    QBrush brush = p->brush();
+                    brush.setColor(prop->interpolatedValue().value<QColor>());
+                    p->setBrush(brush);
+                } else if (prop->propertyName() == QLatin1String("stroke")) {
+                    QPen pen = p->pen();
+                    pen.setColor(prop->interpolatedValue().value<QColor>());
+                    p->setPen(pen);
+                }
+                break;
+            case QSvgAbstractAnimatedProperty::Transform:
+                p->setWorldTransform(prop->interpolatedValue().value<QTransform>() * worldTransform, false);
+                break;
+            default:
+                break;
+            }
+        }
+    }
 }
 
 QT_END_NAMESPACE

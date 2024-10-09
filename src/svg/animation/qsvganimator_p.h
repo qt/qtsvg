@@ -27,8 +27,8 @@ public:
     QSvgAnimator();
     ~QSvgAnimator();
 
-    void appendAnimation(QSvgNode *node, QSvgAbstractAnimation *anim);
-    QList<QSvgAbstractAnimation *> animationsForNode(QSvgNode *node) const;
+    void appendAnimation(const QSvgNode *node, QSvgAbstractAnimation *anim);
+    QList<QSvgAbstractAnimation *> animationsForNode(const QSvgNode *node) const;
 
     void advanceAnimations();
     void restartAnimation();
@@ -37,8 +37,10 @@ public:
     qint64 animationDuration() const;
     void fastForwardAnimation(qint64 time);
 
+    void applyAnimationsOnNode(const QSvgNode *node, QPainter *p);
+
 private:
-    QHash<QSvgNode *, QList<QSvgAbstractAnimation *>> m_animations;
+    QHash<const QSvgNode *, QList<QSvgAbstractAnimation *>> m_animations;
     qint64 m_time;
     qint64 m_animationDuration;
 };

@@ -24,13 +24,14 @@ qt_internal_add_module(Svg
         qsvgfilter.cpp qsvgfilter_p.h
         qsvgstyle.cpp qsvgstyle_p.h
         qsvgtinydocument.cpp qsvgtinydocument_p.h
+        qsvganimate.cpp qsvganimate_p.h
         qsvghelper_p.h
         qsvgdebug.cpp
         qsvgvisitor.cpp qsvgvisitor_p.h
         qtsvgglobal.h qtsvgglobal_p.h
-        animation/qsvganimator_p.h animation/qsvganimator.cpp
-        animation/qsvgabstractanimation_p.h animation/qsvgabstractanimation.cpp
-        animation/qsvganimatedproperty_p.h animation/qsvganimatedproperty.cpp
+        animation/qsvganimator.cpp animation/qsvganimator_p.h
+        animation/qsvgabstractanimation.cpp animation/qsvgabstractanimation_p.h
+        animation/qsvganimatedproperty.cpp animation/qsvganimatedproperty_p.h
     DEFINES
         QT_NO_CONTEXTLESS_CONNECT
         QT_NO_USING_NAMESPACE
