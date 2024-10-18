@@ -437,7 +437,9 @@ void QSvgTransformStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &)
 
 void QSvgTransformStyle::revert(QPainter *p, QSvgExtraStates &)
 {
-    p->setWorldTransform(m_oldWorldTransform.pop(), false /* don't combine */);
+    QTransform oldTransform = m_oldWorldTransform.size() == 1 ? m_oldWorldTransform.top()
+                              : m_oldWorldTransform.pop();
+    p->setWorldTransform(oldTransform, false /* don't combine */);
 }
 
 QSvgStyleProperty::Type QSvgQualityStyle::type() const
