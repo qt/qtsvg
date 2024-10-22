@@ -33,18 +33,18 @@ public:
         Transform,
     };
 
-    QSvgAbstractAnimatedProperty(QString name, Type type);
+    QSvgAbstractAnimatedProperty(const QString &name, Type type);
     virtual ~QSvgAbstractAnimatedProperty();
 
     void setKeyFrames(const QList<qreal> &keyFrames);
     QList<qreal> keyFrames() const;
-    void setPropertyName(QString name);
+    void setPropertyName(const QString &name);
     QStringView propertyName() const;
     Type type() const;
     QVariant interpolatedValue() const;
     virtual void interpolate(uint index, qreal t) = 0;
 
-    static QSvgAbstractAnimatedProperty *createAnimatedProperty(QString name);
+    static QSvgAbstractAnimatedProperty *createAnimatedProperty(const QString &name);
 protected:
     QList<qreal> m_keyFrames;
     QVariant m_interpolatedValue;
@@ -57,7 +57,7 @@ private:
 class QSvgAnimatedPropertyColor : public QSvgAbstractAnimatedProperty
 {
 public:
-    QSvgAnimatedPropertyColor(QString name);
+    QSvgAnimatedPropertyColor(const QString &name);
 
     void setColors(const QList<QColor> &colors);
     QList<QColor> colors() const;
@@ -71,7 +71,7 @@ private:
 class QSvgAnimatedPropertyTransform : public QSvgAbstractAnimatedProperty
 {
 public:
-    QSvgAnimatedPropertyTransform(QString name);
+    QSvgAnimatedPropertyTransform(const QString &name);
 
     void setTranslations(const QList<QPointF> &translations);
     QList<QPointF> translations() const;

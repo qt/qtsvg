@@ -36,7 +36,7 @@ static QPointF pointInterpolator(QPointF v1, QPointF v2, qreal t)
 }
 
 
-QSvgAbstractAnimatedProperty::QSvgAbstractAnimatedProperty(QString name, Type type)
+QSvgAbstractAnimatedProperty::QSvgAbstractAnimatedProperty(const QString &name, Type type)
     : m_propertyName(name)
     , m_type(type)
 {
@@ -56,7 +56,7 @@ QList<qreal> QSvgAbstractAnimatedProperty::keyFrames() const
     return m_keyFrames;
 }
 
-void QSvgAbstractAnimatedProperty::setPropertyName(QString name)
+void QSvgAbstractAnimatedProperty::setPropertyName(const QString &name)
 {
     m_propertyName = name;
 }
@@ -76,7 +76,7 @@ QVariant QSvgAbstractAnimatedProperty::interpolatedValue() const
     return m_interpolatedValue;
 }
 
-QSvgAbstractAnimatedProperty *QSvgAbstractAnimatedProperty::createAnimatedProperty(QString name)
+QSvgAbstractAnimatedProperty *QSvgAbstractAnimatedProperty::createAnimatedProperty(const QString &name)
 {
     if (animatableProperties->isEmpty())
         initHash();
@@ -103,7 +103,7 @@ QSvgAbstractAnimatedProperty *QSvgAbstractAnimatedProperty::createAnimatedProper
     return prop;
 }
 
-QSvgAnimatedPropertyColor::QSvgAnimatedPropertyColor(QString name)
+QSvgAnimatedPropertyColor::QSvgAnimatedPropertyColor(const QString &name)
     : QSvgAbstractAnimatedProperty(name, QSvgAbstractAnimatedProperty::Color)
 {
 }
@@ -131,7 +131,7 @@ void QSvgAnimatedPropertyColor::interpolate(uint index, qreal t)
     m_interpolatedValue = QColor(red, green, blue, alpha);
 }
 
-QSvgAnimatedPropertyTransform::QSvgAnimatedPropertyTransform(QString name)
+QSvgAnimatedPropertyTransform::QSvgAnimatedPropertyTransform(const QString &name)
     : QSvgAbstractAnimatedProperty(name, QSvgAbstractAnimatedProperty::Transform)
 {
 
