@@ -138,6 +138,7 @@ static inline QPaintEngine::PaintEngineFeatures svgEngineFeatures()
 }
 
 Q_GUI_EXPORT QImage qt_imageForBrush(int brushStyle, bool invert);
+Q_GUI_EXPORT bool qHasPixmapTexture(const QBrush& brush);
 
 class QSvgPaintEngine : public QPaintEngine
 {
@@ -163,6 +164,7 @@ public:
     void drawPolygon(const QPointF *points, int pointCount, PolygonDrawMode mode) override;
     void drawRects(const QRectF *rects, int rectCount) override;
     void drawTextItem(const QPointF &pt, const QTextItem &item) override;
+    void generateImage(QTextStream &stream, const QRectF &r, const QImage &pm);
     void drawImage(const QRectF &r, const QImage &pm, const QRectF &sr,
                    Qt::ImageConversionFlags flags = Qt::AutoColor) override;
 
@@ -206,7 +208,7 @@ public:
 
     QString savePatternMask(Qt::BrushStyle style)
     {
-        QString maskId = QString(QStringLiteral("patternmask%1")).arg(style);
+        QString maskId = QStringLiteral("patternmask%1").arg(style);
         if (!d_func()->savedPatternMasks.contains(maskId)) {
             QImage img = qt_imageForBrush(style, true);
             QRegion reg(QBitmap::fromData(img.size(), img.constBits()));
@@ -224,13 +226,35 @@ public:
 
     QString savePatternBrush(const QString &color, const QBrush &brush)
     {
-        QString patternId = QString(QStringLiteral("fillpattern%1_")).arg(brush.style()) + QStringView{color}.mid(1);
+        QString patternId = QStringLiteral("fillpattern%1_").arg(brush.style()) + QStringView{color}.mid(1);
         if (!d_func()->savedPatternBrushes.contains(patternId)) {
             QString maskId = savePatternMask(brush.style());
             QString geo(QStringLiteral("x=\"0\" y=\"0\" width=\"8\" height=\"8\""));
             QTextStream str(&d_func()->defs, QIODevice::Append);
-            str << QString(QStringLiteral("<pattern id=\"%1\" %2 patternUnits=\"userSpaceOnUse\" >")).arg(patternId, geo) << Qt::endl;
-            str << QString(QStringLiteral("<rect %1 stroke=\"none\" fill=\"%2\" mask=\"url(#%3)\" />")).arg(geo, color, maskId) << Qt::endl;
+            str << QStringLiteral("<pattern id=\"%1\" %2 patternUnits=\"userSpaceOnUse\" >").arg(patternId, geo) << Qt::endl;
+            str << QStringLiteral("<rect %1 stroke=\"none\" fill=\"%2\" mask=\"url(#%3)\" />").arg(geo, color, maskId) << Qt::endl;
+            str << QStringLiteral("</pattern>") << Qt::endl << Qt::endl;
+            d_func()->savedPatternBrushes.append(patternId);
+        }
+        return patternId;
+    }
+
+    QString saveTextureBrush(const QString &color, const QBrush &brush)
+    {
+        QImage tex = brush.textureImage();
+        QString patternId = QStringLiteral("texpattern_%1").arg(QString::number(tex.cacheKey(), 16));
+        if (qHasPixmapTexture(brush) && brush.texture().isQBitmap()) {
+            Q_ASSERT(tex.format() == QImage::Format_MonoLSB);
+            tex.setColorCount(2);
+            tex.setColor(0, qRgba(0, 0, 0, 0));
+            tex.setColor(1, brush.color().rgba());
+            patternId += QLatin1Char('_') + QStringView{color}.mid(1);
+        }
+        if (!d_func()->savedPatternBrushes.contains(patternId)) {
+            QString geo = QStringLiteral("x=\"0\" y=\"0\" width=\"%1\" height=\"%2\"").arg(tex.width()).arg(tex.height());
+            QTextStream str(&d_func()->defs, QIODevice::Append);
+            str << QStringLiteral("<pattern id=\"%1\" %2 patternUnits=\"userSpaceOnUse\" >").arg(patternId, geo) << Qt::endl;
+            generateImage(str, tex.rect(), tex);
             str << QStringLiteral("</pattern>") << Qt::endl << Qt::endl;
             d_func()->savedPatternBrushes.append(patternId);
         }
@@ -458,10 +482,12 @@ public:
         case Qt::CrossPattern:
         case Qt::BDiagPattern:
         case Qt::FDiagPattern:
-        case Qt::DiagCrossPattern: {
+        case Qt::DiagCrossPattern:
+        case Qt::TexturePattern: {
             QString color, colorOpacity;
             translate_color(sbrush.color(), &color, &colorOpacity);
-            QString patternId = savePatternBrush(color, sbrush);
+            QString patternId = (sbrush.style() == Qt::TexturePattern) ? saveTextureBrush(color, sbrush)
+                                                                       : savePatternBrush(color, sbrush);
             QString patternRef = QString(QStringLiteral("url(#%1)")).arg(patternId);
             stream() << "fill=\"" << patternRef << "\" fill-opacity=\"" << colorOpacity << "\" ";
             d_func()->attributes.fill = patternRef;
@@ -969,36 +995,39 @@ void QSvgPaintEngine::drawPixmap(const QRectF &r, const QPixmap &pm,
     drawImage(r, pm.toImage(), sr);
 }
 
-void QSvgPaintEngine::drawImage(const QRectF &r, const QImage &image,
-                                const QRectF &sr,
-                                Qt::ImageConversionFlags flags)
+void QSvgPaintEngine::generateImage(QTextStream &stream, const QRectF &r, const QImage &image)
 {
-    //Q_D(QSvgPaintEngine);
-
-    Q_UNUSED(sr);
-    Q_UNUSED(flags);
     QString quality;
     if (state->renderHints() & QPainter::SmoothPixmapTransform) {
         quality = QLatin1String("optimizeQuality");
     } else {
         quality = QLatin1String("optimizeSpeed");
     }
-    stream() << "<image ";
-    stream() << "x=\""<<r.x()<<"\" "
-                "y=\""<<r.y()<<"\" "
-                "width=\""<<r.width()<<"\" "
-                "height=\""<<r.height()<<"\" "
-                "preserveAspectRatio=\"none\" "
-                "image-rendering=\""<<quality<<"\" ";
+    stream << "<image ";
+    stream << "x=\""<<r.x()<<"\" "
+              "y=\""<<r.y()<<"\" "
+              "width=\""<<r.width()<<"\" "
+              "height=\""<<r.height()<<"\" "
+              "preserveAspectRatio=\"none\" "
+              "image-rendering=\""<<quality<<"\" ";
 
     QByteArray data;
     QBuffer buffer(&data);
     buffer.open(QBuffer::ReadWrite);
     image.save(&buffer, "PNG");
     buffer.close();
-    stream() << "xlink:href=\"data:image/png;base64,"
-             << data.toBase64()
-             <<"\" />\n";
+    stream << "xlink:href=\"data:image/png;base64,"
+           << data.toBase64()
+           <<"\" />\n";
+}
+
+void QSvgPaintEngine::drawImage(const QRectF &r, const QImage &image,
+                                const QRectF &sr,
+                                Qt::ImageConversionFlags flags)
+{
+    Q_UNUSED(sr);
+    Q_UNUSED(flags);
+    generateImage(stream(), r, image);
 }
 
 void QSvgPaintEngine::updateState(const QPaintEngineState &state)
