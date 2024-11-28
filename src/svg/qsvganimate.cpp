@@ -18,12 +18,12 @@ QSvgAnimateNode::~QSvgAnimateNode()
 
 }
 
-void QSvgAnimateNode::setLinkId(QString link)
+void QSvgAnimateNode::setLinkId(const QString &link)
 {
     m_linkId = link;
 }
 
-QString QSvgAnimateNode::linkId() const
+const QString &QSvgAnimateNode::linkId() const
 {
     return m_linkId;
 }

@@ -246,7 +246,7 @@ public:
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
     bool isResolved() const { return m_link != nullptr; }
-    QString linkId() const { return m_linkId; }
+    const QString &linkId() const { return m_linkId; }
     void setLink(QSvgNode *link) { m_link = link; }
     QSvgNode *link() const { return m_link; }
     QPointF start() const { return m_start; }

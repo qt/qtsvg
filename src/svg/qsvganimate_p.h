@@ -38,8 +38,8 @@ public:
     QSvgAnimateNode(QSvgNode *parent = nullptr);
     virtual ~QSvgAnimateNode();
 
-    void setLinkId(QString link);
-    QString linkId() const;
+    void setLinkId(const QString &link);
+    const QString &linkId() const;
 
     virtual AnimationType animationType() const override;
     virtual bool isActive() const override;
