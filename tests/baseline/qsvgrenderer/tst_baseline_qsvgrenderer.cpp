@@ -23,6 +23,7 @@ public:
 private Q_SLOTS:
     void initTestCase();
     void cleanup();
+    void cleanupTestCase();
     void testRendering_data();
     void testRendering();
 
@@ -66,6 +67,10 @@ void tst_QSvgRenderer::cleanup()
 
 }
 
+void tst_QSvgRenderer::cleanupTestCase()
+{
+    QBaselineTest::finalizeAndDisconnect();
+}
 
 void tst_QSvgRenderer::testRendering_data()
 {
