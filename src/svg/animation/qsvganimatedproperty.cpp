@@ -22,15 +22,15 @@ static void initHash()
     animatableProperties->insert(QStringLiteral("transform"), QSvgAbstractAnimatedProperty::Transform);
 }
 
-static qreal lerp(qreal a, qreal b, qreal t)
+static qreal q_lerp(qreal a, qreal b, qreal t)
 {
     return a + (b - a) * t;
 }
 
 static QPointF pointInterpolator(QPointF v1, QPointF v2, qreal t)
 {
-    qreal x = lerp(v1.x(), v2.x(), t);
-    qreal y = lerp(v1.y(), v2.y(), t);
+    qreal x = q_lerp(v1.x(), v2.x(), t);
+    qreal y = q_lerp(v1.y(), v2.y(), t);
 
     return QPointF(x, y);
 }
@@ -123,10 +123,10 @@ void QSvgAnimatedPropertyColor::interpolate(uint index, qreal t)
     QColor c1 = m_colors.at(index - 1);
     QColor c2 = m_colors.at(index);
 
-    int alpha  = lerp(c1.alpha(), c2.alpha(), t);
-    int red    = lerp(c1.red(), c2.red(), t);
-    int green  = lerp(c1.green(), c2.green(), t);
-    int blue   = lerp(c1.blue(), c2.blue(), t);
+    int alpha  = q_lerp(c1.alpha(), c2.alpha(), t);
+    int red    = q_lerp(c1.red(), c2.red(), t);
+    int green  = q_lerp(c1.green(), c2.green(), t);
+    int blue   = q_lerp(c1.blue(), c2.blue(), t);
 
     m_interpolatedValue = QColor(red, green, blue, alpha);
 }
@@ -191,7 +191,7 @@ qreal QSvgAnimatedPropertyTransform::interpolatedRotation(uint index, qreal t) c
 {
     qreal r1 = m_rotations.at(index - 1);
     qreal r2 = m_rotations.at(index);
-    return lerp(r1, r2, t);
+    return q_lerp(r1, r2, t);
 }
 
 QPointF QSvgAnimatedPropertyTransform::interpolatedCenterOfRotation(uint index, qreal t) const
