@@ -834,7 +834,7 @@ void tst_QSvgRenderer::testGzLoading()
     QVERIFY(resourceRenderer.isValid());
 
     QFile largeFileGz(QFINDTESTDATA("large.svgz"));
-    largeFileGz.open(QIODevice::ReadOnly);
+    QVERIFY(largeFileGz.open(QIODevice::ReadOnly));
     QByteArray data = largeFileGz.readAll();
     QSvgRenderer autoDetectGzData(data);
     QVERIFY(autoDetectGzData.isValid());
@@ -856,9 +856,9 @@ void tst_QSvgRenderer::testGzHelper_data()
             "cbcfe70200a865327e04000000")) << QByteArray("foo\n");
 
     QFile largeFileGz(QFINDTESTDATA("large.svgz"));
-    largeFileGz.open(QIODevice::ReadOnly);
+    QVERIFY(largeFileGz.open(QIODevice::ReadOnly));
     QFile largeFile(QFINDTESTDATA("large.svg"));
-    largeFile.open(QIODevice::ReadOnly);
+    QVERIFY(largeFile.open(QIODevice::ReadOnly));
     QTest::newRow("large") << largeFileGz.readAll() << largeFile.readAll();
 
     QTest::newRow("zeroes") << QByteArray::fromHex(QByteArray("1f8b0800131f9348000333"
@@ -881,7 +881,7 @@ void tst_QSvgRenderer::testGzHelper()
     QFETCH(QByteArray, out);
 
     QBuffer buffer(&in);
-    buffer.open(QIODevice::ReadOnly);
+    QVERIFY(buffer.open(QIODevice::ReadOnly));
     QVERIFY(buffer.isReadable());
     QByteArray result = qt_inflateGZipDataFrom(&buffer);
     QCOMPARE(result, out);
@@ -1733,7 +1733,7 @@ void tst_QSvgRenderer::oss_fuzz_61586()
 QByteArray image_data_url(QImage &image) {
     QByteArray data;
     QBuffer buffer(&data);
-    buffer.open(QBuffer::ReadWrite);
+    QTEST_ASSERT(buffer.open(QBuffer::ReadWrite));
     image.save(&buffer, "PNG");
     buffer.close();
     QByteArray url("data:image/png;base64,");

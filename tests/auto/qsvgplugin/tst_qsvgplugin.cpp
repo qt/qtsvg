@@ -79,7 +79,7 @@ void tst_QSvgPlugin::checkSize()
     QFETCH(int, imageWidth);
 
     QFile file(filename);
-    file.open(QIODevice::ReadOnly);
+    QVERIFY(file.open(QIODevice::ReadOnly));
 
     QSvgIOHandler plugin;
     plugin.setDevice(&file);
@@ -108,7 +108,7 @@ void tst_QSvgPlugin::checkImageInclude()
     const QString path = filename.left(filename.size() - strlen("imageInclude.svg"));
 
     QFile file(filename);
-    file.open(QIODevice::ReadOnly);
+    QVERIFY(file.open(QIODevice::ReadOnly));
 
     QSvgIOHandler plugin;
     plugin.setDevice(&file);
@@ -152,12 +152,12 @@ void tst_QSvgPlugin::encodings()
 
     {
         QFile file(filename);
-        file.open(QIODevice::ReadOnly);
+        QVERIFY(file.open(QIODevice::ReadOnly));
         QVERIFY(QSvgIOHandler::canRead(&file));
     }
 
     QFile file(filename);
-    file.open(QIODevice::ReadOnly);
+    QVERIFY(file.open(QIODevice::ReadOnly));
     QSvgIOHandler plugin;
     plugin.setDevice(&file);
     QVERIFY(plugin.canRead());
