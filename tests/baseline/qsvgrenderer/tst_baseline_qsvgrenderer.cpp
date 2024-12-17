@@ -35,7 +35,7 @@ private:
     quint16 checksumFileOrDir(const QString &path);
 
     QString testSuitePath;
-    QScopedPointer<QSvgTinyDocument> m_doc;
+    std::unique_ptr<QSvgTinyDocument> m_doc;
 };
 
 tst_QSvgRenderer::tst_QSvgRenderer()
@@ -122,11 +122,11 @@ void tst_QSvgRenderer::runTest(const QStringList& extraArgs)
     QFETCH(QString, svgFile);
 
     m_doc.reset(QSvgTinyDocument::load(svgFile, {}, QtSvg::AnimatorType::Controlled));
-    QSize size = !m_doc.isNull() ? m_doc->viewBox().toRect().size() : QSize(64, 64);
+    QSize size = m_doc ? m_doc->viewBox().toRect().size() : QSize(64, 64);
     QImage actual(size, QImage::Format_RGB32);
     actual.fill(QColor(255, 255, 255));
 
-    if (!m_doc.isNull()) {
+    if (m_doc) {
         if (m_doc->animated()) {
             uint midTime = qFloor(m_doc->animationDuration() * 0.5);
             uint currentFrame = midTime * 0.001 * 30;
