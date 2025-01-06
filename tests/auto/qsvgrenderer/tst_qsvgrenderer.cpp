@@ -1770,6 +1770,9 @@ void tst_QSvgRenderer::ossFuzzLoad_data()
     // resulted in null pointer deref
     QTest::newRow("badly-nested") // id=61586
             << R"(<svg><style>*{font-family:q}<linearGradient><stop>)"_ba;
+    // resulted in stack overflow
+    QTest::newRow("cyclic-reference") // id=42532991
+            << R"-(<svg><pattern height="3" width="9" id="c"><path d="v4T1-" stroke="url(#c)"><symbol>)-"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzLoad()
