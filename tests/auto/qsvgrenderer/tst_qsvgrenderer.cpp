@@ -66,6 +66,7 @@ private slots:
     void oss_fuzz_24131();
     void oss_fuzz_24738();
     void oss_fuzz_61586();
+    void oss_fuzz_42532991();
     void imageRendering();
     void illegalAnimateTransform_data();
     void illegalAnimateTransform();
@@ -1728,6 +1729,12 @@ void tst_QSvgRenderer::oss_fuzz_61586()
 {
     // resulted in null pointer deref
     QSvgRenderer().load(QByteArray("<svg><style>*{font-family:q}<linearGradient><stop>"));
+}
+
+void tst_QSvgRenderer::oss_fuzz_42532991()
+{
+    // resulted in stack overflow
+    QSvgRenderer().load(QByteArray("<svg><pattern height=\"3\" width=\"9\" id=\"c\"><path d=\"v4T1-\" stroke=\"url(#c)\"><symbol>"));
 }
 
 QByteArray image_data_url(QImage &image) {
