@@ -201,8 +201,6 @@ private:
     QStringList m_requiredFormats;
     QStringList m_requiredFonts;
 
-    bool        m_visible;
-
     QString m_id;
     QString m_class;
     QString m_maskId;
@@ -211,9 +209,9 @@ private:
     QString m_markerMidId;
     QString m_markerEndId;
 
-
-    DisplayMode m_displayMode;
     mutable QRectF m_cachedBounds;
+    DisplayMode    m_displayMode;
+    bool           m_visible;
 
     friend class QSvgTinyDocument;
 };

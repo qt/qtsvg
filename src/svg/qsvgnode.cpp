@@ -26,8 +26,8 @@ Q_STATIC_LOGGING_CATEGORY(lcSvgTiming, "qt.svg.timing")
 
 QSvgNode::QSvgNode(QSvgNode *parent)
     : m_parent(parent),
-      m_visible(true),
-      m_displayMode(BlockMode)
+      m_displayMode(BlockMode),
+      m_visible(true)
 {
 }
 
