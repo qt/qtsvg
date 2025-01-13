@@ -39,6 +39,7 @@ public:
     virtual ~QSvgAbstractAnimatedProperty();
 
     void setKeyFrames(const QList<qreal> &keyFrames);
+    void appendKeyFrame(qreal keyFrame);
     QList<qreal> keyFrames() const;
     void setPropertyName(const QString &name);
     QStringView propertyName() const;
@@ -62,6 +63,7 @@ public:
     QSvgAnimatedPropertyColor(const QString &name);
 
     void setColors(const QList<QColor> &colors);
+    void appendColor(const QColor &color);
     QList<QColor> colors() const;
 
     void interpolate(uint index, qreal t) override;
@@ -76,18 +78,23 @@ public:
     QSvgAnimatedPropertyTransform(const QString &name);
 
     void setTranslations(const QList<QPointF> &translations);
+    void appendTranslation(const QPointF &translation);
     QList<QPointF> translations() const;
 
     void setScales(const QList<QPointF> &scales);
+    void appendScale(const QPointF &scale);
     QList<QPointF> scales() const;
 
     void setRotations(const QList<qreal> &rotations);
+    void appendRotation(qreal rotation);
     QList<qreal> rotations() const;
 
     void setCentersOfRotation(const QList<QPointF> &centersOfRotations);
+    void appendCenterOfRotation(const QPointF &centerOfRotation);
     QList<QPointF> centersOfRotations() const;
 
     void setSkews(const QList<QPointF> &skews);
+    void appendSkew(const QPointF &skew);
     QList<QPointF> skews() const;
 
     void interpolate(uint index, qreal t) override;

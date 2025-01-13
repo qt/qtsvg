@@ -12,7 +12,6 @@
 #include "qsvgnode_p.h"
 #include "qsvgfont_p.h"
 #include "qsvganimate_p.h"
-#include "private/qsvgcssanimation_p.h"
 
 #include "qpen.h"
 #include "qpainterpath.h"
@@ -641,10 +640,6 @@ public:
             }
         }
 
-        auto sortFunction = [](QCss::AnimationRule::AnimationRuleSet r1, QCss::AnimationRule::AnimationRuleSet r2) {
-            return r1.keyFrame < r2.keyFrame;
-        };
-        std::sort(nodeAnimationRule.ruleSets.begin(), nodeAnimationRule.ruleSets.end(), sortFunction);
         return nodeAnimationRule;
     }
 
@@ -2010,25 +2005,6 @@ static void parseCssAnimations(QSvgNode *node,
     cssNode.ptr = node;
     QCss::AnimationRule rule = handler->selector()->animationsForNode(cssNode);
 
-    struct PropertyData {
-        QList<qreal> keyFrames;
-        QList<QColor> values;
-    };
-
-
-    QHash<QString, PropertyData> propertyData;
-    for (QCss::AnimationRule::AnimationRuleSet ruleSet : rule.ruleSets) {
-        QList<QCss::Declaration> decls = ruleSet.declarations;
-        for (QCss::Declaration decl : decls) {
-            if (decl.d->property == QStringLiteral("fill") || decl.d->property == QStringLiteral("stroke")) {
-                QColor fillColor;
-                constructColor(decl.d->values.first().toString(), QStringLiteral("1"), fillColor, handler);
-                propertyData[decl.d->property].keyFrames.append(ruleSet.keyFrame);
-                propertyData[decl.d->property].values.append(fillColor);
-            }
-        }
-    }
-
     bool ok;
     int duration = parseClockValue(attributes.animationDuration, &ok);
     int delay = parseClockValue(attributes.animationDelay, &ok);
@@ -2036,24 +2012,14 @@ static void parseCssAnimations(QSvgNode *node,
     qreal repeatCount = (attributes.animationIterationCount == QLatin1String("infinite")) ? -1 :
                             qMax(1.0, QSvgUtils::toDouble(attributes.animationIterationCount));
 
-    QSvgCssAnimation *anim = new QSvgCssAnimation;
-
-    for (auto itr = propertyData.begin(); itr != propertyData.end(); itr++) {
-        QSvgAnimatedPropertyColor *prop = static_cast<QSvgAnimatedPropertyColor *>
-            (QSvgAbstractAnimatedProperty::createAnimatedProperty(itr.key()));
-        if (prop) {
-            prop->setKeyFrames(itr.value().keyFrames);
-            prop->setColors(itr.value().values);
-            anim->appendProperty(prop);
-        }
+    QSvgCssAnimation *anim = handler->cssHandler().createAnimation(attributes.animationName.toString());
+    if (anim) {
+        anim->setRunningTime(delay, duration);
+        anim->setIterationCount(repeatCount);
+        handler->document()->animator()->appendAnimation(node, anim);
+        handler->setAnimPeriod(delay, delay + duration);
+        handler->document()->setAnimated(true);
     }
-
-    anim->setRunningTime(delay, duration);
-    anim->setIterationCount(repeatCount);
-
-    handler->document()->animator()->appendAnimation(node, anim);
-    handler->setAnimPeriod(delay, delay + duration);
-    handler->document()->setAnimated(true);
 }
 
 #endif // QT_NO_CSSPARSER
@@ -5064,6 +5030,7 @@ bool QSvgHandler::characters(const QStringView str)
         QCss::StyleSheet sheet;
         QCss::Parser(css).parse(&sheet);
         m_selector->styleSheets.append(sheet);
+        m_cssHandler.collectAnimations(sheet);
         return true;
     }
 #endif
@@ -5148,6 +5115,11 @@ QSvgStyleSelector * QSvgHandler::selector() const
     return m_selector;
 }
 
+QSvgCssHandler &QSvgHandler::cssHandler()
+{
+    return m_cssHandler;
+}
+
 #endif // QT_NO_CSSPARSER
 
 bool QSvgHandler::processingInstruction(const QString &target, const QString &data)
@@ -5187,6 +5159,7 @@ bool QSvgHandler::processingInstruction(const QString &target, const QString &da
                 QCss::StyleSheet sheet;
                 QCss::Parser(css).parse(&sheet);
                 m_selector->styleSheets.append(sheet);
+                m_cssHandler.collectAnimations(sheet);
             }
 
         }

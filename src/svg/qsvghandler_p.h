@@ -22,6 +22,7 @@
 #include "qsvgstyle_p.h"
 #if QT_CONFIG(cssparser)
 #include "private/qcssparser_p.h"
+#include <QtSvg/private/qsvgcsshandler_p.h>
 #endif
 #include "qsvggraphics_p.h"
 #include "qtsvgglobal_p.h"
@@ -79,6 +80,7 @@ public:
     bool inStyle() const;
 
     QSvgStyleSelector *selector() const;
+    QSvgCssHandler &cssHandler();
 #endif
 
     void setAnimPeriod(int start, int end);
@@ -141,6 +143,7 @@ private:
     bool m_inStyle;
     QSvgStyleSelector *m_selector;
     QCss::Parser m_cssParser;
+    QSvgCssHandler m_cssHandler;
 #endif
     void parse();
     void resolvePaintServers(QSvgNode *node, int nestedDepth = 0);

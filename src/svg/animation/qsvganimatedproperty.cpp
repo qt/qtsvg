@@ -51,6 +51,11 @@ void QSvgAbstractAnimatedProperty::setKeyFrames(const QList<qreal> &keyFrames)
     m_keyFrames = keyFrames;
 }
 
+void QSvgAbstractAnimatedProperty::appendKeyFrame(qreal keyFrame)
+{
+    m_keyFrames.append(keyFrame);
+}
+
 QList<qreal> QSvgAbstractAnimatedProperty::keyFrames() const
 {
     return m_keyFrames;
@@ -113,6 +118,11 @@ void QSvgAnimatedPropertyColor::setColors(const QList<QColor> &colors)
     m_colors = colors;
 }
 
+void QSvgAnimatedPropertyColor::appendColor(const QColor &color)
+{
+    m_colors.append(color);
+}
+
 QList<QColor> QSvgAnimatedPropertyColor::colors() const
 {
     return m_colors;
@@ -142,6 +152,11 @@ void QSvgAnimatedPropertyTransform::setTranslations(const QList<QPointF> &transl
     m_translations = translations;
 }
 
+void QSvgAnimatedPropertyTransform::appendTranslation(const QPointF &translation)
+{
+    m_translations.append(translation);
+}
+
 QList<QPointF> QSvgAnimatedPropertyTransform::translations() const
 {
     return m_translations;
@@ -150,6 +165,11 @@ QList<QPointF> QSvgAnimatedPropertyTransform::translations() const
 void QSvgAnimatedPropertyTransform::setScales(const QList<QPointF> &scales)
 {
     m_scales = scales;
+}
+
+void QSvgAnimatedPropertyTransform::appendScale(const QPointF &scale)
+{
+    m_scales.append(scale);
 }
 
 QList<QPointF> QSvgAnimatedPropertyTransform::scales() const
@@ -162,6 +182,11 @@ void QSvgAnimatedPropertyTransform::setRotations(const QList<qreal> &rotations)
     m_rotations = rotations;
 }
 
+void QSvgAnimatedPropertyTransform::appendRotation(qreal rotation)
+{
+    m_rotations.append(rotation);
+}
+
 QList<qreal> QSvgAnimatedPropertyTransform::rotations() const
 {
     return m_rotations;
@@ -172,6 +197,11 @@ void QSvgAnimatedPropertyTransform::setCentersOfRotation(const QList<QPointF> &c
     m_centersOfRotation = centersOfRotations;
 }
 
+void QSvgAnimatedPropertyTransform::appendCenterOfRotation(const QPointF &centerOfRotation)
+{
+    m_centersOfRotation.append(centerOfRotation);
+}
+
 QList<QPointF> QSvgAnimatedPropertyTransform::centersOfRotations() const
 {
     return m_centersOfRotation;
@@ -180,6 +210,11 @@ QList<QPointF> QSvgAnimatedPropertyTransform::centersOfRotations() const
 void QSvgAnimatedPropertyTransform::setSkews(const QList<QPointF> &skews)
 {
     m_skews = skews;
+}
+
+void QSvgAnimatedPropertyTransform::appendSkew(const QPointF &skew)
+{
+    m_skews.append(skew);
 }
 
 QList<QPointF> QSvgAnimatedPropertyTransform::skews() const

@@ -51,6 +51,11 @@ qt_internal_add_module(Svg
 ## Scopes:
 #####################################################################
 
+qt_internal_extend_target(Svg CONDITION QT_FEATURE_cssparser
+    SOURCES
+        qsvgcsshandler.cpp qsvgcsshandler_p.h
+)
+
 qt_internal_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")
     LINK_OPTIONS
         "/BASE:0x66000000"
