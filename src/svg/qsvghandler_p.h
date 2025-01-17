@@ -25,6 +25,7 @@
 #endif
 #include "qsvggraphics_p.h"
 #include "qtsvgglobal_p.h"
+#include "qsvgutils_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -47,18 +48,6 @@ struct QSvgCssAttribute
 class Q_SVG_EXPORT QSvgHandler
 {
 public:
-    enum LengthType {
-        LT_PERCENT,
-        LT_PX,
-        LT_PC,
-        LT_PT,
-        LT_MM,
-        LT_CM,
-        LT_IN,
-        LT_OTHER
-    };
-
-public:
     QSvgHandler(QIODevice *device, QtSvg::Options options = {},
                 QtSvg::AnimatorType type = QtSvg::AnimatorType::Automatic);
     QSvgHandler(const QByteArray &data, QtSvg::Options options = {},
@@ -77,8 +66,8 @@ public:
     inline QString errorString() const { return xml->errorString(); }
     inline int lineNumber() const { return xml->lineNumber(); }
 
-    void setDefaultCoordinateSystem(LengthType type);
-    LengthType defaultCoordinateSystem() const;
+    void setDefaultCoordinateSystem(QSvgUtils::LengthType type);
+    QSvgUtils::LengthType defaultCoordinateSystem() const;
 
     void pushColor(const QColor &color);
     void pushColorCopy();
@@ -140,7 +129,7 @@ private:
 
     QSvgRefCounter<QSvgStyleProperty> m_style;
 
-    LengthType m_defaultCoords;
+    QSvgUtils::LengthType m_defaultCoords;
 
     QStack<QColor> m_colorStack;
     QStack<int>    m_colorTagCount;
