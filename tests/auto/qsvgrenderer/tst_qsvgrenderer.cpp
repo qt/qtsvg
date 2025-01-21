@@ -86,6 +86,7 @@ private slots:
     void testFeComposite();
     void testFeGaussian();
     void testFeBlend();
+    void testUseCycles();
 
     void testOption_data();
     void testOption();
@@ -2085,6 +2086,21 @@ void tst_QSvgRenderer::testCycles()
                       <rect x="0" y="0" width="10" height="10" fill="url(#pattern) "/>
                       </pattern>
                       </svg>)");
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(!renderer.isValid());
+}
+
+void tst_QSvgRenderer::testUseCycles()
+{
+    QByteArray svgDoc(R"(<svg viewBox="0 0 200 200">
+        <g xml:id="group-1">
+          <use xml:id="use-1" xlink:href="#group-2" />
+        </g>
+        <g xml:id="group-2">
+          <use xml:id="use-2" xlink:href="#group-1" />
+        </g>
+    </svg>)");
 
     QSvgRenderer renderer(svgDoc);
     QVERIFY(!renderer.isValid());

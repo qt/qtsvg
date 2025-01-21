@@ -4900,6 +4900,10 @@ void QSvgHandler::parse()
     }
     resolvePaintServers(m_doc);
     resolveNodes();
+    if (detectCyclesAndWarn(m_doc)) {
+        delete m_doc;
+        m_doc = nullptr;
+    }
 }
 
 bool QSvgHandler::startElement(const QString &localName,
