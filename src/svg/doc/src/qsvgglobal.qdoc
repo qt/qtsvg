@@ -31,5 +31,5 @@
     \value [since 6.9] DisableCSSAnimations
                                Disable CSS animations defined inside a <style> element.
     \value [since 6.9] DisableAnimations
-                               Disable both SMIL and CSS animations.
+                               Disable all animations.
 */

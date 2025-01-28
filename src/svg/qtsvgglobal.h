@@ -16,9 +16,14 @@ enum Option : quint32 {
     NoOption           = 0x00,
     Tiny12FeaturesOnly = 0x01,
     AssumeTrustedSource = 0x02,
-    DisableSMILAnimations = 0x04,
-    DisableCSSAnimations = 0x08,
-    DisableAnimations = DisableSMILAnimations | DisableCSSAnimations,
+    // reserved for non-animation options: 0x04
+    // reserved for non-animation options: 0x08
+    DisableSMILAnimations = 0x10,
+    DisableCSSAnimations = 0x20,
+    // reserved for potentially other animations: 0x40
+    // reserved for potentially other animations: 0x80
+    DisableAnimations = 0xf0,
+    // next value for non-animations: 0x0100
 };
 Q_DECLARE_FLAGS(Options, Option)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Options)
