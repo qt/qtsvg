@@ -15,10 +15,12 @@ QSvgAbstractAnimator::QSvgAbstractAnimator()
 
 QSvgAbstractAnimator::~QSvgAbstractAnimator()
 {
-    for (auto itr = m_animationsCSS.begin(); itr != m_animationsCSS.end(); itr++) {
-        QList<QSvgAbstractAnimation *> &nodeAnimations = itr.value();
-        for (QSvgAbstractAnimation *anim : nodeAnimations)
-            delete anim;
+    for (auto animationHash : {&m_animationsCSS, &m_animationsSMIL}) {
+        for (auto itr = animationHash->begin(); itr != animationHash->end(); itr++) {
+            QList<QSvgAbstractAnimation *> &nodeAnimations = itr.value();
+            for (QSvgAbstractAnimation *anim : nodeAnimations)
+                delete anim;
+        }
     }
 }
 
