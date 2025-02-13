@@ -15,7 +15,8 @@
 // We mean it.
 //
 
-#include "qtsvgglobal_p.h"
+#include <QtSvg/qtsvgglobal.h>
+
 #include "qsvgabstractanimation_p.h"
 
 QT_BEGIN_NAMESPACE
