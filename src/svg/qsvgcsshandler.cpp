@@ -4,8 +4,42 @@
 #include "qsvgcsshandler_p.h"
 #include <QtSvg/private/qsvganimatedproperty_p.h>
 #include <QtSvg/private/qsvgutils_p.h>
+#include <QtGui/private/qmath_p.h>
 
 QT_BEGIN_NAMESPACE
+
+// Parses the angle from a string and convert it to degrees.
+static qreal qsvg_parseAngle(QStringView str, bool *ok = nullptr)
+{
+    QStringView numStr = str.trimmed();
+
+    if (numStr.isEmpty()) {
+        if (ok)
+            *ok = false;
+        return false;
+    }
+
+    qreal unitFactor;
+    if (numStr.endsWith(QLatin1String("deg"))) {
+        numStr.chop(3);
+        unitFactor = 1.0;
+    } else if (numStr.endsWith(QLatin1String("grad"))) {
+        numStr.chop(4);
+        // deg = grad * 0.9;
+        unitFactor = 0.9;
+    } else if (numStr.endsWith(QLatin1String("rad"))) {
+        numStr.chop(3);
+        unitFactor = 180.0 / Q_PI;
+    } else if (numStr.endsWith(QLatin1String("turn"))) {
+        numStr.chop(4);
+        // one circle = one turn
+        unitFactor = 360.0;
+    } else {
+        unitFactor = 0.0;
+    }
+
+    return QSvgUtils::toDouble(numStr, ok) * unitFactor;
+}
 
 void QSvgCssHandler::collectAnimations(const QCss::StyleSheet &sheet)
 {
@@ -83,16 +117,12 @@ void QSvgCssHandler::updateTransformProperty(const QCss::Declaration &decl, QSvg
                 translate1 = QSvgUtils::convertToPixels(translate1, false, type);
                 property->appendTranslation(QPointF(translate0, translate1));
             } else if (transformType == QStringLiteral("rotate")) {
-                QSvgUtils::LengthType type;
-                qreal rotationAngle = QSvgUtils::parseLength(args[0], &type);
+                qreal rotationAngle = qsvg_parseAngle(args[0]);
                 property->appendRotation(rotationAngle);
                 property->appendCenterOfRotation(QPointF(0, 0));
             } else if (transformType == QStringLiteral("skew")) {
-                QSvgUtils::LengthType type;
-                qreal skew0 = QSvgUtils::parseLength(args[0], &type);
-                skew0 = QSvgUtils::convertToPixels(skew0, false, type);
-                qreal skew1 = QSvgUtils::parseLength(args[1], &type);
-                skew1 = QSvgUtils::convertToPixels(skew1, false, type);
+                qreal skew0 = qsvg_parseAngle(args[0]);
+                qreal skew1 = qsvg_parseAngle(args[1]);
                 property->appendSkew(QPointF(skew0, skew1));
             } else if (transformType == QStringLiteral("matrix")) {
                 QSvgUtils::LengthType type;
@@ -102,10 +132,8 @@ void QSvgCssHandler::updateTransformProperty(const QCss::Declaration &decl, QSvg
                 translate1 = QSvgUtils::convertToPixels(translate1, false, type);
                 qreal scale0 = QSvgUtils::toDouble(args[0].trimmed());
                 qreal scale1 = QSvgUtils::toDouble(args[3].trimmed());
-                qreal skew0 = QSvgUtils::parseLength(args[1], &type);
-                skew0 = QSvgUtils::convertToPixels(skew0, false, type);
-                qreal skew1 = QSvgUtils::parseLength(args[2], &type);
-                skew1 = QSvgUtils::convertToPixels(skew1, false, type);
+                qreal skew0 = QSvgUtils::toDouble((args[1].trimmed()));
+                qreal skew1 = QSvgUtils::toDouble((args[2].trimmed()));
                 property->appendSkew(QPointF(skew0, skew1));
                 property->appendTranslation(QPointF(translate0, translate1));
                 property->appendScale(QPointF(scale0, scale1));
