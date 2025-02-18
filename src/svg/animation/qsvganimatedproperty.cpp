@@ -18,7 +18,10 @@ Q_GLOBAL_STATIC(AnimatableHashType, animatableProperties)
 static void initHash()
 {
     animatableProperties->insert(QStringLiteral("fill"), QSvgAbstractAnimatedProperty::Color);
+    animatableProperties->insert(QStringLiteral("fill-opacity"), QSvgAbstractAnimatedProperty::Float);
+    animatableProperties->insert(QStringLiteral("stroke-opacity"), QSvgAbstractAnimatedProperty::Float);
     animatableProperties->insert(QStringLiteral("stroke"), QSvgAbstractAnimatedProperty::Color);
+    animatableProperties->insert(QStringLiteral("opacity"), QSvgAbstractAnimatedProperty::Float);
     animatableProperties->insert(QStringLiteral("transform"), QSvgAbstractAnimatedProperty::Transform);
 }
 
@@ -101,6 +104,8 @@ QSvgAbstractAnimatedProperty *QSvgAbstractAnimatedProperty::createAnimatedProper
     case QSvgAbstractAnimatedProperty::Transform:
         prop = new QSvgAnimatedPropertyTransform(name);
         break;
+    case QSvgAbstractAnimatedProperty::Float:
+        prop = new QSvgAnimatedPropertyFloat(name);
     default:
         break;
     }
@@ -139,6 +144,39 @@ void QSvgAnimatedPropertyColor::interpolate(uint index, qreal t)
     int blue   = q_lerp(c1.blue(), c2.blue(), t);
 
     m_interpolatedValue = QColor(red, green, blue, alpha);
+}
+
+QSvgAnimatedPropertyFloat::QSvgAnimatedPropertyFloat(const QString &name)
+    : QSvgAbstractAnimatedProperty(name, QSvgAbstractAnimatedProperty::Float)
+{
+}
+
+void QSvgAnimatedPropertyFloat::setValues(const QList<qreal> &values)
+{
+    m_values = values;
+}
+
+void QSvgAnimatedPropertyFloat::appendValue(const qreal value)
+{
+    m_values.append(value);
+}
+
+QList<qreal> QSvgAnimatedPropertyFloat::values() const
+{
+    return m_values;
+}
+
+void QSvgAnimatedPropertyFloat::interpolate(uint index, qreal t)
+{
+    if (index >= (uint)m_keyFrames.size()) {
+        qCWarning(lcSvgAnimatedProperty) << "Invalid index for key frames";
+        return;
+    }
+
+    qreal float1 = m_values.at(index - 1);
+    qreal float2 = m_values.at(index);
+
+    m_interpolatedValue = q_lerp(float1, float2, t);
 }
 
 QSvgAnimatedPropertyTransform::QSvgAnimatedPropertyTransform(const QString &name)

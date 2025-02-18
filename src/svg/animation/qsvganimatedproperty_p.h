@@ -72,6 +72,21 @@ private:
     QList<QColor> m_colors;
 };
 
+class Q_SVG_EXPORT QSvgAnimatedPropertyFloat : public QSvgAbstractAnimatedProperty
+{
+public:
+    QSvgAnimatedPropertyFloat(const QString &name);
+
+    void setValues(const QList<qreal> &values);
+    void appendValue(const qreal value);
+    QList<qreal> values() const;
+
+    void interpolate(uint index, qreal t) override;
+
+private:
+    QList<qreal> m_values;
+};
+
 class Q_SVG_EXPORT QSvgAnimatedPropertyTransform : public QSvgAbstractAnimatedProperty
 {
 public:

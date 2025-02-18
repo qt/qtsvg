@@ -682,13 +682,16 @@ public:
 
 private:
     void savePaintingState(const QPainter *p, const QSvgNode *node, QSvgExtraStates &states);
-    void applyPropertyAnimation(QPainter *p, QSvgAbstractAnimatedProperty *property, bool replace);
+    void applyPropertyAnimation(QPainter *p, QSvgAbstractAnimatedProperty *property, bool replace, QSvgExtraStates &states);
 
 private:
     QBrush m_brush;
     QPen m_pen;
     QTransform m_worldTransform;
     QTransform m_transformToNode;
+    qreal m_fillOpacity;
+    qreal m_strokeOpacity;
+    qreal m_opacity;
 };
 
 /********************************************************/
