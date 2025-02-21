@@ -27,12 +27,15 @@
     and are part of the 3GPP platform for third generation mobile phones. You
     can read more about SVG at \l{About SVG}.
 
-    Qt supports the \l{SVG 1.2 Tiny Static Features}{static features} of
-    \l{http://www.w3.org/TR/SVGMobile12}{SVG 1.2 Tiny}. ECMA scripts and DOM
-    manipulation are currently not supported.
+    Qt supports the \l{SVG 1.2 Tiny Static Features}{static features} as well as
+    color and transform animations of \l{http://www.w3.org/TR/SVGMobile12}{SVG 1.2 Tiny}.
+    ECMA scripts and DOM manipulation are currently not supported.
 
     Since Qt 6.7, some \l{Extended Features}{additional features} of the
     \l{https://www.w3.org/TR/SVG11/}{SVG 1.1} standard are supported.
+
+    Since Qt 6.9, CSS animations for fill, stroke and transform were added to
+    match the currently supported SMIL animations by the module.
 
     SVG drawings can be rendered onto any QPaintDevice subclass. This
     approach gives developers the flexibility to experiment, in order
