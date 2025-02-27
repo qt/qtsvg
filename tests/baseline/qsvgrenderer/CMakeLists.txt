@@ -11,7 +11,7 @@ endif()
 list(APPEND test_data "../data")
 set(BASELINE_DIR "../../../../qtbase/tests/baseline/shared")
 
-find_package(Qt6 ${PROJECT_VERSION} CONFIG REQUIRED COMPONENTS Network)
+find_package(Qt6 ${PROJECT_VERSION} CONFIG REQUIRED COMPONENTS Network SvgPrivate)
 
 qt_internal_add_test(tst_baseline_qsvgrenderer
     SOURCES
