@@ -689,9 +689,9 @@ private:
     QPen m_pen;
     QTransform m_worldTransform;
     QTransform m_transformToNode;
-    qreal m_fillOpacity;
-    qreal m_strokeOpacity;
-    qreal m_opacity;
+    qreal m_fillOpacity = 1.0;
+    qreal m_strokeOpacity = 1.0;
+    qreal m_opacity = 1.0;
 };
 
 /********************************************************/
