@@ -102,7 +102,10 @@ void QSvgLine::drawCommand(QPainter *p, QSvgExtraStates &states)
     if (p->pen().widthF() != 0) {
         qreal oldOpacity = p->opacity();
         p->setOpacity(oldOpacity * states.strokeOpacity);
-        p->drawLine(m_line);
+        if (m_line.isNull() && p->pen().capStyle() != Qt::FlatCap)
+            p->drawPoint(m_line.p1());
+        else
+            p->drawLine(m_line);
         p->setOpacity(oldOpacity);
     }
     QSvgMarker::drawMarkersForNode(this, p, states);
@@ -116,7 +119,10 @@ QSvgPath::QSvgPath(QSvgNode *parent, const QPainterPath &qpath)
 void QSvgPath::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
     m_path.setFillRule(states.fillRule);
-    p->drawPath(m_path);
+    if (m_path.boundingRect().isNull() && p->pen().capStyle() != Qt::FlatCap)
+        p->drawPoint(m_path.boundingRect().topLeft());
+    else
+        p->drawPath(m_path);
     QSvgMarker::drawMarkersForNode(this, p, states);
 }
 
@@ -192,7 +198,10 @@ QRectF QSvgPolygon::internalBounds(QPainter *p, QSvgExtraStates &, BoundsMode mo
 
 void QSvgPolygon::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
-    p->drawPolygon(m_poly, states.fillRule);
+    if (m_poly.boundingRect().isNull() && p->pen().capStyle() != Qt::FlatCap)
+        p->drawPoint(m_poly.first());
+    else
+        p->drawPolygon(m_poly, states.fillRule);
     QSvgMarker::drawMarkersForNode(this, p, states);
 }
 
@@ -212,7 +221,10 @@ void QSvgPolyline::drawCommand(QPainter *p, QSvgExtraStates &states)
     if (p->brush().style() != Qt::NoBrush) {
         p->drawPolygon(m_poly, states.fillRule);
     } else {
-        p->drawPolyline(m_poly);
+        if (m_poly.boundingRect().isNull() && p->pen().capStyle() != Qt::FlatCap)
+            p->drawPoint(m_poly.first());
+        else
+            p->drawPolyline(m_poly);
         QSvgMarker::drawMarkersForNode(this, p, states);
     }
 }
