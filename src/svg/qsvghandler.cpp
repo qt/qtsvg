@@ -1252,7 +1252,7 @@ static void parseFont(QSvgNode *node,
         fontStyle = new QSvgFontStyle;
     if (!attributes.fontFamily.isEmpty() && attributes.fontFamily != QT_INHERIT) {
         QString family = attributes.fontFamily.toString().trimmed();
-        if (family.at(0) == QLatin1Char('\'') || family.at(0) == QLatin1Char('\"'))
+        if (!family.isEmpty() && (family.at(0) == QLatin1Char('\'') || family.at(0) == QLatin1Char('\"')))
             family = family.mid(1, family.size() - 2);
         fontStyle->setFamily(family);
     }
