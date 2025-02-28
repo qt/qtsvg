@@ -122,7 +122,7 @@ void tst_QSvgRenderer::runTest(const QStringList& extraArgs)
     QFETCH(QString, svgFile);
 
     m_doc.reset(QSvgTinyDocument::load(svgFile, {}, QtSvg::AnimatorType::Controlled));
-    QSize size = m_doc ? m_doc->viewBox().toRect().size() : QSize(64, 64);
+    QSize size = m_doc ? m_doc->size() : QSize(64, 64);
     QImage actual(size, QImage::Format_RGB32);
     actual.fill(QColor(255, 255, 255));
 
