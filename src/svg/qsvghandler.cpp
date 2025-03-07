@@ -3761,6 +3761,9 @@ static QSvgNode *createPolygonNode(QSvgNode *parent,
     const QChar *s = pointsStr.constData();
     QList<qreal> points = parseNumbersList(s);
     QPolygonF poly(points.size()/2);
+    if (poly.size() < 2)
+        return nullptr;
+
     for (int i = 0; i < poly.size(); ++i)
         poly[i] = QPointF(points.at(2 * i), points.at(2 * i + 1));
     QSvgNode *polygon = new QSvgPolygon(parent, poly);
