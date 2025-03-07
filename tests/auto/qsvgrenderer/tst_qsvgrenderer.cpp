@@ -1744,6 +1744,8 @@ void tst_QSvgRenderer::ossFuzzRender_data()
     // runtime error: signed integer overflow: -2147483648 + -2147483648 cannot be represented in type 'int'
     QTest::newRow("NaN-in-path") // id=24131
             << R"(<svg><path d="M- 4 44044404444E-334-"/></svg>)"_ba;
+    QTest::newRow("empty polygon") // id=399769595
+            << R"-(<svg><linearGradient id="c"/><polygon stroke="url(#c)"/><polygon points="-- 7-" stroke="url(#c)"/></svg>)-"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzRender()
