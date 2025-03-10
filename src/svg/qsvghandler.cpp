@@ -3745,43 +3745,36 @@ static QSvgNode *createPathNode(QSvgNode *parent,
     return path;
 }
 
+static QSvgNode *createPolyNode(QSvgNode *parent,
+                                const QXmlStreamAttributes &attributes,
+                                bool createLine)
+{
+    const QString pointsStr = attributes.value(QLatin1String("points")).toString();
+    const QChar *s = pointsStr.constData();
+    const QList<qreal> points = parseNumbersList(s);
+    if (points.size() < 4)
+        return nullptr;
+    QPolygonF poly(points.size()/2);
+    for (int i = 0; i < poly.size(); ++i)
+        poly[i] = QPointF(points.at(2 * i), points.at(2 * i + 1));
+    if (createLine)
+        return new QSvgPolyline(parent, poly);
+    else
+        return new QSvgPolygon(parent, poly);
+}
+
 static QSvgNode *createPolygonNode(QSvgNode *parent,
                                    const QXmlStreamAttributes &attributes,
                                    QSvgHandler *)
 {
-    QString pointsStr  = attributes.value(QLatin1String("points")).toString();
-
-    //same QPolygon parsing is in createPolylineNode
-    const QChar *s = pointsStr.constData();
-    QList<qreal> points = parseNumbersList(s);
-    QPolygonF poly(points.size()/2);
-    if (poly.size() < 2)
-        return nullptr;
-
-    for (int i = 0; i < poly.size(); ++i)
-        poly[i] = QPointF(points.at(2 * i), points.at(2 * i + 1));
-    QSvgNode *polygon = new QSvgPolygon(parent, poly);
-    return polygon;
+    return createPolyNode(parent, attributes, false);
 }
 
 static QSvgNode *createPolylineNode(QSvgNode *parent,
                                     const QXmlStreamAttributes &attributes,
                                     QSvgHandler *)
 {
-    QString pointsStr  = attributes.value(QLatin1String("points")).toString();
-
-    //same QPolygon parsing is in createPolygonNode
-    const QChar *s = pointsStr.constData();
-    QList<qreal> points = parseNumbersList(s);
-    QPolygonF poly(points.size()/2);
-    if (poly.size() < 2)
-        return nullptr;
-
-    for (int i = 0; i < poly.size(); ++i)
-        poly[i] = QPointF(points.at(2 * i), points.at(2 * i + 1));
-
-    QSvgNode *line = new QSvgPolyline(parent, poly);
-    return line;
+    return createPolyNode(parent, attributes, true);
 }
 
 static bool parsePrefetchNode(QSvgNode *parent,
