@@ -519,20 +519,16 @@ QTransform QSvgTinyDocument::transformForElement(const QString &id) const
 
 int QSvgTinyDocument::currentFrame() const
 {
-    double runningPercentage = qMin(currentElapsed() / double(animationDuration()), 1.);
-
-    int totalFrames = m_fps * animationDuration();
-
+    const double runningPercentage = qMin(currentElapsed() / double(animationDuration()), 1.);
+    const int totalFrames = m_fps * animationDuration() / 1000;
     return int(runningPercentage * totalFrames);
 }
 
 void QSvgTinyDocument::setCurrentFrame(int frame)
 {
-    int totalFrames = m_fps * animationDuration();
-    double framePercentage = frame/double(totalFrames);
-    double timeForFrame = animationDuration() * framePercentage; //in S
-    timeForFrame *= 1000; //in ms
-    int timeToAdd = int(timeForFrame - currentElapsed());
+    const int totalFrames = m_fps * animationDuration() / 1000;
+    const int timeForFrame = frame * animationDuration() / totalFrames; //in ms
+    const int timeToAdd = timeForFrame - currentElapsed();
     m_animator->setAnimatorTime(timeToAdd);
 }
 
