@@ -6,6 +6,7 @@
 #####################################################################
 
 qt_internal_add_module(SvgWidgets
+    NO_PRIVATE_MODULE
     SOURCES
         qsvgwidget.cpp qsvgwidget.h
         qtsvgwidgetsglobal.h
