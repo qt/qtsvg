@@ -18,6 +18,8 @@
 #include "qbrush.h"
 #include "qcolor.h"
 #include "qtextformat.h"
+
+#include <QtCore/private/qdataurl_p.h>
 #include "qlist.h"
 #include "qfileinfo.h"
 #include "qfile.h"
@@ -2886,11 +2888,9 @@ static QSvgNode *createImageNode(QSvgNode *parent,
     } filenameType = NotLoaded;
 
     if (filename.startsWith(QLatin1String("data"))) {
-        int idx = filename.lastIndexOf(QLatin1String("base64,"));
-        if (idx != -1) {
-            idx += 7;
-            const QString dataStr = filename.mid(idx);
-            QByteArray data = QByteArray::fromBase64(dataStr.toLatin1());
+        QString mimeType;
+        QByteArray data;
+        if (qDecodeDataUrl(filename, mimeType, data)) {
             image = QImage::fromData(data);
             filenameType = LoadedFromData;
         }
