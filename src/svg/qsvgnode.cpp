@@ -66,7 +66,7 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
             QRectF boundsRect;
             QImage mask = static_cast<QSvgMask*>(maskNode)->createMask(p, states, this, &boundsRect);
             drawWithMask(p, states, mask, boundsRect.toRect());
-        } else if (!qFuzzyCompare(p->opacity(), 1.0) && requiresGroupRendering()) {
+        } else if (!qFuzzyCompare(p->opacity(), qreal(1.0)) && requiresGroupRendering()) {
             QTransform xf = p->transform();
             p->resetTransform();
 
