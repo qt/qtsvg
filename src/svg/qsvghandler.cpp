@@ -615,37 +615,6 @@ public:
         Q_UNUSED(node);
     }
 
-    QCss::AnimationRule animationsForNode(NodePtr node)
-    {
-        QCss::AnimationRule nodeAnimationRule;
-
-        QList<QCss::Declaration> decls = declarationsForNode(node);
-        QString animationName;
-
-        for (const QCss::Declaration &decl : decls) {
-            if (decl.d->property.isEmpty() || decl.d->values.size() != 1)
-                continue;
-
-            if (decl.d->property == QStringLiteral("animation-name")) {
-                QCss::Value val = decl.d->values.first();
-                animationName = val.toString();
-            }
-        }
-
-        for (const QCss::StyleSheet &styleSheet : styleSheets) {
-            QList<QCss::AnimationRule> animationRules = styleSheet.animationRules;
-            for (const QCss::AnimationRule &rule : animationRules) {
-                if (rule.animName == animationName) {
-                    m_animationRules[animationName] = rule;
-                    nodeAnimationRule = rule;
-                    break;
-                }
-            }
-        }
-
-        return nodeAnimationRule;
-    }
-
 private:
     QHash<QString, QCss::AnimationRule> m_animationRules;
 };
@@ -2003,10 +1972,6 @@ static void parseCssAnimations(QSvgNode *node,
 {
     if (attributes.animationName.isEmpty() || attributes.animationDuration.isEmpty())
         return;
-
-    QCss::StyleSelector::NodePtr cssNode;
-    cssNode.ptr = node;
-    QCss::AnimationRule rule = handler->selector()->animationsForNode(cssNode);
 
     bool ok;
     int duration = parseClockValue(attributes.animationDuration, &ok);
