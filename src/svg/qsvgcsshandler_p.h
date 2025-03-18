@@ -36,7 +36,6 @@ private:
 
 private:
     QHash<QString, QCss::AnimationRule> m_animations;
-    QHash<QString, QSvgCssAnimation *> m_cachedAnimations;
 };
 
 

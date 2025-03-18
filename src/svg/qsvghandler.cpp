@@ -1966,27 +1966,78 @@ static void cssStyleLookup(QSvgNode *node,
     cssStyleLookup(node, handler, selector, attributes);
 }
 
+struct QSvgCssAnimationProperties {
+    QList<QStringView> names;
+    QList<int> durations;
+    QList<int> delays;
+    QList<qreal> iterations;
+};
+
+static void parseCssAnimationsProperties(const QSvgAttributes &attributes,
+                                         QSvgCssAnimationProperties &properties)
+{
+    QList<QStringView> animationDuration;
+    QList<QStringView> animationDelay;
+    QList<QStringView> animationIterationCount;
+
+    animationDuration = attributes.animationDuration.split(QLatin1Char(','), Qt::SkipEmptyParts);
+    animationDelay = attributes.animationDelay.split(QLatin1Char(','), Qt::SkipEmptyParts);
+    animationIterationCount = attributes.animationIterationCount.split(QLatin1Char(','), Qt::SkipEmptyParts);
+    properties.names = attributes.animationName.split(QLatin1Char(','), Qt::SkipEmptyParts);
+
+    bool ok;
+    for (QStringView dur : animationDuration) {
+        int duration = parseClockValue(dur, &ok);
+        properties.durations.append(ok ? duration : 0);
+    }
+
+    for (QStringView del : animationDelay) {
+        int delay = parseClockValue(del, &ok);
+        properties.delays.append(ok ? delay : 0);
+    }
+
+    for (QStringView iteration : animationIterationCount) {
+        if (iteration == QLatin1String("infinite")) {
+            properties.iterations.append(-1);
+        } else {
+            qreal count = QSvgUtils::toDouble(iteration, &ok);
+            properties.iterations.append(ok ? qMax(1.0, count) : 0);
+        }
+    }
+}
+
 static void parseCssAnimations(QSvgNode *node,
                                const QSvgAttributes &attributes,
                                QSvgHandler *handler)
 {
-    if (attributes.animationName.isEmpty() || attributes.animationDuration.isEmpty())
+    QSvgCssAnimationProperties cssAnimProps;
+    parseCssAnimationsProperties(attributes, cssAnimProps);
+
+    if (cssAnimProps.names.isEmpty())
         return;
 
-    bool ok;
-    int duration = parseClockValue(attributes.animationDuration, &ok);
-    int delay = parseClockValue(attributes.animationDelay, &ok);
+    for (int i = 0; i < cssAnimProps.names.size(); i++) {
+        QSvgCssAnimation *anim = handler->cssHandler().createAnimation(cssAnimProps.names[i].toString());
+        if (!anim)
+            continue;
 
-    qreal repeatCount = (attributes.animationIterationCount == QLatin1String("infinite")) ? -1 :
-                            qMax(1.0, QSvgUtils::toDouble(attributes.animationIterationCount));
-
-    QSvgCssAnimation *anim = handler->cssHandler().createAnimation(attributes.animationName.toString());
-    if (anim) {
-        anim->setRunningTime(delay, duration);
-        anim->setIterationCount(repeatCount);
-        handler->document()->animator()->appendAnimation(node, anim);
-        handler->setAnimPeriod(delay, delay + duration);
         handler->document()->setAnimated(true);
+        int duration = 0;
+        int delay = 0;
+        if (!cssAnimProps.durations.isEmpty())
+            duration = cssAnimProps.durations.at(i % cssAnimProps.durations.size());
+
+        if (!cssAnimProps.delays.isEmpty())
+            delay = cssAnimProps.delays.at(i % cssAnimProps.delays.size());
+
+        anim->setRunningTime(delay, duration);
+        handler->setAnimPeriod(delay, delay + duration);
+        if (!cssAnimProps.iterations.isEmpty()) {
+            qreal repeatCount = cssAnimProps.iterations.at(i % cssAnimProps.iterations.size());
+            anim->setIterationCount(repeatCount);
+        }
+
+        handler->document()->animator()->appendAnimation(node, anim);
     }
 }
 

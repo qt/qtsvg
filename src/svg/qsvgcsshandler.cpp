@@ -59,8 +59,6 @@ QSvgCssAnimation *QSvgCssHandler::createAnimation(const QString &name)
 {
     if (!m_animations.contains(name))
         return nullptr;
-    if (m_cachedAnimations.contains(name))
-        return m_cachedAnimations[name];
 
     QCss::AnimationRule animationRule = m_animations[name];
     QHash<QString, QSvgAbstractAnimatedProperty*> animatedProperies;
@@ -97,7 +95,7 @@ QSvgCssAnimation *QSvgCssHandler::createAnimation(const QString &name)
 
     for (auto it = animatedProperies.begin(); it != animatedProperies.end(); it++)
         animation->appendProperty(it.value());
-    m_cachedAnimations[name] = animation;
+
     return animation;
 }
 
