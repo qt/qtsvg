@@ -133,7 +133,7 @@ QList<QColor> QSvgAnimatedPropertyColor::colors() const
     return m_colors;
 }
 
-void QSvgAnimatedPropertyColor::interpolate(uint index, qreal t)
+void QSvgAnimatedPropertyColor::interpolate(uint index, qreal t) const
 {
     QColor c1 = m_colors.at(index - 1);
     QColor c2 = m_colors.at(index);
@@ -166,7 +166,7 @@ QList<qreal> QSvgAnimatedPropertyFloat::values() const
     return m_values;
 }
 
-void QSvgAnimatedPropertyFloat::interpolate(uint index, qreal t)
+void QSvgAnimatedPropertyFloat::interpolate(uint index, qreal t) const
 {
     if (index >= (uint)m_keyFrames.size()) {
         qCWarning(lcSvgAnimatedProperty) << "Invalid index for key frames";
@@ -296,7 +296,7 @@ QPointF QSvgAnimatedPropertyTransform::interpolatedScale(uint index, qreal t) co
     return pointInterpolator(s1, s2, t);
 }
 
-void QSvgAnimatedPropertyTransform::interpolate(uint index, qreal t)
+void QSvgAnimatedPropertyTransform::interpolate(uint index, qreal t) const
 {
     if (index >= (uint)m_keyFrames.size()) {
         qCWarning(lcSvgAnimatedProperty) << "Invalid index for key frames";

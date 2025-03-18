@@ -45,12 +45,12 @@ public:
     QStringView propertyName() const;
     Type type() const;
     QVariant interpolatedValue() const;
-    virtual void interpolate(uint index, qreal t) = 0;
+    virtual void interpolate(uint index, qreal t) const = 0;
 
     static QSvgAbstractAnimatedProperty *createAnimatedProperty(const QString &name);
 protected:
     QList<qreal> m_keyFrames;
-    QVariant m_interpolatedValue;
+    mutable QVariant m_interpolatedValue;
 
 private:
     QString m_propertyName;
@@ -66,7 +66,7 @@ public:
     void appendColor(const QColor &color);
     QList<QColor> colors() const;
 
-    void interpolate(uint index, qreal t) override;
+    void interpolate(uint index, qreal t) const override;
 
 private:
     QList<QColor> m_colors;
@@ -81,7 +81,7 @@ public:
     void appendValue(const qreal value);
     QList<qreal> values() const;
 
-    void interpolate(uint index, qreal t) override;
+    void interpolate(uint index, qreal t) const override;
 
 private:
     QList<qreal> m_values;
@@ -112,7 +112,7 @@ public:
     void appendSkew(const QPointF &skew);
     QList<QPointF> skews() const;
 
-    void interpolate(uint index, qreal t) override;
+    void interpolate(uint index, qreal t) const override;
 
     qreal interpolatedRotation(uint index, qreal t) const;
     QPointF interpolatedCenterOfRotation(uint index, qreal t) const;
