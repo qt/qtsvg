@@ -16,12 +16,10 @@
 //
 
 #include "QtCore/qxmlstream.h"
-#include "QtCore/qhash.h"
 #include "QtCore/qstack.h"
 #include <QtCore/QLoggingCategory>
 #include "qsvgstyle_p.h"
 #if QT_CONFIG(cssparser)
-#include "private/qcssparser_p.h"
 #include <QtSvg/private/qsvgcsshandler_p.h>
 #endif
 #include "qsvggraphics_p.h"
@@ -34,17 +32,6 @@ class QSvgNode;
 class QSvgTinyDocument;
 class QSvgHandler;
 class QColor;
-class QSvgStyleSelector;
-
-#ifndef QT_NO_CSSPARSER
-
-struct QSvgCssAttribute
-{
-    QString name;
-    QString value;
-};
-
-#endif
 
 class Q_SVG_EXPORT QSvgHandler
 {
@@ -79,16 +66,11 @@ public:
     void setInStyle(bool b);
     bool inStyle() const;
 
-    QSvgStyleSelector *selector() const;
     QSvgCssHandler &cssHandler();
 #endif
 
     void setAnimPeriod(int start, int end);
     int animationDuration() const;
-
-#ifndef QT_NO_CSSPARSER
-    void parseCSStoXMLAttrs(const QString &css, QList<QSvgCssAttribute> *attributes);
-#endif
 
     inline QPen defaultPen() const
     { return m_defaultPen; }
@@ -141,8 +123,6 @@ private:
     QXmlStreamReader *const xml;
 #ifndef QT_NO_CSSPARSER
     bool m_inStyle;
-    QSvgStyleSelector *m_selector;
-    QCss::Parser m_cssParser;
     QSvgCssHandler m_cssHandler;
 #endif
     void parse();

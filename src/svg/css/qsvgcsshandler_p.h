@@ -20,15 +20,25 @@
 #include <QList>
 #include <QtGui/private/qcssparser_p.h>
 #include <QtSvg/private/qsvgcssanimation_p.h>
+#include <QtCore/private/qxmlstream_p.h>
 
 QT_BEGIN_NAMESPACE
 
+class QSvgStyleSelector;
+class QSvgNode;
 class QSvgCssHandler {
 public:
-    QSvgCssHandler() = default;
+    QSvgCssHandler();
+    ~QSvgCssHandler();
 
     QSvgCssAnimation *createAnimation(const QString &name);
     void collectAnimations(const QCss::StyleSheet &sheet);
+
+    void parseStyleSheet(const QStringView str);
+    void parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarations, QXmlStreamAttributes &attributes) const;
+    void parseCSStoXMLAttrs(const QString &css, QXmlStreamAttributes &attributes) const;
+
+    void styleLookup(QSvgNode *node, QXmlStreamAttributes &attributes) const;
 
 private:
     void updateColorProperty(const QCss::Declaration &decl, QSvgAnimatedPropertyColor *property);
@@ -36,6 +46,7 @@ private:
 
 private:
     QHash<QString, QCss::AnimationRule> m_animations;
+    QSvgStyleSelector *m_selector = nullptr;
 };
 
 

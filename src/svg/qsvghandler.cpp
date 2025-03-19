@@ -208,7 +208,7 @@ struct QSvgAttributes
 
 
 #ifndef QT_NO_CSSPARSER
-    QList<QSvgCssAttribute> m_cssAttributes;
+    QXmlStreamAttributes m_cssAttributes;
 #endif
 };
 
@@ -361,11 +361,11 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
 #ifndef QT_NO_CSSPARSER
     QStringView style = xmlAttributes.value(QLatin1String("style"));
     if (!style.isEmpty()) {
-        handler->parseCSStoXMLAttrs(style.toString(), &m_cssAttributes);
+        handler->cssHandler().parseCSStoXMLAttrs(style.toString(), m_cssAttributes);
         for (int j = 0; j < m_cssAttributes.size(); ++j) {
-            const QSvgCssAttribute &attribute = m_cssAttributes.at(j);
-            QStringView name = attribute.name;
-            QStringView value = attribute.value;
+            const QXmlStreamAttribute &attribute = m_cssAttributes.at(j);
+            QStringView name = attribute.qualifiedName();
+            QStringView value = attribute.value();
             if (name.isEmpty())
                 continue;
 
@@ -482,144 +482,6 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
     Q_UNUSED(handler);
 #endif // QT_NO_CSSPARSER
 }
-
-#ifndef QT_NO_CSSPARSER
-
-class QSvgStyleSelector : public QCss::StyleSelector
-{
-public:
-    QSvgStyleSelector()
-    {
-        nameCaseSensitivity = Qt::CaseInsensitive;
-    }
-    virtual ~QSvgStyleSelector()
-    {
-    }
-
-    inline QString nodeToName(QSvgNode *node) const
-    {
-        return node->typeName();
-    }
-
-    inline QSvgNode *svgNode(NodePtr node) const
-    {
-        return (QSvgNode*)node.ptr;
-    }
-    inline QSvgStructureNode *nodeToStructure(QSvgNode *n) const
-    {
-        if (n &&
-            (n->type() == QSvgNode::Doc ||
-             n->type() == QSvgNode::Group ||
-             n->type() == QSvgNode::Defs ||
-             n->type() == QSvgNode::Switch)) {
-            return (QSvgStructureNode*)n;
-        }
-        return 0;
-    }
-
-    inline QSvgStructureNode *svgStructure(NodePtr node) const
-    {
-        QSvgNode *n = svgNode(node);
-        QSvgStructureNode *st = nodeToStructure(n);
-        return st;
-    }
-
-    bool nodeNameEquals(NodePtr node, const QString& nodeName) const override
-    {
-        QSvgNode *n = svgNode(node);
-        if (!n)
-            return false;
-        QString name = nodeToName(n);
-        return QString::compare(name, nodeName, Qt::CaseInsensitive) == 0;
-    }
-    QString attributeValue(NodePtr node, const QCss::AttributeSelector &asel) const override
-    {
-        const QString &name = asel.name;
-        QSvgNode *n = svgNode(node);
-        if ((!n->nodeId().isEmpty() && (name == QLatin1String("id") ||
-                                        name == QLatin1String("xml:id"))))
-            return n->nodeId();
-        if (!n->xmlClass().isEmpty() && name == QLatin1String("class"))
-            return n->xmlClass();
-        return QString();
-    }
-    bool hasAttributes(NodePtr node) const override
-    {
-        QSvgNode *n = svgNode(node);
-        return (n &&
-                (!n->nodeId().isEmpty() || !n->xmlClass().isEmpty()));
-    }
-
-    QStringList nodeIds(NodePtr node) const override
-    {
-        QSvgNode *n = svgNode(node);
-        QString nid;
-        if (n)
-            nid = n->nodeId();
-        QStringList lst; lst.append(nid);
-        return lst;
-    }
-
-    QStringList nodeNames(NodePtr node) const override
-    {
-        QSvgNode *n = svgNode(node);
-        if (n)
-           return QStringList(nodeToName(n));
-        return QStringList();
-    }
-
-    bool isNullNode(NodePtr node) const override
-    {
-        return !node.ptr;
-    }
-
-    NodePtr parentNode(NodePtr node) const override
-    {
-        QSvgNode *n = svgNode(node);
-        NodePtr newNode;
-        newNode.ptr = 0;
-        newNode.id = 0;
-        if (n) {
-            QSvgNode *svgParent = n->parent();
-            if (svgParent) {
-                newNode.ptr = svgParent;
-            }
-        }
-        return newNode;
-    }
-    NodePtr previousSiblingNode(NodePtr node) const override
-    {
-        NodePtr newNode;
-        newNode.ptr = 0;
-        newNode.id = 0;
-
-        QSvgNode *n = svgNode(node);
-        if (!n)
-            return newNode;
-        QSvgStructureNode *svgParent = nodeToStructure(n->parent());
-
-        if (svgParent) {
-            newNode.ptr = svgParent->previousSiblingNode(n);
-        }
-        return newNode;
-    }
-    NodePtr duplicateNode(NodePtr node) const override
-    {
-        NodePtr n;
-        n.ptr = node.ptr;
-        n.id  = node.id;
-        return n;
-    }
-    void freeNode(NodePtr node) const override
-    {
-        Q_UNUSED(node);
-    }
-
-private:
-    QHash<QString, QCss::AnimationRule> m_animationRules;
-};
-
-#endif // QT_NO_CSSPARSER
 
 static QList<qreal> parseNumbersList(const QChar *&str)
 {
@@ -1827,143 +1689,19 @@ static int parseClockValue(QStringView str, bool *ok)
 
 #ifndef QT_NO_CSSPARSER
 
-static void parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarations,
-                               QXmlStreamAttributes &attributes)
-{
-    for (int i = 0; i < declarations.size(); ++i) {
-        const QCss::Declaration &decl = declarations.at(i);
-        if (decl.d->property.isEmpty())
-            continue;
-        QCss::Value val = decl.d->values.first();
-        QString valueStr;
-        const int valCount = decl.d->values.size();
-        if (valCount != 1) {
-            for (int i = 0; i < valCount; ++i) {
-                valueStr += decl.d->values[i].toString();
-                if (i + 1 < valCount)
-                    valueStr += QLatin1Char(',');
-            }
-        } else {
-            valueStr = val.toString();
-        }
-        if (val.type == QCss::Value::Uri) {
-            valueStr.prepend(QLatin1String("url("));
-            valueStr.append(QLatin1Char(')'));
-        } else if (val.type == QCss::Value::Function) {
-            QStringList lst = val.variant.toStringList();
-            valueStr.append(lst.at(0));
-            valueStr.append(QLatin1Char('('));
-            for (int i = 1; i < lst.size(); ++i) {
-                valueStr.append(lst.at(i));
-                if ((i +1) < lst.size())
-                    valueStr.append(QLatin1Char(','));
-            }
-            valueStr.append(QLatin1Char(')'));
-        } else if (val.type == QCss::Value::KnownIdentifier) {
-            switch (val.variant.toInt()) {
-            case QCss::Value_None:
-                valueStr = QLatin1String("none");
-                break;
-            default:
-                break;
-            }
-        }
-
-        attributes.append(QString(), decl.d->property, valueStr);
-    }
-}
-
-void QSvgHandler::parseCSStoXMLAttrs(const QString &css, QList<QSvgCssAttribute> *attributes)
-{
-    // preprocess (for unicode escapes), tokenize and remove comments
-    m_cssParser.init(css);
-    QString key;
-
-    attributes->reserve(10);
-
-    while (m_cssParser.hasNext()) {
-        m_cssParser.skipSpace();
-
-        if (!m_cssParser.hasNext())
-            break;
-        m_cssParser.next();
-
-        QString name;
-        if (m_cssParser.hasEscapeSequences) {
-            key = m_cssParser.lexem();
-            name = key;
-        } else {
-            const QCss::Symbol &sym = m_cssParser.symbol();
-            name = sym.text.mid(sym.start, sym.len);
-        }
-
-        m_cssParser.skipSpace();
-        if (!m_cssParser.test(QCss::COLON))
-            break;
-
-        m_cssParser.skipSpace();
-        if (!m_cssParser.hasNext())
-            break;
-
-        QSvgCssAttribute attribute;
-        attribute.name = name;
-
-        const int firstSymbol = m_cssParser.index;
-        int symbolCount = 0;
-        do {
-            m_cssParser.next();
-            ++symbolCount;
-        } while (m_cssParser.hasNext() && !m_cssParser.test(QCss::SEMICOLON));
-
-        bool canExtractValueByRef = !m_cssParser.hasEscapeSequences;
-        if (canExtractValueByRef) {
-            int len = m_cssParser.symbols.at(firstSymbol).len;
-            for (int i = firstSymbol + 1; i < firstSymbol + symbolCount; ++i) {
-                len += m_cssParser.symbols.at(i).len;
-
-                if (m_cssParser.symbols.at(i - 1).start + m_cssParser.symbols.at(i - 1).len
-                        != m_cssParser.symbols.at(i).start) {
-                    canExtractValueByRef = false;
-                    break;
-                }
-            }
-            if (canExtractValueByRef) {
-                const QCss::Symbol &sym = m_cssParser.symbols.at(firstSymbol);
-                attribute.value = sym.text.mid(sym.start, len);
-            }
-        }
-        if (!canExtractValueByRef) {
-            QString value;
-            for (int i = firstSymbol; i < m_cssParser.index - 1; ++i)
-                value += m_cssParser.symbols.at(i).lexem();
-            attribute.value = value;
-        }
-
-        attributes->append(attribute);
-
-        m_cssParser.skipSpace();
-    }
-}
-
 static void cssStyleLookup(QSvgNode *node,
                            QSvgHandler *handler,
-                           QSvgStyleSelector *selector,
                            QXmlStreamAttributes &attributes)
 {
-    QCss::StyleSelector::NodePtr cssNode;
-    cssNode.ptr = node;
-    QList<QCss::Declaration> decls = selector->declarationsForNode(cssNode);
-
-    parseCSStoXMLAttrs(decls, attributes);
+    handler->cssHandler().styleLookup(node, attributes);
     parseStyle(node, attributes, handler);
 }
 
 static void cssStyleLookup(QSvgNode *node,
-                           QSvgHandler *handler,
-                           QSvgStyleSelector *selector)
+                           QSvgHandler *handler)
 {
     QXmlStreamAttributes attributes;
-    cssStyleLookup(node, handler, selector, attributes);
+    cssStyleLookup(node, handler, attributes);
 }
 
 struct QSvgCssAnimationProperties {
@@ -3945,7 +3683,7 @@ static bool parseStopNode(QSvgStyleProperty *parent,
     QXmlStreamAttributes xmlAttr = attributes;
 
 #ifndef QT_NO_CSSPARSER
-    cssStyleLookup(&dummy, handler, handler->selector(), xmlAttr);
+    handler->cssHandler().styleLookup(&dummy, xmlAttr);
 #endif
     parseStyle(&dummy, xmlAttr, handler);
 
@@ -4670,7 +4408,6 @@ void QSvgHandler::parse()
 {
     xml->setNamespaceProcessing(false);
 #ifndef QT_NO_CSSPARSER
-    m_selector = new QSvgStyleSelector;
     m_inStyle = false;
 #endif
     bool done = false;
@@ -4792,7 +4529,7 @@ bool QSvgHandler::startElement(const QString &localName,
             if (node) {
                 parseCoreNode(node, attributes);
 #ifndef QT_NO_CSSPARSER
-                cssStyleLookup(node, this, m_selector);
+                cssStyleLookup(node, this);
 #endif
                 parseStyle(node, attributes, this);
                 if (node->type() == QSvgNode::Filter)
@@ -4848,7 +4585,7 @@ bool QSvgHandler::startElement(const QString &localName,
             if (node) {
                 parseCoreNode(node, attributes);
 #ifndef QT_NO_CSSPARSER
-                cssStyleLookup(node, this, m_selector);
+                cssStyleLookup(node, this);
 #endif
                 parseStyle(node, attributes, this);
                 if (node->type() == QSvgNode::Text || node->type() == QSvgNode::Textarea) {
@@ -5042,11 +4779,7 @@ bool QSvgHandler::characters(const QStringView str)
 {
 #ifndef QT_NO_CSSPARSER
     if (m_inStyle) {
-        QString css = str.toString();
-        QCss::StyleSheet sheet;
-        QCss::Parser(css).parse(&sheet);
-        m_selector->styleSheets.append(sheet);
-        m_cssHandler.collectAnimations(sheet);
+        m_cssHandler.parseStyleSheet(str);
         return true;
     }
 #endif
@@ -5126,11 +4859,6 @@ bool QSvgHandler::inStyle() const
     return m_inStyle;
 }
 
-QSvgStyleSelector * QSvgHandler::selector() const
-{
-    return m_selector;
-}
-
 QSvgCssHandler &QSvgHandler::cssHandler()
 {
     return m_cssHandler;
@@ -5171,11 +4899,7 @@ bool QSvgHandler::processingInstruction(const QString &target, const QString &da
                 }
                 QByteArray cssData = file.readAll();
                 QString css = QString::fromUtf8(cssData);
-
-                QCss::StyleSheet sheet;
-                QCss::Parser(css).parse(&sheet);
-                m_selector->styleSheets.append(sheet);
-                m_cssHandler.collectAnimations(sheet);
+                m_cssHandler.parseStyleSheet(css);
             }
 
         }
@@ -5198,11 +4922,6 @@ int QSvgHandler::animationDuration() const
 
 QSvgHandler::~QSvgHandler()
 {
-#ifndef QT_NO_CSSPARSER
-    delete m_selector;
-    m_selector = 0;
-#endif
-
     if(m_ownsReader)
         delete xml;
 }
