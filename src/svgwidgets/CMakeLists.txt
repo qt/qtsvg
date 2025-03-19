@@ -22,10 +22,6 @@ qt_internal_add_module(SvgWidgets
         Qt::Gui
         Qt::Svg
         Qt::Widgets
-    PRIVATE_MODULE_INTERFACE
-        Qt::CorePrivate
-        Qt::GuiPrivate
-        Qt::WidgetsPrivate
 )
 
 qt_internal_extend_target(SvgWidgets CONDITION QT_FEATURE_graphicsview
