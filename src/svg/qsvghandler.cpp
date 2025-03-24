@@ -160,6 +160,7 @@ static inline QString someId(const QXmlStreamAttributes &attributes)
 struct QSvgAttributes
 {
     QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHandler *handler);
+    void setAttributes(const QXmlStreamAttributes &attributes, QSvgHandler *handler);
 
     QString id;
 
@@ -205,17 +206,17 @@ struct QSvgAttributes
     QStringView animationTimingFunction;
     QStringView animationFillMode;
     QStringView animation;
-
-
-#ifndef QT_NO_CSSPARSER
-    QXmlStreamAttributes m_cssAttributes;
-#endif
 };
 
 QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHandler *handler)
 {
-    for (int i = 0; i < xmlAttributes.size(); ++i) {
-        const QXmlStreamAttribute &attribute = xmlAttributes.at(i);
+    setAttributes(xmlAttributes, handler);
+}
+
+void QSvgAttributes::setAttributes(const QXmlStreamAttributes &attributes, QSvgHandler *handler)
+{
+    for (int i = 0; i < attributes.size(); ++i) {
+        const QXmlStreamAttribute &attribute = attributes.at(i);
         QStringView name = attribute.qualifiedName();
         if (name.isEmpty())
             continue;
@@ -355,132 +356,6 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
             break;
         }
     }
-
-    // If a style attribute is present, let its attribute settings override the plain attribute
-    // values. The spec seems to indicate that, and it is common behavior in svg renderers.
-#ifndef QT_NO_CSSPARSER
-    QStringView style = xmlAttributes.value(QLatin1String("style"));
-    if (!style.isEmpty()) {
-        handler->cssHandler().parseCSStoXMLAttrs(style.toString(), m_cssAttributes);
-        for (int j = 0; j < m_cssAttributes.size(); ++j) {
-            const QXmlStreamAttribute &attribute = m_cssAttributes.at(j);
-            QStringView name = attribute.qualifiedName();
-            QStringView value = attribute.value();
-            if (name.isEmpty())
-                continue;
-
-            switch (name.at(0).unicode()) {
-
-            case 'c':
-                if (name == QLatin1String("color"))
-                    color = value;
-                else if (name == QLatin1String("color-opacity"))
-                    colorOpacity = value;
-                else if (name == QLatin1String("comp-op"))
-                    compOp = value;
-                break;
-
-            case 'd':
-                if (name == QLatin1String("display"))
-                    display = value;
-                break;
-
-            case 'f':
-                if (name == QLatin1String("fill"))
-                    fill = value;
-                else if (name == QLatin1String("fill-rule"))
-                    fillRule = value;
-                else if (name == QLatin1String("fill-opacity"))
-                    fillOpacity = value;
-                else if (name == QLatin1String("font-family"))
-                    fontFamily = value;
-                else if (name == QLatin1String("font-size"))
-                    fontSize = value;
-                else if (name == QLatin1String("font-style"))
-                    fontStyle = value;
-                else if (name == QLatin1String("font-weight"))
-                    fontWeight = value;
-                else if (name == QLatin1String("font-variant"))
-                    fontVariant = value;
-                else if (name == QLatin1String("filter") &&
-                         !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-                    filter = value;
-                break;
-
-            case 'i':
-                if (name == QLatin1String("image-rendering"))
-                    imageRendering = value;
-                break;
-
-            case 'm':
-                if (name == QLatin1String("mask") &&
-                    !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-                    mask = value;
-                if (name == QLatin1String("marker-start") &&
-                    !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-                    markerStart = value;
-                if (name == QLatin1String("marker-mid") &&
-                    !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-                    markerMid = value;
-                if (name == QLatin1String("marker-end") &&
-                    !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-                    markerEnd = value;
-                break;
-
-            case 'o':
-                if (name == QLatin1String("opacity"))
-                    opacity = value;
-                else if (name == QLatin1String("offset"))
-                    offset = value;
-                break;
-
-            case 's':
-                if (name.size() > 5 && name.mid(1, 5) == QLatin1String("troke")) {
-                    QStringView strokeRef = name.mid(6, name.size() - 6);
-                    if (strokeRef.isEmpty())
-                        stroke = value;
-                    else if (strokeRef == QLatin1String("-dasharray"))
-                        strokeDashArray = value;
-                    else if (strokeRef == QLatin1String("-dashoffset"))
-                        strokeDashOffset = value;
-                    else if (strokeRef == QLatin1String("-linecap"))
-                        strokeLineCap = value;
-                    else if (strokeRef == QLatin1String("-linejoin"))
-                        strokeLineJoin = value;
-                    else if (strokeRef == QLatin1String("-miterlimit"))
-                        strokeMiterLimit = value;
-                    else if (strokeRef == QLatin1String("-opacity"))
-                        strokeOpacity = value;
-                    else if (strokeRef == QLatin1String("-width"))
-                        strokeWidth = value;
-                } else if (name == QLatin1String("stop-color"))
-                    stopColor = value;
-                else if (name == QLatin1String("stop-opacity"))
-                    stopOpacity = value;
-                break;
-
-            case 't':
-                if (name == QLatin1String("text-anchor"))
-                    textAnchor = value;
-                else if (name == QLatin1String("transform"))
-                    transform = value;
-                break;
-
-            case 'v':
-                if (name == QLatin1String("vector-effect"))
-                    vectorEffect = value;
-                else if (name == QLatin1String("visibility"))
-                    visibility = value;
-                break;
-
-            default:
-                break;
-            }
-        }
-    }
-#else
-    Q_UNUSED(handler);
-#endif // QT_NO_CSSPARSER
 }
 
 static QList<qreal> parseNumbersList(const QChar *&str)
@@ -1660,11 +1535,7 @@ static bool parsePathDataFast(QStringView dataStr, QPainterPath &path, bool limi
 
 static bool parseStyle(QSvgNode *node,
                        const QXmlStreamAttributes &attributes,
-                       QSvgHandler *);
-
-static bool parseStyle(QSvgNode *node,
-                       const QSvgAttributes &attributes,
-                       QSvgHandler *);
+                       QSvgHandler *handler);
 
 static int parseClockValue(QStringView str, bool *ok)
 {
@@ -1688,21 +1559,6 @@ static int parseClockValue(QStringView str, bool *ok)
 }
 
 #ifndef QT_NO_CSSPARSER
-
-static void cssStyleLookup(QSvgNode *node,
-                           QSvgHandler *handler,
-                           QXmlStreamAttributes &attributes)
-{
-    handler->cssHandler().styleLookup(node, attributes);
-    parseStyle(node, attributes, handler);
-}
-
-static void cssStyleLookup(QSvgNode *node,
-                           QSvgHandler *handler)
-{
-    QXmlStreamAttributes attributes;
-    cssStyleLookup(node, handler, attributes);
-}
 
 struct QSvgCssAnimationProperties {
     QList<QStringView> names;
@@ -2080,60 +1936,43 @@ static void parseRenderingHints(QSvgNode *node,
 }
 
 static bool parseStyle(QSvgNode *node,
-                       const QSvgAttributes &attributes,
+                       const QXmlStreamAttributes &attributes,
                        QSvgHandler *handler)
 {
-    parseColor(node, attributes, handler);
-    parseBrush(node, attributes, handler);
-    parsePen(node, attributes, handler);
-    parseFont(node, attributes, handler);
-    parseTransform(node, attributes, handler);
-    parseVisibility(node, attributes, handler);
-    parseOpacity(node, attributes, handler);
-    parseCompOp(node, attributes, handler);
-    parseRenderingHints(node, attributes, handler);
-    parseOthers(node, attributes, handler);
-    parseExtendedAttributes(node, attributes, handler);
+    // Get style in the following order :
+    // 1) values from svg attributes
+    // 2) CSS style
+    // 3) values defined in the svg "style" property
+    QSvgAttributes svgAttributes(attributes, handler);
+
 #ifndef QT_NO_CSSPARSER
+    QXmlStreamAttributes cssAttributes;
+    handler->cssHandler().styleLookup(node, cssAttributes);
+    svgAttributes.setAttributes(cssAttributes, handler);
+
+    QXmlStreamAttributes styleCssAttributes;
+    QStringView style = attributes.value(QLatin1String("style"));
+    if (!style.isEmpty())
+        handler->cssHandler().parseCSStoXMLAttrs(style.toString(), styleCssAttributes);
+    svgAttributes.setAttributes(styleCssAttributes, handler);
+
     if (!handler->options().testFlag(QtSvg::DisableCSSAnimations))
-        parseCssAnimations(node, attributes, handler);
+        parseCssAnimations(node, svgAttributes, handler);
 #endif
 
-#if 0
-    value = attributes.value("audio-level");
+    parseColor(node, svgAttributes, handler);
+    parseBrush(node, svgAttributes, handler);
+    parsePen(node, svgAttributes, handler);
+    parseFont(node, svgAttributes, handler);
+    parseTransform(node, svgAttributes, handler);
+    parseVisibility(node, svgAttributes, handler);
+    parseOpacity(node, svgAttributes, handler);
+    parseCompOp(node, svgAttributes, handler);
+    parseRenderingHints(node, svgAttributes, handler);
+    parseOthers(node, svgAttributes, handler);
+    parseExtendedAttributes(node, svgAttributes, handler);
 
-    value = attributes.value("color-rendering");
-
-    value = attributes.value("display-align");
-
-    value = attributes.value("image-rendering");
-
-    value = attributes.value("line-increment");
-
-    value = attributes.value("pointer-events");
-
-    value = attributes.value("shape-rendering");
-
-    value = attributes.value("solid-color");
-
-    value = attributes.value("solid-opacity");
-
-    value = attributes.value("text-rendering");
-
-    value = attributes.value("vector-effect");
-
-    value = attributes.value("viewport-fill");
-
-    value = attributes.value("viewport-fill-opacity");
-#endif
     return true;
-}
-
-static bool parseStyle(QSvgNode *node,
-                       const QXmlStreamAttributes &attrs,
-                       QSvgHandler *handler)
-{
-    return parseStyle(node, QSvgAttributes(attrs, handler), handler);
 }
 
 static bool parseAnchorNode(QSvgNode *parent,
@@ -3681,10 +3520,6 @@ static bool parseStopNode(QSvgStyleProperty *parent,
     dummy.setXmlClass(xmlClassStr);
 
     QXmlStreamAttributes xmlAttr = attributes;
-
-#ifndef QT_NO_CSSPARSER
-    handler->cssHandler().styleLookup(&dummy, xmlAttr);
-#endif
     parseStyle(&dummy, xmlAttr, handler);
 
     QSvgAttributes attrs(xmlAttr, handler);
@@ -4528,9 +4363,6 @@ bool QSvgHandler::startElement(const QString &localName,
 
             if (node) {
                 parseCoreNode(node, attributes);
-#ifndef QT_NO_CSSPARSER
-                cssStyleLookup(node, this);
-#endif
                 parseStyle(node, attributes, this);
                 if (node->type() == QSvgNode::Filter)
                     m_toBeResolved.append(node);
@@ -4584,9 +4416,6 @@ bool QSvgHandler::startElement(const QString &localName,
 
             if (node) {
                 parseCoreNode(node, attributes);
-#ifndef QT_NO_CSSPARSER
-                cssStyleLookup(node, this);
-#endif
                 parseStyle(node, attributes, this);
                 if (node->type() == QSvgNode::Text || node->type() == QSvgNode::Textarea) {
                     static_cast<QSvgText *>(node)->setWhitespaceMode(m_whitespaceMode.top());
