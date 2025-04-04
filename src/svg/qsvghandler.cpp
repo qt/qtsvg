@@ -3523,12 +3523,21 @@ static bool parseStopNode(QSvgStyleProperty *parent,
     dummy.setNodeId(nodeIdStr);
     dummy.setXmlClass(xmlClassStr);
 
-    QXmlStreamAttributes xmlAttr = attributes;
-    parseStyle(&dummy, xmlAttr, handler);
+    QSvgAttributes attrs(attributes, handler);
 
-    QSvgAttributes attrs(xmlAttr, handler);
+#ifndef QT_NO_CSSPARSER
+    QXmlStreamAttributes cssAttributes;
+    handler->cssHandler().styleLookup(&dummy, cssAttributes);
+    attrs.setAttributes(cssAttributes, handler);
 
-    QSvgGradientStyle *style =
+    QXmlStreamAttributes styleCssAttributes;
+    QStringView style = attributes.value(QLatin1String("style"));
+    if (!style.isEmpty())
+        handler->cssHandler().parseCSStoXMLAttrs(style.toString(), styleCssAttributes);
+    attrs.setAttributes(styleCssAttributes, handler);
+#endif
+
+    QSvgGradientStyle *gradientStyle =
         static_cast<QSvgGradientStyle*>(parent);
     QStringView colorStr    = attrs.stopColor;
     QColor color;
@@ -3544,11 +3553,11 @@ static bool parseStopNode(QSvgStyleProperty *parent,
 
     constructColor(colorStr, attrs.stopOpacity, color, handler);
 
-    QGradient *grad = style->qgradient();
+    QGradient *grad = gradientStyle->qgradient();
 
     offset = qMin(qreal(1), qMax(qreal(0), offset)); // Clamp to range [0, 1]
     QGradientStops stops;
-    if (style->gradientStopsSet()) {
+    if (gradientStyle->gradientStopsSet()) {
         stops = grad->stops();
         // If the stop offset equals the one previously added, add an epsilon to make it greater.
         if (offset <= stops.back().first)
@@ -3565,7 +3574,7 @@ static bool parseStopNode(QSvgStyleProperty *parent,
     }
 
     grad->setColorAt(offset, color);
-    style->setGradientStopsSet(true);
+    gradientStyle->setGradientStopsSet(true);
     return true;
 }
 
