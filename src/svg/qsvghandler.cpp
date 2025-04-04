@@ -2402,6 +2402,17 @@ static bool parseBaseAnimate(QSvgNode *parent,
     return true;
 }
 
+static void generateKeyFrames(QList<qreal> &keyFrames, uint count)
+{
+    if (count < 2)
+        return;
+
+    qreal spacing = 1.0f / (count - 1);
+    for (uint i = 0; i < count; i++) {
+        keyFrames.append(i * spacing);
+    }
+}
+
 static QSvgNode *createAnimateColorNode(QSvgNode *parent,
                                         const QXmlStreamAttributes &attributes,
                                         QSvgHandler *handler)
@@ -2439,7 +2450,10 @@ static QSvgNode *createAnimateColorNode(QSvgNode *parent,
         return nullptr;
 
     prop->setColors(colors);
-    prop->setKeyFrames({0, 1});
+
+    QList<qreal> keyFrames;
+    generateKeyFrames(keyFrames, colors.size());
+    prop->setKeyFrames(keyFrames);
 
     QSvgAnimateColor *anim = new QSvgAnimateColor(parent);
     anim->appendProperty(prop);
@@ -2520,7 +2534,6 @@ static QSvgNode *createAnimateTransformNode(QSvgNode *parent,
     QList<qreal> rotations;
     QList<QPointF> coRotations;
     QList<QPointF> skews;
-    QList<qreal> keyFrames;
 
     for (int i = 0; i < vals.size(); i+=3) {
         if (typeStr == QLatin1String("translate")) {
@@ -2550,16 +2563,7 @@ static QSvgNode *createAnimateTransformNode(QSvgNode *parent,
     prop->setCentersOfRotation(coRotations);
     prop->setSkews(skews);
 
-    auto generateKeyFrames = [](QList<qreal> &keyFrames, uint count)
-    {
-        if (count < 2)
-            return;
-
-        qreal spacing = 1.0f / (count - 1);
-        for (uint i = 0; i < count; i++) {
-            keyFrames.append(i * spacing);
-        }
-    };
+    QList<qreal> keyFrames;
     generateKeyFrames(keyFrames, vals.size() / 3);
     prop->setKeyFrames(keyFrames);
 

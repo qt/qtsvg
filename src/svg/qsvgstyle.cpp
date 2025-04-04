@@ -732,6 +732,7 @@ void QSvgAnimatedStyle::applyPropertyAnimation(QPainter *p, QSvgAbstractAnimated
         QColor penColor = penBrush.color();
         QColor animatedColor = property->interpolatedValue().value<QColor>();
         penBrush.setColor(replace == true ? animatedColor : sumColor(penColor, animatedColor));
+        penBrush.setStyle(Qt::SolidPattern);
         pen.setBrush(penBrush);
         p->setPen(pen);
     } else if (property->propertyName() == QStringLiteral("transform")) {
