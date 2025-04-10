@@ -90,42 +90,31 @@ private:
 class Q_SVG_EXPORT QSvgAnimatedPropertyTransform : public QSvgAbstractAnimatedProperty
 {
 public:
+    struct TransformComponent {
+        enum Type {
+            Translate,
+            Scale,
+            Rotate,
+            Skew,
+            Matrix
+        };
+        Type type;
+        QVarLengthArray<qreal, 16> values;
+    };
+
+public:
     QSvgAnimatedPropertyTransform(const QString &name);
 
-    void setTranslations(const QList<QPointF> &translations);
-    void appendTranslation(const QPointF &translation);
-    QList<QPointF> translations() const;
-
-    void setScales(const QList<QPointF> &scales);
-    void appendScale(const QPointF &scale);
-    QList<QPointF> scales() const;
-
-    void setRotations(const QList<qreal> &rotations);
-    void appendRotation(qreal rotation);
-    QList<qreal> rotations() const;
-
-    void setCentersOfRotation(const QList<QPointF> &centersOfRotations);
-    void appendCenterOfRotation(const QPointF &centerOfRotation);
-    QList<QPointF> centersOfRotations() const;
-
-    void setSkews(const QList<QPointF> &skews);
-    void appendSkew(const QPointF &skew);
-    QList<QPointF> skews() const;
+    void setTransformCount(quint32 count);
+    quint32 transformCount() const;
+    void appendComponents(const QList<TransformComponent> &components);
+    QList<TransformComponent> components() const;
 
     void interpolate(uint index, qreal t) const override;
 
-    qreal interpolatedRotation(uint index, qreal t) const;
-    QPointF interpolatedCenterOfRotation(uint index, qreal t) const;
-    QPointF interpolatedScale(uint index, qreal t) const;
-    QPointF interpolatedTranslation(uint index, qreal t) const;
-    QPointF interpolatedSkew(uint index, qreal t) const;
-
 private:
-    QList<QPointF> m_translations;
-    QList<QPointF> m_scales;
-    QList<qreal> m_rotations;
-    QList<QPointF> m_centersOfRotation;
-    QList<QPointF> m_skews;
+    QList<TransformComponent> m_components;
+    quint32 m_transformCount;
 };
 
 QT_END_NAMESPACE

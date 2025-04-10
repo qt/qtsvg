@@ -41,10 +41,6 @@ public:
     void styleLookup(QSvgNode *node, QXmlStreamAttributes &attributes) const;
 
 private:
-    void updateColorProperty(const QCss::Declaration &decl, QSvgAnimatedPropertyColor *property);
-    void updateTransformProperty(const QCss::Declaration &decl, QSvgAnimatedPropertyTransform *property);
-
-private:
     QHash<QString, QCss::AnimationRule> m_animations;
     QSvgStyleSelector *m_selector = nullptr;
 };

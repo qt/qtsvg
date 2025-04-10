@@ -2157,27 +2157,35 @@ static QSvgNode *createAnimateTransformNode(QSvgNode *parent,
     if (vals.size() % 3 != 0)
         return nullptr;
 
-    QList<QPointF> translations;
-    QList<QPointF> scales;
-    QList<qreal> rotations;
-    QList<QPointF> coRotations;
-    QList<QPointF> skews;
 
+    QList<QSvgAnimatedPropertyTransform::TransformComponent> components;
     for (int i = 0; i < vals.size(); i+=3) {
+        QSvgAnimatedPropertyTransform::TransformComponent component;
         if (typeStr == QLatin1String("translate")) {
-            translations.append(QPointF(vals.at(i), vals.at(i + 1)));
+            component.type = QSvgAnimatedPropertyTransform::TransformComponent::Translate;
+            component.values.append(vals.at(i));
+            component.values.append(vals.at(i + 1));
         } else if (typeStr == QLatin1String("scale")) {
-            scales.append(QPointF(vals.at(i), vals.at(i + 1)));
+            component.type = QSvgAnimatedPropertyTransform::TransformComponent::Scale;
+            component.values.append(vals.at(i));
+            component.values.append(vals.at(i + 1));
         } else if (typeStr == QLatin1String("rotate")) {
-            rotations.append(vals.at(i));
-            coRotations.append(QPointF(vals.at(i + 1), vals.at(i + 2)));
+            component.type = QSvgAnimatedPropertyTransform::TransformComponent::Rotate;
+            component.values.append(vals.at(i));
+            component.values.append(vals.at(i + 1));
+            component.values.append(vals.at(i + 2));
         } else if (typeStr == QLatin1String("skewX")) {
-            skews.append(QPointF(vals.at(i), 0));
+            component.type = QSvgAnimatedPropertyTransform::TransformComponent::Skew;
+            component.values.append(vals.at(i));
+            component.values.append(0);
         } else if (typeStr == QLatin1String("skewY")) {
-            skews.append(QPointF(0, vals.at(i)));
+            component.type = QSvgAnimatedPropertyTransform::TransformComponent::Skew;
+            component.values.append(0);
+            component.values.append(vals.at(i));
         } else {
             return nullptr;
         }
+        components.append(component);
     }
 
     QSvgAnimatedPropertyTransform *prop = static_cast<QSvgAnimatedPropertyTransform *>
@@ -2185,12 +2193,9 @@ static QSvgNode *createAnimateTransformNode(QSvgNode *parent,
     if (!prop)
         return nullptr;
 
-    prop->setTranslations(translations);
-    prop->setScales(scales);
-    prop->setRotations(rotations);
-    prop->setCentersOfRotation(coRotations);
-    prop->setSkews(skews);
-
+    prop->appendComponents(components);
+    // <animateTransform> always has one component per key frame
+    prop->setTransformCount(1);
     QList<qreal> keyFrames;
     generateKeyFrames(keyFrames, vals.size() / 3);
     prop->setKeyFrames(keyFrames);

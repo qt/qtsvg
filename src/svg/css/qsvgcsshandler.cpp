@@ -10,8 +10,10 @@
 
 QT_BEGIN_NAMESPACE
 
+namespace {
+
 // Parses the angle from a string and convert it to degrees.
-static qreal qsvg_parseAngle(QStringView str, bool *ok = nullptr)
+qreal qsvg_parseAngle(QStringView str, bool *ok = nullptr)
 {
     QStringView numStr = str.trimmed();
 
@@ -43,6 +45,191 @@ static qreal qsvg_parseAngle(QStringView str, bool *ok = nullptr)
     return QSvgUtils::toDouble(numStr, ok) * unitFactor;
 }
 
+struct CssKeyFrameValue{
+    qreal keyFrame;
+    QList<QCss::Value> values;
+};
+
+bool fillColorProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimatedPropertyColor *prop)
+{
+    for (CssKeyFrameValue keyFrame : keyFrames) {
+        if (keyFrame.values.size() != 1)
+            return false;
+
+        QString colorStr = keyFrame.values.first().toString();
+        QColor color = QColor::fromString(colorStr);
+        prop->appendColor(color);
+        prop->appendKeyFrame(keyFrame.keyFrame);
+    }
+
+    return true;
+}
+
+bool fillOpacityProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimatedPropertyFloat *prop)
+{
+    for (CssKeyFrameValue keyFrame : keyFrames) {
+        if (keyFrame.values.size() != 1)
+            return false;
+
+        QString opacity = keyFrame.values.first().toString();
+        prop->appendValue(opacity.toDouble());
+        prop->appendKeyFrame(keyFrame.keyFrame);
+    }
+
+    return true;
+}
+
+bool validateTransform(QList<QList<QSvgAnimatedPropertyTransform::TransformComponent>> &keyFrameComponents) {
+
+    if (keyFrameComponents.size() < 2)
+        return false;
+
+    qsizetype maxIndex = 0;
+    qsizetype maxSize = 0;
+    for (int i = 1; i < keyFrameComponents.size(); i++) {
+        auto &listA = keyFrameComponents[i - 1];
+        auto &listB = keyFrameComponents[i];
+        for (int j = 0; j < qMin(listA.size(), listB.size()); j++) {
+            auto typeA = listA.at(j).type;
+            auto typeB = listB.at(j).type;
+            // TODO: Handle type mismatch as mentioned in CSS Transform Module specs.
+            if (typeA != typeB)
+                return false;
+        }
+
+        if (listA.size() > maxSize) {
+            maxIndex = i - 1;
+            maxSize = listA.size();
+        }
+
+        if (listB.size() > maxSize) {
+            maxIndex = i;
+            maxSize = listB.size();
+        }
+    }
+
+    const auto &longList = keyFrameComponents.at(maxIndex);
+    // pad the shorter list with identical transforms set to default values.
+    for (auto &list : keyFrameComponents) {
+        qsizetype size = list.size();
+
+        for (int j = size; j < maxSize; j++) {
+            QSvgAnimatedPropertyTransform::TransformComponent comp = longList.value(j);
+            switch (comp.type) {
+            case QSvgAnimatedPropertyTransform::TransformComponent::Translate:
+            case QSvgAnimatedPropertyTransform::TransformComponent::Skew:
+                comp.values[0] = 0;
+                comp.values[1] = 0;
+                break;
+            case QSvgAnimatedPropertyTransform::TransformComponent::Rotate:
+                comp.values[0] = 0;
+                comp.values[1] = 0;
+                comp.values[2] = 0;
+                break;
+            case QSvgAnimatedPropertyTransform::TransformComponent::Scale:
+                comp.values[0] = 1;
+                comp.values[1] = 1;
+                break;
+            default:
+                break;
+            }
+            list.append(comp);
+        }
+    }
+
+    return true;
+}
+
+bool fillTransformProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimatedPropertyTransform *prop)
+{
+    // Stores each key frame's list of components
+    QList<QList<QSvgAnimatedPropertyTransform::TransformComponent>> keyFramesComponents;
+
+    for (CssKeyFrameValue keyFrame : keyFrames) {
+        QList<QSvgAnimatedPropertyTransform::TransformComponent> components;
+        for (QCss::Value val : keyFrame.values) {
+            if (val.type == QCss::Value::Function) {
+                QStringList lst = val.variant.toStringList();
+                QStringView transformType = lst.value(0);
+                QStringList args = lst.value(1).split(QStringLiteral(","), Qt::SkipEmptyParts);
+                if (transformType == QStringLiteral("scale")) {
+                    QSvgAnimatedPropertyTransform::TransformComponent component;
+                    qreal scale0 = QSvgUtils::toDouble(args.value(0).trimmed());
+                    qreal scale1 = QSvgUtils::toDouble(args.value(1).trimmed());
+                    component.type = QSvgAnimatedPropertyTransform::TransformComponent::Scale;
+                    component.values.append(scale0);
+                    component.values.append(scale1);
+                    components.append(component);
+                } else if (transformType == QStringLiteral("translate")) {
+                    QSvgAnimatedPropertyTransform::TransformComponent component;
+                    QSvgUtils::LengthType type;
+                    qreal translate0 = QSvgUtils::parseLength(args.value(0), &type);
+                    translate0 = QSvgUtils::convertToPixels(translate0, false, type);
+                    qreal translate1 = QSvgUtils::parseLength(args.value(1), &type);
+                    translate1 = QSvgUtils::convertToPixels(translate1, false, type);
+                    component.type = QSvgAnimatedPropertyTransform::TransformComponent::Translate;
+                    component.values.append(translate0);
+                    component.values.append(translate1);
+                    components.append(component);
+                } else if (transformType == QStringLiteral("rotate")) {
+                    QSvgAnimatedPropertyTransform::TransformComponent component;
+                    qreal rotationAngle = qsvg_parseAngle(args.value(0));
+                    component.type = QSvgAnimatedPropertyTransform::TransformComponent::Rotate;
+                    component.values.append(rotationAngle);
+                    component.values.append(0);
+                    component.values.append(0);
+                    components.append(component);
+                } else if (transformType == QStringLiteral("skew")) {
+                    QSvgAnimatedPropertyTransform::TransformComponent component;
+                    qreal skew0 = qsvg_parseAngle(args.value(0));
+                    qreal skew1 = qsvg_parseAngle(args.value(1));
+                    component.type = QSvgAnimatedPropertyTransform::TransformComponent::Skew;
+                    component.values.append(skew0);
+                    component.values.append(skew1);
+                    components.append(component);
+                } else if (transformType == QStringLiteral("matrix")) {
+                    QSvgAnimatedPropertyTransform::TransformComponent component1, component2, component3;
+                    QSvgUtils::LengthType type;
+                    qreal translate0 = QSvgUtils::parseLength(args.value(4), &type);
+                    translate0 = QSvgUtils::convertToPixels(translate0, false, type);
+                    qreal translate1 = QSvgUtils::parseLength(args.value(5), &type);
+                    translate1 = QSvgUtils::convertToPixels(translate1, false, type);
+                    qreal scale0 = QSvgUtils::toDouble(args.value(0).trimmed());
+                    qreal scale1 = QSvgUtils::toDouble(args.value(3).trimmed());
+                    qreal skew0 = QSvgUtils::toDouble((args.value(1).trimmed()));
+                    qreal skew1 = QSvgUtils::toDouble((args.value(2).trimmed()));
+                    component1.type = QSvgAnimatedPropertyTransform::TransformComponent::Translate;
+                    component1.values.append(translate0);
+                    component1.values.append(translate1);
+                    component2.type = QSvgAnimatedPropertyTransform::TransformComponent::Scale;
+                    component2.values.append(scale0);
+                    component2.values.append(scale1);
+                    component3.type = QSvgAnimatedPropertyTransform::TransformComponent::Skew;
+                    component3.values.append(skew0);
+                    component3.values.append(skew1);
+                    components.append(component1);
+                    components.append(component2);
+                    components.append(component3);
+                }
+            }
+        }
+        keyFramesComponents.append(components);
+        prop->appendKeyFrame(keyFrame.keyFrame);
+    }
+
+    if (!validateTransform(keyFramesComponents))
+        return false;
+
+    for (auto comp : keyFramesComponents) {
+        prop->appendComponents(comp);
+    }
+    prop->setTransformCount(keyFramesComponents.first().size());
+
+    return true;
+}
+
+}
+
 QSvgCssHandler::QSvgCssHandler()
     : m_selector(new QSvgStyleSelector)
 {
@@ -64,33 +251,40 @@ QSvgCssAnimation *QSvgCssHandler::createAnimation(const QString &name)
     QHash<QString, QSvgAbstractAnimatedProperty*> animatedProperies;
     QSvgCssAnimation *animation = new QSvgCssAnimation;
 
+
+    // Css Parser returns a list of all properties for each key frame. Here,
+    // we store the key frames and values for each property for easier parsing.
+    QHash<QString, QList<CssKeyFrameValue>> keyFrameValues;
     for (const auto &ruleSet : std::as_const(animationRule.ruleSets)) {
         for (QCss::Declaration decl : ruleSet.declarations) {
-            if (decl.d->property == QStringLiteral("fill") || decl.d->property == QStringLiteral("stroke")) {
-                QSvgAnimatedPropertyColor *prop = nullptr;
-                if (!animatedProperies.contains(decl.d->property))
-                    animatedProperies[decl.d->property] = QSvgAbstractAnimatedProperty::createAnimatedProperty(decl.d->property);
-                prop = static_cast<QSvgAnimatedPropertyColor *>(animatedProperies[decl.d->property]);
-                prop->appendKeyFrame(ruleSet.keyFrame);
-                updateColorProperty(decl, prop);
-            } else if (decl.d->property == QStringLiteral("transform")) {
-                QSvgAnimatedPropertyTransform *prop = nullptr;
-                if (!animatedProperies.contains(decl.d->property))
-                    animatedProperies[decl.d->property] = QSvgAbstractAnimatedProperty::createAnimatedProperty(decl.d->property);
-                prop = static_cast<QSvgAnimatedPropertyTransform *>(animatedProperies[decl.d->property]);
-                prop->appendKeyFrame(ruleSet.keyFrame);
-                updateTransformProperty(decl, prop);
-            } else if (decl.d->property == QStringLiteral("fill-opacity") || decl.d->property == QStringLiteral("stroke-opacity")
-                       || decl.d->property == QStringLiteral("opacity")) {
-                QSvgAnimatedPropertyFloat *prop = nullptr;
-                if (!animatedProperies.contains(decl.d->property))
-                    animatedProperies[decl.d->property] = QSvgAbstractAnimatedProperty::createAnimatedProperty(decl.d->property);
-                prop = static_cast<QSvgAnimatedPropertyFloat *>(animatedProperies[decl.d->property]);
-                prop->appendKeyFrame(ruleSet.keyFrame);
-                QString opacity = decl.d->values.first().toString();
-                prop->appendValue(opacity.toDouble());
-            }
+            CssKeyFrameValue keyFrameValue = {ruleSet.keyFrame, decl.d->values};
+            QList<CssKeyFrameValue> &value = keyFrameValues[decl.d->property];
+            value.append(keyFrameValue);
         }
+    }
+
+    for (auto it = keyFrameValues.begin(); it != keyFrameValues.end(); it++) {
+        QStringView property = it.key();
+        const QList<CssKeyFrameValue> &keyFrames = it.value();
+        auto *prop = QSvgAbstractAnimatedProperty::createAnimatedProperty(property.toString());
+        if (!prop)
+            continue;
+
+        bool result = false;
+        if (property == QLatin1StringView("fill") || property == QLatin1StringView("stroke"))
+            result = fillColorProperty(keyFrames, static_cast<QSvgAnimatedPropertyColor*>(prop));
+        else if (property == QLatin1StringView("transform"))
+            result = fillTransformProperty(keyFrames, static_cast<QSvgAnimatedPropertyTransform*>(prop));
+        else if (property == QLatin1StringView("fill-opacity") || property == QLatin1StringView("stroke-opacity")
+                 || property == QLatin1StringView("opacity"))
+            result = fillOpacityProperty(keyFrames, static_cast<QSvgAnimatedPropertyFloat*>(prop));
+
+        if (!result) {
+            delete prop;
+            continue;
+        }
+
+        animatedProperies[property] = prop;
     }
 
     for (auto it = animatedProperies.begin(); it != animatedProperies.end(); it++)
@@ -242,57 +436,6 @@ void QSvgCssHandler::styleLookup(QSvgNode *node, QXmlStreamAttributes &attribute
     QList<QCss::Declaration> decls = m_selector->declarationsForNode(cssNode);
 
     parseCSStoXMLAttrs(decls, attributes);
-}
-
-void QSvgCssHandler::updateColorProperty(const QCss::Declaration &decl, QSvgAnimatedPropertyColor *property)
-{
-    QString colorStr = decl.d->values.first().toString();
-    QColor color = QColor::fromString(colorStr);
-    property->appendColor(color);
-}
-
-void QSvgCssHandler::updateTransformProperty(const QCss::Declaration &decl, QSvgAnimatedPropertyTransform *property)
-{
-    for (QCss::Value val : decl.d->values) {
-        if (val.type == QCss::Value::Function) {
-            QStringList lst = val.variant.toStringList();
-            QStringView transformType = lst[0];
-            QStringList args = lst[1].split(QStringLiteral(","), Qt::SkipEmptyParts);
-            if (transformType == QStringLiteral("scale")) {
-                qreal scale0 = QSvgUtils::toDouble(args[0].trimmed());
-                qreal scale1 = QSvgUtils::toDouble(args[1].trimmed());
-                property->appendScale(QPointF(scale0, scale1));
-            } else if (transformType == QStringLiteral("translate")) {
-                QSvgUtils::LengthType type;
-                qreal translate0 = QSvgUtils::parseLength(args[0], &type);
-                translate0 = QSvgUtils::convertToPixels(translate0, false, type);
-                qreal translate1 = QSvgUtils::parseLength(args[1], &type);
-                translate1 = QSvgUtils::convertToPixels(translate1, false, type);
-                property->appendTranslation(QPointF(translate0, translate1));
-            } else if (transformType == QStringLiteral("rotate")) {
-                qreal rotationAngle = qsvg_parseAngle(args[0]);
-                property->appendRotation(rotationAngle);
-                property->appendCenterOfRotation(QPointF(0, 0));
-            } else if (transformType == QStringLiteral("skew")) {
-                qreal skew0 = qsvg_parseAngle(args[0]);
-                qreal skew1 = qsvg_parseAngle(args[1]);
-                property->appendSkew(QPointF(skew0, skew1));
-            } else if (transformType == QStringLiteral("matrix")) {
-                QSvgUtils::LengthType type;
-                qreal translate0 = QSvgUtils::parseLength(args[4], &type);
-                translate0 = QSvgUtils::convertToPixels(translate0, false, type);
-                qreal translate1 = QSvgUtils::parseLength(args[5], &type);
-                translate1 = QSvgUtils::convertToPixels(translate1, false, type);
-                qreal scale0 = QSvgUtils::toDouble(args[0].trimmed());
-                qreal scale1 = QSvgUtils::toDouble(args[3].trimmed());
-                qreal skew0 = QSvgUtils::toDouble((args[1].trimmed()));
-                qreal skew1 = QSvgUtils::toDouble((args[2].trimmed()));
-                property->appendSkew(QPointF(skew0, skew1));
-                property->appendTranslation(QPointF(translate0, translate1));
-                property->appendScale(QPointF(scale0, scale1));
-            }
-        }
-    }
 }
 
 QT_END_NAMESPACE
