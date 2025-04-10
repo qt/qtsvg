@@ -46,6 +46,7 @@ int main(int argc, char **argv)
 
     QDirIterator sourceFileIterator(sourcePath, QStringList(QLatin1String("*.svg")), QDir::Files);
     const QString baselinePath = "baseline";
+    const QString diffPath = "difference";
 
     const auto referenceFilePath = [baselinePath](const QFileInfo &testCaseFileInfo) -> QString {
         return baselinePath + QLatin1Char('/') + testCaseFileInfo.baseName() + QLatin1String(".png");
@@ -59,7 +60,7 @@ int main(int argc, char **argv)
             if (image.isNull())
                 return EXIT_FAILURE;
             QString outputFileName = referenceFilePath(sourceFileIterator.fileInfo());
-            if (!image.save(outputFileName)) {
+            if (!QDir().mkpath(baselinePath) || !image.save(outputFileName)) {
                 fprintf(stderr, "Could not save PNG file %s\n", qPrintable(outputFileName));
                 return EXIT_FAILURE;
             }
@@ -87,8 +88,8 @@ int main(int argc, char **argv)
                 p.drawImage(actual.width(), 0, reference);
             }
 
-            const QString sideBySideFileName = "difference/" + sourceFileIterator.fileInfo().baseName() + QLatin1String(".png");
-            if (!sideBySideImage.save(sideBySideFileName)) {
+            const QString sideBySideFileName = diffPath + QLatin1Char('/') + sourceFileIterator.fileInfo().baseName() + QLatin1String(".png");
+            if (!QDir().mkpath(diffPath) || !sideBySideImage.save(sideBySideFileName)) {
                 fprintf(stderr, "Could not save side-by-side image at %s\n", qPrintable(sideBySideFileName));
                 return EXIT_FAILURE;
             }
