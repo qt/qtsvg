@@ -7,6 +7,7 @@
 #include <QtSvg/private/qsvganimatedproperty_p.h>
 #include <QtSvg/private/qsvgutils_p.h>
 #include <QtGui/private/qmath_p.h>
+#include <QtCore/qlist.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -242,7 +243,7 @@ QSvgCssHandler::~QSvgCssHandler()
     m_selector = nullptr;
 }
 
-QSvgCssAnimation *QSvgCssHandler::createAnimation(const QString &name)
+QSvgCssAnimation *QSvgCssHandler::createAnimation(QStringView name)
 {
     if (!m_animations.contains(name))
         return nullptr;
@@ -327,9 +328,13 @@ void QSvgCssHandler::parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarat
         const int valCount = decl.d->values.size();
         if (valCount != 1) {
             for (int i = 0; i < valCount; ++i) {
-                valueStr += decl.d->values[i].toString();
+                if (decl.d->values[i].type == QCss::Value::TermOperatorComma)
+                    valueStr += QLatin1Char(';');
+                else
+                    valueStr += decl.d->values[i].toString();
+
                 if (i + 1 < valCount)
-                    valueStr += QLatin1Char(',');
+                    valueStr += QLatin1Char(' ');
             }
         } else {
             valueStr = val.toString();

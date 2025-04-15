@@ -16,11 +16,10 @@
 //
 
 #include <QtSvg/private/qtsvgglobal_p.h>
-#include <QStringView>
-#include <QList>
-#include <QtGui/private/qcssparser_p.h>
 #include <QtSvg/private/qsvgcssanimation_p.h>
-#include <QtCore/private/qxmlstream_p.h>
+#include <QtCore/qstringview.h>
+#include <QtGui/private/qcssparser_p.h>
+#include <QtCore/qxmlstream.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -31,7 +30,7 @@ public:
     QSvgCssHandler();
     ~QSvgCssHandler();
 
-    QSvgCssAnimation *createAnimation(const QString &name);
+    QSvgCssAnimation *createAnimation(QStringView name);
     void collectAnimations(const QCss::StyleSheet &sheet);
 
     void parseStyleSheet(const QStringView str);

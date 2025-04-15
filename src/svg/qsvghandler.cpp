@@ -198,14 +198,6 @@ struct QSvgAttributes
     QStringView markerMid;
     QStringView markerEnd;
     QStringView filter;
-    QStringView animationName;
-    QStringView animationDuration;
-    QStringView animationDelay;
-    QStringView animationIterationCount;
-    QStringView animationDirection;
-    QStringView animationTimingFunction;
-    QStringView animationFillMode;
-    QStringView animation;
 };
 
 QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHandler *handler)
@@ -223,25 +215,6 @@ void QSvgAttributes::setAttributes(const QXmlStreamAttributes &attributes, QSvgH
         QStringView value = attribute.value();
 
         switch (name.at(0).unicode()) {
-
-        case 'a':
-            if (name == QLatin1String("animation-name"))
-                animationName = value;
-            if (name == QLatin1String("animation-duration"))
-                animationDuration = value;
-            if (name == QLatin1String("animation-delay"))
-                animationDelay = value;
-            if (name == QLatin1String("animation-iteration-count"))
-                animationIterationCount = value;
-            if (name == QLatin1String("animation-direction"))
-                animationDirection = value;
-            if (name == QLatin1String("animation-timing-function"))
-                animationTimingFunction = value;
-            if (name == QLatin1String("animation-fill-mode"))
-                animationFillMode = value;
-            if (name == QLatin1String("animation"))
-                animation = value;
-            break;
 
         case 'c':
             if (name == QLatin1String("color"))
@@ -1560,78 +1533,23 @@ static int parseClockValue(QStringView str, bool *ok)
 
 #ifndef QT_NO_CSSPARSER
 
-struct QSvgCssAnimationProperties {
-    QList<QStringView> names;
-    QList<int> durations;
-    QList<int> delays;
-    QList<qreal> iterations;
-};
-
-static void parseCssAnimationsProperties(const QSvgAttributes &attributes,
-                                         QSvgCssAnimationProperties &properties)
-{
-    QList<QStringView> animationDuration;
-    QList<QStringView> animationDelay;
-    QList<QStringView> animationIterationCount;
-
-    animationDuration = attributes.animationDuration.split(QLatin1Char(','), Qt::SkipEmptyParts);
-    animationDelay = attributes.animationDelay.split(QLatin1Char(','), Qt::SkipEmptyParts);
-    animationIterationCount = attributes.animationIterationCount.split(QLatin1Char(','), Qt::SkipEmptyParts);
-    properties.names = attributes.animationName.split(QLatin1Char(','), Qt::SkipEmptyParts);
-
-    bool ok;
-    for (QStringView dur : animationDuration) {
-        int duration = parseClockValue(dur, &ok);
-        properties.durations.append(ok ? duration : 0);
-    }
-
-    for (QStringView del : animationDelay) {
-        int delay = parseClockValue(del, &ok);
-        properties.delays.append(ok ? delay : 0);
-    }
-
-    for (QStringView iteration : animationIterationCount) {
-        if (iteration == QLatin1String("infinite")) {
-            properties.iterations.append(-1);
-        } else {
-            qreal count = QSvgUtils::toDouble(iteration, &ok);
-            properties.iterations.append(ok ? qMax(1.0, count) : 0);
-        }
-    }
-}
-
 static void parseCssAnimations(QSvgNode *node,
-                               const QSvgAttributes &attributes,
+                               const QXmlStreamAttributes &attributes,
                                QSvgHandler *handler)
 {
-    QSvgCssAnimationProperties cssAnimProps;
-    parseCssAnimationsProperties(attributes, cssAnimProps);
+    QSvgCssAnimationProperties cssAnimProps(attributes);
+    QList<QSvgAnimationProperty> parsedProperties = cssAnimProps.parse();
 
-    if (cssAnimProps.names.isEmpty())
-        return;
-
-    for (int i = 0; i < cssAnimProps.names.size(); i++) {
-        QSvgCssAnimation *anim = handler->cssHandler().createAnimation(cssAnimProps.names[i].toString());
+    for (QSvgAnimationProperty property : parsedProperties) {
+        QSvgCssAnimation *anim = handler->cssHandler().createAnimation(property.name);
         if (!anim)
             continue;
 
-        handler->document()->setAnimated(true);
-        int duration = 0;
-        int delay = 0;
-        if (!cssAnimProps.durations.isEmpty())
-            duration = cssAnimProps.durations.at(i % cssAnimProps.durations.size());
-
-        if (!cssAnimProps.delays.isEmpty())
-            delay = cssAnimProps.delays.at(i % cssAnimProps.delays.size());
-
-        anim->setRunningTime(delay, duration);
-        handler->setAnimPeriod(delay, delay + duration);
-        if (!cssAnimProps.iterations.isEmpty()) {
-            qreal repeatCount = cssAnimProps.iterations.at(i % cssAnimProps.iterations.size());
-            anim->setIterationCount(repeatCount);
-        }
-
+        anim->setRunningTime(property.delay, property.duration);
+        anim->setIterationCount(property.iteration);
+        handler->setAnimPeriod(property.delay, property.delay + property.duration);
         handler->document()->animator()->appendAnimation(node, anim);
+        handler->document()->setAnimated(true);
     }
 }
 
@@ -1948,16 +1866,14 @@ static bool parseStyle(QSvgNode *node,
 #ifndef QT_NO_CSSPARSER
     QXmlStreamAttributes cssAttributes;
     handler->cssHandler().styleLookup(node, cssAttributes);
-    svgAttributes.setAttributes(cssAttributes, handler);
 
-    QXmlStreamAttributes styleCssAttributes;
     QStringView style = attributes.value(QLatin1String("style"));
     if (!style.isEmpty())
-        handler->cssHandler().parseCSStoXMLAttrs(style.toString(), styleCssAttributes);
-    svgAttributes.setAttributes(styleCssAttributes, handler);
+        handler->cssHandler().parseCSStoXMLAttrs(style.toString(), cssAttributes);
+    svgAttributes.setAttributes(cssAttributes, handler);
 
     if (!handler->options().testFlag(QtSvg::DisableCSSAnimations))
-        parseCssAnimations(node, svgAttributes, handler);
+        parseCssAnimations(node, cssAttributes, handler);
 #endif
 
     parseColor(node, svgAttributes, handler);
