@@ -426,34 +426,22 @@ static QList<qreal> parsePercentageList(const QChar *&str)
     return points;
 }
 
-static QString idFromUrl(const QStringView url)
+static QStringView idFromUrl(QStringView url)
 {
     // The form is url(<IRI>), where IRI can be
     // just an ID on #<id> form.
-    auto itr = url.cbegin();
-    auto end = url.cend();
-    QString id;
-    while (itr != end && (*itr).isSpace())
-        ++itr;
-    if (itr != end && (*itr) == QLatin1Char('('))
-        ++itr;
+    url = url.trimmed();
+    if (url.startsWith(QLatin1Char('(')))
+        url.slice(1);
     else
-        return QString();
-    while (itr != end && (*itr).isSpace())
-        ++itr;
-    if (itr != end && (*itr) == QLatin1Char('#')) {
-        id += *itr;
-        ++itr;
-    } else {
-        return QString();
-    }
-    while (itr != end && (*itr) != QLatin1Char(')')) {
-        id += *itr;
-        ++itr;
-    }
-    if (itr == end || (*itr) != QLatin1Char(')'))
-        return QString();
-    return id;
+        return QStringView();
+    url = url.trimmed();
+    if (!url.startsWith(QLatin1Char('#')))
+        return QStringView();
+    const qsizetype closingBracePos = url.indexOf(QLatin1Char(')'));
+    if (closingBracePos == -1)
+        return QStringView();
+    return url.first(closingBracePos);
 }
 
 /**
@@ -613,7 +601,7 @@ static void parseBrush(QSvgNode *node,
                             || style->type() == QSvgStyleProperty::PATTERN)
                         prop->setFillStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
                 } else {
-                    QString id = idFromUrl(value);
+                    QString id = idFromUrl(value).toString();
                     prop->setPaintStyleId(id);
                     prop->setPaintStyleResolved(false);
                 }
@@ -781,7 +769,7 @@ static void parsePen(QSvgNode *node,
                             || style->type() == QSvgStyleProperty::PATTERN)
                         prop->setStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
                     } else {
-                        QString id = idFromUrl(value);
+                        QString id = idFromUrl(value).toString();
                         prop->setPaintStyleId(id);
                         prop->setPaintStyleResolved(false);
                     }
@@ -1783,7 +1771,7 @@ static std::optional<QString> getAttributeId(const QStringView &attribute)
     QStringView attrStr = attribute.trimmed();
     if (attrStr.startsWith(urlKeyword))
         attrStr.slice(urlKeyword.size());
-    QString id = idFromUrl(attrStr.toString());
+    QString id = idFromUrl(attrStr).toString();
     if (id.startsWith(QLatin1Char('#')))
         id.slice(1);
     return id;
