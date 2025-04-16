@@ -1770,6 +1770,21 @@ static void parseOthers(QSvgNode *node,
     }
 }
 
+static std::optional<QString> getAttributeId(const QStringView &attribute)
+{
+    if (attribute.isEmpty())
+        return std::nullopt;
+
+    constexpr QLatin1String urlKeyword("url");
+    QStringView attrStr = attribute.trimmed();
+    if (attrStr.startsWith(urlKeyword))
+        attrStr.slice(urlKeyword.size());
+    QString id = idFromUrl(attrStr.toString());
+    if (id.startsWith(QLatin1Char('#')))
+        id.slice(1);
+    return id;
+}
+
 static void parseExtendedAttributes(QSvgNode *node,
                                     const QSvgAttributes &attributes,
                                     QSvgHandler *handler)
@@ -1777,60 +1792,16 @@ static void parseExtendedAttributes(QSvgNode *node,
     if (handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
         return;
 
-    if (!attributes.mask.isEmpty()) {
-        QString maskStr = attributes.mask.toString().trimmed();
-        if (maskStr.size() > 3 && maskStr.mid(0, 3) == QLatin1String("url"))
-            maskStr = maskStr.mid(3, maskStr.size() - 3);
-        QString maskId = idFromUrl(maskStr);
-        if (maskId.startsWith(QLatin1Char('#'))) //TODO: handle urls and ids in a single place
-            maskId.remove(0, 1);
-
-        node->setMaskId(maskId);
-    }
-
-    if (!attributes.markerStart.isEmpty() &&
-        !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly)) {
-        QString markerStr = attributes.markerStart.toString().trimmed();
-        if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
-            markerStr = markerStr.mid(3, markerStr.size() - 3);
-        QString markerId = idFromUrl(markerStr);
-        if (markerId.startsWith(QLatin1Char('#'))) //TODO: handle urls and ids in a single place
-            markerId.remove(0, 1);
-        node->setMarkerStartId(markerId);
-    }
-    if (!attributes.markerMid.isEmpty() &&
-        !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly)) {
-        QString markerStr = attributes.markerMid.toString().trimmed();
-        if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
-            markerStr = markerStr.mid(3, markerStr.size() - 3);
-        QString markerId = idFromUrl(markerStr);
-        if (markerId.startsWith(QLatin1Char('#'))) //TODO: handle urls and ids in a single place
-            markerId.remove(0, 1);
-        node->setMarkerMidId(markerId);
-    }
-    if (!attributes.markerEnd.isEmpty() &&
-        !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly)) {
-        QString markerStr = attributes.markerEnd.toString().trimmed();
-        if (markerStr.size() > 3 && markerStr.mid(0, 3) == QLatin1String("url"))
-            markerStr = markerStr.mid(3, markerStr.size() - 3);
-        QString markerId = idFromUrl(markerStr);
-        if (markerId.startsWith(QLatin1Char('#'))) //TODO: handle urls and ids in a single place
-            markerId.remove(0, 1);
-        node->setMarkerEndId(markerId);
-    }
-
-    if (!attributes.filter.isEmpty() &&
-        !handler->options().testFlag(QtSvg::Tiny12FeaturesOnly)) {
-        QString filterStr = attributes.filter.toString().trimmed();
-
-        if (filterStr.size() > 3 && filterStr.mid(0, 3) == QLatin1String("url"))
-            filterStr = filterStr.mid(3, filterStr.size() - 3);
-        QString filterId = idFromUrl(filterStr);
-        if (filterId.startsWith(QLatin1Char('#'))) //TODO: handle urls and ids in a single place
-            filterId.remove(0, 1);
-        node->setFilterId(filterId);
-    }
-
+    if (auto id = getAttributeId(attributes.mask))
+        node->setMaskId(*id);
+    if (auto id = getAttributeId(attributes.markerStart))
+        node->setMarkerStartId(*id);
+    if (auto id = getAttributeId(attributes.markerMid))
+        node->setMarkerMidId(*id);
+    if (auto id = getAttributeId(attributes.markerEnd))
+        node->setMarkerEndId(*id);
+    if (auto id = getAttributeId(attributes.filter))
+        node->setFilterId(*id);
 }
 
 static void parseRenderingHints(QSvgNode *node,
