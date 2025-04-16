@@ -39,6 +39,9 @@ public:
     QList<QSvgAnimationProperty> parse() const;
 
 private:
+    void shortHandtoLonghandForm(QStringView value);
+
+private:
     QList<QStringView> m_names;
     QList<QStringView> m_durations;
     QList<QStringView> m_delays;
@@ -46,6 +49,7 @@ private:
     QList<QStringView> m_directions;
     QList<QStringView> m_timingFunctions;
     QList<QStringView> m_fillModes;
+    QList<QStringView> m_playStates;
 };
 
 QT_END_NAMESPACE
