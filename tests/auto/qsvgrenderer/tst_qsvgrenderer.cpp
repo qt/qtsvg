@@ -29,6 +29,8 @@ public:
 
 private slots:
     void getSetCheck();
+    void emptyRect_data();
+    void emptyRect();
     void inexistentUrl();
     void emptyUrl();
     void invalidUrl_data();
@@ -134,6 +136,29 @@ void tst_QSvgRenderer::getSetCheck()
     QVERIFY(!obj1.isAnimationEnabled());
     obj1.setAnimationEnabled(true);
     QVERIFY(obj1.isAnimationEnabled());
+}
+
+void tst_QSvgRenderer::emptyRect_data()
+{
+    // Testing rects with zero width or height or no given value
+    // Those caused divisions by zero, e.g. QTBUG-49160 and oss-fuzz issue 23588
+    // UBSAN is required to see those divisions by zero
+    QTest::addColumn<QByteArray>("svg");
+    QTest::newRow("nothing") << R"(<svg><rect/></svg>)"_ba;
+    QTest::newRow("no width zero height") << R"(<svg><rect height="0"/></svg>)"_ba;
+    QTest::newRow("zero width no height") << R"(<svg><rect width="0"/></svg>)"_ba;
+    QTest::newRow("no width") << R"(<svg><rect height="1"/></svg>)"_ba;
+    QTest::newRow("no height") << R"(<svg><rect width="1"/></svg>)"_ba;
+    QTest::newRow("both zero") << R"(<svg><rect width="0" height="0"/></svg>)"_ba;
+    QTest::newRow("zero width") << R"(<svg><rect width="0" height="1"/></svg>)"_ba;
+    QTest::newRow("zero heigth") << R"(<svg><rect width="1" height="0"/></svg>)"_ba;
+}
+
+void tst_QSvgRenderer::emptyRect()
+{
+    QFETCH(QByteArray, svg);
+    QSvgRenderer renderer(svg);
+    QVERIFY(renderer.isValid());
 }
 
 void tst_QSvgRenderer::inexistentUrl()
