@@ -323,43 +323,38 @@ void QSvgCssHandler::parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarat
         const QCss::Declaration &decl = declarations.at(i);
         if (decl.d->property.isEmpty())
             continue;
-        QCss::Value val = decl.d->values.first();
         QString valueStr;
         const int valCount = decl.d->values.size();
-        if (valCount != 1) {
-            for (int i = 0; i < valCount; ++i) {
-                if (decl.d->values[i].type == QCss::Value::TermOperatorComma)
-                    valueStr += QLatin1Char(';');
-                else
-                    valueStr += decl.d->values[i].toString();
+        for (int i = 0; i < valCount; ++i) {
+            QCss::Value val = decl.d->values.at(i);
+            if (val.type == QCss::Value::TermOperatorComma) {
+                valueStr += QLatin1Char(';');
+            } else if (val.type == QCss::Value::Uri) {
+                valueStr.prepend(QLatin1String("url("));
+                valueStr.append(QLatin1Char(')'));
+            } else if (val.type == QCss::Value::Function) {
+                QStringList lst = val.variant.toStringList();
+                valueStr.append(lst.at(0));
+                valueStr.append(QLatin1Char('('));
+                for (int i = 1; i < lst.size(); ++i) {
+                    valueStr.append(lst.at(i));
+                    if ((i +1) < lst.size())
+                        valueStr.append(QLatin1Char(','));
+                }
+                valueStr.append(QLatin1Char(')'));
+            } else if (val.type == QCss::Value::KnownIdentifier) {
+                switch (val.variant.toInt()) {
+                case QCss::Value_None:
+                    valueStr = QLatin1String("none");
+                    break;
+                default:
+                    break;
+                }
+            } else
+                valueStr += val.toString();
 
-                if (i + 1 < valCount)
-                    valueStr += QLatin1Char(' ');
-            }
-        } else {
-            valueStr = val.toString();
-        }
-        if (val.type == QCss::Value::Uri) {
-            valueStr.prepend(QLatin1String("url("));
-            valueStr.append(QLatin1Char(')'));
-        } else if (val.type == QCss::Value::Function) {
-            QStringList lst = val.variant.toStringList();
-            valueStr.append(lst.at(0));
-            valueStr.append(QLatin1Char('('));
-            for (int i = 1; i < lst.size(); ++i) {
-                valueStr.append(lst.at(i));
-                if ((i +1) < lst.size())
-                    valueStr.append(QLatin1Char(','));
-            }
-            valueStr.append(QLatin1Char(')'));
-        } else if (val.type == QCss::Value::KnownIdentifier) {
-            switch (val.variant.toInt()) {
-            case QCss::Value_None:
-                valueStr = QLatin1String("none");
-                break;
-            default:
-                break;
-            }
+            if (i + 1 < valCount)
+                valueStr += QLatin1Char(' ');
         }
 
         attributes.append(QString(), decl.d->property, valueStr);
