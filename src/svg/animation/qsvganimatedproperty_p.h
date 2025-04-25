@@ -18,6 +18,7 @@
 #include <QtSvg/private/qtsvgglobal_p.h>
 #include <QtCore/qlist.h>
 #include <QtCore/qvariant.h>
+#include <QtCore/qvarlengtharray.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qpoint.h>
 #include <QtGui/qcolor.h>
