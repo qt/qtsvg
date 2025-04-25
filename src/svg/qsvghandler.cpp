@@ -3774,22 +3774,22 @@ static QSvgStyleProperty *createRadialGradientNode(QSvgNode *node,
     qreal ncx = 0.5;
     qreal ncy = 0.5;
     if (!cx.isEmpty())
-        ncx = QSvgUtils::toDouble(cx);
+        ncx = convertToNumber(cx);
     if (!cy.isEmpty())
-        ncy = QSvgUtils::toDouble(cy);
+        ncy = convertToNumber(cy);
 
     qreal nr = 0.5;
     if (!r.isEmpty())
-        nr = QSvgUtils::toDouble(r);
+        nr = convertToNumber(r);
     if (nr <= 0.0)
         return nullptr;
 
     qreal nfx = ncx;
     if (!fx.isEmpty())
-        nfx = QSvgUtils::toDouble(fx);
+        nfx = convertToNumber(fx);
     qreal nfy = ncy;
     if (!fy.isEmpty())
-        nfy = QSvgUtils::toDouble(fy);
+        nfy = convertToNumber(fy);
 
     QRadialGradient *grad = new QRadialGradient(ncx, ncy, nr, nfx, nfy, 0);
     grad->setInterpolationMode(QGradient::ComponentInterpolation);
