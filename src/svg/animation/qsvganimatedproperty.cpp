@@ -225,8 +225,8 @@ void QSvgAnimatedPropertyTransform::interpolate(uint index, qreal t) const
 
     QTransform transform = QTransform();
 
-    qsizetype startIndex = (index - 1) * m_transformCount;
-    qsizetype endIndex = index * m_transformCount;
+    qsizetype startIndex = (index - 1) * qsizetype(m_transformCount);
+    qsizetype endIndex = index * qsizetype(m_transformCount);
 
     for (quint32 i = 0; i < m_transformCount; i++) {
         TransformComponent tc1 = m_components.at(startIndex + i);
