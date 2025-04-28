@@ -6,7 +6,7 @@
 
 QT_BEGIN_NAMESPACE
 
-static int parseClockValue(QStringView str, bool *ok)
+static int parseCssClockValue(QStringView str, bool *ok)
 {
     int res = 0;
     int ms = 1000;
@@ -76,13 +76,13 @@ QList<QSvgAnimationProperty> QSvgCssAnimationProperties::parse() const
 
         if (!m_durations.isEmpty()) {
             QStringView durationStr = m_durations.at(i % m_durations.size());
-            int duration = parseClockValue(durationStr, &ok);
+            int duration = parseCssClockValue(durationStr, &ok);
             property.duration = ok ? duration : 0;
         }
 
         if (!m_delays.isEmpty()) {
             QStringView delayStr = m_delays.at(i % m_delays.size());
-            int delay = parseClockValue(delayStr, &ok);
+            int delay = parseCssClockValue(delayStr, &ok);
             property.delay = ok ? delay : 0;
         }
 
