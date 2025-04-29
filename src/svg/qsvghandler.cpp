@@ -207,8 +207,7 @@ QSvgAttributes::QSvgAttributes(const QXmlStreamAttributes &xmlAttributes, QSvgHa
 
 void QSvgAttributes::setAttributes(const QXmlStreamAttributes &attributes, QSvgHandler *handler)
 {
-    for (int i = 0; i < attributes.size(); ++i) {
-        const QXmlStreamAttribute &attribute = attributes.at(i);
+    for (const QXmlStreamAttribute &attribute : attributes) {
         QStringView name = attribute.qualifiedName();
         if (name.isEmpty())
             continue;
@@ -1586,8 +1585,7 @@ static bool parseCoreNode(QSvgNode *node,
     QStringList fonts;
     QString xmlClassStr;
 
-    for (int i = 0; i < attributes.size(); ++i) {
-        const QXmlStreamAttribute &attribute = attributes.at(i);
+    for (const QXmlStreamAttribute &attribute : attributes) {
         QStringView name = attribute.qualifiedName();
         if (name.isEmpty())
             continue;
