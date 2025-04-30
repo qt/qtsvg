@@ -5,13 +5,18 @@
 ## tst_bench_qsvgrenderer Binary:
 #####################################################################
 
+if(NOT QT_BUILD_STANDALONE_TESTS AND NOT QT_BUILDING_QT)
+    cmake_minimum_required(VERSION 3.16)
+    project(tst_qicon_svg LANGUAGES CXX)
+    find_package(Qt6BuildInternals REQUIRED COMPONENTS STANDALONE_TEST)
+endif()
+
 qt_internal_add_benchmark(tst_bench_qsvgrenderer
     SOURCES
         tst_qsvgrenderer.cpp
     LIBRARIES
         Qt::Gui
         Qt::Test
-        Qt::Widgets
         Qt::Svg
 )
 
