@@ -64,6 +64,7 @@ private slots:
     void oss_fuzz_24131();
     void oss_fuzz_24738();
     void imageRendering();
+    void imageMalformedDataUrl();
     void illegalAnimateTransform_data();
     void illegalAnimateTransform();
     void tSpanLineBreak();
@@ -1716,6 +1717,16 @@ void tst_QSvgRenderer::imageRendering() {
         p2.end();
         QCOMPARE(img1, img2);
     }
+}
+
+void tst_QSvgRenderer::imageMalformedDataUrl()
+{
+    // The input below triggered an assert in qDecodeDataUrl() which is used when creating svg
+    // nodes. That assert is fixed and tested in qtbase. Still, the input is invalid and should be
+    // treated as such. The test makes sure that QSvgRenderer properly warns about it.
+    QTest::ignoreMessage(QtWarningMsg, R"(Could not create image from "data:charset,")");
+    QVERIFY(QSvgRenderer().load(
+            QByteArray("<svg><image width=\"1\" height=\"1\" xlink:href=\"data:charset,\"/></svg>")));
 }
 
 void tst_QSvgRenderer::illegalAnimateTransform_data()
