@@ -182,6 +182,7 @@ public:
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const override;
     Type type() const override;
+    bool separateFillStroke() const override;
 
     void addTspan(QSvgTspan *tspan) {m_tspans.append(tspan);}
     const QList<QSvgTspan *> tspans() const { return m_tspans; }
