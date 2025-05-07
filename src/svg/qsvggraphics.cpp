@@ -368,13 +368,15 @@ bool QSvgText::shouldDrawNode(QPainter *p, QSvgExtraStates &) const
     return true;
 }
 
+bool QSvgText::separateFillStroke() const
+{
+    return true;
+}
+
 void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundingRect) const
 {
     const bool isPainting = (boundingRect == nullptr);
     if (!isPainting || shouldDrawNode(p, states)) {
-        qreal oldOpacity = p->opacity();
-        p->setOpacity(oldOpacity * states.fillOpacity);
-
         QFont font = p->font();
         Qt::Alignment alignment = states.textAnchor;
 
@@ -448,7 +450,9 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
                 range.format.setFont(font);
                 if (p->pen().style() != Qt::NoPen && p->pen().brush() != Qt::NoBrush)
                     range.format.setTextOutline(p->pen());
-                range.format.setForeground(p->brush());
+                // work around QTBUG-136696: NoBrush fills the foreground with the outline's pen
+                range.format.setForeground(p->brush().style() == Qt::NoBrush
+                                           ? QColor(Qt::transparent) : p->brush());
 
                 if (appendSpace) {
                     Q_ASSERT(!formatRanges.back().isEmpty());
@@ -542,8 +546,6 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
                 *boundingRect = brect;
             }
         }
-
-        p->setOpacity(oldOpacity);
     }
 }
 
