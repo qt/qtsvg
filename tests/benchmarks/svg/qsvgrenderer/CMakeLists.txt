@@ -28,4 +28,5 @@ qt_internal_add_resource(tst_bench_qsvgrenderer "tst_bench_qsvgrenderer_dat"
         "./data/filter.svg"
         "./data/mask.svg"
         "./data/opacity.svg"
+        "./data/text.svg"
 )

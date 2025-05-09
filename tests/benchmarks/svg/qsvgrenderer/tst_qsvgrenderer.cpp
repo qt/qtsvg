@@ -63,6 +63,7 @@ void load_sample_filenames()
     QTest::newRow("filter") << u":/data/filter.svg"_s;
     QTest::newRow("mask") << u":/data/mask.svg"_s;
     QTest::newRow("opacity") << u":/data/opacity.svg"_s;
+    QTest::newRow("text") << u":/data/text.svg"_s;
 }
 
 void tst_QSvgRenderer::load_data()
