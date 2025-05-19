@@ -50,6 +50,9 @@ exampledirs += ../../../examples/svg \
 
 examplesinstallpath = svg
 
+# Path to the root of qtsvg (for automatic linking to source code)
+url.sources.rootdir     = ../../..
+
 imagedirs   += images
 
 navigation.landingpage = "Qt SVG"
