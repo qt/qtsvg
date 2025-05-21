@@ -67,7 +67,7 @@ void QSvgEllipse::drawCommand(QPainter *p, QSvgExtraStates &)
     p->drawEllipse(m_bounds);
 }
 
-bool QSvgEllipse::separateFillStroke() const
+bool QSvgEllipse::separateFillStroke(const QSvgExtraStates &) const
 {
     return true;
 }
@@ -126,7 +126,7 @@ void QSvgPath::drawCommand(QPainter *p, QSvgExtraStates &states)
     QSvgMarker::drawMarkersForNode(this, p, states);
 }
 
-bool QSvgPath::separateFillStroke() const
+bool QSvgPath::separateFillStroke(const QSvgExtraStates &) const
 {
     return true;
 }
@@ -205,7 +205,7 @@ void QSvgPolygon::drawCommand(QPainter *p, QSvgExtraStates &states)
     QSvgMarker::drawMarkersForNode(this, p, states);
 }
 
-bool QSvgPolygon::separateFillStroke() const
+bool QSvgPolygon::separateFillStroke(const QSvgExtraStates &) const
 {
     return true;
 }
@@ -229,7 +229,7 @@ void QSvgPolyline::drawCommand(QPainter *p, QSvgExtraStates &states)
     }
 }
 
-bool QSvgPolyline::separateFillStroke() const
+bool QSvgPolyline::separateFillStroke(const QSvgExtraStates &) const
 {
     return true;
 }
@@ -275,7 +275,7 @@ void QSvgRect::drawCommand(QPainter *p, QSvgExtraStates &)
         p->drawRect(m_rect);
 }
 
-bool QSvgRect::separateFillStroke() const
+bool QSvgRect::separateFillStroke(const QSvgExtraStates &) const
 {
     return true;
 }
@@ -368,7 +368,7 @@ bool QSvgText::shouldDrawNode(QPainter *p, QSvgExtraStates &) const
     return true;
 }
 
-bool QSvgText::separateFillStroke() const
+bool QSvgText::separateFillStroke(const QSvgExtraStates &) const
 {
     return true;
 }
