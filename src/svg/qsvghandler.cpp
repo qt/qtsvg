@@ -441,7 +441,7 @@ static QStringView idFromUrl(QStringView url)
     const qsizetype closingBracePos = url.indexOf(QLatin1Char(')'));
     if (closingBracePos == -1)
         return QStringView();
-    return url.first(closingBracePos);
+    return url.first(closingBracePos).trimmed();
 }
 
 /**
