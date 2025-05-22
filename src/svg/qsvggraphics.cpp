@@ -118,17 +118,23 @@ QSvgPath::QSvgPath(QSvgNode *parent, const QPainterPath &qpath)
 
 void QSvgPath::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
+    const qreal oldOpacity = p->opacity();
+    const bool drawingInOnePass = !separateFillStroke(states);
+    if (drawingInOnePass)
+        p->setOpacity(oldOpacity * states.fillOpacity);
     m_path.setFillRule(states.fillRule);
     if (m_path.boundingRect().isNull() && p->pen().capStyle() != Qt::FlatCap)
         p->drawPoint(m_path.boundingRect().topLeft());
     else
         p->drawPath(m_path);
     QSvgMarker::drawMarkersForNode(this, p, states);
+    if (drawingInOnePass)
+        p->setOpacity(oldOpacity);
 }
 
-bool QSvgPath::separateFillStroke(const QSvgExtraStates &) const
+bool QSvgPath::separateFillStroke(const QSvgExtraStates &s) const
 {
-    return true;
+    return !qFuzzyCompare(s.fillOpacity, s.strokeOpacity);
 }
 
 QRectF QSvgPath::internalFastBounds(QPainter *p, QSvgExtraStates &) const
