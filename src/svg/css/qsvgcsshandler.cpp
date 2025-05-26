@@ -13,39 +13,6 @@ QT_BEGIN_NAMESPACE
 
 namespace {
 
-// Parses the angle from a string and convert it to degrees.
-qreal qsvg_parseAngle(QStringView str, bool *ok = nullptr)
-{
-    QStringView numStr = str.trimmed();
-
-    if (numStr.isEmpty()) {
-        if (ok)
-            *ok = false;
-        return false;
-    }
-
-    qreal unitFactor;
-    if (numStr.endsWith(QLatin1String("deg"))) {
-        numStr.chop(3);
-        unitFactor = 1.0;
-    } else if (numStr.endsWith(QLatin1String("grad"))) {
-        numStr.chop(4);
-        // deg = grad * 0.9;
-        unitFactor = 0.9;
-    } else if (numStr.endsWith(QLatin1String("rad"))) {
-        numStr.chop(3);
-        unitFactor = 180.0 / Q_PI;
-    } else if (numStr.endsWith(QLatin1String("turn"))) {
-        numStr.chop(4);
-        // one circle = one turn
-        unitFactor = 360.0;
-    } else {
-        unitFactor = 0.0;
-    }
-
-    return QSvgUtils::toDouble(numStr, ok) * unitFactor;
-}
-
 struct CssKeyFrameValue{
     qreal keyFrame;
     QList<QCss::Value> values;
@@ -174,7 +141,7 @@ bool fillTransformProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimate
                     components.append(component);
                 } else if (transformType == QStringLiteral("rotate")) {
                     QSvgAnimatedPropertyTransform::TransformComponent component;
-                    qreal rotationAngle = qsvg_parseAngle(args.value(0));
+                    qreal rotationAngle = QSvgUtils::parseAngle(args.value(0)).value_or(0);
                     component.type = QSvgAnimatedPropertyTransform::TransformComponent::Rotate;
                     component.values.append(rotationAngle);
                     component.values.append(0);
@@ -182,8 +149,8 @@ bool fillTransformProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimate
                     components.append(component);
                 } else if (transformType == QStringLiteral("skew")) {
                     QSvgAnimatedPropertyTransform::TransformComponent component;
-                    qreal skew0 = qsvg_parseAngle(args.value(0));
-                    qreal skew1 = qsvg_parseAngle(args.value(1));
+                    qreal skew0 = QSvgUtils::parseAngle(args.value(0)).value_or(0);
+                    qreal skew1 = QSvgUtils::parseAngle(args.value(1)).value_or(0);
                     component.type = QSvgAnimatedPropertyTransform::TransformComponent::Skew;
                     component.values.append(skew0);
                     component.values.append(skew1);

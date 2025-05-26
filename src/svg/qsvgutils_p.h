@@ -15,8 +15,9 @@
 // We mean it.
 //
 
-#include "qtsvgglobal_p.h"
 #include <QString>
+#include <QtGui/qpainterpath.h>
+#include <optional>
 
 QT_BEGIN_NAMESPACE
 
@@ -38,8 +39,12 @@ qreal toDouble(const QChar *&str);
 qreal toDouble(QStringView str, bool *ok = NULL);
 qreal parseLength(QStringView str, LengthType *type, bool *ok = NULL);
 qreal convertToPixels(qreal len, bool , LengthType type);
+std::optional<qreal> parseAngle(QStringView str);
+void parseNumbersArray(const QChar *&str, QVarLengthArray<qreal, 8> &points,
+                              const char *pattern = nullptr);
+std::optional<QPainterPath> parsePathDataFast(QStringView dataStr, bool limitLength = true);
 
-};
+}
 
 QT_END_NAMESPACE
 
