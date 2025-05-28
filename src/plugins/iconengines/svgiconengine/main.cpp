@@ -25,11 +25,9 @@ public:
     QIconEngine *create(const QString &filename = QString()) override;
 };
 
-QIconEngine *QSvgIconPlugin::create(const QString &file)
+QIconEngine *QSvgIconPlugin::create(const QString &)
 {
     QSvgIconEngine *engine = new QSvgIconEngine;
-    if (!file.isNull())
-        engine->addFile(file, QSize(), QIcon::Normal, QIcon::Off);
     return engine;
 }
 
