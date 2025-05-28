@@ -446,7 +446,8 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
                 range.start = paragraphs.back().size();
                 range.length = newText.size();
                 range.format.setFont(font);
-                range.format.setTextOutline(p->pen());
+                if (p->pen().style() != Qt::NoPen && p->pen().brush() != Qt::NoBrush)
+                    range.format.setTextOutline(p->pen());
                 range.format.setForeground(p->brush());
 
                 if (appendSpace) {
