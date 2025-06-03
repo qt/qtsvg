@@ -27,6 +27,7 @@
 #include "qtransform.h"
 #include "qvarlengtharray.h"
 #include "private/qmath_p.h"
+#include "qimagereader.h"
 
 #include "float.h"
 #include <cmath>
@@ -142,7 +143,7 @@ bool qsvg_get_hex_rgb(const QChar *str, int len, QRgb *rgb)
 
 // ======== end of qcolor_p duplicate
 
-static bool parsePathDataFast(QStringView data, QPainterPath &path);
+static bool parsePathDataFast(QStringView data, QPainterPath &path, bool limitLength = true);
 
 static inline QString someId(const QXmlStreamAttributes &attributes)
 {
@@ -1557,7 +1558,7 @@ static void pathArc(QPainterPath &path,
     }
 }
 
-static bool parsePathDataFast(QStringView dataStr, QPainterPath &path)
+static bool parsePathDataFast(QStringView dataStr, QPainterPath &path, bool limitLength)
 {
     const int maxElementCount = 0x7fff; // Assume file corruption if more path elements than this
     qreal x0 = 0, y0 = 0;              // starting point
@@ -1878,7 +1879,7 @@ static bool parsePathDataFast(QStringView dataStr, QPainterPath &path)
                 break;
             }
             lastMode = pathElem.toLatin1();
-            if (path.elementCount() > maxElementCount)
+            if (limitLength && path.elementCount() > maxElementCount)
                 ok = false;
         }
     }
@@ -2027,6 +2028,12 @@ static void cssStyleLookup(QSvgNode *node,
 }
 
 #endif // QT_NO_CSSPARSER
+
+bool QSvgHandler::trustedSourceMode() const
+{
+    static const bool envAssumeTrusted = qEnvironmentVariableIsSet("QT_SVG_ASSUME_TRUSTED_SOURCE");
+    return envAssumeTrusted;
+}
 
 static inline QStringList stringToList(const QString &str)
 {
@@ -2768,7 +2775,9 @@ static QSvgNode *createImageNode(QSvgNode *parent,
                 filename = info.absoluteDir().absoluteFilePath(filename);
             }
         }
-        image = QImage(filename);
+
+        if (handler->trustedSourceMode() || !QImageReader::imageFormat(filename).startsWith("svg"))
+            image = QImage(filename);
     }
 
     if (image.isNull()) {
@@ -2936,13 +2945,13 @@ static bool parseMpathNode(QSvgNode *parent,
 
 static QSvgNode *createPathNode(QSvgNode *parent,
                                 const QXmlStreamAttributes &attributes,
-                                QSvgHandler *)
+                                QSvgHandler *handler)
 {
     QStringView data = attributes.value(QLatin1String("d"));
 
     QPainterPath qpath;
     qpath.setFillRule(Qt::WindingFill);
-    if (!parsePathDataFast(data, qpath))
+    if (!parsePathDataFast(data, qpath, !handler->trustedSourceMode()))
         qCWarning(lcSvgHandler, "Invalid path data; path truncated.");
 
     QSvgNode *path = new QSvgPath(parent, qpath);
@@ -3683,9 +3692,8 @@ void QSvgHandler::parse()
             }
             break;
         case QXmlStreamReader::EndElement:
-            endElement(xml->name());
+            done = endElement(xml->name());
             ++remainingUnfinishedElements;
-            done = (xml->name() == QLatin1String("svg"));
             break;
         case QXmlStreamReader::Characters:
             characters(xml->text());
@@ -3734,6 +3742,15 @@ bool QSvgHandler::startElement(const QString &localName,
 
     if (!m_doc && localName != QLatin1String("svg"))
         return false;
+
+    if (m_doc && localName == QLatin1String("svg")) {
+        m_skipNodes.push(Doc);
+        qCWarning(lcSvgHandler) << "Skipping a nested svg element, because "
+                                   "SVG Document must not contain nested svg elements in Svg Tiny 1.2";
+    }
+
+    if (!m_skipNodes.isEmpty() && m_skipNodes.top() == Doc)
+        return true;
 
     if (FactoryMethod method = findGroupFactory(localName)) {
         //group
@@ -3865,14 +3882,17 @@ bool QSvgHandler::startElement(const QString &localName,
 bool QSvgHandler::endElement(const QStringView localName)
 {
     CurrentNode node = m_skipNodes.top();
+
+    if (node == Doc && localName != QLatin1String("svg"))
+        return false;
+
     m_skipNodes.pop();
     m_whitespaceMode.pop();
 
     popColor();
 
-    if (node == Unknown) {
-        return true;
-    }
+    if (node == Unknown)
+        return false;
 
 #ifdef QT_NO_CSSPARSER
     Q_UNUSED(localName);
@@ -3886,7 +3906,7 @@ bool QSvgHandler::endElement(const QStringView localName)
     else if (m_style && !m_skipNodes.isEmpty() && m_skipNodes.top() != Style)
         m_style = 0;
 
-    return true;
+    return ((localName == QLatin1String("svg")) && (node != Doc));
 }
 
 void QSvgHandler::resolveGradients(QSvgNode *node, int nestedDepth)
