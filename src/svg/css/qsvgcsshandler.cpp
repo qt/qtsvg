@@ -196,6 +196,30 @@ bool fillTransformProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimate
     return true;
 }
 
+bool fillOffsetDistanceProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimatedPropertyFloat *prop)
+{
+    for (CssKeyFrameValue keyFrame : keyFrames) {
+        if (keyFrame.values.size() != 1)
+            return false;
+
+        QString offsetDistance = keyFrame.values.first().toString();
+
+        bool ok = false;
+        qreal distance = offsetDistance.toDouble(&ok);
+        if (!ok)
+            return false;
+
+        QCss::Value::Type type = keyFrame.values.first().type;
+        if (type != QCss::Value::Percentage && !qFuzzyCompare(distance, 0.))
+            return false;
+        distance /= 100;
+        prop->appendValue(distance);
+        prop->appendKeyFrame(keyFrame.keyFrame);
+    }
+
+    return true;
+}
+
 }
 
 QSvgCssHandler::QSvgCssHandler()
@@ -246,6 +270,8 @@ QSvgCssAnimation *QSvgCssHandler::createAnimation(QStringView name)
         else if (property == QLatin1StringView("fill-opacity") || property == QLatin1StringView("stroke-opacity")
                  || property == QLatin1StringView("opacity"))
             result = fillOpacityProperty(keyFrames, static_cast<QSvgAnimatedPropertyFloat*>(prop));
+        else if (property == QLatin1StringView("offset-distance"))
+            result = fillOffsetDistanceProperty(keyFrames, static_cast<QSvgAnimatedPropertyFloat*>(prop));
 
         if (!result) {
             delete prop;
@@ -314,11 +340,16 @@ void QSvgCssHandler::parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarat
                 case QCss::Value_None:
                     valueStr = QLatin1String("none");
                     break;
+                case QCss::Value_Auto:
+                    valueStr += QLatin1String("auto");
                 default:
                     break;
                 }
-            } else
+            } else if (val.type == QCss::Value::Percentage) {
+                valueStr += val.toString() + QLatin1Char('%');
+            } else {
                 valueStr += val.toString();
+            }
 
             if (i + 1 < valCount)
                 valueStr += QLatin1Char(' ');

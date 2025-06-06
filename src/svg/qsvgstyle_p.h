@@ -17,6 +17,7 @@
 
 #include "QtCore/qstack.h"
 #include "QtGui/qpainter.h"
+#include "QtGui/qpainterpath.h"
 #include "QtGui/qpen.h"
 #include "QtGui/qbrush.h"
 #include "QtGui/qtransform.h"
@@ -137,7 +138,8 @@ public:
         ANIMATE_TRANSFORM,
         ANIMATE_COLOR,
         OPACITY,
-        COMP_OP
+        COMP_OP,
+        OFFSET,
     };
 public:
     virtual ~QSvgStyleProperty();
@@ -648,6 +650,61 @@ private:
     QPainter::CompositionMode m_oldMode;
 };
 
+class Q_SVG_EXPORT QSvgOffsetStyle : public QSvgStyleProperty
+{
+public:
+    QSvgOffsetStyle() = default;
+    void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
+    void revert(QPainter *p, QSvgExtraStates &states) override;
+    Type type() const override;
+
+    void setPath(const QPainterPath &path)
+    {
+        m_path = path;
+    }
+
+    const QPainterPath &path() const
+    {
+        return m_path;
+    }
+
+    void setRotateAngle(qreal angle)
+    {
+        m_rotateAngle = angle;
+    }
+
+    qreal rotateAngle() const
+    {
+        return m_rotateAngle;
+    }
+
+    void setRotateType(QtSvg::OffsetRotateType type)
+    {
+        m_rotateType = type;
+    }
+
+    QtSvg::OffsetRotateType rotateType() const
+    {
+        return m_rotateType;
+    }
+
+    void setDistance(qreal distance)
+    {
+        m_distance = distance;
+    }
+
+    qreal distance() const
+    {
+        return m_distance;
+    }
+
+private:
+    QPainterPath m_path;
+    qreal m_distance = 0;
+    qreal m_rotateAngle = 0;
+    QtSvg::OffsetRotateType m_rotateType = QtSvg::OffsetRotateType::Auto;
+};
+
 class Q_SVG_EXPORT QSvgStaticStyle
 {
 public:
@@ -667,9 +724,25 @@ public:
     QSvgRefCounter<QSvgTransformStyle>    transform;
     QSvgRefCounter<QSvgOpacityStyle>      opacity;
     QSvgRefCounter<QSvgCompOpStyle>       compop;
+    QSvgRefCounter<QSvgOffsetStyle>       offset;
 };
 
-class QSvgAbstractAnimatedProperty;
+class QSvgAbstractAnimation;
+
+struct QSvgStyleState
+{
+    QBrush fill;
+    QPen stroke;
+    qreal fillOpacity;
+    qreal strokeOpacity;
+    qreal opacity;
+    QTransform transform;
+    std::optional<QPainterPath> offsetPath;
+    qreal offsetDistance;
+    qreal offsetRotate;
+    QtSvg::OffsetRotateType offsetRotateType;
+};
+
 class Q_SVG_EXPORT QSvgAnimatedStyle
 {
 public:
@@ -681,16 +754,13 @@ public:
 
 private:
     void savePaintingState(const QPainter *p, const QSvgNode *node, QSvgExtraStates &states);
-    void applyPropertyAnimation(QPainter *p, QSvgAbstractAnimatedProperty *property, bool replace, QSvgExtraStates &states);
+    void fetchStyleState(const QSvgAbstractAnimation *animation, QSvgStyleState &currentStyle);
+    void applyStyle(QPainter *p, QSvgExtraStates &states, const QSvgStyleState &currentStyle);
 
 private:
-    QBrush m_brush;
-    QPen m_pen;
     QTransform m_worldTransform;
     QTransform m_transformToNode;
-    qreal m_fillOpacity = 1.0;
-    qreal m_strokeOpacity = 1.0;
-    qreal m_opacity = 1.0;
+    QSvgStyleState m_static;
 };
 
 /********************************************************/

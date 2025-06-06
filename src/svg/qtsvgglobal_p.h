@@ -33,6 +33,14 @@ enum class AnimatorType : quint32 {
     Automatic,
 };
 
+enum class OffsetRotateType : quint32 {
+    Auto,
+    Angle,
+    AutoAngle,
+    Reverse,
+    ReverseAngle
+};
+
 }
 
 QT_END_NAMESPACE

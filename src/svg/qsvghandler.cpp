@@ -1031,8 +1031,8 @@ static void parseCssAnimations(QSvgNode *node,
                                const QXmlStreamAttributes &attributes,
                                QSvgHandler *handler)
 {
-    QSvgCssAnimationProperties cssAnimProps(attributes);
-    QList<QSvgAnimationProperty> parsedProperties = cssAnimProps.parse();
+    QSvgCssProperties cssAnimProps(attributes);
+    QList<QSvgAnimationProperty> parsedProperties = cssAnimProps.animations();
 
     for (QSvgAnimationProperty property : parsedProperties) {
         QSvgCssAnimation *anim = handler->cssHandler().createAnimation(property.name);
@@ -1045,6 +1045,23 @@ static void parseCssAnimations(QSvgNode *node,
         handler->document()->animator()->appendAnimation(node, anim);
         handler->document()->setAnimated(true);
     }
+}
+
+static void parseOffsetPath(QSvgNode *node,
+                            const QXmlStreamAttributes &attributes)
+{
+    QSvgCssProperties cssProperties(attributes);
+    QSvgOffsetProperty offset = cssProperties.offset();
+
+    if (!offset.path)
+        return;
+
+    QSvgOffsetStyle *offsetStyle = new QSvgOffsetStyle();
+    offsetStyle->setPath(offset.path.value());
+    offsetStyle->setRotateAngle(offset.angle);
+    offsetStyle->setRotateType(offset.rotateType);
+    offsetStyle->setDistance(offset.distance);
+    node->appendStyleProperty(offsetStyle, QString());
 }
 
 #endif // QT_NO_CSSPARSER
@@ -1336,6 +1353,7 @@ static bool parseStyle(QSvgNode *node,
         handler->cssHandler().parseCSStoXMLAttrs(style.toString(), cssAttributes);
     svgAttributes.setAttributes(cssAttributes, handler);
 
+    parseOffsetPath(node, cssAttributes);
     if (!handler->options().testFlag(QtSvg::DisableCSSAnimations))
         parseCssAnimations(node, cssAttributes, handler);
 #endif

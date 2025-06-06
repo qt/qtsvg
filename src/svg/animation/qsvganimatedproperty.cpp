@@ -23,6 +23,7 @@ static void initHash()
     animatableProperties->insert(QStringLiteral("stroke"), QSvgAbstractAnimatedProperty::Color);
     animatableProperties->insert(QStringLiteral("opacity"), QSvgAbstractAnimatedProperty::Float);
     animatableProperties->insert(QStringLiteral("transform"), QSvgAbstractAnimatedProperty::Transform);
+    animatableProperties->insert(QStringLiteral("offset-distance"), QSvgAbstractAnimatedProperty::Float);
 }
 
 static qreal q_lerp(qreal a, qreal b, qreal t)

@@ -20,6 +20,8 @@
 #include <QtCore/qregularexpression.h>
 #include <QtCore/qlist.h>
 #include <QtCore/qstringview.h>
+#include <QtGui/qpainterpath.h>
+#include <QtSvg/private/qtsvgglobal_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -32,11 +34,20 @@ struct QSvgAnimationProperty
     int iteration = 1;
 };
 
-class QSvgCssAnimationProperties
+struct QSvgOffsetProperty
+{
+    std::optional<QPainterPath> path;
+    qreal distance = 0;
+    qreal angle = 0;
+    QtSvg::OffsetRotateType rotateType = QtSvg::OffsetRotateType::Auto;
+};
+
+class QSvgCssProperties
 {
 public:
-    QSvgCssAnimationProperties(const QXmlStreamAttributes &attributes);
-    QList<QSvgAnimationProperty> parse() const;
+    QSvgCssProperties(const QXmlStreamAttributes &attributes);
+    QList<QSvgAnimationProperty> animations() const;
+    QSvgOffsetProperty offset() const;
 
 private:
     void shortHandtoLonghandForm(QStringView value);
@@ -50,6 +61,10 @@ private:
     QList<QStringView> m_timingFunctions;
     QList<QStringView> m_fillModes;
     QList<QStringView> m_playStates;
+
+    QStringView m_offsetPath;
+    QStringView m_offsetDistance;
+    QStringView m_offsetRotate;
 };
 
 QT_END_NAMESPACE

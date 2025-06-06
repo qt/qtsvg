@@ -3,6 +3,7 @@
 // Qt-Security score:critical reason:data-parser
 
 #include "qsvgcssproperties_p.h"
+#include <QtSvg/private/qsvgutils_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -75,7 +76,7 @@ bool isPlayState(QStringView str) {
 
 }
 
-QSvgCssAnimationProperties::QSvgCssAnimationProperties(const QXmlStreamAttributes &attributes)
+QSvgCssProperties::QSvgCssProperties(const QXmlStreamAttributes &attributes)
 {
     QRegularExpression re(";| "_L1);
     for (int i = 0; i < attributes.size(); ++i) {
@@ -108,13 +109,22 @@ QSvgCssAnimationProperties::QSvgCssAnimationProperties(const QXmlStreamAttribute
                 m_playStates = value.split(re, Qt::SkipEmptyParts);
             break;
 
+        case 'o':
+            if (name == "offset-path"_L1)
+                m_offsetPath = value;
+            if (name == "offset-distance"_L1)
+                m_offsetDistance = value;
+            if (name == "offset-rotate"_L1)
+                m_offsetRotate = value;
+            break;
+
         default:
             break;
         }
     }
 }
 
-QList<QSvgAnimationProperty> QSvgCssAnimationProperties::parse() const
+QList<QSvgAnimationProperty> QSvgCssProperties::animations() const
 {
     bool ok;
     QList<QSvgAnimationProperty> parsedProperties;
@@ -152,7 +162,42 @@ QList<QSvgAnimationProperty> QSvgCssAnimationProperties::parse() const
     return parsedProperties;
 }
 
-void QSvgCssAnimationProperties::shortHandtoLonghandForm(QStringView value)
+QSvgOffsetProperty QSvgCssProperties::offset() const
+{
+    QSvgOffsetProperty offset;
+
+    offset.path = QSvgUtils::parsePathDataFast(m_offsetPath);
+
+    qsizetype index;
+    Qt::CaseSensitivity cs = Qt::CaseInsensitive;
+    if ((index = m_offsetRotate.indexOf("auto"_L1, 0, cs)) >= 0) {
+        std::optional<qreal> angle = QSvgUtils::parseAngle(m_offsetRotate.sliced(index + 4));
+        offset.rotateType = angle ? QtSvg::OffsetRotateType::AutoAngle :
+                                QtSvg::OffsetRotateType::Auto;
+        offset.angle = angle.value_or(0);
+    } else if ((index = m_offsetRotate.indexOf("reverse"_L1, 0, cs)) >= 0) {
+        std::optional<qreal> angle = QSvgUtils::parseAngle(m_offsetRotate.sliced(index + 7));
+        offset.rotateType = angle ? QtSvg::OffsetRotateType::ReverseAngle :
+                                QtSvg::OffsetRotateType::Reverse;
+        offset.angle = angle.value_or(0);
+    } else {
+        std::optional<qreal> angle = QSvgUtils::parseAngle(m_offsetRotate);
+        offset.rotateType = angle ? QtSvg::OffsetRotateType::Angle :
+                                QtSvg::OffsetRotateType::Auto;
+        offset.angle = angle.value_or(0);
+    }
+
+    QSvgUtils::LengthType type;
+    bool *ok = nullptr;
+    offset.distance= QSvgUtils::parseLength(m_offsetDistance, &type, ok);
+    if (type == QSvgUtils::LengthType::LT_PERCENT) {
+        offset.distance = offset.distance / 100.0;
+    }
+
+    return offset;
+}
+
+void QSvgCssProperties::shortHandtoLonghandForm(QStringView value)
 {
     m_names.clear();
     m_durations.clear();

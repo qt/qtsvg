@@ -234,6 +234,9 @@ void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop, const QString &id)
     case QSvgStyleProperty::COMP_OP:
         m_style.compop = static_cast<QSvgCompOpStyle*>(prop);
         break;
+    case QSvgStyleProperty::OFFSET:
+        m_style.offset = static_cast<QSvgOffsetStyle*>(prop);
+        break;
     default:
         qDebug("QSvgNode: Trying to append unknown property!");
         break;
