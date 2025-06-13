@@ -38,6 +38,7 @@ set(tst_qicon_svg_resource_files
     "icons/trash.svg"
     "icons/triangle.svg"
     "icons/testtheme/svg/actions/heart.svg"
+    "icons/testtheme/16x16/actions/heart.png"
     "icons/testtheme/index.theme"
 )
 

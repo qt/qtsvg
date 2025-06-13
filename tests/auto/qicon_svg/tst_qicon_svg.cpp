@@ -200,7 +200,7 @@ void tst_QIcon_Svg::fromTheme()
 
     QIcon heartIcon = QIcon::fromTheme("heart");
     QVERIFY(!heartIcon.isNull());
-    QVERIFY(!heartIcon.availableSizes(QIcon::Normal, QIcon::Off).isEmpty()); // 22x22
+    QCOMPARE(heartIcon.availableSizes().size(), 2); // 16x16, 22x22
 
     const QPixmap pixmap = heartIcon.pixmap(QSize(requestedSize, requestedSize), requestedDpr);
     const auto width = pixmap.size().width();
