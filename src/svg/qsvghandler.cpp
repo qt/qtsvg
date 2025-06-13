@@ -1762,7 +1762,7 @@ static void parseOthers(QSvgNode *node,
     }
 }
 
-static std::optional<QString> getAttributeId(const QStringView &attribute)
+static std::optional<QStringView> getAttributeId(const QStringView &attribute)
 {
     if (attribute.isEmpty())
         return std::nullopt;
@@ -1771,7 +1771,7 @@ static std::optional<QString> getAttributeId(const QStringView &attribute)
     QStringView attrStr = attribute.trimmed();
     if (attrStr.startsWith(urlKeyword))
         attrStr.slice(urlKeyword.size());
-    QString id = idFromUrl(attrStr).toString();
+    QStringView id = idFromUrl(attrStr);
     if (id.startsWith(QLatin1Char('#')))
         id.slice(1);
     return id;
@@ -1785,15 +1785,15 @@ static void parseExtendedAttributes(QSvgNode *node,
         return;
 
     if (auto id = getAttributeId(attributes.mask))
-        node->setMaskId(*id);
+        node->setMaskId(id->toString());
     if (auto id = getAttributeId(attributes.markerStart))
-        node->setMarkerStartId(*id);
+        node->setMarkerStartId(id->toString());
     if (auto id = getAttributeId(attributes.markerMid))
-        node->setMarkerMidId(*id);
+        node->setMarkerMidId(id->toString());
     if (auto id = getAttributeId(attributes.markerEnd))
-        node->setMarkerEndId(*id);
+        node->setMarkerEndId(id->toString());
     if (auto id = getAttributeId(attributes.filter))
-        node->setFilterId(*id);
+        node->setFilterId(id->toString());
 }
 
 static void parseRenderingHints(QSvgNode *node,
