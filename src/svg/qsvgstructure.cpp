@@ -800,6 +800,7 @@ QSvgPattern::QSvgPattern(QSvgNode *parent, QSvgRectF bounds, QRectF viewBox,
     m_rect(bounds),
     m_viewBox(viewBox),
     m_contentUnits(contentUnits),
+    m_isRendering(false),
     m_transform(transform)
 
 {
@@ -884,6 +885,13 @@ QImage QSvgPattern::renderPattern(QSize size, qreal contentScaleX, qreal content
         return defaultPattern();
     }
     pattern.fill(Qt::transparent);
+
+    if (m_isRendering) {
+        qCWarning(lcSvgDraw) << "The pattern is trying to render itself recursively. "
+                                "Returning a transparent QImage of the right size.";
+        return pattern;
+    }
+    QScopedValueRollback<bool> guard(m_isRendering, true);
 
     // Draw the pattern using our QPainter.
     QPainter patternPainter(&pattern);

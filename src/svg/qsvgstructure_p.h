@@ -241,6 +241,7 @@ private:
     QSvgRectF m_rect;
     QRectF m_viewBox;
     QtSvg::UnitTypes m_contentUnits;
+    mutable bool m_isRendering;
     QTransform m_transform;
 };
 

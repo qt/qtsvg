@@ -1809,6 +1809,9 @@ void tst_QSvgRenderer::ossFuzzLoad_data()
     // resulted in stack overflow
     QTest::newRow("cyclic-reference") // id=42532991
             << R"-(<svg><pattern height="3" width="9" id="c"><path d="v4T1-" stroke="url(#c)"><symbol>)-"_ba;
+    // resulted in stack overflow
+    QTest::newRow("cyclic-reference-from-parent") // id=390467765
+            << R"-(<svg stroke="url(#c)"><pattern height="2" width="4" id="c"/><path stroke="#F00" d="v2"/></svg>)-"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzLoad()
