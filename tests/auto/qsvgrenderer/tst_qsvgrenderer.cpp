@@ -69,6 +69,7 @@ private slots:
     void oss_fuzz_24738();
     void oss_fuzz_61586();
     void oss_fuzz_42532991();
+    void oss_fuzz_390467765();
     void oss_fuzz_399769595();
     void imageRendering();
     void imageMalformedDataUrl();
@@ -1767,6 +1768,12 @@ void tst_QSvgRenderer::oss_fuzz_42532991()
 {
     // resulted in stack overflow
     QSvgRenderer().load(QByteArray("<svg><pattern height=\"3\" width=\"9\" id=\"c\"><path d=\"v4T1-\" stroke=\"url(#c)\"><symbol>"));
+}
+
+void tst_QSvgRenderer::oss_fuzz_390467765()
+{
+    // resulted in stack overflow
+    QSvgRenderer().load(QByteArray("<svg stroke=\"url(#c)\"><pattern height=\"2\" width=\"4\" id=\"c\"/><path stroke=\"#F00\" d=\"v2\"/></svg>"));
 }
 
 void tst_QSvgRenderer::oss_fuzz_399769595()
