@@ -4112,9 +4112,7 @@ void QSvgHandler::parse()
             // namespaceUri is empty. The only possible strategy at
             // this point is to do what everyone else seems to do and
             // ignore the reported namespaceUri completely.
-            if (remainingUnfinishedElements
-                    && startElement(xml->name(), xml->attributes())
-                    && !detectCyclesAndWarn(m_doc)) {
+            if (remainingUnfinishedElements && startElement(xml->name(), xml->attributes())) {
                 --remainingUnfinishedElements;
             } else {
                 delete m_doc;
