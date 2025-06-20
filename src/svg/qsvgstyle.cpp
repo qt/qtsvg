@@ -419,8 +419,7 @@ QSvgPatternStyle::QSvgPatternStyle(QSvgPattern *pattern)
 
 QBrush QSvgPatternStyle::brush(QPainter *p, const QSvgNode *node, QSvgExtraStates &states)
 {
-    m_patternImage = m_pattern->patternImage(p, states, node);
-    QBrush b(m_patternImage);
+    QBrush b(m_pattern->patternImage(p, states, node));
     b.setTransform(m_pattern->appliedTransform());
     return b;
 }

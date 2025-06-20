@@ -606,7 +606,6 @@ public:
     QSvgPattern *patternNode() { return m_pattern; }
 private:
     QSvgPattern *m_pattern;
-    QImage m_patternImage;
     QRectF m_parentBound;
 };
 
