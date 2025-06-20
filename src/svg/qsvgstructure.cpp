@@ -862,7 +862,10 @@ QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSv
     imageSize.setHeight(qCeil(patternBoundingBox.height() * t.m22() * m_transform.m22()));
 
     calculateAppliedTransform(t, peBoundingBox, imageSize);
-    return renderPattern(imageSize, contentScaleFactorX, contentScaleFactorY);
+    if (document()->isCalculatingImplicitViewBox())
+        return QImage(imageSize, QImage::Format_ARGB32); // dummy image to avoid endless recursion
+    else
+        return renderPattern(imageSize, contentScaleFactorX, contentScaleFactorY);
 }
 
 QSvgNode::Type QSvgPattern::type() const

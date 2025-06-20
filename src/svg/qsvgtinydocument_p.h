@@ -23,6 +23,7 @@
 #include "QtCore/qhash.h"
 #include "QtCore/qdatetime.h"
 #include "QtCore/qxmlstream.h"
+#include "QtCore/qscopedvaluerollback.h"
 #include "QtCore/qsharedpointer.h"
 #include "qsvgstyle_p.h"
 #include "qsvgfont_p.h"
@@ -63,6 +64,7 @@ public:
 
     inline QRectF viewBox() const;
     void setViewBox(const QRectF &rect);
+    bool isCalculatingImplicitViewBox() { return m_calculatingImplicitViewBox; }
 
     QtSvg::Options options() const;
 
@@ -102,6 +104,7 @@ private:
     bool   m_widthPercent;
     bool   m_heightPercent;
 
+    mutable bool m_calculatingImplicitViewBox = false;
     mutable bool m_implicitViewBox = true;
     mutable QRectF m_viewBox;
     bool m_preserveAspectRatio = false;
@@ -156,6 +159,7 @@ inline bool QSvgTinyDocument::heightPercent() const
 inline QRectF QSvgTinyDocument::viewBox() const
 {
     if (m_viewBox.isNull()) {
+        QScopedValueRollback<bool> guard(m_calculatingImplicitViewBox, true);
         m_viewBox = bounds();
         m_implicitViewBox = true;
     }
