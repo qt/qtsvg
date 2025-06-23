@@ -130,6 +130,8 @@ void tst_QSvgRenderer::getSetCheck()
     QCOMPARE(20, obj1.framesPerSecond());
     obj1.setFramesPerSecond(0);
     QCOMPARE(0, obj1.framesPerSecond());
+    QTest::ignoreMessage(QtWarningMsg,
+                         "QSvgRenderer::setFramesPerSecond: Cannot set negative value -2147483648");
     obj1.setFramesPerSecond(INT_MIN);
     QCOMPARE(0, obj1.framesPerSecond()); // Can't have a negative framerate
     obj1.setFramesPerSecond(INT_MAX);
@@ -169,7 +171,8 @@ void tst_QSvgRenderer::emptyRect()
 
 void tst_QSvgRenderer::inexistentUrl()
 {
-    const char *src = "<svg><g><path d=\"\" style=\"stroke:url(#inexistent)\"/></g></svg>";
+    const char *src = "<svg><g><path d=\"M0 0\" style=\"stroke:url(#inexistent)\"/></g></svg>";
+    QTest::ignoreMessage(QtWarningMsg, "<input>:1:66: Could not resolve property: #inexistent");
 
     QByteArray data(src);
     QSvgRenderer renderer(data);
@@ -180,6 +183,7 @@ void tst_QSvgRenderer::inexistentUrl()
 void tst_QSvgRenderer::emptyUrl()
 {
     const char *src = "<svg><text fill=\"url()\" /></svg>";
+    QTest::ignoreMessage(QtWarningMsg, "<input>:1:32: Could not resolve property: ");
 
     QByteArray data(src);
     QSvgRenderer renderer(data);
@@ -1755,6 +1759,7 @@ void tst_QSvgRenderer::smallFont()
         QByteArray data(svgs[i]);
         if (i == 0)
             QTest::ignoreMessage(QtWarningMsg, "QFont::setPointSizeF: Point size <= 0 (0.000000), must be greater than 0");
+        QTest::ignoreMessage(QtWarningMsg, "QFont::setPixelSize: Pixel size <= 0 (0)");
         QSvgRenderer renderer(data);
         images[i] = QImage(50, 50, QImage::Format_ARGB32_Premultiplied);
         images[i].fill(-1);
