@@ -57,7 +57,7 @@ public:
     void setFramesPerSecond(int num);
     int currentFrame() const;
     void setCurrentFrame(int);
-    int animationDuration() const;//in seconds
+    int animationDuration() const;
     bool isAnimationEnabled() const;
     void setAnimationEnabled(bool enable);
 
