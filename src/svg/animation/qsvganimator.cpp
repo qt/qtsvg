@@ -16,8 +16,7 @@ QSvgAbstractAnimator::QSvgAbstractAnimator()
 QSvgAbstractAnimator::~QSvgAbstractAnimator()
 {
     for (auto animationHash : {&m_animationsCSS, &m_animationsSMIL}) {
-        for (auto itr = animationHash->begin(); itr != animationHash->end(); itr++) {
-            QList<QSvgAbstractAnimation *> &nodeAnimations = itr.value();
+        for (const auto &nodeAnimations : *std::as_const(animationHash)) {
             for (QSvgAbstractAnimation *anim : nodeAnimations)
                 delete anim;
         }
@@ -44,19 +43,12 @@ QList<QSvgAbstractAnimation *> QSvgAbstractAnimator::animationsForNode(const QSv
 void QSvgAbstractAnimator::advanceAnimations()
 {
     qreal elapsedTime = currentElapsed();
-    for (auto itr = m_animationsCSS.begin(); itr != m_animationsCSS.end(); itr++) {
-        QList<QSvgAbstractAnimation *> &nodeAnimations = itr.value();
-        for (QSvgAbstractAnimation *anim : nodeAnimations) {
-            if (!anim->finished())
-                anim->evaluateAnimation(elapsedTime);
-        }
-    }
-
-    for (auto itr = m_animationsSMIL.begin(); itr != m_animationsSMIL.end(); itr++) {
-        QList<QSvgAbstractAnimation *> &nodeAnimations = itr.value();
-        for (QSvgAbstractAnimation *anim : nodeAnimations) {
-            if (!anim->finished())
-                anim->evaluateAnimation(elapsedTime);
+    for (auto animationHash : {&m_animationsCSS, &m_animationsSMIL}) {
+        for (const auto &nodeAnimations : *std::as_const(animationHash)) {
+            for (QSvgAbstractAnimation *anim : nodeAnimations) {
+                if (!anim->finished())
+                    anim->evaluateAnimation(elapsedTime);
+            }
         }
     }
 }
