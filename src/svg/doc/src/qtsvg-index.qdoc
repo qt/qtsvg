@@ -52,5 +52,5 @@
     Furthermore, Qt SVG contains third party
     code under following permissive licenses:
 
-    \generatelist{groupsbymodule attributions-qtsvg}
+    \annotatedlist attributions-qtsvg
 */
