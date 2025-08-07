@@ -45,10 +45,8 @@ void QSvgAbstractAnimator::advanceAnimations()
     qreal elapsedTime = currentElapsed();
     for (auto animationHash : {&m_animationsCSS, &m_animationsSMIL}) {
         for (const auto &nodeAnimations : *std::as_const(animationHash)) {
-            for (QSvgAbstractAnimation *anim : nodeAnimations) {
-                if (!anim->finished())
-                    anim->evaluateAnimation(elapsedTime);
-            }
+            for (QSvgAbstractAnimation *anim : nodeAnimations)
+                anim->evaluateAnimation(elapsedTime);
         }
     }
 }
@@ -91,7 +89,7 @@ qint64 QSvgAnimator::currentElapsed()
 
 void QSvgAnimator::setAnimatorTime(qint64 time)
 {
-    m_time += time;
+    m_time -= time;
 }
 
 QSvgAnimationController::QSvgAnimationController()
