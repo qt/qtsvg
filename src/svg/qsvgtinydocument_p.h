@@ -85,7 +85,7 @@ public:
     QSvgPaintStyleProperty *namedStyle(const QString &id) const;
 
     void restartAnimation();
-    inline int currentElapsed() const;
+    inline qint64 currentElapsed() const;
     bool animated() const;
     void setAnimated(bool a);
     inline int animationDuration() const;
@@ -168,7 +168,7 @@ inline bool QSvgTinyDocument::preserveAspectRatio() const
     return m_preserveAspectRatio;
 }
 
-inline int QSvgTinyDocument::currentElapsed() const
+inline qint64 QSvgTinyDocument::currentElapsed() const
 {
     return m_animator->currentElapsed();
 }

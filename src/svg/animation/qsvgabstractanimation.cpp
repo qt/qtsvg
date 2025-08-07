@@ -42,14 +42,18 @@ bool QSvgAbstractAnimation::isActive() const
 
 void QSvgAbstractAnimation::evaluateAnimation(qreal elapsedTime)
 {
-    qreal fractionOfTotalTime = 0;
-    if (m_duration != 0 && elapsedTime >= m_start) {
-        fractionOfTotalTime = (elapsedTime - m_start) / m_duration;
-        if (m_iterationCount >= 0 && m_iterationCount < fractionOfTotalTime) {
-            m_finished = true;
-            return;
-        }
-    }
+    if (m_duration == 0 || m_start > elapsedTime)
+        return;
+
+    qreal fractionOfTotalTime = (elapsedTime - m_start) / m_duration;
+
+    if (m_iterationCount >= 0 && m_iterationCount < fractionOfTotalTime)
+        m_finished = true;
+    else
+        m_finished = false;
+
+    if (m_finished)
+        return;
 
     qreal fractionOfCurrentIterationTime = fractionOfTotalTime - std::trunc(fractionOfTotalTime);
 
