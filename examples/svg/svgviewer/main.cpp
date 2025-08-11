@@ -1,4 +1,4 @@
-// Copyright (C) 2017 The Qt Company Ltd.
+// Copyright (C) 2025 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 #include <QApplication>
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     parser.process(app);
 
     MainWindow window;
-    if (!window.loadFile(parser.positionalArguments().value(0, QLatin1String(":/files/bubbles.svg"))))
+    if (!window.loadFile(parser.positionalArguments().value(0, QLatin1String(":/files/abstract_tree.svg"))))
         return -1;
     window.show();
     return app.exec();

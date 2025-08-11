@@ -1,10 +1,11 @@
-# Copyright (C) 2022 The Qt Company Ltd.
+# Copyright (C) 2025 The Qt Company Ltd.
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 cmake_minimum_required(VERSION 3.16)
 project(svgviewer LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
 
 if(NOT DEFINED INSTALL_EXAMPLESDIR)
     set(INSTALL_EXAMPLESDIR "examples")
@@ -12,13 +13,22 @@ endif()
 
 set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/svg/svgviewer")
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Svg SvgWidgets Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Svg Widgets)
 
 qt_add_executable(svgviewer
     exportdialog.cpp exportdialog.h
     main.cpp
     mainwindow.cpp mainwindow.h
-    svgview.cpp svgview.h
+    mainwindow.ui
+    svgview.h svgview.cpp
+)
+
+qt_add_resources(svgviewer "files"
+    FILES
+        files/abstract_tree.svg
+        files/black.png
+        files/white.png
+        files/chequered.png
 )
 
 set_target_properties(svgviewer PROPERTIES
@@ -30,32 +40,8 @@ target_link_libraries(svgviewer PUBLIC
     Qt::Core
     Qt::Gui
     Qt::Svg
-    Qt::SvgWidgets
     Qt::Widgets
 )
-
-# Resources:
-set(svgviewer_resource_files
-    "files/bubbles.svg"
-)
-
-qt6_add_resources(svgviewer "svgviewer"
-    PREFIX
-        "/"
-    FILES
-        ${svgviewer_resource_files}
-)
-
-if(TARGET Qt::OpenGL AND TARGET Qt::OpenGLWidgets)
-    target_compile_definitions(svgviewer PUBLIC
-        USE_OPENGLWIDGETS
-    )
-
-    target_link_libraries(svgviewer PUBLIC
-        Qt::OpenGL
-        Qt::OpenGLWidgets
-    )
-endif()
 
 install(TARGETS svgviewer
     RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"

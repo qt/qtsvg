@@ -26,6 +26,7 @@ qhp.QtSvg.subprojects.manual.type = manual
 
 depends += qtcore \
            qtwidgets \
+           qtquick\
            qtgui \
            qtdesigner \
            qtdoc \
