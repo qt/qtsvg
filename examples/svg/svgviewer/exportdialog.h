@@ -1,4 +1,4 @@
-// Copyright (C) 2017 The Qt Company Ltd.
+// Copyright (C) 2025 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 #ifndef EXPORTDIALOG_H
@@ -6,8 +6,10 @@
 
 #include <QDialog>
 
-QT_FORWARD_DECLARE_CLASS(QLineEdit)
-QT_FORWARD_DECLARE_CLASS(QSpinBox)
+QT_BEGIN_NAMESPACE
+class QLineEdit;
+class QSpinBox;
+QT_END_NAMESPACE
 
 class ExportDialog : public QDialog
 {
