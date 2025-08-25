@@ -35,6 +35,16 @@ void QSvgFont::addGlyph(QChar unicode, const QPainterPath &path, qreal horizAdvX
                                        (horizAdvX==-1)?m_horizAdvX:horizAdvX));
 }
 
+bool QSvgFont::addMissingGlyph(const QPainterPath &path, qreal horizAdvX)
+{
+    if (m_missingGlyph) {
+        qWarning("The font already has a 'missing-glyph' element.");
+        return false;
+    }
+    m_missingGlyph.reset(new QSvgGlyph(QChar(), path, (horizAdvX == -1) ? m_horizAdvX : horizAdvX));
+    return true;
+}
+
 
 void QSvgFont::draw(QPainter *p, const QPointF &point, const QString &str,
                     qreal pixelSize, Qt::Alignment alignment) const
@@ -65,9 +75,9 @@ void QSvgFont::draw_helper(QPainter *p, const QPointF &point, const QString &str
     for ( ; itr != str.constEnd(); ++itr) {
         QChar unicode = *itr;
         if (!m_glyphs.contains(*itr)) {
-            unicode = u'\0';
-            if (!m_glyphs.contains(unicode))
-                continue;
+            if (m_missingGlyph)
+                textWidth += static_cast<int>(m_missingGlyph->m_horizAdvX);
+            continue;
         }
         textWidth += static_cast<int>(m_glyphs[unicode].m_horizAdvX);
     }
@@ -91,26 +101,29 @@ void QSvgFont::draw_helper(QPainter *p, const QPointF &point, const QString &str
 
     itr = str.constBegin();
     for ( ; itr != str.constEnd(); ++itr) {
+        QSvgGlyph foundGlyph;
         QChar unicode = *itr;
-        if (!m_glyphs.contains(*itr)) {
-            unicode = u'\0';
-            if (!m_glyphs.contains(unicode))
+        if (m_glyphs.contains(*itr)) {
+            foundGlyph = m_glyphs[unicode];
+        } else {
+            if (!m_missingGlyph)
                 continue;
+            foundGlyph = *m_missingGlyph;
         }
 
         if (isPainting)
-            p->drawPath(m_glyphs[unicode].m_path);
+            p->drawPath(foundGlyph.m_path);
 
         if (boundingRect) {
             QPainterPathStroker stroker;
             stroker.setWidth(penWidth);
             stroker.setJoinStyle(p->pen().joinStyle());
             stroker.setMiterLimit(p->pen().miterLimit());
-            QPainterPath stroke = stroker.createStroke(m_glyphs[unicode].m_path);
+            QPainterPath stroke = stroker.createStroke(foundGlyph.m_path);
             *boundingRect |= p->transform().map(stroke).boundingRect();
         }
 
-        p->translate(m_glyphs[unicode].m_horizAdvX, 0);
+        p->translate(foundGlyph.m_horizAdvX, 0);
     }
 
     p->restore();

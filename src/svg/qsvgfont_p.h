@@ -21,6 +21,8 @@
 #include "qsvgstyle_p.h"
 #include "qtsvgglobal_p.h"
 
+#include <memory>
+
 QT_BEGIN_NAMESPACE
 
 class Q_SVG_EXPORT QSvgGlyph
@@ -47,6 +49,7 @@ public:
     void setUnitsPerEm(qreal upem);
 
     void addGlyph(QChar unicode, const QPainterPath &path, qreal horizAdvX = -1);
+    bool addMissingGlyph(const QPainterPath &path, qreal horizAdvX);
 
     void draw(QPainter *p, const QPointF &point, const QString &str,
               qreal pixelSize, Qt::Alignment alignment) const;
@@ -57,6 +60,8 @@ public:
     QString m_familyName;
     qreal m_unitsPerEm = DEFAULT_UNITS_PER_EM;
     qreal m_horizAdvX;
+    // not about a missing <glyph> element, but the font's <missing-glyph> element:
+    std::unique_ptr<const QSvgGlyph> m_missingGlyph;
     QHash<QChar, QSvgGlyph> m_glyphs;
 
 private:
