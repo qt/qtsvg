@@ -64,6 +64,8 @@ private slots:
     void testStopOffsetOpacity();
     void testUseElement();
     void smallFont();
+    void glyphWarnings_data();
+    void glyphWarnings();
     void styleSheet();
     void duplicateStyleId();
     void ossFuzzRender_data();
@@ -1733,6 +1735,52 @@ void tst_QSvgRenderer::smallFont()
         p.end();
     }
     QVERIFY(images[0] != images[1]);
+}
+
+void tst_QSvgRenderer::glyphWarnings_data()
+{
+    QTest::addColumn<QString>("missingGlyphAttributes");
+    QTest::addColumn<QString>("secondElement");
+    QTest::addColumn<QByteArrayList>("warnings");
+
+    const QString glyph = R"(<glyph %1 d="M0 0L9 9z"/>)";
+    QTest::newRow("glyph-without-unicode")
+        << "" << glyph.arg("")
+        << QByteArrayList{"glyph does not define a non-empty 'unicode' attribute and will be ignored",
+                          "<input>:1:120: Problem parsing glyph"};
+    QTest::newRow("glyph-empty-unicode")
+        << "" << glyph.arg(R"(unicode="")")
+        << QByteArrayList{"glyph does not define a non-empty 'unicode' attribute and will be ignored",
+                          "<input>:1:130: Problem parsing glyph"};
+    QTest::newRow("missing-glyph-with-unicode")
+        << R"(unicode="a")" << glyph.arg(R"(unicode="a")")
+        << QByteArrayList{"Ignoring missing-glyph's 'unicode' attribute"};
+    QTest::newRow("double-missing-glyph")
+        << "" << R"(<missing-glyph d="M0 0L9 9z"/>)"
+        << QByteArrayList{"The font already has a 'missing-glyph' element.",
+                          "<input>:1:127: Problem parsing missing-glyph"};
+}
+
+void tst_QSvgRenderer::glyphWarnings()
+{
+    // This test validates that questionable attributes in a font's glyph and missing-glyph elements
+    // will trigger suitable warnings while parsing of the entire document finishes sucessfully.
+
+    const QString svgTemplate = R"(<svg><defs>)"
+                                R"(<font xml:id="tstFnt"><font-face font-family="tstFnt"/>)"
+                                R"(<missing-glyph %1 d="M0 0L9 9z"/>)"
+                                R"(%2)"
+                                R"(</font></defs>)"
+                                R"(<text font-family="tstFnt">a</text></svg>)";
+
+    QFETCH(QString, missingGlyphAttributes);
+    QFETCH(QString, secondElement);
+    QFETCH(QByteArrayList, warnings);
+
+    for (const auto &w: warnings)
+        QTest::ignoreMessage(QtWarningMsg, w);
+    QSvgRenderer renderer(svgTemplate.arg(missingGlyphAttributes).arg(secondElement).toUtf8());
+    QVERIFY(renderer.isValid());
 }
 
 void tst_QSvgRenderer::styleSheet()

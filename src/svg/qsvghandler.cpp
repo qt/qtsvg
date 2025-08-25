@@ -538,20 +538,29 @@ static inline qreal convertToNumber(QStringView str, bool *ok = NULL)
     return num;
 }
 
-static bool createSvgGlyph(QSvgFont *font, const QXmlStreamAttributes &attributes)
+static bool createSvgGlyph(QSvgFont *font, const QXmlStreamAttributes &attributes,
+                           bool isMissingGlyph)
 {
     QStringView uncStr = attributes.value(QLatin1String("unicode"));
     QStringView havStr = attributes.value(QLatin1String("horiz-adv-x"));
     QStringView pathStr = attributes.value(QLatin1String("d"));
 
-    QChar unicode = (uncStr.isEmpty()) ? u'\0' : uncStr.at(0);
     qreal havx = (havStr.isEmpty()) ? -1 : QSvgUtils::toDouble(havStr);
     QPainterPath path;
     path.setFillRule(Qt::WindingFill);
     parsePathDataFast(pathStr, path);
 
-    font->addGlyph(unicode, path, havx);
+    if (isMissingGlyph) {
+        if (!uncStr.isEmpty())
+            qWarning("Ignoring missing-glyph's 'unicode' attribute");
+        return font->addMissingGlyph(path, havx);
+    }
 
+    if (uncStr.isEmpty()) {
+        qWarning("glyph does not define a non-empty 'unicode' attribute and will be ignored");
+        return false;
+    }
+    font->addGlyph(uncStr.at(0), path, havx);
     return true;
 }
 
@@ -2272,8 +2281,7 @@ static bool parseGlyphNode(QSvgStyleProperty *parent,
 
     QSvgFontStyle *style = static_cast<QSvgFontStyle*>(parent);
     QSvgFont *font = style->svgFont();
-    createSvgGlyph(font, attributes);
-    return true;
+    return createSvgGlyph(font, attributes, false);
 }
 
 static bool parseHandlerNode(QSvgNode *parent,
@@ -2505,8 +2513,7 @@ static bool parseMissingGlyphNode(QSvgStyleProperty *parent,
 
     QSvgFontStyle *style = static_cast<QSvgFontStyle*>(parent);
     QSvgFont *font = style->svgFont();
-    createSvgGlyph(font, attributes);
-    return true;
+    return createSvgGlyph(font, attributes, true);
 }
 
 static bool parseMpathNode(QSvgNode *parent,
