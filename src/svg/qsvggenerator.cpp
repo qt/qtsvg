@@ -571,7 +571,14 @@ public:
     by setting the \l size property, and in some cases where the drawing will be included in
     another, the \l viewBox property also needs to be set.
 
-    \snippet svggenerator/window.cpp configure SVG generator
+    \code
+    QSvgGenerator generator;
+    generator.setFileName(path);
+    generator.setSize(QSize(200, 200));
+    generator.setViewBox(QRect(0, 0, 200, 200));
+    generator.setTitle(tr("SVG Generator Drawing"));
+    generator.setDescription(tr("An SVG drawing created by the SVG Generator"));
+    \endcode
 
     Other meta-data can be specified by setting the \a title, \a description and \a resolution
     properties.
@@ -579,9 +586,12 @@ public:
     As with other QPaintDevice subclasses, a QPainter object is used to paint onto an instance
     of this class:
 
-    \snippet svggenerator/window.cpp begin painting
-    \dots
-    \snippet svggenerator/window.cpp end painting
+    \code
+    QPainter painter;
+    painter.begin(&generator);
+    ...
+    painter.end();
+    \endcode
 
     Painting is performed in the same way as for any other paint device. However,
     it is necessary to use the QPainter::begin() and \l{QPainter::}{end()} to

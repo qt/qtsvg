@@ -46,8 +46,7 @@ sourcedirs  += .. \
                ../../svgwidgets
 
 exampledirs += ../../../examples/svg \
-               ../../../tests/manual/examples \
-               snippets/
+               snippets
 
 examplesinstallpath = svg
 
