@@ -68,6 +68,29 @@ char32_t firstUcs4(QStringView text)
     return text.first().unicode();
 }
 
+// returns a pointer to the first QSvgGlyph to be used in the text
+// or nullptr if none can be found
+const QSvgGlyph *QSvgFont::findFirstGlyphFor(QStringView text) const
+{
+    const auto possibleIndices = m_possibleGlyphIndicesForChar.value(firstUcs4(text));
+    for (const qsizetype i : possibleIndices) {
+        const QSvgGlyph &currentGlyph = m_glyphs.at(i);
+        if (text.startsWith(currentGlyph.m_unicode)) {
+            return &currentGlyph;
+        }
+    }
+
+    for (; m_firstUnscannedGlyphIdx < m_glyphs.size(); ++m_firstUnscannedGlyphIdx) {
+        const QSvgGlyph &currentGlyph = m_glyphs.at(m_firstUnscannedGlyphIdx);
+        m_possibleGlyphIndicesForChar[firstUcs4(currentGlyph.m_unicode)].push_back(m_firstUnscannedGlyphIdx);
+        if (text.startsWith(currentGlyph.m_unicode)) {
+            ++m_firstUnscannedGlyphIdx;
+            return &currentGlyph;
+        }
+    }
+    return nullptr;
+}
+
 void QSvgFont::draw_helper(QPainter *p, const QPointF &point, const QString &str, qreal pixelSize,
                            Qt::Alignment alignment, QRectF *boundingRect) const
 {
@@ -77,26 +100,10 @@ void QSvgFont::draw_helper(QPainter *p, const QPointF &point, const QString &str
     p->translate(point);
     p->scale(pixelSize / m_unitsPerEm, -pixelSize / m_unitsPerEm);
 
-    QHash<char32_t, QList<qsizetype>> possibleGlyphIndices;
     QVarLengthArray<const QSvgGlyph *> glyphsToDraw;
     QStringView substring = str;
-    qsizetype firstUnscannedIdx = 0;
     while (substring.length()) {
-        const QSvgGlyph *foundGlyph = nullptr;
-        for (const qsizetype i: possibleGlyphIndices.value(firstUcs4(substring))) {
-            const QSvgGlyph &currentGlyph = m_glyphs.at(i);
-            if (substring.startsWith(currentGlyph.m_unicode)) {
-                foundGlyph = &currentGlyph;
-                break;
-            }
-        }
-
-        for (; !foundGlyph && firstUnscannedIdx < m_glyphs.size(); ++firstUnscannedIdx) {
-            const QSvgGlyph &currentGlyph = m_glyphs.at(firstUnscannedIdx);
-            possibleGlyphIndices[firstUcs4(currentGlyph.m_unicode)].push_back(firstUnscannedIdx);
-            if (substring.startsWith(currentGlyph.m_unicode))
-                foundGlyph = &currentGlyph;
-        }
+        const QSvgGlyph *foundGlyph = findFirstGlyphFor(substring);
         if (foundGlyph) {
             glyphsToDraw.append(foundGlyph);
             substring.slice(foundGlyph->m_unicode.length());

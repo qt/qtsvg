@@ -55,6 +55,7 @@ public:
               qreal pixelSize, Qt::Alignment alignment) const;
     QRectF boundingRect(QPainter *p, const QPointF &point, const QString &str,
                         qreal pixelSize, Qt::Alignment alignment) const;
+    const QSvgGlyph *findFirstGlyphFor(QStringView text) const;
 
 public:
     QString m_familyName;
@@ -69,6 +70,10 @@ public:
     QList<QSvgGlyph> m_glyphs;
 
 private:
+    // to speed up finding glyphs
+    mutable QHash<char32_t, QList<qsizetype>> m_possibleGlyphIndicesForChar;
+    mutable qsizetype m_firstUnscannedGlyphIdx = 0;
+
     void draw_helper(QPainter *p, const QPointF &point, const QString &str, qreal pixelSize,
                      Qt::Alignment alignment, QRectF *boundingRect = nullptr) const;
 };
