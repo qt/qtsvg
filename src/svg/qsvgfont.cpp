@@ -10,7 +10,7 @@
 
 QT_BEGIN_NAMESPACE
 
-QSvgGlyph::QSvgGlyph(QChar unicode, const QPainterPath &path, qreal horizAdvX)
+QSvgGlyph::QSvgGlyph(const QString &unicode, const QPainterPath &path, qreal horizAdvX)
     : m_unicode(unicode), m_path(path), m_horizAdvX(horizAdvX)
 {
 
@@ -29,10 +29,9 @@ QString QSvgFont::familyName() const
 }
 
 
-void QSvgFont::addGlyph(QChar unicode, const QPainterPath &path, qreal horizAdvX )
+void QSvgFont::addGlyph(const QString &unicode, const QPainterPath &path, qreal horizAdvX)
 {
-    m_glyphs.insert(unicode, QSvgGlyph(unicode, path,
-                                       (horizAdvX==-1)?m_horizAdvX:horizAdvX));
+    m_glyphs.emplaceBack(unicode, path, (horizAdvX == -1) ? m_horizAdvX : horizAdvX);
 }
 
 bool QSvgFont::addMissingGlyph(const QPainterPath &path, qreal horizAdvX)
@@ -60,6 +59,15 @@ QRectF QSvgFont::boundingRect(QPainter *p, const QPointF &point, const QString &
     return bounds;
 }
 
+// text must not be empty
+char32_t firstUcs4(QStringView text)
+{
+    if (text.size() > 1 && text.at(0).isHighSurrogate() && text.at(1).isLowSurrogate())
+        return QChar::surrogateToUcs4(text.at(0), text.at(1));
+
+    return text.first().unicode();
+}
+
 void QSvgFont::draw_helper(QPainter *p, const QPointF &point, const QString &str, qreal pixelSize,
                            Qt::Alignment alignment, QRectF *boundingRect) const
 {
@@ -69,18 +77,45 @@ void QSvgFont::draw_helper(QPainter *p, const QPointF &point, const QString &str
     p->translate(point);
     p->scale(pixelSize / m_unitsPerEm, -pixelSize / m_unitsPerEm);
 
+    QHash<char32_t, QList<qsizetype>> possibleGlyphIndices;
+    QVarLengthArray<const QSvgGlyph *> glyphsToDraw;
+    QStringView substring = str;
+    qsizetype firstUnscannedIdx = 0;
+    while (substring.length()) {
+        const QSvgGlyph *foundGlyph = nullptr;
+        for (const qsizetype i: possibleGlyphIndices.value(firstUcs4(substring))) {
+            const QSvgGlyph &currentGlyph = m_glyphs.at(i);
+            if (substring.startsWith(currentGlyph.m_unicode)) {
+                foundGlyph = &currentGlyph;
+                break;
+            }
+        }
+
+        for (; !foundGlyph && firstUnscannedIdx < m_glyphs.size(); ++firstUnscannedIdx) {
+            const QSvgGlyph &currentGlyph = m_glyphs.at(firstUnscannedIdx);
+            possibleGlyphIndices[firstUcs4(currentGlyph.m_unicode)].push_back(firstUnscannedIdx);
+            if (substring.startsWith(currentGlyph.m_unicode))
+                foundGlyph = &currentGlyph;
+        }
+        if (foundGlyph) {
+            glyphsToDraw.append(foundGlyph);
+            substring.slice(foundGlyph->m_unicode.length());
+        } else {
+            if (m_missingGlyph)
+                glyphsToDraw.append(m_missingGlyph.get());
+            if (substring.size() > 1
+                && substring.at(0).isHighSurrogate() && substring.at(1).isLowSurrogate()) {
+                substring.slice(2);
+            } else {
+                substring.slice(1);
+            }
+        }
+    }
+
     // Calculate the text width to be used for alignment
     int textWidth = 0;
-    QString::const_iterator itr = str.constBegin();
-    for ( ; itr != str.constEnd(); ++itr) {
-        QChar unicode = *itr;
-        if (!m_glyphs.contains(*itr)) {
-            if (m_missingGlyph)
-                textWidth += static_cast<int>(m_missingGlyph->m_horizAdvX);
-            continue;
-        }
-        textWidth += static_cast<int>(m_glyphs[unicode].m_horizAdvX);
-    }
+    for (const auto *glyph : std::as_const(glyphsToDraw))
+        textWidth += static_cast<int>(glyph->m_horizAdvX);
 
     QPoint alignmentOffset(0, 0);
     if (alignment == Qt::AlignHCenter) {
@@ -99,31 +134,20 @@ void QSvgFont::draw_helper(QPainter *p, const QPointF &point, const QString &str
     pen.setWidthF(penWidth);
     p->setPen(pen);
 
-    itr = str.constBegin();
-    for ( ; itr != str.constEnd(); ++itr) {
-        QSvgGlyph foundGlyph;
-        QChar unicode = *itr;
-        if (m_glyphs.contains(*itr)) {
-            foundGlyph = m_glyphs[unicode];
-        } else {
-            if (!m_missingGlyph)
-                continue;
-            foundGlyph = *m_missingGlyph;
-        }
-
+    for (const auto *glyph : std::as_const(glyphsToDraw)) {
         if (isPainting)
-            p->drawPath(foundGlyph.m_path);
+            p->drawPath(glyph->m_path);
 
         if (boundingRect) {
             QPainterPathStroker stroker;
             stroker.setWidth(penWidth);
             stroker.setJoinStyle(p->pen().joinStyle());
             stroker.setMiterLimit(p->pen().miterLimit());
-            QPainterPath stroke = stroker.createStroke(foundGlyph.m_path);
+            QPainterPath stroke = stroker.createStroke(glyph->m_path);
             *boundingRect |= p->transform().map(stroke).boundingRect();
         }
 
-        p->translate(foundGlyph.m_horizAdvX, 0);
+        p->translate(glyph->m_horizAdvX, 0);
     }
 
     p->restore();

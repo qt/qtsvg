@@ -560,7 +560,7 @@ static bool createSvgGlyph(QSvgFont *font, const QXmlStreamAttributes &attribute
         qWarning("glyph does not define a non-empty 'unicode' attribute and will be ignored");
         return false;
     }
-    font->addGlyph(uncStr.at(0), path, havx);
+    font->addGlyph(uncStr.toString(), path, havx);
     return true;
 }
 
