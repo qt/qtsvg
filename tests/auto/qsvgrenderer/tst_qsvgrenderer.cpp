@@ -869,6 +869,12 @@ void tst_QSvgRenderer::recursiveRefs_data()
                                           <linearGradient id="2" xlink:href="#0"/>
                                           <rect x="0" y="0" width="20" height="20" fill="url(#0) "/>
                                           </svg>)");
+
+    QTest::newRow("pattern") << QByteArray(R"(<svg><pattern id="pattern" width="4" height="4"
+                                              fill="url(#pattern) ">
+                                              <rect width="2" height="2" fill=" "/></pattern>
+                                              <rect width="2" height="2" fill="url(#pattern) "/>
+                                              </svg>)");
 }
 
 void tst_QSvgRenderer::recursiveRefs()
