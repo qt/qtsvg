@@ -527,6 +527,9 @@ int QSvgTinyDocument::currentFrame() const
 void QSvgTinyDocument::setCurrentFrame(int frame)
 {
     const int totalFrames = m_fps * animationDuration() / 1000;
+    if (totalFrames == 0)
+        return;
+
     const int timeForFrame = frame * animationDuration() / totalFrames; //in ms
     const int timeToAdd = timeForFrame - currentElapsed();
     m_animator->setAnimatorTime(timeToAdd);
