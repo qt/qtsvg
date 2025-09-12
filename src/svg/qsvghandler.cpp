@@ -4182,43 +4182,43 @@ bool QSvgHandler::startElement(const QStringView localName,
 
     if (FactoryMethod method = findGroupFactory(localName, options())) {
         //group
-        node = method(m_doc ? m_nodes.top() : 0, attributes, this);
-
-        if (node) {
-            if (!m_doc) {
+        if (!m_doc) {
+            node = method(nullptr, attributes, this);
+            if (node) {
                 Q_ASSERT(node->type() == QSvgNode::Doc);
                 m_doc = static_cast<QSvgTinyDocument*>(node);
-            } else {
-                switch (m_nodes.top()->type()) {
-                case QSvgNode::Doc:
-                case QSvgNode::Group:
-                case QSvgNode::Defs:
-                case QSvgNode::Switch:
-                case QSvgNode::Mask:
-                case QSvgNode::Symbol:
-                case QSvgNode::Marker:
-                case QSvgNode::Pattern:
-                {
+            }
+        } else {
+            switch (m_nodes.top()->type()) {
+            case QSvgNode::Doc:
+            case QSvgNode::Group:
+            case QSvgNode::Defs:
+            case QSvgNode::Switch:
+            case QSvgNode::Mask:
+            case QSvgNode::Symbol:
+            case QSvgNode::Marker:
+            case QSvgNode::Pattern:
+            {
+                node = method(m_nodes.top(), attributes, this);
+                if (node) {
                     QSvgStructureNode *group =
                         static_cast<QSvgStructureNode*>(m_nodes.top());
                     group->addChild(node, someId(attributes));
                 }
-                    break;
-                default:
-                    const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
-                    qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
-                    delete node;
-                    node = 0;
-                    break;
-                }
             }
+                break;
+            default:
+                const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
+                qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
+                break;
+            }
+        }
 
-            if (node) {
-                parseCoreNode(node, attributes);
-                parseStyle(node, attributes, this);
-                if (node->type() == QSvgNode::Filter)
-                    m_toBeResolved.append(node);
-            }
+        if (node) {
+            parseCoreNode(node, attributes);
+            parseStyle(node, attributes, this);
+            if (node->type() == QSvgNode::Filter)
+                m_toBeResolved.append(node);
         }
     } else if (FactoryMethod method = findGraphicsFactory(localName, options())) {
         //rendering element
