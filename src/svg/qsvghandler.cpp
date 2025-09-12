@@ -4219,61 +4219,58 @@ bool QSvgHandler::startElement(const QStringView localName,
     } else if (FactoryMethod method = findGraphicsFactory(localName, options())) {
         //rendering element
         Q_ASSERT(!m_nodes.isEmpty());
-        node = method(m_nodes.top(), attributes, this);
-        if (node) {
-            switch (m_nodes.top()->type()) {
-            case QSvgNode::Doc:
-            case QSvgNode::Group:
-            case QSvgNode::Defs:
-            case QSvgNode::Switch:
-            case QSvgNode::Mask:
-            case QSvgNode::Symbol:
-            case QSvgNode::Marker:
-            case QSvgNode::Pattern:
-            {
-                if (node->type() == QSvgNode::Tspan) {
-                    const QByteArray msg = QByteArrayLiteral("\'tspan\' element in wrong context.");
-                    qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
-                    delete node;
-                    node = 0;
-                    break;
-                }
+        switch (m_nodes.top()->type()) {
+        case QSvgNode::Doc:
+        case QSvgNode::Group:
+        case QSvgNode::Defs:
+        case QSvgNode::Switch:
+        case QSvgNode::Mask:
+        case QSvgNode::Symbol:
+        case QSvgNode::Marker:
+        case QSvgNode::Pattern:
+        {
+            if (localName == QLatin1String("tspan")) {
+                const QByteArray msg = QByteArrayLiteral("\'tspan\' element in wrong context.");
+                qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
+                break;
+            }
+            node = method(m_nodes.top(), attributes, this);
+            if (node) {
                 QSvgStructureNode *group =
                     static_cast<QSvgStructureNode*>(m_nodes.top());
                 group->addChild(node, someId(attributes));
             }
-                break;
-            case QSvgNode::Text:
-            case QSvgNode::Textarea:
-                if (node->type() == QSvgNode::Tspan) {
+        }
+            break;
+        case QSvgNode::Text:
+        case QSvgNode::Textarea:
+            if (localName == QLatin1String("tspan")) {
+                node = method(m_nodes.top(), attributes, this);
+                if (node) {
                     static_cast<QSvgText *>(m_nodes.top())->addTspan(static_cast<QSvgTspan *>(node));
-                } else {
-                    const QByteArray msg = QByteArrayLiteral("\'text\' or \'textArea\' element contains invalid element type.");
-                    qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
-                    delete node;
-                    node = 0;
                 }
-                break;
-            default:
-                const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
+            } else {
+                const QByteArray msg = QByteArrayLiteral("\'text\' or \'textArea\' element contains invalid element type.");
                 qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
-                delete node;
-                node = 0;
-                break;
             }
+            break;
+        default:
+            const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
+            qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
+            break;
+        }
 
-            if (node) {
-                parseCoreNode(node, attributes);
-                parseStyle(node, attributes, this);
-                if (node->type() == QSvgNode::Text || node->type() == QSvgNode::Textarea) {
-                    static_cast<QSvgText *>(node)->setWhitespaceMode(m_whitespaceMode.top());
-                } else if (node->type() == QSvgNode::Tspan) {
-                    static_cast<QSvgTspan *>(node)->setWhitespaceMode(m_whitespaceMode.top());
-                } else if (node->type() == QSvgNode::Use) {
-                    auto useNode = static_cast<QSvgUse *>(node);
-                    if (!useNode->isResolved())
-                        m_toBeResolved.append(useNode);
-                }
+        if (node) {
+            parseCoreNode(node, attributes);
+            parseStyle(node, attributes, this);
+            if (node->type() == QSvgNode::Text || node->type() == QSvgNode::Textarea) {
+                static_cast<QSvgText *>(node)->setWhitespaceMode(m_whitespaceMode.top());
+            } else if (node->type() == QSvgNode::Tspan) {
+                static_cast<QSvgTspan *>(node)->setWhitespaceMode(m_whitespaceMode.top());
+            } else if (node->type() == QSvgNode::Use) {
+                auto useNode = static_cast<QSvgUse *>(node);
+                if (!useNode->isResolved())
+                    m_toBeResolved.append(useNode);
             }
         }
     } else if (FactoryMethod method = findFilterFactory(localName, options())) {
