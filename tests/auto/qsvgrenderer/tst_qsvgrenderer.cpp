@@ -81,6 +81,7 @@ private slots:
     void testSymbol();
     void testMarker();
     void testPatternElement();
+    void testMisplacedElement();
     void testCycles();
     void testFeFlood();
     void testFeOffset();
@@ -2131,6 +2132,31 @@ void tst_QSvgRenderer::testPatternElement()
     p.end();
 
     QCOMPARE(refImage, image);
+}
+
+void tst_QSvgRenderer::testMisplacedElement()
+{
+    // This input caused a QSvgPattern node to be created with a QSvgPatternStyle referencing to it.
+    // The code then detected that the <pattern> element is misplaced in the <text> element and
+    // deleted it. That left behind the QSvgPatternStyle pointing to the deleted QSvgPattern. That
+    // was reported when running the test with ASAN or UBSAN.
+    QByteArray svg(R"(<svg>
+                      <text><pattern id="ptn" width="4" height="4"/></text>
+                      <g fill="url(#ptn) "/>
+                      </svg>)");
+
+    QImage image(20, 20, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::green);
+    QImage refImage = image.copy();
+
+    QTest::ignoreMessage(QtWarningMsg, "<input>:2:68: Could not add child element to parent "
+                                       "element because the types are incorrect.");
+    QTest::ignoreMessage(QtWarningMsg, "<input>:4:28: Could not resolve property: #ptn");
+
+    QSvgRenderer renderer(svg);
+    QPainter painter(&image);
+    renderer.render(&painter);
+    QCOMPARE(image, refImage);
 }
 
 void tst_QSvgRenderer::testCycles()
