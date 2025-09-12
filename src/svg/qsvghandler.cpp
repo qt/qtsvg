@@ -4276,19 +4276,17 @@ bool QSvgHandler::startElement(const QStringView localName,
     } else if (FactoryMethod method = findFilterFactory(localName, options())) {
         //filter nodes to be aded to be filtercontainer
         Q_ASSERT(!m_nodes.isEmpty());
-        node = method(m_nodes.top(), attributes, this);
-        if (node) {
-            if (m_nodes.top()->type() == QSvgNode::Filter ||
-                (m_nodes.top()->type() == QSvgNode::FeMerge && node->type() == QSvgNode::FeMergenode)) {
+        if (m_nodes.top()->type() == QSvgNode::Filter ||
+            (m_nodes.top()->type() == QSvgNode::FeMerge && localName == QLatin1String("feMergeNode"))) {
+            node = method(m_nodes.top(), attributes, this);
+            if (node) {
                 QSvgStructureNode *container =
                     static_cast<QSvgStructureNode*>(m_nodes.top());
                 container->addChild(node, someId(attributes));
-            } else {
-                const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
-                qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
-                delete node;
-                node = 0;
             }
+        } else {
+            const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
+            qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
         }
     } else if (AnimationMethod method = findAnimationFactory(localName, options())) {
         Q_ASSERT(!m_nodes.isEmpty());
