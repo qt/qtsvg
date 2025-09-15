@@ -2609,8 +2609,7 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
     return mask;
 }
 
-static void parseFilterBounds(QSvgNode *, const QXmlStreamAttributes &attributes,
-                              QSvgHandler *, QSvgRectF *rect)
+static void parseFilterBounds(const QXmlStreamAttributes &attributes, QSvgRectF *rect)
 {
     const QStringView xStr        = attributes.value(QLatin1String("x"));
     const QStringView yStr        = attributes.value(QLatin1String("y"));
@@ -2704,15 +2703,14 @@ static QSvgNode *createFilterNode(QSvgNode *parent,
                          QtSvg::UnitTypes::objectBoundingBox, QtSvg::UnitTypes::objectBoundingBox);
     }
 
-    parseFilterBounds(parent, attributes, handler, &rect);
+    parseFilterBounds(attributes, &rect);
 
     QSvgNode *filter = new QSvgFilterContainer(parent, rect, filterUnits, primitiveUnits);
     return filter;
 }
 
-static void parseFilterAttributes(QSvgNode *parent, const QXmlStreamAttributes &attributes,
-                                  QSvgHandler *handler, QString *inString, QString *outString,
-                                  QSvgRectF *rect)
+static void parseFilterAttributes(const QXmlStreamAttributes &attributes, QString *inString,
+                                  QString *outString, QSvgRectF *rect)
 {
     *inString = attributes.value(QLatin1String("in")).toString();
     *outString = attributes.value(QLatin1String("result")).toString();
@@ -2727,12 +2725,12 @@ static void parseFilterAttributes(QSvgNode *parent, const QXmlStreamAttributes &
     // if we recognize unit == unknown we use the filter as a reference instead of the item, see
     // QSvgFeFilterPrimitive::localSubRegion
 
-    parseFilterBounds(parent, attributes, handler, rect);
+    parseFilterBounds(attributes, rect);
 }
 
 static QSvgNode *createFeColorMatrixNode(QSvgNode *parent,
                                         const QXmlStreamAttributes &attributes,
-                                        QSvgHandler *handler)
+                                        QSvgHandler *)
 {
     const QStringView typeString   = attributes.value(QLatin1String("type"));
     const QStringView valuesString = attributes.value(QLatin1String("values"));
@@ -2745,8 +2743,7 @@ static QSvgNode *createFeColorMatrixNode(QSvgNode *parent,
     QSvgFeColorMatrix::Matrix values;
     values.fill(0);
 
-    parseFilterAttributes(parent, attributes, handler,
-                          &inputString, &outputString, &rect);
+    parseFilterAttributes(attributes, &inputString, &outputString, &rect);
 
     if (typeString.startsWith(QLatin1String("saturate")))
         type = QSvgFeColorMatrix::ColorShiftType::Saturate;
@@ -2778,7 +2775,7 @@ static QSvgNode *createFeColorMatrixNode(QSvgNode *parent,
 
 static QSvgNode *createFeGaussianBlurNode(QSvgNode *parent,
                                           const QXmlStreamAttributes &attributes,
-                                          QSvgHandler *handler)
+                                          QSvgHandler *)
 {
     const QStringView edgeModeString     = attributes.value(QLatin1String("edgeMode"));
     const QStringView stdDeviationString = attributes.value(QLatin1String("stdDeviation"));
@@ -2789,8 +2786,7 @@ static QSvgNode *createFeGaussianBlurNode(QSvgNode *parent,
 
     QSvgFeGaussianBlur::EdgeMode edgemode = QSvgFeGaussianBlur::EdgeMode::Duplicate;
 
-    parseFilterAttributes(parent, attributes, handler,
-                          &inputString, &outputString, &rect);
+    parseFilterAttributes(attributes, &inputString, &outputString, &rect);
     qreal stdDeviationX = 0;
     qreal stdDeviationY = 0;
     if (stdDeviationString.contains(QStringLiteral(" "))){
@@ -2812,7 +2808,7 @@ static QSvgNode *createFeGaussianBlurNode(QSvgNode *parent,
 
 static QSvgNode *createFeOffsetNode(QSvgNode *parent,
                                     const QXmlStreamAttributes &attributes,
-                                    QSvgHandler *handler)
+                                    QSvgHandler *)
 {
     QStringView dxString = attributes.value(QLatin1String("dx"));
     QStringView dyString = attributes.value(QLatin1String("dy"));
@@ -2821,8 +2817,7 @@ static QSvgNode *createFeOffsetNode(QSvgNode *parent,
     QString outputString;
     QSvgRectF rect;
 
-    parseFilterAttributes(parent, attributes, handler,
-                          &inputString, &outputString, &rect);
+    parseFilterAttributes(attributes, &inputString, &outputString, &rect);
 
     qreal dx = 0;
     if (!dxString.isEmpty()) {
@@ -2847,7 +2842,7 @@ static QSvgNode *createFeOffsetNode(QSvgNode *parent,
 
 static QSvgNode *createFeCompositeNode(QSvgNode *parent,
                                   const QXmlStreamAttributes &attributes,
-                                  QSvgHandler *handler)
+                                  QSvgHandler *)
 {
     const QStringView in2String      = attributes.value(QLatin1String("in2"));
     const QStringView operatorString = attributes.value(QLatin1String("operator"));
@@ -2860,8 +2855,7 @@ static QSvgNode *createFeCompositeNode(QSvgNode *parent,
     QString outputString;
     QSvgRectF rect;
 
-    parseFilterAttributes(parent, attributes, handler,
-                          &inputString, &outputString, &rect);
+    parseFilterAttributes(attributes, &inputString, &outputString, &rect);
 
     QSvgFeComposite::Operator op = QSvgFeComposite::Operator::Over;
     if (operatorString.startsWith(QLatin1String("in")))
@@ -2903,14 +2897,13 @@ static QSvgNode *createFeCompositeNode(QSvgNode *parent,
 
 static QSvgNode *createFeMergeNode(QSvgNode *parent,
                                    const QXmlStreamAttributes &attributes,
-                                   QSvgHandler *handler)
+                                   QSvgHandler *)
 {
     QString inputString;
     QString outputString;
     QSvgRectF rect;
 
-    parseFilterAttributes(parent, attributes, handler,
-                          &inputString, &outputString, &rect);
+    parseFilterAttributes(attributes, &inputString, &outputString, &rect);
 
     QSvgNode *filter = new QSvgFeMerge(parent, inputString, outputString, rect);
     return filter;
@@ -2936,8 +2929,7 @@ static QSvgNode *createFeFloodNode(QSvgNode *parent,
     QString outputString;
     QSvgRectF rect;
 
-    parseFilterAttributes(parent, attributes, handler,
-                          &inputString, &outputString, &rect);
+    parseFilterAttributes(attributes, &inputString, &outputString, &rect);
 
     QSvgNode *filter = new QSvgFeFlood(parent, inputString, outputString, rect, color);
     return filter;
@@ -2945,14 +2937,13 @@ static QSvgNode *createFeFloodNode(QSvgNode *parent,
 
 static QSvgNode *createFeMergeNodeNode(QSvgNode *parent,
                                        const QXmlStreamAttributes &attributes,
-                                       QSvgHandler *handler)
+                                       QSvgHandler *)
 {
     QString inputString;
     QString outputString;
     QSvgRectF rect;
 
-    parseFilterAttributes(parent, attributes, handler,
-                          &inputString, &outputString, &rect);
+    parseFilterAttributes(attributes, &inputString, &outputString, &rect);
 
     QSvgNode *filter = new QSvgFeMergeNode(parent, inputString, outputString, rect);
     return filter;
@@ -2960,7 +2951,7 @@ static QSvgNode *createFeMergeNodeNode(QSvgNode *parent,
 
 static QSvgNode *createFeBlendNode(QSvgNode *parent,
                                    const QXmlStreamAttributes &attributes,
-                                   QSvgHandler *handler)
+                                   QSvgHandler *)
 {
     const QStringView in2String = attributes.value(QLatin1String("in2"));
     const QStringView modeString = attributes.value(QLatin1String("mode"));
@@ -2969,8 +2960,7 @@ static QSvgNode *createFeBlendNode(QSvgNode *parent,
     QString outputString;
     QSvgRectF rect;
 
-    parseFilterAttributes(parent, attributes, handler,
-                          &inputString, &outputString, &rect);
+    parseFilterAttributes(attributes, &inputString, &outputString, &rect);
 
     QSvgFeBlend::Mode mode = QSvgFeBlend::Mode::Normal;
     if (modeString.startsWith(QLatin1StringView("multiply")))
@@ -2989,14 +2979,13 @@ static QSvgNode *createFeBlendNode(QSvgNode *parent,
 
 static QSvgNode *createFeUnsupportedNode(QSvgNode *parent,
                                          const QXmlStreamAttributes &attributes,
-                                         QSvgHandler *handler)
+                                         QSvgHandler *)
 {
     QString inputString;
     QString outputString;
     QSvgRectF rect;
 
-    parseFilterAttributes(parent, attributes, handler,
-                          &inputString, &outputString, &rect);
+    parseFilterAttributes(attributes, &inputString, &outputString, &rect);
 
     QSvgNode *filter = new QSvgFeUnsupported(parent, inputString, outputString, rect);
     return filter;
