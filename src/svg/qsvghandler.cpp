@@ -2534,7 +2534,7 @@ static bool parseMarkerNode(QSvgNode *,
 
 static QSvgNode *createMaskNode(QSvgNode *parent,
                           const QXmlStreamAttributes &attributes,
-                          QSvgHandler *)
+                          QSvgHandler *handler)
 {
     const QStringView x      = attributes.value(QLatin1String("x"));
     const QStringView y      = attributes.value(QLatin1String("y"));
@@ -2562,7 +2562,7 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
         nx = -0.1;
         nmUx = QtSvg::UnitTypes::objectBoundingBox;
     } else if (type == QSvgUtils::LengthType::LT_PERCENT && nmU == QtSvg::UnitTypes::userSpaceOnUse) {
-        nx = nx / 100. * parent->document()->viewBox().width();
+        nx = nx / 100. * handler->document()->viewBox().width();
     } else if (type == QSvgUtils::LengthType::LT_PERCENT) {
         nx = nx / 100.;
     }
@@ -2573,7 +2573,7 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
         ny = -0.1;
         nmUy = QtSvg::UnitTypes::objectBoundingBox;
     } else if (type == QSvgUtils::LengthType::LT_PERCENT && nmU == QtSvg::UnitTypes::userSpaceOnUse) {
-        ny = ny / 100. * parent->document()->viewBox().height();
+        ny = ny / 100. * handler->document()->viewBox().height();
     } else if (type == QSvgUtils::LengthType::LT_PERCENT) {
         ny = ny / 100.;
     }
@@ -2584,7 +2584,7 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
         nwidth = 1.2;
         nmUw = QtSvg::UnitTypes::objectBoundingBox;
     } else if (type == QSvgUtils::LengthType::LT_PERCENT && nmU == QtSvg::UnitTypes::userSpaceOnUse) {
-        nwidth = nwidth / 100. * parent->document()->viewBox().width();
+        nwidth = nwidth / 100. * handler->document()->viewBox().width();
     } else if (type == QSvgUtils::LengthType::LT_PERCENT) {
         nwidth = nwidth / 100.;
     }
@@ -2595,7 +2595,7 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
         nheight = 1.2;
         nmUh = QtSvg::UnitTypes::objectBoundingBox;
     } else if (type == QSvgUtils::LengthType::LT_PERCENT && nmU == QtSvg::UnitTypes::userSpaceOnUse) {
-        nheight = nheight / 100. * parent->document()->viewBox().height();
+        nheight = nheight / 100. * handler->document()->viewBox().height();
     } else if (type == QSvgUtils::LengthType::LT_PERCENT) {
         nheight = nheight / 100.;
     }
@@ -2693,8 +2693,8 @@ static QSvgNode *createFilterNode(QSvgNode *parent,
     // If ‘width’ or ‘height’ is not specified, the effect is as if a value of 120% were specified.
     QSvgRectF rect;
     if (filterUnits == QtSvg::UnitTypes::userSpaceOnUse) {
-        qreal width = parent->document()->viewBox().width();
-        qreal height = parent->document()->viewBox().height();
+        qreal width = handler->document()->viewBox().width();
+        qreal height = handler->document()->viewBox().height();
         rect = QSvgRectF(QRectF(-0.1 * width, -0.1 * height, 1.2 * width, 1.2 * height),
                          QtSvg::UnitTypes::userSpaceOnUse, QtSvg::UnitTypes::userSpaceOnUse,
                          QtSvg::UnitTypes::userSpaceOnUse, QtSvg::UnitTypes::userSpaceOnUse);
