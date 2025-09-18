@@ -19,7 +19,7 @@ extern "C" int LLVMFuzzerTestOneInput(const char *Data, size_t Size) {
     static char *argv[] = {arg1, arg2, arg3, nullptr};
     static QGuiApplication qga(argc, argv);
     static QImage image(377, 233, QImage::Format_RGB32);
-    static QPainter painter(&image);
+    QPainter painter(&image);
     QSvgRenderer renderer(QByteArray::fromRawData(Data, Size));
     renderer.render(&painter);
     return 0;
