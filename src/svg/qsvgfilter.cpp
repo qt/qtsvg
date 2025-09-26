@@ -107,7 +107,7 @@ QSvgFeColorMatrix::QSvgFeColorMatrix(QSvgNode *parent, const QString &input, con
         m_matrix.fill(0);
 
         m_matrix.data()[0+0*5] = 0.213f + 0.787f * s;
-        m_matrix.data()[1+0*5] = 0.715f - 0.717f * s;
+        m_matrix.data()[1+0*5] = 0.715f - 0.715f * s;
         m_matrix.data()[2+0*5] = 0.072f - 0.072f * s;
 
         m_matrix.data()[0+1*5] = 0.213f - 0.213f * s;
