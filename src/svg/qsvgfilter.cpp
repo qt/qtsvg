@@ -94,6 +94,8 @@ const QSvgFeFilterPrimitive *QSvgFeFilterPrimitive::castToFilterPrimitive(const 
     }
 }
 
+typedef QGenericMatrix<3, 3, qreal> Matrix3x3;
+
 QSvgFeColorMatrix::QSvgFeColorMatrix(QSvgNode *parent, const QString &input, const QString &result,
                                      const QSvgRectF &rect, ColorShiftType type,
                                      const Matrix &matrix)
@@ -101,23 +103,31 @@ QSvgFeColorMatrix::QSvgFeColorMatrix(QSvgNode *parent, const QString &input, con
     , m_matrix(matrix)
 {
     //Magic numbers see SVG 1.1(Second edition)
+    constexpr qreal v1[] = {0.213, 0.213, 0.213,
+                            0.715, 0.715, 0.715,
+                            0.072, 0.072, 0.072};
+    static const Matrix3x3 m1(v1);
+
+    constexpr qreal v2[] = { 0.787, -0.213, -0.213,
+                            -0.715,  0.285, -0.715,
+                            -0.072, -0.072,  0.928};
+    static const Matrix3x3 m2(v2);
+
+    constexpr qreal v3[] = {-0.213,  0.143, -0.787,
+                            -0.715,  0.140,  0.715,
+                             0.928, -0.283,  0.072};
+    static const Matrix3x3 m3(v3);
+
     if (type == ColorShiftType::Saturate) {
         qreal s = qBound(0., m_matrix.data()[0], 1.);
 
         m_matrix.fill(0);
 
-        m_matrix.data()[0+0*5] = 0.213f + 0.787f * s;
-        m_matrix.data()[1+0*5] = 0.715f - 0.715f * s;
-        m_matrix.data()[2+0*5] = 0.072f - 0.072f * s;
+        const Matrix3x3 m = m1 + m2 * s;
 
-        m_matrix.data()[0+1*5] = 0.213f - 0.213f * s;
-        m_matrix.data()[1+1*5] = 0.715f + 0.285f * s;
-        m_matrix.data()[2+1*5] = 0.072f - 0.072f * s;
-
-        m_matrix.data()[0+2*5] = 0.213f - 0.213f * s;
-        m_matrix.data()[1+2*5] = 0.715f - 0.715f * s;
-        m_matrix.data()[2+2*5] = 0.072f + 0.928f * s;
-
+        for (int j = 0; j < 3; ++j)
+            for (int i = 0; i < 3; ++i)
+                m_matrix.data()[i+j*5] = m.data()[i+j*3];
         m_matrix.data()[3+3*5] = 1;
 
     } else if (type == ColorShiftType::HueRotate){
@@ -127,59 +137,11 @@ QSvgFeColorMatrix::QSvgFeColorMatrix(QSvgNode *parent, const QString &input, con
 
         m_matrix.fill(0);
 
-        QMatrix3x3 m1;
-        m1.data()[0+0*3] = 0.213f;
-        m1.data()[1+0*3] = 0.715f;
-        m1.data()[2+0*3] = 0.072f;
+        const Matrix3x3 m = m1 + m2 * c + m3 * s;
 
-        m1.data()[0+1*3] = 0.213f;
-        m1.data()[1+1*3] = 0.715f;
-        m1.data()[2+1*3] = 0.072f;
-
-        m1.data()[0+2*3] = 0.213f;
-        m1.data()[1+2*3] = 0.715f;
-        m1.data()[2+2*3] = 0.072f;
-
-        QMatrix3x3 m2;
-        m2.data()[0+0*3] = 0.787 * c;
-        m2.data()[1+0*3] = -0.715 * c;
-        m2.data()[2+0*3] = -0.072 * c;
-
-        m2.data()[0+1*3] = -0.213 * c;
-        m2.data()[1+1*3] = 0.285 * c;
-        m2.data()[2+1*3] = -0.072 * c;
-
-        m2.data()[0+2*3] = -0.213 * c;
-        m2.data()[1+2*3] = -0.715 * c;
-        m2.data()[2+2*3] = 0.928 * c;
-
-        QMatrix3x3 m3;
-        m3.data()[0+0*3] = -0.213 * s;
-        m3.data()[1+0*3] = -0.715 * s;
-        m3.data()[2+0*3] = 0.928 * s;
-
-        m3.data()[0+1*3] = 0.143 * s;
-        m3.data()[1+1*3] = 0.140 * s;
-        m3.data()[2+1*3] = -0.283 * s;
-
-        m3.data()[0+2*3] = -0.787 * s;
-        m3.data()[1+2*3] = 0.715 * s;
-        m3.data()[2+2*3] = 0.072 * s;
-
-        QMatrix3x3 m = m1 + m2 + m3;
-
-        m_matrix.data()[0+0*5] = m.data()[0+0*3];
-        m_matrix.data()[1+0*5] = m.data()[1+0*3];
-        m_matrix.data()[2+0*5] = m.data()[2+0*3];
-
-        m_matrix.data()[0+1*5] = m.data()[0+1*3];
-        m_matrix.data()[1+1*5] = m.data()[1+1*3];
-        m_matrix.data()[2+1*5] = m.data()[2+1*3];
-
-        m_matrix.data()[0+2*5] = m.data()[0+2*3];
-        m_matrix.data()[1+2*5] = m.data()[1+2*3];
-        m_matrix.data()[2+2*5] = m.data()[2+2*3];
-
+        for (int j = 0; j < 3; ++j)
+            for (int i = 0; i < 3; ++i)
+                m_matrix.data()[i+j*5] = m.data()[i+j*3];
         m_matrix.data()[3+3*5] = 1;
     } else if (type == ColorShiftType::LuminanceToAlpha){
         m_matrix.fill(0);
@@ -217,6 +179,8 @@ QImage QSvgFeColorMatrix::apply(const QMap<QString, QImage> &sources, QPainter *
 
     Q_ASSERT(source.depth() == 32);
 
+    const Matrix transposedMatrix = m_matrix.transposed();
+
     for (int i = 0; i < result.height(); i++) {
         int sourceI = i - source.offset().y() + result.offset().y();
 
@@ -233,36 +197,18 @@ QImage QSvgFeColorMatrix::apply(const QMap<QString, QImage> &sources, QPainter *
                 continue;
 
             QRgb sourceColor = qUnpremultiply(sourceLine[sourceJ]);
-            qreal a = qAlpha(sourceColor);
-            qreal r = qRed(sourceColor);
-            qreal g = qGreen(sourceColor);
-            qreal b = qBlue(sourceColor);
+            const qreal values[] = {qreal(qRed(sourceColor)),
+                                    qreal(qGreen(sourceColor)),
+                                    qreal(qBlue(sourceColor)),
+                                    qreal(qAlpha(sourceColor)),
+                                    255.};
+            const QGenericMatrix<1, 5, qreal> sourceVector(values);
+            const QGenericMatrix<1, 5, qreal> resultVector = transposedMatrix * sourceVector;
 
-            qreal r2 = m_matrix.data()[0+0*5] * r +
-                       m_matrix.data()[1+0*5] * g +
-                       m_matrix.data()[2+0*5] * b +
-                       m_matrix.data()[3+0*5] * a +
-                       m_matrix.data()[4+0*5] * 255.;
-            qreal g2 = m_matrix.data()[0+1*5] * r +
-                       m_matrix.data()[1+1*5] * g +
-                       m_matrix.data()[2+1*5] * b +
-                       m_matrix.data()[3+1*5] * a +
-                       m_matrix.data()[4+1*5] * 255.;
-            qreal b2 = m_matrix.data()[0+2*5] * r +
-                       m_matrix.data()[1+2*5] * g +
-                       m_matrix.data()[2+2*5] * b +
-                       m_matrix.data()[3+2*5] * a +
-                       m_matrix.data()[4+2*5] * 255.;
-            qreal a2 = m_matrix.data()[0+3*5] * r +
-                       m_matrix.data()[1+3*5] * g +
-                       m_matrix.data()[2+3*5] * b +
-                       m_matrix.data()[3+3*5] * a +
-                       m_matrix.data()[4+3*5] * 255.;
-
-            QRgb rgba = qRgba(qBound(0, int(r2), 255),
-                              qBound(0, int(g2), 255),
-                              qBound(0, int(b2), 255),
-                              qBound(0, int(a2), 255));
+            QRgb rgba = qRgba(qBound(0, int(resultVector(0, 0)), 255),
+                              qBound(0, int(resultVector(1, 0)), 255),
+                              qBound(0, int(resultVector(2, 0)), 255),
+                              qBound(0, int(resultVector(3, 0)), 255));
             resultLine[j] = qPremultiply(rgba);
         }
     }
