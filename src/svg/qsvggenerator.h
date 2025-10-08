@@ -68,6 +68,7 @@ public:
 protected:
     QPaintEngine *paintEngine() const override;
     int metric(QPaintDevice::PaintDeviceMetric metric) const override;
+    void initPainter(QPainter *) const override;
 
 private:
     QScopedPointer<QSvgGeneratorPrivate> d_ptr;

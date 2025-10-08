@@ -7,9 +7,10 @@
 
 #include "qpainterpath.h"
 
-#include "private/qpaintengine_p.h"
-#include "private/qtextengine_p.h"
 #include "private/qdrawhelper_p.h"
+#include "private/qpaintengine_p.h"
+#include "private/qpainter_p.h"
+#include "private/qtextengine_p.h"
 
 #include "qfile.h"
 #include "qtextstream.h"
@@ -890,6 +891,17 @@ int QSvgGenerator::metric(QPaintDevice::PaintDeviceMetric metric) const
         break;
     }
     return 0;
+}
+
+void QSvgGenerator::initPainter(QPainter *painter) const
+{
+    QPainterPrivate *painterPrivate = QPainterPrivate::get(painter);
+
+    for (QFont *font : { &painterPrivate->state->deviceFont, &painterPrivate->state->font }) {
+        if (font->hintingPreference() == QFont::PreferDefaultHinting)
+            font->setHintingPreference(QFont::PreferNoHinting);
+    }
+    painterPrivate->setEngineDirtyFlags({ QPaintEngine::DirtyFont });
 }
 
 /*****************************************************************************
