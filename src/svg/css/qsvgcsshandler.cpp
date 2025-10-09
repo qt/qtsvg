@@ -327,12 +327,20 @@ void QSvgCssHandler::parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarat
         const int valCount = decl.d->values.size();
         for (int i = 0; i < valCount; ++i) {
             QCss::Value val = decl.d->values.at(i);
-            if (val.type == QCss::Value::TermOperatorComma) {
+            switch (val.type) {
+            case QCss::Value::TermOperatorComma:
                 valueStr += QLatin1Char(';');
-            } else if (val.type == QCss::Value::Uri) {
-                valueStr.prepend(QLatin1String("url("));
-                valueStr.append(QLatin1Char(')'));
-            } else if (val.type == QCss::Value::Function) {
+                break;
+            case QCss::Value::Uri:
+            {
+                QString temp = val.toString();
+                temp.prepend(QLatin1String("url("));
+                temp.append(QLatin1Char(')'));
+                valueStr += temp;
+                break;
+            }
+            case QCss::Value::Function:
+            {
                 QStringList lst = val.variant.toStringList();
                 valueStr.append(lst.at(0));
                 valueStr.append(QLatin1Char('('));
@@ -342,16 +350,22 @@ void QSvgCssHandler::parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarat
                         valueStr.append(QLatin1Char(','));
                 }
                 valueStr.append(QLatin1Char(')'));
-            } else if (val.type == QCss::Value::KnownIdentifier) {
+                break;
+            }
+            case QCss::Value::KnownIdentifier:
                 switch (val.variant.toInt()) {
                 case QCss::Value_None:
-                    valueStr = QLatin1String("none");
+                    valueStr += QLatin1String("none");
                     break;
                 default:
+                    valueStr += val.toString();
                     break;
                 }
-            } else
+                break;
+            default:
                 valueStr += val.toString();
+                break;
+            }
 
             if (i + 1 < valCount)
                 valueStr += QLatin1Char(' ');

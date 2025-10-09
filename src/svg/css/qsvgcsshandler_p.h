@@ -25,7 +25,7 @@ QT_BEGIN_NAMESPACE
 
 class QSvgStyleSelector;
 class QSvgNode;
-class QSvgCssHandler {
+class Q_SVG_EXPORT QSvgCssHandler {
 public:
     QSvgCssHandler();
     ~QSvgCssHandler();
