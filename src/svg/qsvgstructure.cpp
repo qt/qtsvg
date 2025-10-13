@@ -860,6 +860,8 @@ QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSv
     QSize imageSize;
     imageSize.setWidth(qCeil(patternBoundingBox.width() * t.m11() * m_transform.m11()));
     imageSize.setHeight(qCeil(patternBoundingBox.height() * t.m22() * m_transform.m22()));
+    if (imageSize.isEmpty())
+        return QImage(); // Avoid division by zero in calculateAppliedTransform()
 
     calculateAppliedTransform(t, peBoundingBox, imageSize);
     return renderPattern(imageSize, contentScaleFactorX, contentScaleFactorY);

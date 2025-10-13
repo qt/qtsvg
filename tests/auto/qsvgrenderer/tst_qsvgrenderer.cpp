@@ -878,6 +878,12 @@ void tst_QSvgRenderer::recursiveRefs_data()
                                               <rect width="2" height="2" fill=" "/></pattern>
                                               <rect width="2" height="2" fill="url(#pattern) "/>
                                               </svg>)");
+
+    // lead to division by zero in QSvgPattern::patternImage while loading document
+    QTest::newRow("pattern-no-elements") << QByteArray(R"(<svg>
+                                                          <pattern id="pattern" width="4" height="4"
+                                                           fill="url(#pattern) "/>
+                                                          </svg>)");
 }
 
 void tst_QSvgRenderer::recursiveRefs()
