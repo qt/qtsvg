@@ -28,6 +28,10 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
         if (!visitMaskNodeStart(static_cast<const QSvgMask *>(node)))
             return;
         break;
+    case QSvgNode::Symbol:
+        if (!visitSymbolNodeStart(static_cast<const QSvgSymbol *>(node)))
+            return;
+        break;
     default:
         Q_UNREACHABLE();
         break;
@@ -52,6 +56,9 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
     case QSvgNode::Mask:
         visitMaskNodeEnd(static_cast<const QSvgMask *>(node));
         break;
+    case QSvgNode::Symbol:
+        visitSymbolNodeEnd(static_cast<const QSvgSymbol *>(node));
+        break;
     default:
         Q_UNREACHABLE();
         break;
@@ -66,6 +73,7 @@ void QSvgVisitor::traverse(const QSvgNode *node)
     case QSvgNode::Defs:
     case QSvgNode::Group:
     case QSvgNode::Mask:
+    case QSvgNode::Symbol:
         traverse(static_cast<const QSvgStructureNode *>(node));
         break;
     case QSvgNode::AnimateColor:
@@ -109,7 +117,6 @@ void QSvgVisitor::traverse(const QSvgNode *node)
         break;
 
         // Enum values that don't have any QSvgNode classes yet:
-    case QSvgNode::Symbol:
     case QSvgNode::Marker:
     case QSvgNode::Pattern:
     case QSvgNode::Filter:

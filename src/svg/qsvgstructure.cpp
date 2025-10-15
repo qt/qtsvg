@@ -122,27 +122,39 @@ bool QSvgSymbolLike::requiresGroupRendering() const
     return m_renderers.count() > 1;
 }
 
-void QSvgSymbolLike::setPainterToRectAndAdjustment(QPainter *p) const
+QRectF QSvgSymbolLike::clipRect() const
 {
-    qreal scaleX = 1;
+    if (m_overflow != Overflow::Hidden || !m_viewBox.isValid())
+        return QRectF{};
+
+    qreal scaleX = 1.0;
     if (m_rect.width() > 0 && m_viewBox.width() > 0)
-        scaleX = m_rect.width()/m_viewBox.width();
-    qreal scaleY = 1;
+        scaleX = m_rect.width() / m_viewBox.width();
+    qreal scaleY = 1.0;
     if (m_rect.height() > 0 && m_viewBox.height() > 0)
-        scaleY = m_rect.height()/m_viewBox.height();
+        scaleY = m_rect.height() / m_viewBox.height();
 
-    if (m_overflow == Overflow::Hidden) {
-        QTransform t;
-        t.translate(- m_refP.x() * scaleX - m_rect.left() - m_viewBox.left() * scaleX,
-                    - m_refP.y() * scaleY - m_rect.top() - m_viewBox.top() * scaleY);
-        t.scale(scaleX, scaleY);
+    QTransform t;
+    t.translate(- m_refP.x() * scaleX - m_rect.left() - m_viewBox.left() * scaleX,
+                - m_refP.y() * scaleY - m_rect.top() - m_viewBox.top() * scaleY);
+    t.scale(scaleX, scaleY);
 
-        if (m_viewBox.isValid())
-            p->setClipRect(t.mapRect(m_viewBox));
-    }
+    return t.mapRect(m_viewBox);
+}
 
-    qreal offsetX = 0;
-    qreal offsetY = 0;
+QTransform QSvgSymbolLike::aspectRatioTransform() const
+{
+    QTransform xform;
+
+    qreal offsetX = 0.0;
+    qreal offsetY = 0.0;
+
+    qreal scaleX = 1.0;
+    if (m_rect.width() > 0 && m_viewBox.width() > 0)
+        scaleX = m_rect.width() / m_viewBox.width();
+    qreal scaleY = 1.0;
+    if (m_rect.height() > 0 && m_viewBox.height() > 0)
+        scaleY = m_rect.height() / m_viewBox.height();
 
     if (!qFuzzyCompare(scaleX, scaleY) &&
         m_pAspectRatios.testAnyFlag(PreserveAspectRatio::xyMask)) {
@@ -166,8 +178,19 @@ void QSvgSymbolLike::setPainterToRectAndAdjustment(QPainter *p) const
             offsetY -= yOverflow;
     }
 
-    p->translate(offsetX - m_refP.x() * scaleX, offsetY - m_refP.y() * scaleY);
-    p->scale(scaleX, scaleY);
+    xform.translate(offsetX - m_refP.x() * scaleX, offsetY - m_refP.y() * scaleY);
+    xform.scale(scaleX, scaleY);
+
+    return xform;
+}
+
+void QSvgSymbolLike::setPainterToRectAndAdjustment(QPainter *p) const
+{
+    QRectF clip = clipRect();
+    if (!clip.isEmpty())
+        p->setClipRect(clip);
+
+    p->setTransform(aspectRatioTransform(), true);
 }
 
 QSvgSymbol::QSvgSymbol(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF refP,

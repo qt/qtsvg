@@ -99,6 +99,35 @@ public:
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
     QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
     bool requiresGroupRendering() const override;
+
+    QRectF viewBox() const
+    {
+        return m_viewBox;
+    }
+
+    QRectF rect() const
+    {
+        return m_rect;
+    }
+
+    QPointF refP() const
+    {
+        return m_refP;
+    }
+
+    QTransform aspectRatioTransform() const;
+    QRectF clipRect() const;
+
+    Overflow overflow() const
+    {
+        return m_overflow;
+    }
+
+    PreserveAspectRatios preserveAspectRatios() const
+    {
+        return m_pAspectRatios;
+    }
+
 protected:
     void setPainterToRectAndAdjustment(QPainter *p) const;
 protected:
