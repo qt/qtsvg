@@ -123,7 +123,8 @@ void QSvgPath::drawCommand(QPainter *p, QSvgExtraStates &states)
         p->drawPoint(m_path.boundingRect().topLeft());
     else
         p->drawPath(m_path);
-    QSvgMarker::drawMarkersForNode(this, p, states);
+    if (!path().isEmpty())
+        QSvgMarker::drawMarkersForNode(this, p, states);
 }
 
 bool QSvgPath::separateFillStroke() const

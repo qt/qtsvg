@@ -58,6 +58,8 @@ private slots:
     void opacity();
     void paths();
     void paths2();
+    void emptyPath_data();
+    void emptyPath();
     void displayMode();
     void strokeInherit();
     void testFillInheritance();
@@ -1212,6 +1214,26 @@ void tst_QSvgRenderer::paths2()
     QSvgRenderer renderer(data);
     QVERIFY(renderer.isValid());
     QCOMPARE(renderer.boundsOnElement("path1"_L1).toRect(), QRect(3, 8, 10, 5));
+}
+
+void tst_QSvgRenderer::emptyPath_data()
+{
+    QTest::addColumn<QByteArray>("svg");
+
+    // This caused a division by zero in in QPainterPath::angleAtPercent, reported by UBSAN.
+    QTest::newRow("empty")
+            << (R"(<svg><path marker-end="url(#w) "/></svg>)"_ba);
+    QTest::newRow("zero-movements")
+            << (R"(<svg><path d="M1 2L1 2l0 0H1h0V2v0Z" marker-end="url(#w) "/></svg>)"_ba);
+}
+
+void tst_QSvgRenderer::emptyPath()
+{
+    QFETCH(QByteArray, svg);
+    QImage image(377, 233, QImage::Format_RGB32);
+    QPainter painter(&image);
+    QSvgRenderer renderer(svg);
+    renderer.render(&painter);
 }
 
 void tst_QSvgRenderer::displayMode()
