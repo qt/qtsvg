@@ -2933,12 +2933,9 @@ static bool parseStopNode(QSvgStyleProperty *parent,
     qreal offset = convertToNumber(attrs.offset, &ok);
     if (!ok)
         offset = 0.0;
-    QString black = QString::fromLatin1("#000000");
-    if (colorStr.isEmpty()) {
-        colorStr = black;
-    }
 
-    constructColor(colorStr, attrs.stopOpacity, color, handler);
+    if (!constructColor(colorStr, attrs.stopOpacity, color, handler))
+        color = Qt::black;
 
     QGradient *grad = gradientStyle->qgradient();
 
