@@ -6,54 +6,116 @@
     \title Rendering SVG Files
     \brief Rendering SVG files with the Qt SVG module
 
-    Qt SVG provides classes for rendering SVG files. To include the definitions
-    of the module's classes, use the following directive:
+    SVG drawings can be rendered onto any \l QPaintDevice subclass, such as
+    \l QWidget or \l QImage. The easiest way to render SVG files is to use
+    \l QSvgWidget or \l QSvgRenderer.
 
-    \snippet doc_src_qtsvg.cpp 0
+    \section1 Using QSvgWidget
 
-    To link against the module, add this line to your \l qmake \c
-    .pro file:
+    \l QSvgWidget provides a convenient widget for displaying SVG files.
 
-    \snippet doc_src_qtsvg.pro 1
+    \code
+    #include <QApplication>
+    #include <QSvgWidget>
 
-    \section1 Rendering SVG Files
+    int main(int argc, char *argv[])
+    {
+        QApplication app(argc, argv);
+        QSvgWidget svgWidget(QStringLiteral(":/images/example.svg"));
+        svgWidget.setGeometry(100, 100, 400, 400);
+        svgWidget.show();
+        return app.exec();
+    }
+    \endcode
 
-    Scalable Vector Graphics (SVG) is a language for describing two-dimensional
-    graphics and graphical applications in XML. SVG 1.1 is a W3C Recommendation
-    and forms the core of the current SVG developments in Qt. SVG 1.2 is the
-    specification currently being developed by the \l{SVG Working Group}, and it
-    is \l{http://www.w3.org/TR/SVG12/}{available in draft form}. The \l{Mobile
-    SVG Profiles} (SVG Basic and SVG Tiny) are aimed at resource-limited devices
-    and are part of the 3GPP platform for third generation mobile phones. You
-    can read more about SVG at \l{About SVG}.
+    You can also load an SVG file after construction:
 
-    Qt supports the \l{SVG 1.2 Tiny Static Features}{static features} as well as
-    color and transform animations of \l{http://www.w3.org/TR/SVGMobile12}{SVG 1.2 Tiny}.
-    ECMA scripts and DOM manipulation are currently not supported.
+    \code
+    #include <QApplication>
+    #include <QSvgWidget>
 
-    Since Qt 6.7, some \l{Extended Features}{additional features} of the
-    \l{https://www.w3.org/TR/SVG11/}{SVG 1.1} standard are supported.
+    int main(int argc, char *argv[])
+    {
+        QApplication app(argc, argv);
+        QSvgWidget *svgWidget = new QSvgWidget;
+        svgWidget->load(QStringLiteral(":/images/example.svg"));
+        svgWidget->show();
+        return app.exec();
+    }
+    \endcode
 
-    Since Qt 6.9, CSS animations for fill, stroke and transform were added to
-    match the currently supported SMIL animations by the module.
+    \section1 Using QSvgRenderer
 
-    SVG drawings can be rendered onto any QPaintDevice subclass. This
-    approach gives developers the flexibility to experiment, in order
-    to find the best solution for each application.
+    Use \l QSvgRenderer to render SVG content onto any \l QPaintDevice.
 
-    The easiest way to render SVG files is to construct a QSvgWidget and
-    load an SVG file using one of the QSvgWidget::load() functions.
+    \code
+    #include <QApplication>
+    #include <QSvgRenderer>
+    #include <QImage>
+    #include <QPainter>
+    #include <QLabel>
+    #include <QPixmap>
 
-    QSvgRenderer is the class responsible for rendering SVG files for
-    QSvgWidget, and it can be used directly to provide SVG support for
-    custom widgets.
-    To load an SVG file, construct a QSvgRenderer with a file name or the
-    contents of a file, or call QSvgRenderer::load() on an existing
-    renderer. If the SVG file has been loaded successfully the
-    QSvgRenderer::isValid() will return true.
+    int main(int argc, char *argv[])
+    {
+        QApplication app(argc, argv);
+        QSvgRenderer renderer(QStringLiteral(":/images/example.svg"));
+        if (renderer.isValid()) {
+            QImage image(400, 400, QImage::Format_ARGB32_Premultiplied);
+            image.fill(Qt::transparent);
+            QPainter painter(&image);
+            renderer.render(&painter);
 
-    Once you have loaded the SVG file successfully, you can render it
-    with the QSvgRenderer::render() function. Note that this scheme allows
-    you to render SVG files on all paint devices supported by Qt, including
-    QWidget, QGLWidget, and QImage.
+            QLabel label;
+            label.setPixmap(QPixmap::fromImage(image));
+            label.resize(400, 400);
+            label.show();
+            return app.exec();
+        }
+        return 1;
+    }
+    \endcode
+
+    You can also use \l QSvgRenderer to render SVG directly in a custom widget's
+    paint event:
+
+    \code
+    // In your widget's header file:
+    #include <QSvgRenderer>
+
+    class MyWidget : public QWidget
+    {
+        Q_OBJECT
+    public:
+        MyWidget(QWidget *parent = nullptr)
+            : QWidget(parent), renderer(QStringLiteral(":/images/example.svg")) {}
+
+    protected:
+        void paintEvent(QPaintEvent *) override {
+            QPainter painter(this);
+            renderer.render(&painter);
+        }
+
+    private:
+        QSvgRenderer renderer;
+    };
+    \endcode
+
+    These approaches allow you to render SVG files on all paint devices
+    supported by Qt, including \l QWidget and \l QImage.
+
+
+    \section2 Rendering options
+
+    \l QSvgRenderer provides rendering \l {QSvgRenderer::}{options} via the
+    \l {QtSvg::Option} enum. These options let you control how SVG files are
+    parsed and rendered.
+
+    \section2 Rendering animated SVG files
+
+    The Qt SVG module supports rendering animated SVG files. Refer to the
+    \l QSvgRenderer class documentation for details on how to work with animated
+    SVGs.
+
+    \sa {Vector Image Formats in Qt}, {Extended Features}
 */
