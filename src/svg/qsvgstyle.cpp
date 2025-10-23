@@ -764,7 +764,7 @@ void QSvgAnimatedStyle::fetchStyleState(const QSvgAbstractAnimation *animation, 
             brush.setColor(sumOrReplaceColor);
             currentStyle.fill = brush;
         } else if (property->propertyName() == QStringLiteral("stroke")) {
-            QPen pen = currentStyle.stroke;
+            QPen &pen = currentStyle.stroke;
             QBrush penBrush = pen.brush();
             QColor penColor = penBrush.color();
             QColor animatedColor = property->interpolatedValue().value<QColor>();
@@ -772,7 +772,6 @@ void QSvgAnimatedStyle::fetchStyleState(const QSvgAbstractAnimation *animation, 
             penBrush.setColor(sumOrReplaceColor);
             penBrush.setStyle(Qt::SolidPattern);
             pen.setBrush(penBrush);
-            currentStyle.stroke = pen;
         } else if (property->propertyName() == QStringLiteral("transform")) {
             QTransform animatedTransform = property->interpolatedValue().value<QTransform>();
             QTransform sumOrReplaceTransform = replace ? animatedTransform : animatedTransform * currentStyle.transform;
