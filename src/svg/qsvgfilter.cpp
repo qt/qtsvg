@@ -289,11 +289,35 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
     // Three successive box-blurs build a piece-wise quadratic convolution kernel,
     // which approximates the Gaussian kernel
     for (int m = 0; m < 3; m++) {
+        // https://www.w3.org/TR/SVG11/filters.html#feGaussianBlurElement:
+        // if d is odd, use three box-blurs of size 'd', centered on the output pixel.
+        // if d is even, two box-blurs of size 'd' (the first one centered on the pixel boundary
+        // between the output pixel and the one to the left, the second one centered on the pixel
+        // boundary between the output pixel and the one to the right) and one box blur of size
+        // 'd+1' centered on the output pixel.
+        auto adjustD = [](int d, int iteration) {
+            d = qMax(1, d);     // Treat d == 0 just like d == 1
+            std::pair<int, int> result;
+            if (d % 2 == 1)
+                result = {d / 2 + 1, d / 2};
+            else if (iteration == 0)
+                result = {d / 2 + 1, d / 2 - 1};
+            else if (iteration == 1)
+                result = {d / 2, d / 2};
+            else
+                result = {d / 2 + 1, d / 2};
+            Q_ASSERT(result.first + result.second > 0);
+            return result;
+        };
+
+        const auto [dxleft, dxright] = adjustD(dx, m);
+        const auto [dytop, dybottom] = adjustD(dy, m);
+
         for (int col = 0; col < 4 * 8; col += 8 ){
             // Generating the partial sum of color values from the top left corner
             // These sums can be combined to yield the partial sum of any rectangular subregion
-            for (int i = 0; i < sourceWidth; i++) {
-                for (int j = 0; j < sourceHeight; j++) {
+            for (int j = 0; j < sourceHeight; j++) {
+                for (int i = 0; i < sourceWidth; i++) {
                     buffer[i + j * sourceWidth] = (rawImage[i + j * sourceWidth] >> col) & 0xff;
                     if (i > 0)
                         buffer[i + j * sourceWidth] += buffer[(i - 1) + j * sourceWidth];
@@ -304,35 +328,12 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
                 }
             }
 
-            // https://www.w3.org/TR/SVG11/filters.html#feGaussianBlurElement:
-            // if d is odd, use three box-blurs of size 'd', centered on the output pixel.
-            // if d is even, two box-blurs of size 'd' (the first one centered on the pixel boundary
-            // between the output pixel and the one to the left, the second one centered on the pixel
-            // boundary between the output pixel and the one to the right) and one box blur of size
-            // 'd+1' centered on the output pixel.
-            auto adjustD = [](int d, int iteration) {
-                d = qMax(1, d);     // Treat d == 0 just like d == 1
-                std::pair<int, int> result;
-                if (d % 2 == 1)
-                    result = {d / 2 + 1, d / 2};
-                else if (iteration == 0)
-                    result = {d / 2 + 1, d / 2 - 1};
-                else if (iteration == 1)
-                    result = {d / 2, d / 2};
-                else
-                    result = {d / 2 + 1, d / 2};
-                Q_ASSERT(result.first + result.second > 0);
-                return result;
-            };
-
-            const auto [dxleft, dxright] = adjustD(dx, m);
-            const auto [dytop, dybottom] = adjustD(dy, m);
-            for (int i = 0; i < sourceWidth; i++) {
-                for (int j = 0; j < sourceHeight; j++) {
+            for (int j = 0; j < sourceHeight; j++) {
+                const int j1 = qMax(0, j - dytop);
+                const int j2 = qMin(sourceHeight - 1, j + dybottom);
+                for (int i = 0; i < sourceWidth; i++) {
                     const int i1 = qMax(0, i - dxleft);
                     const int i2 = qMin(sourceWidth - 1, i + dxright);
-                    const int j1 = qMax(0, j - dytop);
-                    const int j2 = qMin(sourceHeight - 1, j + dybottom);
 
                     uint64_t colorValue64 = buffer[i2 + j2 * sourceWidth];
                     colorValue64 -= buffer[i1 + j2 * sourceWidth];
