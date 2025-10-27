@@ -2924,6 +2924,9 @@ static bool parseStopNode(QSvgStyleProperty *parent,
     attrs.setAttributes(styleCssAttributes, handler);
 #endif
 
+    //TODO: Handle style parsing for gradients stop like the rest of the nodes.
+    parseColor(&dummy, attrs, handler);
+
     QSvgGradientStyle *gradientStyle =
         static_cast<QSvgGradientStyle*>(parent);
     QStringView colorStr    = attrs.stopColor;
