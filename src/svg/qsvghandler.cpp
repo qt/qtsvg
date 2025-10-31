@@ -1034,13 +1034,16 @@ static void parseCssAnimations(QSvgNode *node,
     QSvgCssProperties cssAnimProps(attributes);
     QList<QSvgAnimationProperty> parsedProperties = cssAnimProps.animations();
 
-    for (QSvgAnimationProperty property : parsedProperties) {
+    for (auto &property : parsedProperties) {
         QSvgCssAnimation *anim = handler->cssHandler().createAnimation(property.name);
         if (!anim)
             continue;
 
         anim->setRunningTime(property.delay, property.duration);
         anim->setIterationCount(property.iteration);
+        QSvgCssEasingPtr easing = handler->cssHandler().createEasing(property.easingFunction, property.easingValues);
+        anim->setEasing(std::move(easing));
+
         handler->setAnimPeriod(property.delay, property.delay + property.duration);
         handler->document()->animator()->appendAnimation(node, anim);
         handler->document()->setAnimated(true);

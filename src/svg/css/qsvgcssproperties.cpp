@@ -5,9 +5,11 @@
 #include "qsvgcssproperties_p.h"
 #include <QtSvg/private/qsvgutils_p.h>
 
+
 QT_BEGIN_NAMESPACE
 
 using namespace Qt::Literals::StringLiterals;
+using namespace QSvgCssValues;
 
 namespace {
 
@@ -85,7 +87,6 @@ QSvgCssProperties::QSvgCssProperties(const QXmlStreamAttributes &attributes)
         if (name.isEmpty())
             continue;
         QStringView value = attribute.value();
-
         switch (name.at(0).unicode()) {
 
         case 'a':
@@ -156,6 +157,24 @@ QList<QSvgAnimationProperty> QSvgCssProperties::animations() const
             property.iteration = iteration;
         }
 
+        if (!m_timingFunctions.isEmpty()) {
+            QStringView timingFunctionStr = m_timingFunctions.at(i % m_timingFunctions.size());
+            if (timingFunctionStr == "linear"_L1) {
+                property.easingFunction = EasingFunction::Linear;
+            } else if (timingFunctionStr == "ease-in"_L1) {
+                property.easingFunction = EasingFunction::EaseIn;
+            } else if (timingFunctionStr == "ease-out"_L1) {
+                property.easingFunction = EasingFunction::EaseOut;
+            } else if (timingFunctionStr == "ease-in-out"_L1) {
+                property.easingFunction = EasingFunction::EaseInOut;
+            } else if (timingFunctionStr == "step-end"_L1) {
+                property.easingFunction = EasingFunction::Steps;
+                property.easingValues = StepValues{quint32(1), QSvgCssValues::StepPosition::End};
+            } else if (timingFunctionStr == "step-start"_L1) {
+                property.easingFunction = EasingFunction::Steps;
+                property.easingValues = StepValues{quint32(1), QSvgCssValues::StepPosition::Start};
+            }
+        }
         parsedProperties.append(property);
     }
 

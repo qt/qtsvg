@@ -287,6 +287,30 @@ QSvgCssAnimation *QSvgCssHandler::createAnimation(QStringView name)
     return animation;
 }
 
+QSvgCssEasingPtr QSvgCssHandler::createEasing(QSvgCssValues::EasingFunction easingFunction,
+                                              const QSvgCssValues::EasingValues &values)
+{
+    QSvgCssEasingPtr easing;
+
+    switch (easingFunction) {
+    case QSvgCssValues::EasingFunction::Ease:
+    case QSvgCssValues::EasingFunction::EaseIn:
+    case QSvgCssValues::EasingFunction::EaseOut:
+    case QSvgCssValues::EasingFunction::EaseInOut:
+    case QSvgCssValues::EasingFunction::Linear:
+        easing = createEasingFromKeyword(easingFunction);
+        break;
+    case QSvgCssValues::EasingFunction::Steps:
+        easing = createStepsEasing(std::get<QSvgCssValues::StepValues>(values));
+        break;
+    default:
+        easing = createEasingFromKeyword(QSvgCssValues::EasingFunction::Ease);
+        break;
+    }
+
+    return easing;
+}
+
 void QSvgCssHandler::collectAnimations(const QCss::StyleSheet &sheet)
 {
     auto sortFunction = [](QCss::AnimationRule::AnimationRuleSet r1, QCss::AnimationRule::AnimationRuleSet r2) {
@@ -449,6 +473,51 @@ void QSvgCssHandler::styleLookup(QSvgNode *node, QXmlStreamAttributes &attribute
     QList<QCss::Declaration> decls = m_selector->declarationsForNode(cssNode);
 
     parseCSStoXMLAttrs(decls, attributes);
+}
+
+QSvgCssEasingPtr QSvgCssHandler::createEasingFromKeyword(QSvgCssValues::EasingFunction easingFunction)
+{
+    constexpr QPointF easeC1(0.25, 0.1);
+    constexpr QPointF easeC2(0.25, 1);
+    constexpr QPointF easeInC1(0.42, 0);
+    constexpr QPointF easeInC2(1, 1);
+    constexpr QPointF easeOutC1(0, 0);
+    constexpr QPointF easeOutC2(0.58, 1);
+    constexpr QPointF linearC1(0, 0);
+    constexpr QPointF linearC2(1, 1);
+
+    QSvgCssEasingPtr easing;
+
+    switch (easingFunction) {
+    case QSvgCssValues::EasingFunction::Ease:
+        easing = std::make_unique<QSvgCssCubicBezierEasing>(easingFunction, easeC1, easeC2);
+        break;
+    case QSvgCssValues::EasingFunction::EaseIn:
+        easing = std::make_unique<QSvgCssCubicBezierEasing>(easingFunction, easeInC1, easeInC2);
+        break;
+    case QSvgCssValues::EasingFunction::EaseOut:
+        easing = std::make_unique<QSvgCssCubicBezierEasing>(easingFunction, easeOutC1, easeOutC2);
+        break;
+    case QSvgCssValues::EasingFunction::EaseInOut:
+        easing = std::make_unique<QSvgCssCubicBezierEasing>(easingFunction, easeInC1, easeOutC2);
+        break;
+    case QSvgCssValues::EasingFunction::Linear:
+        easing = std::make_unique<QSvgCssCubicBezierEasing>(easingFunction, linearC1, linearC2);
+        break;
+    default:
+        Q_UNREACHABLE();
+        break;
+    }
+
+    return easing;
+}
+
+QSvgCssEasingPtr QSvgCssHandler::createStepsEasing(const QSvgCssValues::StepValues &values)
+{
+    quint32 steps = values.steps;
+    QSvgCssValues::StepPosition position = values.stepPosition;
+
+    return std::make_unique<QSvgCssStepsEasing>(steps, position);
 }
 
 QT_END_NAMESPACE

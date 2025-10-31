@@ -17,6 +17,7 @@
 
 #include <QtSvg/private/qtsvgglobal_p.h>
 #include "qsvganimatedproperty_p.h"
+#include "qsvgeasinginterface_p.h"
 #include <QtCore/qlist.h>
 
 QT_BEGIN_NAMESPACE
@@ -43,6 +44,9 @@ public:
     void setIterationCount(int count);
     int iterationCount() const;
 
+    void setEasing(QSvgEasingInterfacePtr easing);
+    QSvgEasingInterface *easing() const;
+
     virtual void appendProperty(QSvgAbstractAnimatedProperty *property);
     QList<QSvgAbstractAnimatedProperty *> properties() const;
 
@@ -54,6 +58,7 @@ protected:
     int m_duration;
     bool m_finished;
     int m_iterationCount;
+    QSvgEasingInterfacePtr m_easing;
     QList<QSvgAbstractAnimatedProperty *> m_properties;
 };
 

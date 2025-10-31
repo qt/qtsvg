@@ -22,6 +22,7 @@
 #include <QtCore/qstringview.h>
 #include <QtGui/qpainterpath.h>
 #include <QtSvg/private/qtsvgglobal_p.h>
+#include <QtSvg/private/qsvgcssvalues_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -32,6 +33,8 @@ struct QSvgAnimationProperty
     int duration = 0;
     int delay = 0;
     int iteration = 1;
+    QSvgCssValues::EasingFunction easingFunction = QSvgCssValues::EasingFunction::Ease;
+    QSvgCssValues::EasingValues easingValues;
 };
 
 struct QSvgOffsetProperty

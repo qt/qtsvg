@@ -22,6 +22,7 @@
 #if QT_CONFIG(cssparser)
 #include <QtSvg/private/qsvgcsshandler_p.h>
 #include <QtSvg/private/qsvgcssproperties_p.h>
+#include <QtSvg/private/qsvgcssvalues_p.h>
 #endif
 #include "qsvggraphics_p.h"
 #include "qtsvgglobal_p.h"

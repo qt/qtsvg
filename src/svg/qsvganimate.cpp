@@ -11,6 +11,7 @@ QSvgAnimateNode::QSvgAnimateNode(QSvgNode *parent)
     , m_fill(Fill::Freeze)
     , m_additive(Additive::Replace)
 {
+    m_easing = std::make_unique<QSvgLinearEasing>();
 }
 
 void QSvgAnimateNode::setRunningTime(int startMs, int durMs, int endMs, int by)

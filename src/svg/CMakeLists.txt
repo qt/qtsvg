@@ -31,6 +31,7 @@ qt_internal_add_module(Svg
         qtsvgglobal.h qtsvgglobal_p.h
         animation/qsvganimator.cpp animation/qsvganimator_p.h
         animation/qsvgabstractanimation.cpp animation/qsvgabstractanimation_p.h
+        animation/qsvgeasinginterface_p.h
         animation/qsvganimatedproperty.cpp animation/qsvganimatedproperty_p.h
         animation/qsvgcssanimation.cpp animation/qsvgcssanimation_p.h
         qsvgutils_p.h qsvgutils.cpp
@@ -56,6 +57,8 @@ qt_internal_extend_target(Svg CONDITION QT_FEATURE_cssparser
         css/qsvgcsshandler.cpp css/qsvgcsshandler_p.h
         css/qsvgstyleselector.cpp css/qsvgstyleselector_p.h
         css/qsvgcssproperties.cpp css/qsvgcssproperties_p.h
+        css/animation/qsvgcsseasing.cpp css/animation/qsvgcsseasing_p.h
+        css/util/qsvgcssvalues_p.h
 )
 
 qt_internal_extend_target(Svg CONDITION MSVC AND (TEST_architecture_arch STREQUAL "i386")

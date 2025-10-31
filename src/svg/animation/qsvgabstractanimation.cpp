@@ -11,7 +11,6 @@ QSvgAbstractAnimation::QSvgAbstractAnimation()
     , m_finished(false)
     , m_iterationCount(0)
 {
-
 }
 
 QSvgAbstractAnimation::~QSvgAbstractAnimation()
@@ -64,7 +63,8 @@ void QSvgAbstractAnimation::evaluateAnimation(qreal elapsedTime)
             qreal to = keyFrames.at(i);
             if (fractionOfCurrentIterationTime >= from && fractionOfCurrentIterationTime < to) {
                 qreal currFraction = (fractionOfCurrentIterationTime - from) / (to - from);
-                animProperty->interpolate(i, currFraction);
+                qreal effectiveFraction = m_easing->progress(currFraction);
+                animProperty->interpolate(i, effectiveFraction);
             }
         }
     }
@@ -94,6 +94,16 @@ void QSvgAbstractAnimation::setIterationCount(int count)
 int QSvgAbstractAnimation::iterationCount() const
 {
     return m_iterationCount;
+}
+
+void QSvgAbstractAnimation::setEasing(QSvgEasingInterfacePtr easing)
+{
+    m_easing = std::move(easing);
+}
+
+QSvgEasingInterface *QSvgAbstractAnimation::easing() const
+{
+    return m_easing.get();
 }
 
 QT_END_NAMESPACE

@@ -16,9 +16,20 @@
 //
 
 #include "qsvgnode_p.h"
-#include "private/qsvgabstractanimation_p.h"
+#include <QtSvg/private/qsvgabstractanimation_p.h>
+#include <QtSvg/private/qsvgeasinginterface_p.h>
+#include <QtCore/qminmax.h>
 
 QT_BEGIN_NAMESPACE
+
+class Q_SVG_EXPORT QSvgLinearEasing : public QSvgEasingInterface
+{
+public:
+    virtual qreal progress(qreal t) override
+    {
+        return qBound(0., t, 1.);
+    }
+};
 
 class Q_SVG_EXPORT QSvgAnimateNode : public QSvgNode, public QSvgAbstractAnimation
 {

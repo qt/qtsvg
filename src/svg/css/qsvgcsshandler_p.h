@@ -17,6 +17,8 @@
 
 #include <QtSvg/private/qtsvgglobal_p.h>
 #include <QtSvg/private/qsvgcssanimation_p.h>
+#include <QtSvg/private/qsvgcssvalues_p.h>
+#include <QtSvg/private/qsvgcsseasing_p.h>
 #include <QtCore/qstringview.h>
 #include <QtGui/private/qcssparser_p.h>
 #include <QtCore/qxmlstream.h>
@@ -31,6 +33,9 @@ public:
     ~QSvgCssHandler();
 
     QSvgCssAnimation *createAnimation(QStringView name);
+    QSvgCssEasingPtr createEasing(QSvgCssValues::EasingFunction easingFunction,
+                                  const QSvgCssValues::EasingValues &values);
+
     void collectAnimations(const QCss::StyleSheet &sheet);
 
     void parseStyleSheet(const QStringView str);
@@ -38,6 +43,10 @@ public:
     void parseCSStoXMLAttrs(const QString &css, QXmlStreamAttributes &attributes) const;
 
     void styleLookup(QSvgNode *node, QXmlStreamAttributes &attributes) const;
+
+private:
+    QSvgCssEasingPtr createEasingFromKeyword(QSvgCssValues::EasingFunction easingFunction);
+    QSvgCssEasingPtr createStepsEasing(const QSvgCssValues::StepValues &values);
 
 private:
     QHash<QString, QCss::AnimationRule> m_animations;
