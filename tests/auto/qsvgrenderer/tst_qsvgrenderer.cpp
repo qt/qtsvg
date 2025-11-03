@@ -1895,6 +1895,9 @@ void tst_QSvgRenderer::ossFuzzLoad_data()
     // resulted in stack overflow
     QTest::newRow("cyclic-reference-from-parent") // id=390467765
             << R"-(<svg stroke="url(#c)"><pattern height="2" width="4" id="c"/><path stroke="#F00" d="v2"/></svg>)-"_ba;
+    // resulted in memory leak, reported when configured with "-sanitize address"
+    QTest::newRow("animation-without-target") // id=456050169
+            << R"-(<svg><animateTransform type="rotate" from=" " to=" " href="#X">)-"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzLoad()
