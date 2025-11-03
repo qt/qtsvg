@@ -4454,8 +4454,13 @@ void QSvgHandler::resolveNodes()
         } else if (node->type() == QSvgNode::AnimateTransform || node->type() == QSvgNode::AnimateColor) {
             QSvgAnimateNode *anim = static_cast<QSvgAnimateNode *>(node);
             QSvgNode *targetNode = m_doc->namedNode(anim->linkId());
-            if (targetNode)
+            if (targetNode) {
                 m_doc->animator()->appendAnimation(targetNode, anim);
+            } else {
+                qCWarning(lcSvgHandler, "Cannot find target for link #%s!",
+                          qPrintable(anim->linkId()));
+                delete anim;
+            }
         }
     }
     m_toBeResolved.clear();
