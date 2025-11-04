@@ -1483,7 +1483,10 @@ static QSvgNode *createAnimateColorNode(QSvgNode *parent,
     QSvgAnimateColor *anim = new QSvgAnimateColor(parent);
     anim->appendProperty(prop);
 
-    parseBaseAnimate(parent, attributes, anim, handler);
+    if (!parseBaseAnimate(parent, attributes, anim, handler)) {
+        delete anim;
+        return nullptr;
+    }
 
     return anim;
 }
@@ -1600,7 +1603,10 @@ static QSvgNode *createAnimateTransformNode(QSvgNode *parent,
     QSvgAnimateTransform *anim = new QSvgAnimateTransform(parent);
     anim->appendProperty(prop);
 
-    parseBaseAnimate(parent, attributes, anim, handler);
+    if (!parseBaseAnimate(parent, attributes, anim, handler)) {
+        delete anim;
+        return nullptr;
+    }
 
     return anim;
 }
