@@ -3,7 +3,7 @@
 /*!
     \title SVG Viewer
     \example svgviewer
-    \image svgviewer-example.png
+    \image svgviewer-example.png {Screenshot of SVG Viever tool displaying a svg file}
     \brief A Qt Widgets example for rendering and viewing SVG files.
     \examplecategory {Graphics}
 
