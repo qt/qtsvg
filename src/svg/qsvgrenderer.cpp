@@ -71,15 +71,10 @@ class QSvgRendererPrivate : public QObjectPrivate
 public:
     explicit QSvgRendererPrivate()
         : QObjectPrivate(),
-          render(0), timer(0),
+          timer(0),
           fps(30)
     {
         options = defaultOptions();
-    }
-
-    ~QSvgRendererPrivate()
-    {
-        delete render;
     }
 
     void startOrStopTimer()
@@ -111,7 +106,7 @@ public:
         return envOk ? envOpts : appDefaultOptions;
     }
 
-    QSvgDocument *render;
+    std::unique_ptr<QSvgDocument> render;
     QTimer *timer;
     int fps;
     QtSvg::Options options;
@@ -175,7 +170,7 @@ QSvgRenderer::~QSvgRenderer()
 bool QSvgRenderer::isValid() const
 {
     Q_D(const QSvgRenderer);
-    return d->render;
+    return bool(d->render);
 }
 
 /*!
@@ -414,12 +409,10 @@ static bool loadDocument(QSvgRenderer *const q,
                          QSvgRendererPrivate *const d,
                          const TInputType &in)
 {
-    delete d->render;
     d->render = QSvgDocument::load(in, d->options);
-    if (d->render && !d->render->size().isValid()) {
-        delete d->render;
-        d->render = nullptr;
-    }
+    if (d->render && !d->render->size().isValid())
+        d->render.reset();
+
     d->startOrStopTimer();
 
     if (d->render)
@@ -428,7 +421,7 @@ static bool loadDocument(QSvgRenderer *const q,
     //force first update
     QSvgRendererPrivate::callRepaintNeeded(q);
 
-    return d->render;
+    return bool(d->render);
 }
 
 /*!

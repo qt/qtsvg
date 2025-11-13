@@ -32,14 +32,18 @@ public:
     QSvgStructureNode(QSvgNode *parent);
     ~QSvgStructureNode();
     QSvgNode *scopeNode(const QString &id) const;
-    void addChild(QSvgNode *child, const QString &id);
+    void addChild(std::unique_ptr<QSvgNode> child, const QString &id);
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QSvgNode *previousSiblingNode(QSvgNode *n) const;
-    QList<QSvgNode*> renderers() const { return m_renderers; }
+    const std::vector<std::unique_ptr<QSvgNode>> &renderers() const { return m_renderers; }
 protected:
-    QList<QSvgNode*>          m_renderers;
+    std::vector<std::unique_ptr<QSvgNode>>          m_renderers;
     mutable bool              m_recursing = false;
+
+private:
+    Q_DISABLE_COPY_X(QSvgStructureNode, "Class has a vector of unique"
+                                        "pointers as member variable")
 };
 
 class Q_SVG_EXPORT QSvgG : public QSvgStructureNode

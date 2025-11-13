@@ -28,17 +28,13 @@ QSvgG::QSvgG(QSvgNode *parent)
 
 QSvgStructureNode::~QSvgStructureNode()
 {
-    qDeleteAll(m_renderers);
 }
 
 void QSvgG::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
-    QList<QSvgNode*>::iterator itr = m_renderers.begin();
-    while (itr != m_renderers.end()) {
-        QSvgNode *node = *itr;
+    for (const auto &node : renderers()) {
         if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode))
             node->draw(p, states);
-        ++itr;
     }
 }
 
@@ -54,7 +50,7 @@ QSvgNode::Type QSvgG::type() const
 
 bool QSvgG::requiresGroupRendering() const
 {
-    return m_renderers.count() > 1;
+    return m_renderers.size() > 1;
 }
 
 QSvgStructureNode::QSvgStructureNode(QSvgNode *parent)
@@ -69,16 +65,15 @@ QSvgNode * QSvgStructureNode::scopeNode(const QString &id) const
     return doc ? doc->namedNode(id) : 0;
 }
 
-void QSvgStructureNode::addChild(QSvgNode *child, const QString &id)
+void QSvgStructureNode::addChild(std::unique_ptr<QSvgNode> child, const QString &id)
 {
-    m_renderers.append(child);
+    if (!id.isEmpty()) {
+        QSvgDocument *doc = document();
+        if (doc)
+            doc->addNamedNode(id, child.get());
+    }
 
-    if (id.isEmpty())
-        return; //we can't add it to scope without id
-
-    QSvgDocument *doc = document();
-    if (doc)
-        doc->addNamedNode(id, child);
+    m_renderers.push_back(std::move(child));
 }
 
 QSvgDefs::QSvgDefs(QSvgNode *parent)
@@ -119,7 +114,7 @@ QRectF QSvgSymbolLike::decoratedInternalBounds(QPainter *p, QSvgExtraStates &sta
 
 bool QSvgSymbolLike::requiresGroupRendering() const
 {
-    return m_renderers.count() > 1;
+    return m_renderers.size() > 1;
 }
 
 QRectF QSvgSymbolLike::clipRect() const
@@ -205,15 +200,11 @@ void QSvgSymbol::drawCommand(QPainter *p, QSvgExtraStates &states)
     if (!states.inUse) //Symbol is only drawn when within a use node.
         return;
 
-    QList<QSvgNode*>::iterator itr = m_renderers.begin();
-
     p->save();
     setPainterToRectAndAdjustment(p);
-    while (itr != m_renderers.end()) {
-        QSvgNode *node = *itr;
+    for (const auto &node : renderers()) {
         if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode))
             node->draw(p, states);
-        ++itr;
     }
     p->restore();
 }
@@ -270,16 +261,12 @@ void QSvgMarker::drawCommand(QPainter *p, QSvgExtraStates &states)
         return;
     QScopedValueRollback<bool> recursingGuard(m_recursing, true);
 
-    QList<QSvgNode*>::iterator itr = m_renderers.begin();
-
     p->save();
     setPainterToRectAndAdjustment(p);
 
-    while (itr != m_renderers.end()) {
-        QSvgNode *node = *itr;
+    for (const auto &node : renderers()) {
         if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode))
             node->draw(p, states);
-        ++itr;
     }
     p->restore();
 }
@@ -496,9 +483,8 @@ QImage QSvgFilterContainer::applyFilter(const QImage &buffer, QPainter *p, const
 
     bool requiresSourceAlpha = false;
 
-    const QList<QSvgNode *> children = renderers();
-    for (const QSvgNode *renderer : children) {
-        const QSvgFeFilterPrimitive *filter = QSvgFeFilterPrimitive::castToFilterPrimitive(renderer);
+    for (const auto &node : renderers()) {
+        const QSvgFeFilterPrimitive *filter = QSvgFeFilterPrimitive::castToFilterPrimitive(node.get());
         if (filter && filter->requiresSourceAlpha()) {
             requiresSourceAlpha = true;
             break;
@@ -514,8 +500,8 @@ QImage QSvgFilterContainer::applyFilter(const QImage &buffer, QPainter *p, const
     }
 
     QImage result;
-    for (const QSvgNode *renderer : children) {
-        const QSvgFeFilterPrimitive *filter = QSvgFeFilterPrimitive::castToFilterPrimitive(renderer);
+    for (const auto &node : renderers()) {
+        const QSvgFeFilterPrimitive *filter = QSvgFeFilterPrimitive::castToFilterPrimitive(node.get());
         if (filter) {
             result = filter->apply(buffers, p, bounds, localFilterRegion, m_primitiveUnits, m_filterUnits);
             if (!result.isNull()) {
@@ -592,8 +578,7 @@ QSvgNode *QSvgSwitch::childToRender() const
 {
     auto itr = m_renderers.begin();
 
-    while (itr != m_renderers.end()) {
-        QSvgNode *node = *itr;
+    for (const auto &node : renderers()) {
         if (node->isVisible() && (node->displayMode() != QSvgNode::NoneMode)) {
             const QStringList &features  = node->requiredFeatures();
             const QStringList &extensions = node->requiredExtensions();
@@ -640,7 +625,7 @@ QSvgNode *QSvgSwitch::childToRender() const
                 okToRender = false;
 
             if (okToRender)
-                return node;
+                return node.get();
         }
 
         ++itr;
@@ -674,7 +659,7 @@ QRectF QSvgStructureNode::internalBounds(QPainter *p, QSvgExtraStates &states) c
     QRectF bounds;
     if (!m_recursing) {
         QScopedValueRollback<bool> guard(m_recursing, true);
-        for (QSvgNode *node : std::as_const(m_renderers))
+        for (const auto &node : renderers())
             bounds |= node->bounds(p, states);
     }
     return bounds;
@@ -685,7 +670,7 @@ QRectF QSvgStructureNode::decoratedInternalBounds(QPainter *p, QSvgExtraStates &
     QRectF bounds;
     if (!m_recursing) {
         QScopedValueRollback<bool> guard(m_recursing, true);
-        for (QSvgNode *node : std::as_const(m_renderers))
+        for (const auto &node : renderers())
             bounds |= node->decoratedBounds(p, states);
     }
     return bounds;
@@ -694,12 +679,10 @@ QRectF QSvgStructureNode::decoratedInternalBounds(QPainter *p, QSvgExtraStates &
 QSvgNode* QSvgStructureNode::previousSiblingNode(QSvgNode *n) const
 {
     QSvgNode *prev = nullptr;
-    QList<QSvgNode*>::const_iterator itr = m_renderers.constBegin();
-    for (; itr != m_renderers.constEnd(); ++itr) {
-        QSvgNode *node = *itr;
-        if (node == n)
+    for (const auto &node : renderers()) {
+        if (node.get() == n)
             return prev;
-        prev = node;
+        prev = node.get();
     }
     return prev;
 }
@@ -777,12 +760,10 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
     }
 
     // Draw all content items of the mask to generate the mask
-    QList<QSvgNode*>::const_iterator itr = m_renderers.begin();
-    while (itr != m_renderers.end()) {
-        QSvgNode *node = *itr;
+    for (const auto &node : renderers())
+    {
         if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode))
             node->draw(&painter, maskNodeStates);
-        ++itr;
     }
 
     for (int i=0; i < mask.height(); i++) {
@@ -934,7 +915,7 @@ QImage QSvgPattern::renderPattern(QSize size, qreal contentScaleX, qreal content
 
     // Draw all this Pattern children nodes with our QPainter,
     // no need to use any Extra States
-    for (QSvgNode *node : m_renderers)
+    for (const auto &node : renderers())
         node->draw(&patternPainter, patternStates);
 
     revertStyleRecursive(&patternPainter, patternStates);
