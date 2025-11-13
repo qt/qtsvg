@@ -176,14 +176,15 @@ static QByteArray qt_inflateSvgzDataFrom(QIODevice *)
 }
 #endif
 
-QSvgDocument *QSvgDocument::load(const QString &fileName, QtSvg::Options options,
+std::unique_ptr<QSvgDocument> QSvgDocument::load(const QString &fileName, QtSvg::Options options,
                                          QtSvg::AnimatorType type)
 {
+    std::unique_ptr<QSvgDocument> doc;
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly)) {
         qCWarning(lcSvgHandler, "Cannot open file '%s', because: %s",
                   qPrintable(fileName), qPrintable(file.errorString()));
-        return 0;
+        return doc;
     }
 
     if (fileName.endsWith(QLatin1String(".svgz"), Qt::CaseInsensitive)
@@ -191,10 +192,9 @@ QSvgDocument *QSvgDocument::load(const QString &fileName, QtSvg::Options options
         return load(qt_inflateSvgzDataFrom(&file));
     }
 
-    QSvgDocument *doc = nullptr;
     QSvgHandler handler(&file, options, type);
     if (handler.ok()) {
-        doc = handler.document();
+        doc.reset(handler.document());
         doc->m_animator->setAnimationDuration(handler.animationDuration());
     } else {
         qCWarning(lcSvgHandler, "Cannot read file '%s', because: %s (line %d)",
@@ -204,9 +204,10 @@ QSvgDocument *QSvgDocument::load(const QString &fileName, QtSvg::Options options
     return doc;
 }
 
-QSvgDocument *QSvgDocument::load(const QByteArray &contents, QtSvg::Options options,
+std::unique_ptr<QSvgDocument> QSvgDocument::load(const QByteArray &contents, QtSvg::Options options,
                                          QtSvg::AnimatorType type)
 {
+    std::unique_ptr<QSvgDocument> doc;
     QByteArray svg;
     // Check for gzip magic number and inflate if appropriate
     if (contents.startsWith("\x1f\x8b")) {
@@ -217,16 +218,15 @@ QSvgDocument *QSvgDocument::load(const QByteArray &contents, QtSvg::Options opti
         svg = contents;
     }
     if (svg.isNull())
-        return nullptr;
+        return doc;
 
     QBuffer buffer;
     buffer.setData(svg);
     buffer.open(QIODevice::ReadOnly);
     QSvgHandler handler(&buffer, options, type);
 
-    QSvgDocument *doc = nullptr;
     if (handler.ok()) {
-        doc = handler.document();
+        doc.reset(handler.document());
         doc->m_animator->setAnimationDuration(handler.animationDuration());
     } else {
         delete handler.document();
@@ -234,14 +234,14 @@ QSvgDocument *QSvgDocument::load(const QByteArray &contents, QtSvg::Options opti
     return doc;
 }
 
-QSvgDocument *QSvgDocument::load(QXmlStreamReader *contents, QtSvg::Options options,
+std::unique_ptr<QSvgDocument> QSvgDocument::load(QXmlStreamReader *contents, QtSvg::Options options,
                                          QtSvg::AnimatorType type)
 {
     QSvgHandler handler(contents, options, type);
 
-    QSvgDocument *doc = nullptr;
+    std::unique_ptr<QSvgDocument> doc;
     if (handler.ok()) {
-        doc = handler.document();
+        doc.reset(handler.document());
         doc->m_animator->setAnimationDuration(handler.animationDuration());
     } else {
         delete handler.document();
@@ -259,13 +259,10 @@ void QSvgDocument::draw(QPainter *p, const QRectF &bounds)
     //### not the most optimal way
     mapSourceToTarget(p, bounds);
     initPainter(p);
-    QList<QSvgNode*>::iterator itr = m_renderers.begin();
     applyStyle(p, m_states);
-    while (itr != m_renderers.end()) {
-        QSvgNode *node = *itr;
+    for (const auto &node : renderers()) {
         if ((node->isVisible()) && (node->displayMode() != QSvgNode::NoneMode))
             node->draw(p, m_states);
-        ++itr;
     }
     revertStyle(p, m_states);
     p->restore();

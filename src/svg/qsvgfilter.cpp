@@ -499,11 +499,10 @@ QImage QSvgFeMerge::apply(const QMap<QString, QImage> &sources, QPainter *p,
                           QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
 {
     QList<QImage> mergeNodeResults;
-    for (int i = 0; i < renderers().size(); i++) {
-        QSvgNode *child = renderers().at(i);
-        if (child->type() == QSvgNode::FeMergenode) {
-            QSvgFeMergeNode *filter = static_cast<QSvgFeMergeNode*>(child);
-            mergeNodeResults.append(filter->apply(sources, p, itemBounds, filterBounds, primitiveUnits, filterUnits));
+    for (const auto &node : renderers()) {
+        if (node->type() == QSvgNode::FeMergenode) {
+            const QSvgFeMergeNode &filter = static_cast<const QSvgFeMergeNode&>(*node);
+            mergeNodeResults.append(filter.apply(sources, p, itemBounds, filterBounds, primitiveUnits, filterUnits));
         }
     }
 
@@ -532,11 +531,10 @@ QImage QSvgFeMerge::apply(const QMap<QString, QImage> &sources, QPainter *p,
 
 bool QSvgFeMerge::requiresSourceAlpha() const
 {
-    for (int i = 0; i < renderers().size(); i++) {
-        QSvgNode *child = renderers().at(i);
-        if (child->type() == QSvgNode::FeMergenode) {
-            QSvgFeMergeNode *filter = static_cast<QSvgFeMergeNode *>(child);
-            if (filter->requiresSourceAlpha())
+    for (const auto &node : renderers()) {
+        if (node->type() == QSvgNode::FeMergenode) {
+            const QSvgFeMergeNode &filter = static_cast<const QSvgFeMergeNode&>(*node);
+            if (filter.requiresSourceAlpha())
                 return true;
         }
     }

@@ -60,8 +60,8 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
         break;
     }
 
-    for (const auto *child : node->renderers())
-        traverse(child);
+    for (auto &child : node->renderers())
+        traverse(child.get());
 
     switch (node->type()) {
     case QSvgNode::Switch:

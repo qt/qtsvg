@@ -38,11 +38,11 @@ class QTransform;
 class Q_SVG_EXPORT QSvgDocument : public QSvgStructureNode
 {
 public:
-    static QSvgDocument *load(const QString &file, QtSvg::Options options = {},
+    static std::unique_ptr<QSvgDocument> load(const QString &file, QtSvg::Options options = {},
                                   QtSvg::AnimatorType type = QtSvg::AnimatorType::Automatic);
-    static QSvgDocument *load(const QByteArray &contents, QtSvg::Options options = {},
+    static std::unique_ptr<QSvgDocument> load(const QByteArray &contents, QtSvg::Options options = {},
                                   QtSvg::AnimatorType type = QtSvg::AnimatorType::Automatic);
-    static QSvgDocument *load(QXmlStreamReader *contents, QtSvg::Options options = {},
+    static std::unique_ptr<QSvgDocument> load(QXmlStreamReader *contents, QtSvg::Options options = {},
                                   QtSvg::AnimatorType type = QtSvg::AnimatorType::Automatic);
     static bool isLikelySvg(QIODevice *device, bool *isCompressed = nullptr);
 public:

@@ -3570,8 +3570,8 @@ static bool detectCycles(const QSvgNode *node, QList<const QSvgNode *> active = 
             active.append(node);
 
         auto *g = static_cast<const QSvgStructureNode*>(node);
-        for (auto *r : g->renderers()) {
-            if (detectCycles(r, active))
+        for (auto &node : g->renderers()) {
+            if (detectCycles(node.get(), active))
                 return true;
         }
     }
@@ -3728,7 +3728,7 @@ bool QSvgHandler::startElement(const QStringView localName,
                 if (node) {
                     QSvgStructureNode *group =
                         static_cast<QSvgStructureNode*>(m_nodes.top());
-                    group->addChild(node, someId(attributes));
+                    group->addChild(std::unique_ptr<QSvgNode>(node), someId(attributes));
                 }
             }
                 break;
@@ -3767,7 +3767,7 @@ bool QSvgHandler::startElement(const QStringView localName,
             if (node) {
                 QSvgStructureNode *group =
                     static_cast<QSvgStructureNode*>(m_nodes.top());
-                group->addChild(node, someId(attributes));
+                group->addChild(std::unique_ptr<QSvgNode>(node), someId(attributes));
             }
         }
             break;
@@ -3811,7 +3811,7 @@ bool QSvgHandler::startElement(const QStringView localName,
             if (node) {
                 QSvgStructureNode *container =
                     static_cast<QSvgStructureNode*>(m_nodes.top());
-                container->addChild(node, someId(attributes));
+                container->addChild(std::unique_ptr<QSvgNode>(node), someId(attributes));
             }
         } else {
             const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");
@@ -3902,9 +3902,8 @@ void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)
 
     QSvgStructureNode *structureNode = static_cast<QSvgStructureNode *>(node);
 
-    const QList<QSvgNode *> ren = structureNode->renderers();
-    for (auto it = ren.begin(); it != ren.end(); ++it) {
-        QSvgFillStyle *fill = static_cast<QSvgFillStyle *>((*it)->styleProperty(QSvgStyleProperty::FILL));
+    for (auto &node : structureNode->renderers()) {
+        QSvgFillStyle *fill = static_cast<QSvgFillStyle *>(node->styleProperty(QSvgStyleProperty::FILL));
         if (fill && !fill->isPaintStyleResolved()) {
             QString id = fill->paintStyleId();
             QSvgPaintStyleProperty *style = structureNode->styleProperty(id);
@@ -3916,7 +3915,7 @@ void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)
             }
         }
 
-        QSvgStrokeStyle *stroke = static_cast<QSvgStrokeStyle *>((*it)->styleProperty(QSvgStyleProperty::STROKE));
+        QSvgStrokeStyle *stroke = static_cast<QSvgStrokeStyle *>(node->styleProperty(QSvgStyleProperty::STROKE));
         if (stroke && !stroke->isPaintStyleResolved()) {
             QString id = stroke->paintStyleId();
             QSvgPaintStyleProperty *style = structureNode->styleProperty(id);
@@ -3929,7 +3928,7 @@ void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)
         }
 
         if (nestedDepth < 2048)
-            resolvePaintServers(*it, nestedDepth + 1);
+            resolvePaintServers(node.get(), nestedDepth + 1);
     }
 }
 
@@ -3959,8 +3958,8 @@ void QSvgHandler::resolveNodes()
             useNode->setLink(link);
         } else if (node->type() == QSvgNode::Filter) {
             QSvgFilterContainer *filter = static_cast<QSvgFilterContainer *>(node);
-            for (const QSvgNode *renderer : filter->renderers()) {
-                const QSvgFeFilterPrimitive *primitive = QSvgFeFilterPrimitive::castToFilterPrimitive(renderer);
+            for (auto &renderer : filter->renderers()) {
+                const QSvgFeFilterPrimitive *primitive = QSvgFeFilterPrimitive::castToFilterPrimitive(renderer.get());
                 if (!primitive || primitive->type() == QSvgNode::FeUnsupported) {
                     filter->setSupported(false);
                     break;

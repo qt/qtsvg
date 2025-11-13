@@ -35,7 +35,6 @@ private:
     quint16 checksumFileOrDir(const QString &path);
 
     QString testSuitePath;
-    std::unique_ptr<QSvgDocument> m_doc;
 };
 
 tst_QSvgRenderer::tst_QSvgRenderer()
@@ -121,20 +120,20 @@ void tst_QSvgRenderer::runTest(const QStringList& extraArgs)
 
     QFETCH(QString, svgFile);
 
-    m_doc.reset(QSvgDocument::load(svgFile, {}, QtSvg::AnimatorType::Controlled));
-    QSize size = m_doc ? m_doc->size() : QSize(64, 64);
+    auto svgDoc = QSvgDocument::load(svgFile, {}, QtSvg::AnimatorType::Controlled);
+    QSize size = svgDoc ? svgDoc->size() : QSize(64, 64);
     QImage actual(size, QImage::Format_RGB32);
     actual.fill(QColor(255, 255, 255));
 
-    if (m_doc) {
-        if (m_doc->animated()) {
-            uint midTime = qFloor(m_doc->animationDuration() * 0.5);
+    if (svgDoc) {
+        if (svgDoc->animated()) {
+            uint midTime = qFloor(svgDoc->animationDuration() * 0.5);
             uint currentFrame = midTime * 0.001 * 30;
-            m_doc->setCurrentFrame(currentFrame);
-            m_doc->animator()->advanceAnimations();
+            svgDoc->setCurrentFrame(currentFrame);
+            svgDoc->animator()->advanceAnimations();
         }
         QPainter actualPainter(&actual);
-        m_doc->draw(&actualPainter);
+        svgDoc->draw(&actualPainter);
     }
 
     QBASELINE_TEST(actual);
