@@ -1861,7 +1861,7 @@ static QSvgNode *createImageNode(QSvgNode *parent,
     if (filename.startsWith(QLatin1String("data"))) {
         QString mimeType;
         QByteArray data;
-        if (qDecodeDataUrl(filename, mimeType, data)) {
+        if (qDecodeDataUrl(QUrl{filename}, mimeType, data)) {
             image = QImage::fromData(data);
             filenameType = LoadedFromData;
         }
