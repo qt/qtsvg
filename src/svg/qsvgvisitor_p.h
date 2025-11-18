@@ -20,6 +20,7 @@
 #include <private/qsvggraphics_p.h>
 #include <private/qsvgstructure_p.h>
 #include <private/qsvganimate_p.h>
+#include <private/qsvgfilter_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -59,6 +60,10 @@ protected:
     virtual void visitMaskNodeEnd(const QSvgMask *node) { visitStructureNodeEnd(node); }
     virtual bool visitSymbolNodeStart(const QSvgSymbol *node) { return visitStructureNodeStart(node); }
     virtual void visitSymbolNodeEnd(const QSvgSymbol *node) { visitStructureNodeEnd(node); }
+    virtual bool visitFilterNodeStart(const QSvgFilterContainer *node) { return visitStructureNodeStart(node); }
+    virtual void visitFilterNodeEnd(const QSvgFilterContainer *node) { visitStructureNodeEnd(node); }
+    virtual bool visitFeFilterPrimitiveNodeStart(const QSvgFeFilterPrimitive *node) { return visitStructureNodeStart(node); }
+    virtual void visitFeFilterPrimitiveNodeEnd(const QSvgFeFilterPrimitive *node) { visitStructureNodeEnd(node); }
 };
 
 QT_END_NAMESPACE
