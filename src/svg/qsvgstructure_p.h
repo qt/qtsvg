@@ -201,6 +201,11 @@ public:
     void setSupported(bool supported);
     bool supported() const;
     QRectF filterRegion(const QRectF &itemBounds) const;
+
+    QSvgRectF rect() const { return m_rect; }
+    QtSvg::UnitTypes filterUnits() const { return m_filterUnits; }
+    QtSvg::UnitTypes primitiveUnits() const { return m_primitiveUnits; }
+
 private:
     QSvgRectF m_rect;
     QtSvg::UnitTypes m_filterUnits;
