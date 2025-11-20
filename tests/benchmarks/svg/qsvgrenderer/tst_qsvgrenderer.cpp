@@ -102,6 +102,7 @@ void tst_QSvgRenderer::render_picture()
     renderer.load(data);
 
     QPicture picture;
+    picture.setBoundingRect(QRect(QPoint(), renderer.defaultSize()));
     QPainter painter(&picture);
 
     QBENCHMARK {
