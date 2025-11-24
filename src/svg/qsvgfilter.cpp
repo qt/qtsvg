@@ -233,6 +233,69 @@ QSvgNode::Type QSvgFeGaussianBlur::type() const
     return QSvgNode::FeGaussianblur;
 }
 
+class ColorValues {
+    // This class is not designed for general use. It is is only meant to improve the calling code's
+    // readability by replacing a two-dimensial array of integers with a one-dimensial array of
+    // objects which perform repeated calculations on the single values by just one call.
+public:
+    ColorValues() = default;
+    explicit ColorValues(QRgb rgb) : b(qBlue(rgb)), g(qGreen(rgb)), r(qRed(rgb)), a(qAlpha(rgb)){}
+
+    ColorValues &operator+=(const ColorValues &other)
+    {
+        b += other.b;
+        g += other.g;
+        r += other.r;
+        a += other.a;
+        return *this;
+    }
+
+    ColorValues operator+(const ColorValues &other)
+    {
+        ColorValues result(*this);
+        result+=(other);
+        return result;
+    }
+
+    ColorValues &operator-=(const ColorValues &other)
+    {
+        b -= other.b;
+        g -= other.g;
+        r -= other.r;
+        a -= other.a;
+        return *this;
+    }
+
+    ColorValues operator-(const ColorValues &other)
+    {
+        ColorValues result(*this);
+        result -= other;
+        return result;
+    }
+
+    ColorValues operator/=(uint64_t div)
+    {
+        // This does neither avoid nor handle division by zero. It
+        // relies on the calling code to never pass a zero value.
+        b /= div;
+        g /= div;
+        r /= div;
+        a /= div;
+        return *this;
+    }
+
+    QRgb toRgb()
+    {
+        return qRgba(r, g, b, a);
+    }
+
+private:
+    uint64_t b = 0;
+    uint64_t g = 0;
+    uint64_t r = 0;
+    uint64_t a = 0;
+};
+
 QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter *p,
                                  const QRectF &itemBounds, const QRectF &filterBounds,
                                  QtSvg::UnitTypes primitiveUnits, QtSvg::UnitTypes filterUnits) const
@@ -279,7 +342,7 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
     copyPainter.drawImage(source.offset(), source);
     copyPainter.end();
 
-    QVarLengthArray<uint64_t, 32 * 32> buffer(tempSource.width() * tempSource.height());
+    QVarLengthArray<ColorValues, 32 * 32> buffer(tempSource.width() * tempSource.height());
 
     const int sourceHeight = tempSource.height();
     const int sourceWidth = tempSource.width();
@@ -313,39 +376,33 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
         const auto [dxleft, dxright] = adjustD(dx, m);
         const auto [dytop, dybottom] = adjustD(dy, m);
 
-        for (int col = 0; col < 4 * 8; col += 8 ){
-            // Generating the partial sum of color values from the top left corner
-            // These sums can be combined to yield the partial sum of any rectangular subregion
-            for (int j = 0; j < sourceHeight; j++) {
-                for (int i = 0; i < sourceWidth; i++) {
-                    buffer[i + j * sourceWidth] = (rawImage[i + j * sourceWidth] >> col) & 0xff;
-                    if (i > 0)
-                        buffer[i + j * sourceWidth] += buffer[(i - 1) + j * sourceWidth];
-                    if (j > 0)
-                        buffer[i + j * sourceWidth] += buffer[i + (j - 1) * sourceWidth];
-                    if (i > 0 && j > 0)
-                        buffer[i + j * sourceWidth] -= buffer[(i - 1) + (j - 1) * sourceWidth];
-                }
+        // Generating the partial sum of color values from the top left corner
+        // These sums can be combined to yield the partial sum of any rectangular subregion
+        for (int j = 0; j < sourceHeight; j++) {
+            for (int i = 0; i < sourceWidth; i++) {
+                ColorValues colorValues(rawImage[i + j * sourceWidth]);
+                if (i > 0)
+                    colorValues += buffer[(i - 1) + j * sourceWidth];
+                if (j > 0)
+                    colorValues += buffer[i + (j - 1) * sourceWidth];
+                if (i > 0 && j > 0)
+                    colorValues -= buffer[(i - 1) + (j - 1) * sourceWidth];
+                buffer[i + j * sourceWidth] = colorValues;
             }
+        }
 
-            for (int j = 0; j < sourceHeight; j++) {
-                const int j1 = qMax(0, j - dytop);
-                const int j2 = qMin(sourceHeight - 1, j + dybottom);
-                for (int i = 0; i < sourceWidth; i++) {
-                    const int i1 = qMax(0, i - dxleft);
-                    const int i2 = qMin(sourceWidth - 1, i + dxright);
-
-                    uint64_t colorValue64 = buffer[i2 + j2 * sourceWidth];
-                    colorValue64 -= buffer[i1 + j2 * sourceWidth];
-                    colorValue64 -= buffer[i2 + j1 * sourceWidth];
-                    colorValue64 += buffer[i1 + j1 * sourceWidth];
-                    colorValue64 /= uint64_t(dxleft + dxright) * uint64_t(dytop + dybottom);
-
-                    const unsigned int colorValue = colorValue64;
-                    rawImage[i + j * sourceWidth] &= ~(0xff << col);
-                    rawImage[i + j * sourceWidth] |= colorValue << col;
-
-                }
+        for (int j = 0; j < sourceHeight; j++) {
+            const int j1 = qMax(0, j - dytop);
+            const int j2 = qMin(sourceHeight - 1, j + dybottom);
+            for (int i = 0; i < sourceWidth; i++) {
+                const int i1 = qMax(0, i - dxleft);
+                const int i2 = qMin(sourceWidth - 1, i + dxright);
+                ColorValues colorValues =   buffer[i2 + j2 * sourceWidth]
+                                          - buffer[i1 + j2 * sourceWidth]
+                                          - buffer[i2 + j1 * sourceWidth]
+                                          + buffer[i1 + j1 * sourceWidth];
+                colorValues /= uint64_t(dxleft + dxright) * uint64_t(dytop + dybottom);
+                rawImage[i + j * sourceWidth] = colorValues.toRgb();
             }
         }
     }
