@@ -22,10 +22,13 @@
 #include "QtGui/qtextlayout.h"
 #include "QtCore/qloggingcategory.h"
 
+#include <optional>
+
 QT_BEGIN_NAMESPACE
 
 Q_DECLARE_LOGGING_CATEGORY(lcSvgDraw);
 
+class QSvgGlyph;
 class QTextCharFormat;
 
 class Q_SVG_EXPORT QSvgDummyNode : public QSvgNode
@@ -208,6 +211,8 @@ private:
 
     Type m_type;
     WhitespaceMode m_mode;
+
+    mutable std::optional<QList<const QSvgGlyph *> > m_glyphsToDraw;
 };
 
 class Q_SVG_EXPORT QSvgTspan : public QSvgNode
