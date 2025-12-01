@@ -203,13 +203,13 @@ private:
     static QSvgTspan * const LINEBREAK;
 
     QPointF m_coord;
+    QSizeF m_size;
 
     // 'm_tspans' is also used to store characters outside tspans and line breaks.
     // If a 'm_tspan' item is null, it indicates a line break.
     QList<QSvgTspan *> m_tspans;
 
     Type m_type;
-    QSizeF m_size;
     WhitespaceMode m_mode;
 };
 

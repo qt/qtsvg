@@ -292,8 +292,8 @@ QSvgTspan * const QSvgText::LINEBREAK = 0;
 QSvgText::QSvgText(QSvgNode *parent, const QPointF &coord)
     : QSvgNode(parent)
     , m_coord(coord)
-    , m_type(Text)
     , m_size(0, 0)
+    , m_type(Text)
     , m_mode(Default)
 {
 }
