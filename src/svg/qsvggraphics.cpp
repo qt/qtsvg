@@ -403,7 +403,7 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
             bounds = QRectF(0, py, 1, m_size.height()); // x and width are not used.
 
         bool appendSpace = false;
-        QList<QString> paragraphs;
+        QStringList paragraphs;
         QList<QList<QTextLayout::FormatRange> > formatRanges(1);
         paragraphs.push_back(QString());
 
@@ -478,18 +478,14 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
 
         if (states.svgFont) {
             // SVG fonts not fully supported...
-            QString text = paragraphs.front();
-            for (int i = 1; i < paragraphs.size(); ++i) {
-                text.append(QLatin1Char('\n'));
-                text.append(paragraphs[i]);
-            }
+            if (!m_glyphsToDraw)
+                m_glyphsToDraw = states.svgFont->toGlyphs(paragraphs.join(QLatin1Char('\n')));
             if (isPainting) {
-                states.svgFont->draw(
-                        p, m_coord, text, p->font().pointSizeF(), states.textAnchor);
-            }
-            if (boundingRect) {
-                *boundingRect = states.svgFont->boundingRect(
-                        p, m_coord, text, p->font().pointSizeF(), states.textAnchor);
+                states.svgFont->draw(p, m_coord, m_glyphsToDraw.value(),
+                                     p->font().pointSizeF(), states.textAnchor);
+            } else {
+                *boundingRect = states.svgFont->boundingRect(p, m_coord, m_glyphsToDraw.value(),
+                                                             p->font().pointSizeF(), states.textAnchor);
             }
         } else {
             QRectF brect;
