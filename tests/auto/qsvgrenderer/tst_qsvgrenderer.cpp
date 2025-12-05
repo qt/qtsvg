@@ -86,6 +86,7 @@ private slots:
     void testMarker();
     void testPatternElement();
     void testMisplacedElement();
+    void testCycles_data();
     void testCycles();
     void testFeFlood();
     void testFeOffset();
@@ -94,7 +95,6 @@ private slots:
     void testFeComposite();
     void testFeGaussian();
     void testFeBlend();
-    void testUseCycles();
 
     void testOption_data();
     void testOption();
@@ -2238,29 +2238,26 @@ void tst_QSvgRenderer::testMisplacedElement()
     QCOMPARE(image, refImage);
 }
 
-void tst_QSvgRenderer::testCycles()
+void tst_QSvgRenderer::testCycles_data()
 {
-    QByteArray svgDoc(R"(<svg viewBox="0 0 200 200">
-                      <pattern id="pattern" patternUnits="userSpaceOnUse" width="20" height="20">
-                      <rect x="0" y="0" width="10" height="10" fill="url(#pattern) "/>
-                      </pattern>
-                      </svg>)");
+    QTest::addColumn<QByteArray>("svgDoc");
 
-    QSvgRenderer renderer(svgDoc);
-    QVERIFY(!renderer.isValid());
+    QTest::newRow("fill-pattern") << R"(<svg viewBox="0 0 200 200">
+                         <pattern id="pattern" patternUnits="userSpaceOnUse" width="20" height="20">
+                           <rect x="0" y="0" width="10" height="10" fill="url(#pattern) "/>
+                         </pattern>
+                       </svg>)"_ba;
+
+    QTest::newRow("use") << R"(<svg viewBox="0 0 200 200">
+                                 <g xml:id="group-1"><use xml:id="use-1" xlink:href="#group-2"/></g>
+                                 <g xml:id="group-2"><use xml:id="use-2" xlink:href="#group-1"/></g>
+                               </svg>)"_ba;
 }
 
-void tst_QSvgRenderer::testUseCycles()
+void tst_QSvgRenderer::testCycles()
 {
-    QByteArray svgDoc(R"(<svg viewBox="0 0 200 200">
-        <g xml:id="group-1">
-          <use xml:id="use-1" xlink:href="#group-2" />
-        </g>
-        <g xml:id="group-2">
-          <use xml:id="use-2" xlink:href="#group-1" />
-        </g>
-    </svg>)");
-
+    QFETCH(QByteArray, svgDoc);
+    QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cycles detected in SVG"));
     QSvgRenderer renderer(svgDoc);
     QVERIFY(!renderer.isValid());
 }
