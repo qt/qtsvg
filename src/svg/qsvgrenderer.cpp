@@ -5,7 +5,7 @@
 
 #ifndef QT_NO_SVGRENDERER
 
-#include "qsvgtinydocument_p.h"
+#include "qsvgdocument_p.h"
 
 #include "qbytearray.h"
 #include "qtimer.h"
@@ -111,7 +111,7 @@ public:
         return envOk ? envOpts : appDefaultOptions;
     }
 
-    QSvgTinyDocument *render;
+    QSvgDocument *render;
     QTimer *timer;
     int fps;
     QtSvg::Options options;
@@ -415,7 +415,7 @@ static bool loadDocument(QSvgRenderer *const q,
                          const TInputType &in)
 {
     delete d->render;
-    d->render = QSvgTinyDocument::load(in, d->options);
+    d->render = QSvgDocument::load(in, d->options);
     if (d->render && !d->render->size().isValid()) {
         delete d->render;
         d->render = nullptr;

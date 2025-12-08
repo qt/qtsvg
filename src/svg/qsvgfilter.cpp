@@ -5,7 +5,7 @@
 
 #include "qsvggraphics_p.h"
 #include "qsvgnode_p.h"
-#include "qsvgtinydocument_p.h"
+#include "qsvgdocument_p.h"
 #include "qpainter.h"
 
 #include <QLoggingCategory>

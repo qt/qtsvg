@@ -1,8 +1,8 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-#ifndef QSVGTINYDOCUMENT_P_H
-#define QSVGTINYDOCUMENT_P_H
+#ifndef QSVGDOCUMENT_P_H
+#define QSVGDOCUMENT_P_H
 
 //
 //  W A R N I N G
@@ -36,19 +36,19 @@ class QByteArray;
 class QSvgFont;
 class QTransform;
 
-class Q_SVG_EXPORT QSvgTinyDocument : public QSvgStructureNode
+class Q_SVG_EXPORT QSvgDocument : public QSvgStructureNode
 {
 public:
-    static QSvgTinyDocument *load(const QString &file, QtSvg::Options options = {},
+    static QSvgDocument *load(const QString &file, QtSvg::Options options = {},
                                   QtSvg::AnimatorType type = QtSvg::AnimatorType::Automatic);
-    static QSvgTinyDocument *load(const QByteArray &contents, QtSvg::Options options = {},
+    static QSvgDocument *load(const QByteArray &contents, QtSvg::Options options = {},
                                   QtSvg::AnimatorType type = QtSvg::AnimatorType::Automatic);
-    static QSvgTinyDocument *load(QXmlStreamReader *contents, QtSvg::Options options = {},
+    static QSvgDocument *load(QXmlStreamReader *contents, QtSvg::Options options = {},
                                   QtSvg::AnimatorType type = QtSvg::AnimatorType::Automatic);
     static bool isLikelySvg(QIODevice *device, bool *isCompressed = nullptr);
 public:
-    QSvgTinyDocument(QtSvg::Options options, QtSvg::AnimatorType type);
-    ~QSvgTinyDocument();
+    QSvgDocument(QtSvg::Options options, QtSvg::AnimatorType type);
+    ~QSvgDocument();
     Type type() const override;
 
     inline QSize size() const;
@@ -122,9 +122,9 @@ private:
     QSharedPointer<QSvgAbstractAnimator> m_animator;
 };
 
-Q_SVG_EXPORT QDebug operator<<(QDebug debug, const QSvgTinyDocument &doc);
+Q_SVG_EXPORT QDebug operator<<(QDebug debug, const QSvgDocument &doc);
 
-inline QSize QSvgTinyDocument::size() const
+inline QSize QSvgDocument::size() const
 {
     if (m_size.isEmpty())
         return viewBox().size().toSize();
@@ -136,27 +136,27 @@ inline QSize QSvgTinyDocument::size() const
     return m_size;
 }
 
-inline int QSvgTinyDocument::width() const
+inline int QSvgDocument::width() const
 {
     return size().width();
 }
 
-inline int QSvgTinyDocument::height() const
+inline int QSvgDocument::height() const
 {
     return size().height();
 }
 
-inline bool QSvgTinyDocument::widthPercent() const
+inline bool QSvgDocument::widthPercent() const
 {
     return m_widthPercent;
 }
 
-inline bool QSvgTinyDocument::heightPercent() const
+inline bool QSvgDocument::heightPercent() const
 {
     return m_heightPercent;
 }
 
-inline QRectF QSvgTinyDocument::viewBox() const
+inline QRectF QSvgDocument::viewBox() const
 {
     if (m_viewBox.isNull()) {
         QScopedValueRollback<bool> guard(m_calculatingImplicitViewBox, true);
@@ -167,21 +167,21 @@ inline QRectF QSvgTinyDocument::viewBox() const
     return m_viewBox;
 }
 
-inline bool QSvgTinyDocument::preserveAspectRatio() const
+inline bool QSvgDocument::preserveAspectRatio() const
 {
     return m_preserveAspectRatio;
 }
 
-inline qint64 QSvgTinyDocument::currentElapsed() const
+inline qint64 QSvgDocument::currentElapsed() const
 {
     return m_animator->currentElapsed();
 }
 
-inline int QSvgTinyDocument::animationDuration() const
+inline int QSvgDocument::animationDuration() const
 {
     return m_animator->animationDuration();
 }
 
 QT_END_NAMESPACE
 
-#endif // QSVGTINYDOCUMENT_P_H
+#endif // QSVGDOCUMENT_P_H

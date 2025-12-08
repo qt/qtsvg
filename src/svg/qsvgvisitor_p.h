@@ -15,7 +15,7 @@
 // We mean it.
 //
 
-#include <private/qsvgtinydocument_p.h>
+#include <private/qsvgdocument_p.h>
 #include <private/qsvghandler_p.h>
 #include <private/qsvggraphics_p.h>
 #include <private/qsvgstructure_p.h>
@@ -48,8 +48,8 @@ protected:
     virtual void visitUseNode(const QSvgUse *node) { visitNode(node); }
     virtual void visitVideoNode(const QSvgVideo *node) { visitNode(node); }
 
-    virtual bool visitDocumentNodeStart(const QSvgTinyDocument *node) { return visitStructureNodeStart(node); }
-    virtual void visitDocumentNodeEnd(const QSvgTinyDocument *node) { visitStructureNodeEnd(node); }
+    virtual bool visitDocumentNodeStart(const QSvgDocument *node) { return visitStructureNodeStart(node); }
+    virtual void visitDocumentNodeEnd(const QSvgDocument *node) { visitStructureNodeEnd(node); }
     virtual bool visitGroupNodeStart(const QSvgG *node) { return visitStructureNodeStart(node); }
     virtual void visitGroupNodeEnd(const QSvgG *node)  { visitStructureNodeEnd(node); }
     virtual bool visitDefsNodeStart(const QSvgDefs *node) { return visitStructureNodeStart(node); }

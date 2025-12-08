@@ -6,7 +6,7 @@
 
 #include "qsvghandler_p.h"
 
-#include "qsvgtinydocument_p.h"
+#include "qsvgdocument_p.h"
 #include "qsvgstructure_p.h"
 #include "qsvggraphics_p.h"
 #include "qsvgfilter_p.h"
@@ -890,7 +890,7 @@ static void parseFont(QSvgNode *node,
 
     QSvgFontStyle *fontStyle = nullptr;
     if (!attributes.fontFamily.isEmpty()) {
-        QSvgTinyDocument *doc = node->document();
+        QSvgDocument *doc = node->document();
         if (doc) {
             QSvgFont *svgFont = doc->svgFont(attributes.fontFamily.toString());
             if (svgFont)
@@ -1697,7 +1697,7 @@ static QSvgStyleProperty *createFontNode(QSvgNode *parent,
     }
 
     if (parent && !myId.isEmpty()) {
-        QSvgTinyDocument *doc = static_cast<QSvgTinyDocument*>(parent);
+        QSvgDocument *doc = static_cast<QSvgDocument*>(parent);
         QSvgFont *font = doc->svgFont(myId);
         if (!font) {
             font = new QSvgFont(horizAdvX);
@@ -2997,7 +2997,7 @@ static QSvgNode *createSvgNode(QSvgNode *parent,
 {
     Q_UNUSED(parent); Q_UNUSED(attributes);
 
-    QSvgTinyDocument *node = new QSvgTinyDocument(handler->options(), handler->animatorType());
+    QSvgDocument *node = new QSvgDocument(handler->options(), handler->animatorType());
     const QStringView widthStr  = attributes.value(QLatin1String("width"));
     const QStringView heightStr = attributes.value(QLatin1String("height"));
     const QStringView viewBoxStr = attributes.value(QLatin1String("viewBox"));
@@ -3610,7 +3610,7 @@ static bool detectCyclesAndWarn(const QSvgNode *node) {
 }
 
 // Having too many unfinished elements will cause a stack overflow
-// in the dtor of QSvgTinyDocument, see oss-fuzz issue 24000.
+// in the dtor of QSvgDocument, see oss-fuzz issue 24000.
 static const int unfinishedElementsLimit = 2048;
 
 void QSvgHandler::parse()
@@ -3706,7 +3706,7 @@ bool QSvgHandler::startElement(const QStringView localName,
             node = method(nullptr, attributes, this);
             if (node) {
                 Q_ASSERT(node->type() == QSvgNode::Doc);
-                m_doc = static_cast<QSvgTinyDocument*>(node);
+                m_doc = static_cast<QSvgDocument*>(node);
             }
         } else {
             switch (m_nodes.top()->type()) {
@@ -4001,7 +4001,7 @@ QIODevice *QSvgHandler::device() const
     return xml->device();
 }
 
-QSvgTinyDocument *QSvgHandler::document() const
+QSvgDocument *QSvgHandler::document() const
 {
     return m_doc;
 }

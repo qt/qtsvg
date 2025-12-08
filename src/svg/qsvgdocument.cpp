@@ -1,7 +1,7 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
-#include "qsvgtinydocument_p.h"
+#include "qsvgdocument_p.h"
 
 #include "qsvghandler_p.h"
 #include "qsvgfont_p.h"
@@ -23,7 +23,7 @@ QT_BEGIN_NAMESPACE
 
 using namespace Qt::StringLiterals;
 
-QSvgTinyDocument::QSvgTinyDocument(QtSvg::Options options, QtSvg::AnimatorType type)
+QSvgDocument::QSvgDocument(QtSvg::Options options, QtSvg::AnimatorType type)
     : QSvgStructureNode(0)
     , m_widthPercent(false)
     , m_heightPercent(false)
@@ -43,7 +43,7 @@ QSvgTinyDocument::QSvgTinyDocument(QtSvg::Options options, QtSvg::AnimatorType t
     }
 }
 
-QSvgTinyDocument::~QSvgTinyDocument()
+QSvgDocument::~QSvgDocument()
 {
 }
 
@@ -177,7 +177,7 @@ static QByteArray qt_inflateSvgzDataFrom(QIODevice *)
 }
 #endif
 
-QSvgTinyDocument *QSvgTinyDocument::load(const QString &fileName, QtSvg::Options options,
+QSvgDocument *QSvgDocument::load(const QString &fileName, QtSvg::Options options,
                                          QtSvg::AnimatorType type)
 {
     QFile file(fileName);
@@ -192,7 +192,7 @@ QSvgTinyDocument *QSvgTinyDocument::load(const QString &fileName, QtSvg::Options
         return load(qt_inflateSvgzDataFrom(&file));
     }
 
-    QSvgTinyDocument *doc = nullptr;
+    QSvgDocument *doc = nullptr;
     QSvgHandler handler(&file, options, type);
     if (handler.ok()) {
         doc = handler.document();
@@ -205,7 +205,7 @@ QSvgTinyDocument *QSvgTinyDocument::load(const QString &fileName, QtSvg::Options
     return doc;
 }
 
-QSvgTinyDocument *QSvgTinyDocument::load(const QByteArray &contents, QtSvg::Options options,
+QSvgDocument *QSvgDocument::load(const QByteArray &contents, QtSvg::Options options,
                                          QtSvg::AnimatorType type)
 {
     QByteArray svg;
@@ -225,7 +225,7 @@ QSvgTinyDocument *QSvgTinyDocument::load(const QByteArray &contents, QtSvg::Opti
     buffer.open(QIODevice::ReadOnly);
     QSvgHandler handler(&buffer, options, type);
 
-    QSvgTinyDocument *doc = nullptr;
+    QSvgDocument *doc = nullptr;
     if (handler.ok()) {
         doc = handler.document();
         doc->m_animator->setAnimationDuration(handler.animationDuration());
@@ -235,12 +235,12 @@ QSvgTinyDocument *QSvgTinyDocument::load(const QByteArray &contents, QtSvg::Opti
     return doc;
 }
 
-QSvgTinyDocument *QSvgTinyDocument::load(QXmlStreamReader *contents, QtSvg::Options options,
+QSvgDocument *QSvgDocument::load(QXmlStreamReader *contents, QtSvg::Options options,
                                          QtSvg::AnimatorType type)
 {
     QSvgHandler handler(contents, options, type);
 
-    QSvgTinyDocument *doc = nullptr;
+    QSvgDocument *doc = nullptr;
     if (handler.ok()) {
         doc = handler.document();
         doc->m_animator->setAnimationDuration(handler.animationDuration());
@@ -250,7 +250,7 @@ QSvgTinyDocument *QSvgTinyDocument::load(QXmlStreamReader *contents, QtSvg::Opti
     return doc;
 }
 
-void QSvgTinyDocument::draw(QPainter *p, const QRectF &bounds)
+void QSvgDocument::draw(QPainter *p, const QRectF &bounds)
 {
     if (displayMode() == QSvgNode::NoneMode)
         return;
@@ -273,7 +273,7 @@ void QSvgTinyDocument::draw(QPainter *p, const QRectF &bounds)
 }
 
 
-void QSvgTinyDocument::draw(QPainter *p, const QString &id,
+void QSvgDocument::draw(QPainter *p, const QString &id,
                             const QRectF &bounds)
 {
     QSvgNode *node = scopeNode(id);
@@ -328,60 +328,60 @@ void QSvgTinyDocument::draw(QPainter *p, const QString &id,
     p->restore();
 }
 
-QSvgNode::Type QSvgTinyDocument::type() const
+QSvgNode::Type QSvgDocument::type() const
 {
     return Doc;
 }
 
-void QSvgTinyDocument::setWidth(int len, bool percent)
+void QSvgDocument::setWidth(int len, bool percent)
 {
     m_size.setWidth(len);
     m_widthPercent = percent;
 }
 
-void QSvgTinyDocument::setHeight(int len, bool percent)
+void QSvgDocument::setHeight(int len, bool percent)
 {
     m_size.setHeight(len);
     m_heightPercent = percent;
 }
 
-void QSvgTinyDocument::setPreserveAspectRatio(bool on)
+void QSvgDocument::setPreserveAspectRatio(bool on)
 {
     m_preserveAspectRatio = on;
 }
 
-void QSvgTinyDocument::setViewBox(const QRectF &rect)
+void QSvgDocument::setViewBox(const QRectF &rect)
 {
     m_viewBox = rect;
     m_implicitViewBox = rect.isNull();
 }
 
-QtSvg::Options QSvgTinyDocument::options() const
+QtSvg::Options QSvgDocument::options() const
 {
     return m_options;
 }
 
-void QSvgTinyDocument::addSvgFont(QSvgFont *font)
+void QSvgDocument::addSvgFont(QSvgFont *font)
 {
     m_fonts.insert(font->familyName(), font);
 }
 
-QSvgFont * QSvgTinyDocument::svgFont(const QString &family) const
+QSvgFont * QSvgDocument::svgFont(const QString &family) const
 {
     return m_fonts[family];
 }
 
-void QSvgTinyDocument::addNamedNode(const QString &id, QSvgNode *node)
+void QSvgDocument::addNamedNode(const QString &id, QSvgNode *node)
 {
     m_namedNodes.insert(id, node);
 }
 
-QSvgNode *QSvgTinyDocument::namedNode(const QString &id) const
+QSvgNode *QSvgDocument::namedNode(const QString &id) const
 {
     return m_namedNodes.value(id);
 }
 
-void QSvgTinyDocument::addNamedStyle(const QString &id, QSvgPaintStyleProperty *style)
+void QSvgDocument::addNamedStyle(const QString &id, QSvgPaintStyleProperty *style)
 {
     if (!m_namedStyles.contains(id))
         m_namedStyles.insert(id, style);
@@ -389,32 +389,32 @@ void QSvgTinyDocument::addNamedStyle(const QString &id, QSvgPaintStyleProperty *
         qCWarning(lcSvgHandler) << "Duplicate unique style id:" << id;
 }
 
-QSvgPaintStyleProperty *QSvgTinyDocument::namedStyle(const QString &id) const
+QSvgPaintStyleProperty *QSvgDocument::namedStyle(const QString &id) const
 {
     return m_namedStyles.value(id);
 }
 
-void QSvgTinyDocument::restartAnimation()
+void QSvgDocument::restartAnimation()
 {
     m_animator->restartAnimation();
 }
 
-bool QSvgTinyDocument::animated() const
+bool QSvgDocument::animated() const
 {
     return m_animated;
 }
 
-void QSvgTinyDocument::setAnimated(bool a)
+void QSvgDocument::setAnimated(bool a)
 {
     m_animated = a;
 }
 
-void QSvgTinyDocument::draw(QPainter *p)
+void QSvgDocument::draw(QPainter *p)
 {
     draw(p, QRectF());
 }
 
-void QSvgTinyDocument::drawCommand(QPainter *, QSvgExtraStates &)
+void QSvgDocument::drawCommand(QPainter *, QSvgExtraStates &)
 {
     qCDebug(lcSvgHandler) << "SVG Tiny does not support nested <svg> elements: ignored.";
     return;
@@ -426,7 +426,7 @@ static bool isValidMatrix(const QTransform &transform)
     return qIsFinite(determinant);
 }
 
-void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, const QRectF &sourceRect)
+void QSvgDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, const QRectF &sourceRect)
 {
     QTransform oldTransform = p->worldTransform();
 
@@ -483,7 +483,7 @@ void QSvgTinyDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, 
         p->setWorldTransform(oldTransform);
 }
 
-QRectF QSvgTinyDocument::boundsOnElement(const QString &id) const
+QRectF QSvgDocument::boundsOnElement(const QString &id) const
 {
     const QSvgNode *node = scopeNode(id);
     if (!node)
@@ -491,14 +491,14 @@ QRectF QSvgTinyDocument::boundsOnElement(const QString &id) const
     return node->bounds();
 }
 
-bool QSvgTinyDocument::elementExists(const QString &id) const
+bool QSvgDocument::elementExists(const QString &id) const
 {
     QSvgNode *node = scopeNode(id);
 
     return (node!=0);
 }
 
-QTransform QSvgTinyDocument::transformForElement(const QString &id) const
+QTransform QSvgDocument::transformForElement(const QString &id) const
 {
     QSvgNode *node = scopeNode(id);
 
@@ -519,14 +519,14 @@ QTransform QSvgTinyDocument::transformForElement(const QString &id) const
     return t;
 }
 
-int QSvgTinyDocument::currentFrame() const
+int QSvgDocument::currentFrame() const
 {
     const double runningPercentage = qMin(currentElapsed() / double(animationDuration()), 1.);
     const int totalFrames = m_fps * animationDuration() / 1000;
     return int(runningPercentage * totalFrames);
 }
 
-void QSvgTinyDocument::setCurrentFrame(int frame)
+void QSvgDocument::setCurrentFrame(int frame)
 {
     const int totalFrames = m_fps * animationDuration() / 1000;
     if (totalFrames == 0)
@@ -537,17 +537,17 @@ void QSvgTinyDocument::setCurrentFrame(int frame)
     m_animator->setAnimatorTime(timeToAdd);
 }
 
-void QSvgTinyDocument::setFramesPerSecond(int num)
+void QSvgDocument::setFramesPerSecond(int num)
 {
     m_fps = num;
 }
 
-QSharedPointer<QSvgAbstractAnimator> QSvgTinyDocument::animator() const
+QSharedPointer<QSvgAbstractAnimator> QSvgDocument::animator() const
 {
     return m_animator;
 }
 
-bool QSvgTinyDocument::isLikelySvg(QIODevice *device, bool *isCompressed)
+bool QSvgDocument::isLikelySvg(QIODevice *device, bool *isCompressed)
 {
     constexpr int bufSize = 4096;
     char buf[bufSize];

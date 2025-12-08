@@ -5,7 +5,7 @@
 #include "qsvggraphics_p.h"
 
 #include "qsvgstyle_p.h"
-#include "qsvgtinydocument_p.h"
+#include "qsvgdocument_p.h"
 #include "qsvggraphics_p.h"
 #include "qsvgstyle_p.h"
 #include "qsvgfilter_p.h"
@@ -65,7 +65,7 @@ QSvgStructureNode::QSvgStructureNode(QSvgNode *parent)
 
 QSvgNode * QSvgStructureNode::scopeNode(const QString &id) const
 {
-    QSvgTinyDocument *doc = document();
+    QSvgDocument *doc = document();
     return doc ? doc->namedNode(id) : 0;
 }
 
@@ -76,7 +76,7 @@ void QSvgStructureNode::addChild(QSvgNode *child, const QString &id)
     if (id.isEmpty())
         return; //we can't add it to scope without id
 
-    QSvgTinyDocument *doc = document();
+    QSvgDocument *doc = document();
     if (doc)
         doc->addNamedNode(id, child);
 }
