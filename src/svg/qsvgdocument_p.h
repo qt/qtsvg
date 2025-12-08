@@ -16,12 +16,11 @@
 //
 
 #include "qsvgstructure_p.h"
+#include "qtsvgglobal.h"
 #include "qtsvgglobal_p.h"
 
 #include "QtCore/qrect.h"
-#include "QtCore/qlist.h"
 #include "QtCore/qhash.h"
-#include "QtCore/qdatetime.h"
 #include "QtCore/qxmlstream.h"
 #include "QtCore/qscopedvaluerollback.h"
 #include "QtCore/qsharedpointer.h"

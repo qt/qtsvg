@@ -4,17 +4,13 @@
 #include "qsvgstyle_p.h"
 
 #include "qsvgfont_p.h"
-#include "qsvggraphics_p.h"
 #include "qsvgnode_p.h"
 #include "private/qsvganimate_p.h"
 #include "qsvgdocument_p.h"
 
 #include "qpainter.h"
-#include "qpair.h"
 #include "qcolor.h"
 #include "qdebug.h"
-#include "qmath.h"
-#include "qnumeric.h"
 
 QT_BEGIN_NAMESPACE
 

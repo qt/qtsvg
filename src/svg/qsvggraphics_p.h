@@ -16,14 +16,11 @@
 //
 
 #include "qsvgnode_p.h"
-#include "qtsvgglobal_p.h"
 
 #include "QtGui/qpainterpath.h"
 #include "QtGui/qimage.h"
 #include "QtGui/qtextlayout.h"
-#include "QtGui/qtextoption.h"
 #include "QtCore/qloggingcategory.h"
-#include "QtCore/qstack.h"
 
 QT_BEGIN_NAMESPACE
 

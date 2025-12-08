@@ -10,7 +10,6 @@
 #include <QtGui/qimageiohandler.h>
 
 #include "qdebug.h"
-#include "qstack.h"
 
 #include <QtGui/private/qoutlinemapper_p.h>
 

@@ -10,7 +10,6 @@
 #include "qfile.h"
 #include "qbuffer.h"
 #include "qbytearray.h"
-#include "qqueue.h"
 #include "qstack.h"
 #include "qtransform.h"
 #include "qdebug.h"
