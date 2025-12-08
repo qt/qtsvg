@@ -3,7 +3,7 @@
 
 #include <qbaselinetest.h>
 
-#include <QtSvg/private/qsvgtinydocument_p.h>
+#include <QtSvg/private/qsvgdocument_p.h>
 #include <QtSvg/private/qtsvgglobal_p.h>
 #include <QPainter>
 
@@ -35,7 +35,7 @@ private:
     quint16 checksumFileOrDir(const QString &path);
 
     QString testSuitePath;
-    std::unique_ptr<QSvgTinyDocument> m_doc;
+    std::unique_ptr<QSvgDocument> m_doc;
 };
 
 tst_QSvgRenderer::tst_QSvgRenderer()
@@ -121,7 +121,7 @@ void tst_QSvgRenderer::runTest(const QStringList& extraArgs)
 
     QFETCH(QString, svgFile);
 
-    m_doc.reset(QSvgTinyDocument::load(svgFile, {}, QtSvg::AnimatorType::Controlled));
+    m_doc.reset(QSvgDocument::load(svgFile, {}, QtSvg::AnimatorType::Controlled));
     QSize size = m_doc ? m_doc->size() : QSize(64, 64);
     QImage actual(size, QImage::Format_RGB32);
     actual.fill(QColor(255, 255, 255));

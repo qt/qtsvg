@@ -13,7 +13,7 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
             return;
         break;
     case QSvgNode::Doc:
-        if (!visitDocumentNodeStart(static_cast<const QSvgTinyDocument *>(node)))
+        if (!visitDocumentNodeStart(static_cast<const QSvgDocument *>(node)))
             return;
         break;
     case QSvgNode::Defs:
@@ -60,7 +60,7 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
         visitSwitchNodeEnd(static_cast<const QSvgSwitch *>(node));
         break;
     case QSvgNode::Doc:
-        visitDocumentNodeEnd(static_cast<const QSvgTinyDocument *>(node));
+        visitDocumentNodeEnd(static_cast<const QSvgDocument *>(node));
         break;
     case QSvgNode::Defs:
         visitDefsNodeEnd(static_cast<const QSvgDefs *>(node));

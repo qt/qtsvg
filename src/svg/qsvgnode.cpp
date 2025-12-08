@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #include "qsvgnode_p.h"
-#include "qsvgtinydocument_p.h"
+#include "qsvgdocument_p.h"
 #include "qsvggraphics_p.h"
 
 #include <QLoggingCategory>
@@ -190,7 +190,7 @@ bool QSvgNode::isDescendantOf(const QSvgNode *parent) const
 void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop, const QString &id)
 {
     //qDebug()<<"appending "<<prop->type()<< " ("<< id <<") "<<"to "<<this<<this->type();
-    QSvgTinyDocument *doc;
+    QSvgDocument *doc;
     switch (prop->type()) {
     case QSvgStyleProperty::QUALITY:
         m_style.quality = static_cast<QSvgQualityStyle*>(prop);
@@ -350,7 +350,7 @@ QSvgPaintStyleProperty *QSvgNode::styleProperty(QStringView id) const
 {
     if (id.startsWith(QLatin1Char('#')))
         id.slice(1);
-    QSvgTinyDocument *doc = document();
+    QSvgDocument *doc = document();
     return doc ? doc->namedStyle(id.toString()) : 0;
 }
 
@@ -383,14 +383,14 @@ QRectF QSvgNode::bounds() const
     return m_cachedBounds;
 }
 
-QSvgTinyDocument * QSvgNode::document() const
+QSvgDocument * QSvgNode::document() const
 {
-    QSvgTinyDocument *doc = nullptr;
+    QSvgDocument *doc = nullptr;
     QSvgNode *node = const_cast<QSvgNode*>(this);
     while (node && node->type() != QSvgNode::Doc) {
         node = node->parent();
     }
-    doc = static_cast<QSvgTinyDocument*>(node);
+    doc = static_cast<QSvgDocument*>(node);
 
     return doc;
 }

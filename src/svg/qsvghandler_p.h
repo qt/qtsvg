@@ -31,7 +31,7 @@
 QT_BEGIN_NAMESPACE
 
 class QSvgNode;
-class QSvgTinyDocument;
+class QSvgDocument;
 class QSvgHandler;
 class QColor;
 
@@ -47,7 +47,7 @@ public:
     ~QSvgHandler();
 
     QIODevice *device() const;
-    QSvgTinyDocument *document() const;
+    QSvgDocument *document() const;
 
     inline bool ok() const {
         return document() != 0 && !xml->hasError();
@@ -90,7 +90,7 @@ public:
 private:
     void init();
 
-    QSvgTinyDocument *m_doc;
+    QSvgDocument *m_doc;
     QStack<QSvgNode *> m_nodes;
     // TODO: This is only needed during parsing, so it unnecessarily takes up space after that.
     // Temporary container for :

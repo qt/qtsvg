@@ -22,7 +22,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class QSvgTinyDocument;
+class QSvgDocument;
 class QSvgNode;
 class QPainter;
 class QSvgDefs;

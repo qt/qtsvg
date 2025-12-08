@@ -25,7 +25,7 @@
 QT_BEGIN_NAMESPACE
 
 class QPainter;
-class QSvgTinyDocument;
+class QSvgDocument;
 
 class Q_SVG_EXPORT QSvgNode
 {
@@ -112,7 +112,7 @@ public:
     QSvgStyleProperty *styleProperty(QSvgStyleProperty::Type type) const;
     QSvgPaintStyleProperty *styleProperty(QStringView id) const;
 
-    QSvgTinyDocument *document() const;
+    QSvgDocument *document() const;
 
     virtual Type type() const = 0;
     QString typeName() const;
@@ -213,7 +213,7 @@ private:
     DisplayMode    m_displayMode;
     bool           m_visible;
 
-    friend class QSvgTinyDocument;
+    friend class QSvgDocument;
 };
 
 inline QSvgNode *QSvgNode::parent() const

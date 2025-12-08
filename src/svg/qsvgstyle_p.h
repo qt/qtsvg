@@ -31,7 +31,7 @@ QT_BEGIN_NAMESPACE
 class QPainter;
 class QSvgNode;
 class QSvgFont;
-class QSvgTinyDocument;
+class QSvgDocument;
 class QSvgPattern;
 
 template <class T> class QSvgRefCounter
@@ -313,7 +313,7 @@ public:
     static const int LIGHTER = -1;
     static const int BOLDER = 1;
 
-    QSvgFontStyle(QSvgFont *font, QSvgTinyDocument *doc);
+    QSvgFontStyle(QSvgFont *font, QSvgDocument *doc);
     QSvgFontStyle();
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
@@ -366,11 +366,11 @@ public:
         return m_qfont;
     }
 
-    QSvgTinyDocument *doc() const {return m_doc;}
+    QSvgDocument *doc() const {return m_doc;}
 
 private:
     QSvgFont *m_svgFont;
-    QSvgTinyDocument *m_doc;
+    QSvgDocument *m_doc;
     QFont m_qfont;
 
     int m_weight;
@@ -561,7 +561,7 @@ public:
     ~QSvgGradientStyle() { delete m_gradient; }
     Type type() const override;
 
-    void setStopLink(const QString &link, QSvgTinyDocument *doc);
+    void setStopLink(const QString &link, QSvgDocument *doc);
     QString stopLink() const { return m_link; }
     void resolveStops();
     void resolveStops_helper(QStringList *visited);
@@ -592,7 +592,7 @@ private:
     QGradient      *m_gradient;
     QTransform m_transform;
 
-    QSvgTinyDocument *m_doc;
+    QSvgDocument *m_doc;
     QString           m_link;
     bool m_gradientStopsSet;
 };

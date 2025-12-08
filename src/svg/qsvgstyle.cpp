@@ -7,7 +7,7 @@
 #include "qsvggraphics_p.h"
 #include "qsvgnode_p.h"
 #include "private/qsvganimate_p.h"
-#include "qsvgtinydocument_p.h"
+#include "qsvgdocument_p.h"
 
 #include "qpainter.h"
 #include "qpair.h"
@@ -171,7 +171,7 @@ void QSvgViewportFillStyle::revert(QPainter *p, QSvgExtraStates &)
     p->setBrush(m_oldFill);
 }
 
-QSvgFontStyle::QSvgFontStyle(QSvgFont *font, QSvgTinyDocument *doc)
+QSvgFontStyle::QSvgFontStyle(QSvgFont *font, QSvgDocument *doc)
     : m_svgFont(font)
     , m_doc(doc)
     , m_familySet(0)
@@ -543,7 +543,7 @@ QSvgStyleProperty::Type QSvgOpacityStyle::type() const
     return OPACITY;
 }
 
-void QSvgGradientStyle::setStopLink(const QString &link, QSvgTinyDocument *doc)
+void QSvgGradientStyle::setStopLink(const QString &link, QSvgDocument *doc)
 {
     m_link = link;
     m_doc  = doc;
