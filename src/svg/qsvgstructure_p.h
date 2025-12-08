@@ -40,8 +40,6 @@ public:
     QList<QSvgNode*> renderers() const { return m_renderers; }
 protected:
     QList<QSvgNode*>          m_renderers;
-    QHash<QString, QSvgNode*> m_scope;
-    QList<QSvgStructureNode*> m_linkedScopes;
     mutable bool              m_recursing = false;
 };
 
