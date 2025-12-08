@@ -2262,7 +2262,9 @@ void tst_QSvgRenderer::testCycles_data()
 void tst_QSvgRenderer::testCycles()
 {
     QFETCH(QByteArray, svgDoc);
+#if QT_CONFIG(regularexpression)
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cycles detected in SVG"));
+#endif
     QSvgRenderer renderer(svgDoc);
     QVERIFY(!renderer.isValid());
 }
