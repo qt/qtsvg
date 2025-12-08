@@ -15,7 +15,7 @@
 // We mean it.
 //
 
-#include "qtsvgglobal.h"
+#include <QtCore/qtypes.h>
 #include <QtSvg/qtsvgexports.h>
 
 QT_BEGIN_NAMESPACE

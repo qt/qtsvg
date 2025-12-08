@@ -16,11 +16,7 @@
 //
 
 #include "qsvgstyle_p.h"
-#include "qtsvgglobal_p.h"
-#include "qsvghelper_p.h"
-
-#include "QtCore/qstring.h"
-#include "QtCore/qhash.h"
+#include <QtCore/qstring.h>
 
 QT_BEGIN_NAMESPACE
 

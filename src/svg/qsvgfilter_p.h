@@ -20,8 +20,6 @@
 #include "qsvgstructure_p.h"
 #include "qgenericmatrix.h"
 
-#include "QtCore/qlist.h"
-#include "QtCore/qhash.h"
 #include "QtGui/qvector4d.h"
 
 QT_BEGIN_NAMESPACE

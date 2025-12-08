@@ -27,11 +27,9 @@
 #include "qdir.h"
 #include "qdebug.h"
 #include "qmath.h"
-#include "qnumeric.h"
 #include <qregularexpression.h>
 #include "qtransform.h"
 #include "qvarlengtharray.h"
-#include "private/qmath_p.h"
 #include "qimagereader.h"
 
 #include "float.h"

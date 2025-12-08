@@ -16,9 +16,8 @@
 //
 
 #include "qsvgnode_p.h"
-
-#include "QtCore/qlist.h"
-#include "QtCore/qhash.h"
+#include <QtSvg/private/qsvghelper_p.h>
+#include <QtCore/qlist.h>
 
 QT_BEGIN_NAMESPACE
 

@@ -19,7 +19,6 @@
 #include "qlist.h"
 #include "qstring.h"
 #include "qsvgstyle_p.h"
-#include "qtsvgglobal_p.h"
 
 #include <memory>
 

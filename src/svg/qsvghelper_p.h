@@ -16,7 +16,7 @@
 //
 
 #include "qtsvgglobal_p.h"
-
+#include <QtCore/qdebug.h>
 #include <QRectF>
 
 QT_BEGIN_NAMESPACE

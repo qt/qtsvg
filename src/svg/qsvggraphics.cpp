@@ -18,7 +18,6 @@
 #include <QLoggingCategory>
 
 #include <math.h>
-#include <limits.h>
 
 QT_BEGIN_NAMESPACE
 
