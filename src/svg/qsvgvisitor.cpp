@@ -36,6 +36,14 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
         if (!visitFilterNodeStart(static_cast<const QSvgFilterContainer *>(node)))
             return;
         break;
+    case QSvgNode::Marker:
+        if (!visitMarkerNodeStart(static_cast<const QSvgMarker *>(node)))
+            return;
+        break;
+    case QSvgNode::Pattern:
+        if (!visitPatternNodeStart(static_cast<const QSvgPattern *>(node)))
+            return;
+        break;
     case QSvgNode::FeMerge:
     case QSvgNode::FeMergenode:
     case QSvgNode::FeColormatrix:
@@ -77,6 +85,12 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
     case QSvgNode::Filter:
         visitFilterNodeEnd(static_cast<const QSvgFilterContainer *>(node));
         break;
+    case QSvgNode::Marker:
+        visitMarkerNodeEnd(static_cast<const QSvgMarker *>(node));
+        break;
+    case QSvgNode::Pattern:
+        visitPatternNodeEnd(static_cast<const QSvgPattern *>(node));
+        break;
     case QSvgNode::FeMerge:
     case QSvgNode::FeMergenode:
     case QSvgNode::FeColormatrix:
@@ -111,6 +125,8 @@ void QSvgVisitor::traverse(const QSvgNode *node)
     case QSvgNode::FeComposite:
     case QSvgNode::FeFlood:
     case QSvgNode::FeBlend:
+    case QSvgNode::Marker:
+    case QSvgNode::Pattern:
         traverse(static_cast<const QSvgStructureNode *>(node));
         break;
     case QSvgNode::AnimateColor:
@@ -154,8 +170,6 @@ void QSvgVisitor::traverse(const QSvgNode *node)
         break;
 
         // Enum values that don't have any QSvgNode classes yet:
-    case QSvgNode::Marker:
-    case QSvgNode::Pattern:
     case QSvgNode::FeUnsupported:
         qDebug() << "Unhandled type in switch" << node->type();
         break;
