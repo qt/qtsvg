@@ -60,6 +60,10 @@ protected:
     virtual void visitMaskNodeEnd(const QSvgMask *node) { visitStructureNodeEnd(node); }
     virtual bool visitSymbolNodeStart(const QSvgSymbol *node) { return visitStructureNodeStart(node); }
     virtual void visitSymbolNodeEnd(const QSvgSymbol *node) { visitStructureNodeEnd(node); }
+    virtual bool visitMarkerNodeStart(const QSvgMarker *) { return false; }
+    virtual void visitMarkerNodeEnd(const QSvgMarker *) { }
+    virtual bool visitPatternNodeStart(const QSvgPattern *) { return false; }
+    virtual void visitPatternNodeEnd(const QSvgPattern *) { }
     virtual bool visitFilterNodeStart(const QSvgFilterContainer *node) { return visitStructureNodeStart(node); }
     virtual void visitFilterNodeEnd(const QSvgFilterContainer *node) { visitStructureNodeEnd(node); }
     virtual bool visitFeFilterPrimitiveNodeStart(const QSvgFeFilterPrimitive *node) { return visitStructureNodeStart(node); }
