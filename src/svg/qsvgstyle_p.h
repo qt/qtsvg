@@ -373,13 +373,13 @@ private:
     QSvgDocument *m_doc;
     QFont m_qfont;
 
-    int m_weight;
+    int m_weight = 0;
     Qt::Alignment m_textAnchor;
 
-    QSvgFont *m_oldSvgFont;
+    QSvgFont *m_oldSvgFont = nullptr;
     QFont m_oldQFont;
     Qt::Alignment m_oldTextAnchor;
-    int m_oldWeight;
+    int m_oldWeight = 0;
 
     uint m_familySet : 1;
     uint m_sizeSet : 1;
