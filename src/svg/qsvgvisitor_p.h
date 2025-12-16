@@ -26,8 +26,8 @@ QT_BEGIN_NAMESPACE
 
 class Q_SVG_EXPORT QSvgVisitor {
 public:
-    void traverse(const QSvgStructureNode *node);
-    void traverse(const QSvgNode *node);
+    virtual void traverse(const QSvgStructureNode *node);
+    virtual void traverse(const QSvgNode *node);
 
     virtual ~QSvgVisitor() {}
 
@@ -53,9 +53,9 @@ protected:
     virtual bool visitGroupNodeStart(const QSvgG *node) { return visitStructureNodeStart(node); }
     virtual void visitGroupNodeEnd(const QSvgG *node)  { visitStructureNodeEnd(node); }
     virtual bool visitDefsNodeStart(const QSvgDefs *node) { return visitStructureNodeStart(node); }
-    virtual void visitDefsNodeEnd(const QSvgDefs *node)  { visitStructureNodeEnd(node); };
+    virtual void visitDefsNodeEnd(const QSvgDefs *node)  { visitStructureNodeEnd(node); }
     virtual bool visitSwitchNodeStart(const QSvgSwitch *node) { return visitStructureNodeStart(node); }
-    virtual void visitSwitchNodeEnd(const QSvgSwitch *node)  { visitStructureNodeEnd(node); };
+    virtual void visitSwitchNodeEnd(const QSvgSwitch *node)  { visitStructureNodeEnd(node); }
     virtual bool visitMaskNodeStart(const QSvgMask *node) { return visitStructureNodeStart(node); }
     virtual void visitMaskNodeEnd(const QSvgMask *node) { visitStructureNodeEnd(node); }
     virtual bool visitSymbolNodeStart(const QSvgSymbol *node) { return visitStructureNodeStart(node); }
