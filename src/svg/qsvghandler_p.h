@@ -27,6 +27,7 @@
 #include "qsvggraphics_p.h"
 #include "qtsvgglobal_p.h"
 #include "qsvgutils_p.h"
+#include "qtsvgglobal.h"
 
 QT_BEGIN_NAMESPACE
 
