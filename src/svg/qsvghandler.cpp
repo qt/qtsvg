@@ -478,18 +478,22 @@ static bool resolveColor(QStringView colorStr, QColor &color, QSvgHandler *handl
     return color.isValid();
 }
 
+void setAlpha(QStringView opacity, QColor *color)
+{
+    bool ok = true;
+    qreal op = qBound(qreal(0.0), QSvgUtils::toDouble(opacity, &ok), qreal(1.0));
+    if (!ok)
+        op = 1.0;
+    color->setAlphaF(op);
+}
+
 static bool constructColor(QStringView colorStr, QStringView opacity,
                            QColor &color, QSvgHandler *handler)
 {
     if (!resolveColor(colorStr, color, handler))
         return false;
-    if (!opacity.isEmpty()) {
-        bool ok = true;
-        qreal op = qMin(qreal(1.0), qMax(qreal(0.0), QSvgUtils::toDouble(opacity, &ok)));
-        if (!ok)
-            op = 1.0;
-        color.setAlphaF(op);
-    }
+    if (!opacity.isEmpty())
+        setAlpha(opacity, &color);
     return true;
 }
 
@@ -2445,10 +2449,7 @@ static QSvgNode *createFeFloodNode(QSvgNode *parent,
     QColor color;
     if (!constructColor(colorStr, opacityStr, color, handler)) {
         color = QColor(Qt::black);
-        bool ok;
-        qreal op = qMin(qreal(1.0), qMax(qreal(0.0), QSvgUtils::toDouble(opacityStr, &ok)));
-        if (ok)
-            color.setAlphaF(op);
+        setAlpha(opacityStr, &color);
     }
 
     QString inputString;
@@ -2944,8 +2945,11 @@ static bool parseStopNode(QSvgStyleProperty *parent,
     if (!ok)
         offset = 0.0;
 
-    if (!constructColor(colorStr, attrs.stopOpacity, color, handler))
+    if (!constructColor(colorStr, attrs.stopOpacity, color, handler)) {
         color = Qt::black;
+        if (!attrs.stopOpacity.isEmpty())
+            setAlpha(attrs.stopOpacity, &color);
+    }
 
     QGradient *grad = gradientStyle->qgradient();
 
