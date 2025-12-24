@@ -61,6 +61,6 @@ private:
 
 using QSvgCssEasingPtr = std::unique_ptr<QSvgCssEasing>;
 
-#endif // QSVGCSSEASING_P_H
-
 QT_END_NAMESPACE
+
+#endif // QSVGCSSEASING_P_H
