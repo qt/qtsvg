@@ -2449,7 +2449,10 @@ static QSvgNode *createFeFloodNode(QSvgNode *parent,
     QColor color;
     if (!constructColor(colorStr, opacityStr, color, handler)) {
         color = QColor(Qt::black);
-        setAlpha(opacityStr, &color);
+        if (opacityStr.isEmpty())
+            color.setAlphaF(1.0);
+        else
+            setAlpha(opacityStr, &color);
     }
 
     QString inputString;
