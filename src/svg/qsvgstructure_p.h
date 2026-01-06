@@ -262,6 +262,10 @@ public:
     QImage patternImage(QPainter *p, QSvgExtraStates &states, const QSvgNode *patternElement);
     Type type() const override;
     const QTransform& appliedTransform() const { return m_appliedTransform; }
+    const QTransform &transform() const { return m_transform; }
+    const QSvgRectF &rect() const { return m_rect; }
+    const QRectF &viewBox() const { return m_viewBox; }
+    QtSvg::UnitTypes contentUnits() const { return m_contentUnits; }
 
 private:
     QImage renderPattern(QSize size, qreal contentScaleX, qreal contentScaleY);
