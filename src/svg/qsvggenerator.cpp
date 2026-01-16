@@ -1180,23 +1180,22 @@ void QSvgPaintEngine::drawPolygon(const QPointF *points, int pointCount,
 
     //Q_D(QSvgPaintEngine);
 
-    QPainterPath path(points[0]);
-    for (int i=1; i<pointCount; ++i)
-        path.lineTo(points[i]);
+    if (mode == PolylineMode)
+        stream() << "<polyline fill=\"none\"";
+    else if (mode == OddEvenMode)
+        stream() << "<polygon fill-rule=\"evenodd\"";
+    else if (mode == WindingMode || mode == ConvexMode)
+        stream() << "<polygon fill-rule=\"nonzero\"";
 
-    if (mode == PolylineMode) {
-        stream() << "<polyline fill=\"none\" vector-effect=\""
-                 << (state->pen().isCosmetic() ? "non-scaling-stroke" : "none")
-                 << "\" points=\"";
-        for (int i = 0; i < pointCount; ++i) {
-            const QPointF &pt = points[i];
-            stream() << pt.x() << ',' << pt.y() << ' ';
-        }
-        stream() << "\" />" <<Qt::endl;
-    } else {
-        path.closeSubpath();
-        drawPath(path);
+    stream() << " vector-effect=\""
+             << (state->pen().isCosmetic() ? "non-scaling-stroke" : "none")
+             << "\" points=\"";
+    for (int i = 0; i < pointCount; ++i) {
+        const QPointF &pt = points[i];
+        stream() << pt.x() << ',' << pt.y() << ' ';
     }
+    stream() << "\" />" <<Qt::endl;
+
 }
 
 void QSvgPaintEngine::drawRects(const QRectF *rects, int rectCount)
