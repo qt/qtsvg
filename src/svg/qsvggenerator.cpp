@@ -1161,10 +1161,22 @@ void QSvgPaintEngine::drawPath(const QPainterPath &p)
                << (p.fillRule() == Qt::OddEvenFill ? "evenodd" : "nonzero")
                << "\" d=\"";
 
-    for (int i=0; i<p.elementCount(); ++i) {
+    int i = 0;
+    QPointF subPathStart;
+    auto endSubPath = [&]() {
+        if (i > 0) {
+            const QPointF subPathEnd = p.elementAt(i - 1);
+            if (subPathEnd == subPathStart)
+                *d->stream << "Z ";
+        }
+    };
+
+    for (i = 0; i < p.elementCount(); ++i) {
         const QPainterPath::Element &e = p.elementAt(i);
         switch (e.type) {
         case QPainterPath::MoveToElement:
+            endSubPath();
+            subPathStart = e;
             *d->stream << 'M' << e.x << ',' << e.y;
             break;
         case QPainterPath::LineToElement:
@@ -1187,10 +1199,9 @@ void QSvgPaintEngine::drawPath(const QPainterPath &p)
         default:
             break;
         }
-        if (i != p.elementCount() - 1) {
-            *d->stream << ' ';
-        }
+        *d->stream << ' ';
     }
+    endSubPath();
 
     *d->stream << "\"/>" << Qt::endl;
 }
