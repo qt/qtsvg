@@ -903,6 +903,10 @@ int QSvgGenerator::metric(QPaintDevice::PaintDeviceMetric metric) const
     return 0;
 }
 
+/*!
+    \since 6.11
+    \reimp
+*/
 void QSvgGenerator::initPainter(QPainter *painter) const
 {
     QPainterPrivate *painterPrivate = QPainterPrivate::get(painter);
