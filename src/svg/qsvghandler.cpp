@@ -1564,7 +1564,7 @@ static QSvgNode *createAnimateTransformNode(QSvgNode *parent,
 
 
     QList<QSvgAnimatedPropertyTransform::TransformComponent> components;
-    for (int i = 0; i < vals.size(); i+=3) {
+    for (int i = 0; i <= vals.size() - 3; i += 3) {
         QSvgAnimatedPropertyTransform::TransformComponent component;
         if (typeStr == QLatin1String("translate")) {
             component.type = QSvgAnimatedPropertyTransform::TransformComponent::Translate;
