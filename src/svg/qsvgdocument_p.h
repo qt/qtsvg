@@ -125,14 +125,28 @@ private:
 
 Q_SVG_EXPORT QDebug operator<<(QDebug debug, const QSvgDocument &doc);
 
+inline std::optional<int> calculateSizeValue(bool isPercent, int sizeValue, qreal viewBoxSizeValue)
+{
+    if (!isPercent)
+        return sizeValue;
+
+    const double valueAsDouble = 0.01 * sizeValue * viewBoxSizeValue;
+    if (valueAsDouble < (std::numeric_limits<int>::min)() || valueAsDouble > (std::numeric_limits<int>::max)())
+        return {};
+    return qRound(valueAsDouble);
+}
+
 inline QSize QSvgDocument::size() const
 {
     if (m_size.isEmpty())
         return viewBox().size().toSize();
     if (m_widthPercent || m_heightPercent) {
-        const int width = m_widthPercent ? qRound(0.01 * m_size.width() * viewBox().size().width()) : m_size.width();
-        const int height = m_heightPercent ? qRound(0.01 * m_size.height() * viewBox().size().height()) : m_size.height();
-        return QSize(width, height);
+        const std::optional<int> width = calculateSizeValue(m_widthPercent, m_size.width(), viewBox().size().width());
+        const std::optional<int> height = calculateSizeValue(m_heightPercent, m_size.height(), viewBox().size().height());
+        if (!width || !height)
+            return {};
+
+        return QSize(*width, *height);
     }
     return m_size;
 }
