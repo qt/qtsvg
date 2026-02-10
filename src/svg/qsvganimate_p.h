@@ -27,7 +27,7 @@ QT_BEGIN_NAMESPACE
 class Q_SVG_EXPORT QSvgLinearEasing : public QSvgEasingInterface
 {
 public:
-    virtual qreal progress(qreal t) override
+    virtual qreal progress(qreal t) const override
     {
         return qBound(0., t, 1.);
     }

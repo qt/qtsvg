@@ -35,20 +35,21 @@ public:
     ~QSvgCssHandler();
 
     QSvgCssAnimation *createAnimation(QStringView name);
-    QSvgCssEasingPtr createEasing(QSvgCssValues::EasingFunction easingFunction,
-                                  const QSvgCssValues::EasingValues &values);
+    static QSvgCssEasingPtr createEasing(QSvgCssValues::EasingFunction easingFunction,
+                                  const QSvgCssValues::EasingValues &values = {});
 
     void collectAnimations(const QCss::StyleSheet &sheet);
 
     void parseStyleSheet(const QStringView str);
+    static QString parseDecltoString(const QCss::Declaration &decl);
     void parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarations, QXmlStreamAttributes &attributes) const;
     void parseCSStoXMLAttrs(const QString &css, QXmlStreamAttributes &attributes) const;
 
     void styleLookup(QSvgNode *node, QXmlStreamAttributes &attributes) const;
 
 private:
-    QSvgCssEasingPtr createEasingFromKeyword(QSvgCssValues::EasingFunction easingFunction);
-    QSvgCssEasingPtr createStepsEasing(const QSvgCssValues::StepValues &values);
+    static QSvgCssEasingPtr createEasingFromKeyword(QSvgCssValues::EasingFunction easingFunction);
+    static QSvgCssEasingPtr createStepsEasing(const QSvgCssValues::StepValues &values);
 
 private:
     QHash<QString, QCss::AnimationRule> m_animations;

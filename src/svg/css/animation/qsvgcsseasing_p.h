@@ -39,7 +39,7 @@ class Q_SVG_EXPORT QSvgCssCubicBezierEasing : public QSvgCssEasing
 {
 public:
     QSvgCssCubicBezierEasing(QSvgCssValues::EasingFunction easingFunction, const QPointF &c1, const QPointF &c2);
-    virtual qreal progress(qreal t) override;
+    virtual qreal progress(qreal t) const override;
     QPointF c1() const;
     QPointF c2() const;
 
@@ -52,7 +52,7 @@ class Q_SVG_EXPORT QSvgCssStepsEasing : public QSvgCssEasing
 {
 public:
     QSvgCssStepsEasing(quint32 stops, QSvgCssValues::StepPosition position);
-    virtual qreal progress(qreal t) override;
+    virtual qreal progress(qreal t) const override;
     quint32 stops() const;
     QSvgCssValues::StepPosition stepPosition();
 

@@ -28,7 +28,7 @@ QSvgCssCubicBezierEasing::QSvgCssCubicBezierEasing(QSvgCssValues::EasingFunction
     m_easingCurve.addCubicBezierSegment(c1, c2, QPointF(1, 1));
 }
 
-qreal QSvgCssCubicBezierEasing::progress(qreal t)
+qreal QSvgCssCubicBezierEasing::progress(qreal t) const
 {
     return m_easingCurve.valueForProgress(t);
 }
@@ -50,7 +50,7 @@ QSvgCssStepsEasing::QSvgCssStepsEasing(quint32 stops, QSvgCssValues::StepPositio
 {
 }
 
-qreal QSvgCssStepsEasing::progress(qreal t)
+qreal QSvgCssStepsEasing::progress(qreal t) const
 {
     const qreal incr = 1.0 / m_stops;
     const qreal interval = (m_stepPosition == QSvgCssValues::StepPosition::JumpEnd) ?

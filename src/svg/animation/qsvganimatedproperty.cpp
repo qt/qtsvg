@@ -67,6 +67,16 @@ QList<qreal> QSvgAbstractAnimatedProperty::keyFrames() const
     return m_keyFrames;
 }
 
+void QSvgAbstractAnimatedProperty::appendEasing(QSvgEasingInterfacePtr easing)
+{
+    m_easings.push_back(std::move(easing));
+}
+
+const QSvgEasingInterface *QSvgAbstractAnimatedProperty::easingAt(unsigned int i) const
+{
+    return i < m_easings.size() ? m_easings[i].get() : nullptr;
+}
+
 void QSvgAbstractAnimatedProperty::setPropertyName(const QString &name)
 {
     m_propertyName = name;

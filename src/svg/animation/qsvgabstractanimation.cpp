@@ -65,7 +65,12 @@ void QSvgAbstractAnimation::evaluateAnimation(qreal elapsedTime)
             qreal to = keyFrames.at(i);
             if (fractionOfCurrentIterationTime >= from && fractionOfCurrentIterationTime < to) {
                 qreal currFraction = (fractionOfCurrentIterationTime - from) / (to - from);
-                qreal effectiveFraction = m_easing->progress(currFraction);
+                const QSvgEasingInterface *easing = animProperty->easingAt(i - 1);
+                qreal effectiveFraction = 0;
+                if (easing)
+                    effectiveFraction = easing->progress(currFraction);
+                else
+                    effectiveFraction = m_easing->progress(currFraction);
                 animProperty->interpolate(i, effectiveFraction);
             }
         }

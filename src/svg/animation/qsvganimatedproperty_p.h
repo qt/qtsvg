@@ -18,6 +18,7 @@
 //
 
 #include <QtSvg/private/qtsvgglobal_p.h>
+#include <QtSvg/private/qsvgeasinginterface_p.h>
 #include <QtCore/qlist.h>
 #include <QtCore/qvariant.h>
 #include <QtCore/qvarlengtharray.h>
@@ -44,6 +45,9 @@ public:
     void setKeyFrames(const QList<qreal> &keyFrames);
     void appendKeyFrame(qreal keyFrame);
     QList<qreal> keyFrames() const;
+
+    void appendEasing(QSvgEasingInterfacePtr easing);
+    const QSvgEasingInterface *easingAt(unsigned int i) const;
     void setPropertyName(const QString &name);
     QStringView propertyName() const;
     Type type() const;
@@ -53,11 +57,16 @@ public:
     static QSvgAbstractAnimatedProperty *createAnimatedProperty(const QString &name);
 protected:
     QList<qreal> m_keyFrames;
+    std::vector<QSvgEasingInterfacePtr> m_easings;
     mutable QVariant m_interpolatedValue;
 
 private:
     QString m_propertyName;
     Type m_type;
+
+private:
+    Q_DISABLE_COPY_X(QSvgAbstractAnimatedProperty, "Class has a vector of unique"
+                                        "pointers as member variable")
 };
 
 class Q_SVG_EXPORT QSvgAnimatedPropertyColor : public QSvgAbstractAnimatedProperty

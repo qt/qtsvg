@@ -16,7 +16,39 @@ namespace {
 struct CssKeyFrameValue{
     qreal keyFrame;
     QList<QCss::Value> values;
+    QCss::Declaration timingFunction;
 };
+
+bool fillPropertyEasing(const QList<CssKeyFrameValue> &keyFrames, QSvgAbstractAnimatedProperty *prop)
+{
+    for (const CssKeyFrameValue &keyFrameValue : keyFrames) {
+        QStringView timingFunctionStr = QSvgCssHandler::parseDecltoString(keyFrameValue.timingFunction);
+        QSvgEasingInterfacePtr easing;
+        if (timingFunctionStr == QStringLiteral("linear")) {
+            easing = QSvgCssHandler::createEasing(QSvgCssValues::EasingFunction::Linear);
+        } else if (timingFunctionStr == QStringLiteral("ease-in")) {
+            easing = QSvgCssHandler::createEasing(QSvgCssValues::EasingFunction::EaseIn);
+        } else if (timingFunctionStr == QStringLiteral("ease-out")) {
+            easing = QSvgCssHandler::createEasing(QSvgCssValues::EasingFunction::EaseOut);
+        } else if (timingFunctionStr == QStringLiteral("ease-in-out")) {
+            easing = QSvgCssHandler::createEasing(QSvgCssValues::EasingFunction::EaseInOut);
+        } else if (timingFunctionStr == QStringLiteral("step-end")) {
+            easing = QSvgCssHandler::createEasing(QSvgCssValues::EasingFunction::Steps,
+                                                  QSvgCssValues::StepValues{quint32(1),
+                                                  QSvgCssValues::StepPosition::End});
+        } else if (timingFunctionStr == QStringLiteral("step-start")) {
+            easing = QSvgCssHandler::createEasing(QSvgCssValues::EasingFunction::Steps,
+                                                  QSvgCssValues::StepValues{quint32(1),
+                                                  QSvgCssValues::StepPosition::Start});
+        }
+
+        prop->appendEasing(std::move(easing));
+    }
+
+
+
+    return true;
+}
 
 bool fillColorProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimatedPropertyColor *prop)
 {
@@ -249,7 +281,8 @@ QSvgCssAnimation *QSvgCssHandler::createAnimation(QStringView name)
     QHash<QString, QList<CssKeyFrameValue>> keyFrameValues;
     for (const auto &ruleSet : std::as_const(animationRule.ruleSets)) {
         for (QCss::Declaration decl : ruleSet.declarations) {
-            CssKeyFrameValue keyFrameValue = {ruleSet.keyFrame, decl.d->values};
+            QCss::Value timingFunction;
+            CssKeyFrameValue keyFrameValue = {ruleSet.keyFrame, decl.d->values, ruleSet.timingFunction};
             QList<CssKeyFrameValue> &value = keyFrameValues[decl.d->property];
             value.append(keyFrameValue);
         }
@@ -273,6 +306,7 @@ QSvgCssAnimation *QSvgCssHandler::createAnimation(QStringView name)
         else if (property == QLatin1StringView("offset-distance"))
             result = fillOffsetDistanceProperty(keyFrames, static_cast<QSvgAnimatedPropertyFloat*>(prop));
 
+        result &= fillPropertyEasing(keyFrames, prop);
         if (!result) {
             delete prop;
             continue;
@@ -334,67 +368,75 @@ void QSvgCssHandler::parseStyleSheet(const QStringView str)
     collectAnimations(sheet);
 }
 
-void QSvgCssHandler::parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarations, QXmlStreamAttributes &attributes) const
+QString QSvgCssHandler::parseDecltoString(const QCss::Declaration &decl)
 {
-    for (int i = 0; i < declarations.size(); ++i) {
-        const QCss::Declaration &decl = declarations.at(i);
-        if (decl.d->property.isEmpty())
-            continue;
-        QString valueStr;
-        const int valCount = decl.d->values.size();
-        for (int i = 0; i < valCount; ++i) {
-            QCss::Value val = decl.d->values.at(i);
-            switch (val.type) {
-            case QCss::Value::TermOperatorComma:
-                valueStr += QLatin1Char(';');
-                break;
-            case QCss::Value::Uri:
-            {
-                QString temp = val.toString();
-                temp.prepend(QLatin1String("url("));
-                temp.append(QLatin1Char(')'));
-                valueStr += temp;
-                break;
+    if (decl.d->property.isEmpty())
+        return QString();
+
+    QString valueStr;
+    const int valCount = decl.d->values.size();
+    for (int i = 0; i < valCount; ++i) {
+        QCss::Value val = decl.d->values.at(i);
+        switch (val.type) {
+        case QCss::Value::TermOperatorComma:
+            valueStr += QLatin1Char(';');
+            break;
+        case QCss::Value::Uri:
+        {
+            QString temp = val.toString();
+            temp.prepend(QLatin1String("url("));
+            temp.append(QLatin1Char(')'));
+            valueStr += temp;
+            break;
+        }
+        case QCss::Value::Function:
+        {
+            QStringList lst = val.variant.toStringList();
+            valueStr.append(lst.at(0));
+            valueStr.append(QLatin1Char('('));
+            for (int i = 1; i < lst.size(); ++i) {
+                valueStr.append(lst.at(i));
+                if ((i +1) < lst.size())
+                    valueStr.append(QLatin1Char(','));
             }
-            case QCss::Value::Function:
-            {
-                QStringList lst = val.variant.toStringList();
-                valueStr.append(lst.at(0));
-                valueStr.append(QLatin1Char('('));
-                for (int i = 1; i < lst.size(); ++i) {
-                    valueStr.append(lst.at(i));
-                    if ((i +1) < lst.size())
-                        valueStr.append(QLatin1Char(','));
-                }
-                valueStr.append(QLatin1Char(')'));
+            valueStr.append(QLatin1Char(')'));
+            break;
+        }
+        case QCss::Value::KnownIdentifier:
+            switch (val.variant.toInt()) {
+            case QCss::Value_None:
+                valueStr += QLatin1String("none");
                 break;
-            }
-            case QCss::Value::KnownIdentifier:
-                switch (val.variant.toInt()) {
-                case QCss::Value_None:
-                    valueStr += QLatin1String("none");
-                    break;
-                case QCss::Value_Auto:
-                    valueStr += QLatin1String("auto");
-                    break;
-                default:
-                    valueStr += val.toString();
-                    break;
-                }
-                break;
-            case QCss::Value::Percentage:
-                valueStr += val.toString() + QLatin1Char('%');
+            case QCss::Value_Auto:
+                valueStr += QLatin1String("auto");
                 break;
             default:
                 valueStr += val.toString();
                 break;
             }
-
-            if (i + 1 < valCount)
-                valueStr += QLatin1Char(' ');
+            break;
+        case QCss::Value::Percentage:
+            valueStr += val.toString() + QLatin1Char('%');
+            break;
+        default:
+            valueStr += val.toString();
+            break;
         }
 
-        attributes.append(QString(), decl.d->property, valueStr);
+        if (i + 1 < valCount)
+            valueStr += QLatin1Char(' ');
+    }
+
+    return valueStr;
+}
+
+void QSvgCssHandler::parseCSStoXMLAttrs(const QList<QCss::Declaration> &declarations, QXmlStreamAttributes &attributes) const
+{
+    for (int i = 0; i < declarations.size(); ++i) {
+        const QCss::Declaration &decl = declarations.at(i);
+        QString valueStr = parseDecltoString(decl);
+        if (!valueStr.isEmpty())
+            attributes.append(QString(), decl.d->property, valueStr);
     }
 }
 
