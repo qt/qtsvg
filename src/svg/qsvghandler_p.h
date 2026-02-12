@@ -38,6 +38,8 @@ class QSvgDocument;
 class QSvgHandler;
 class QColor;
 
+Q_AUTOTEST_EXPORT QList<qreal> parseNumbersList(const QChar *&str);
+
 class Q_SVG_EXPORT QSvgHandler
 {
 public:

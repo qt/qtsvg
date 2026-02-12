@@ -335,7 +335,7 @@ void QSvgAttributes::setAttributes(const QXmlStreamAttributes &attributes, QSvgH
     }
 }
 
-static QList<qreal> parseNumbersList(const QChar *&str)
+QList<qreal> parseNumbersList(const QChar *&str)
 {
     QList<qreal> points;
     if (!str)
