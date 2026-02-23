@@ -89,7 +89,7 @@ public:
     QSvgNode(QSvgNode *parent=0);
     virtual ~QSvgNode();
     void draw(QPainter *p, QSvgExtraStates &states);
-    virtual bool separateFillStroke(const QSvgExtraStates &) const {return false;}
+    virtual bool separateFillStroke(const QPainter *, const QSvgExtraStates &) const {return false;}
     virtual void drawCommand(QPainter *p, QSvgExtraStates &states) = 0;
     void fillThenStroke(QPainter *p, QSvgExtraStates &states);
     QImage drawIntoBuffer(QPainter *p, QSvgExtraStates &states, const QRect &boundsRect);

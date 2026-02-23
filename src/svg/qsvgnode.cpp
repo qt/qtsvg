@@ -85,7 +85,7 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
             QImage proxy = drawIntoBuffer(p, states, boundsRect.toAlignedRect());
             applyBufferToCanvas(p, proxy);
         } else {
-            if (separateFillStroke(states))
+            if (separateFillStroke(p, states))
                 fillThenStroke(p, states);
             else
                 drawCommand(p, states);
@@ -154,7 +154,7 @@ QImage QSvgNode::drawIntoBuffer(QPainter *p, QSvgExtraStates &states, const QRec
     proxyPainter.translate(-boundsRect.topLeft());
     proxyPainter.setTransform(p->transform(), true);
     proxyPainter.setRenderHints(p->renderHints());
-    if (separateFillStroke(states))
+    if (separateFillStroke(p, states))
         fillThenStroke(&proxyPainter, states);
     else
         drawCommand(&proxyPainter, states);
