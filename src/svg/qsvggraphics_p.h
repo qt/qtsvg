@@ -44,7 +44,7 @@ class Q_SVG_EXPORT QSvgEllipse : public QSvgNode
 {
 public:
     QSvgEllipse(QSvgNode *parent, const QRectF &rect);
-    bool separateFillStroke(const QSvgExtraStates &) const override;
+    bool separateFillStroke(const QPainter *, const QSvgExtraStates &) const override;
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
@@ -102,7 +102,7 @@ class Q_SVG_EXPORT QSvgPath : public QSvgNode
 {
 public:
     QSvgPath(QSvgNode *parent, const QPainterPath &qpath);
-    bool separateFillStroke(const QSvgExtraStates &) const override;
+    bool separateFillStroke(const QPainter *, const QSvgExtraStates &) const override;
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
@@ -118,7 +118,7 @@ class Q_SVG_EXPORT QSvgPolygon : public QSvgNode
 {
 public:
     QSvgPolygon(QSvgNode *parent, const QPolygonF &poly);
-    bool separateFillStroke(const QSvgExtraStates &) const override;
+    bool separateFillStroke(const QPainter *, const QSvgExtraStates &) const override;
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
@@ -135,7 +135,7 @@ class Q_SVG_EXPORT QSvgPolyline : public QSvgNode
 {
 public:
     QSvgPolyline(QSvgNode *parent, const QPolygonF &poly);
-    bool separateFillStroke(const QSvgExtraStates &) const override;
+    bool separateFillStroke(const QPainter *, const QSvgExtraStates &) const override;
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
@@ -153,7 +153,7 @@ class Q_SVG_EXPORT QSvgRect : public QSvgNode
 public:
     QSvgRect(QSvgNode *paren, const QRectF &rect, qreal rx=0, qreal ry=0);
     Type type() const override;
-    bool separateFillStroke(const QSvgExtraStates &) const override;
+    bool separateFillStroke(const QPainter *, const QSvgExtraStates &) const override;
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
@@ -184,7 +184,7 @@ public:
     void drawCommand(QPainter *p, QSvgExtraStates &states) override;
     bool shouldDrawNode(QPainter *p, QSvgExtraStates &states) const override;
     Type type() const override;
-    bool separateFillStroke(const QSvgExtraStates &) const override;
+    bool separateFillStroke(const QPainter *, const QSvgExtraStates &) const override;
 
     void addTspan(QSvgTspan *tspan) {m_tspans.append(tspan);}
     const QList<QSvgTspan *> tspans() const { return m_tspans; }

@@ -68,7 +68,7 @@ void QSvgEllipse::drawCommand(QPainter *p, QSvgExtraStates &)
     p->drawEllipse(m_bounds);
 }
 
-bool QSvgEllipse::separateFillStroke(const QSvgExtraStates &) const
+bool QSvgEllipse::separateFillStroke(const QPainter *, const QSvgExtraStates &) const
 {
     return true;
 }
@@ -120,7 +120,7 @@ QSvgPath::QSvgPath(QSvgNode *parent, const QPainterPath &qpath)
 void QSvgPath::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
     const qreal oldOpacity = p->opacity();
-    const bool drawingInOnePass = !separateFillStroke(states);
+    const bool drawingInOnePass = !separateFillStroke(p, states);
     if (drawingInOnePass)
         p->setOpacity(oldOpacity * states.fillOpacity);
     m_path.setFillRule(states.fillRule);
@@ -134,9 +134,10 @@ void QSvgPath::drawCommand(QPainter *p, QSvgExtraStates &states)
         p->setOpacity(oldOpacity);
 }
 
-bool QSvgPath::separateFillStroke(const QSvgExtraStates &s) const
+bool QSvgPath::separateFillStroke(const QPainter *p, const QSvgExtraStates &s) const
 {
-    return !qFuzzyCompare(s.fillOpacity, s.strokeOpacity);
+    return !qFuzzyCompare(s.fillOpacity, s.strokeOpacity)
+            || qFuzzyIsNull(p->pen().widthF());
 }
 
 QRectF QSvgPath::internalFastBounds(QPainter *p, QSvgExtraStates &) const
@@ -213,7 +214,7 @@ void QSvgPolygon::drawCommand(QPainter *p, QSvgExtraStates &states)
     QSvgMarker::drawMarkersForNode(this, p, states);
 }
 
-bool QSvgPolygon::separateFillStroke(const QSvgExtraStates &) const
+bool QSvgPolygon::separateFillStroke(const QPainter *, const QSvgExtraStates &) const
 {
     return true;
 }
@@ -237,7 +238,7 @@ void QSvgPolyline::drawCommand(QPainter *p, QSvgExtraStates &states)
     }
 }
 
-bool QSvgPolyline::separateFillStroke(const QSvgExtraStates &) const
+bool QSvgPolyline::separateFillStroke(const QPainter *, const QSvgExtraStates &) const
 {
     return true;
 }
@@ -283,7 +284,7 @@ void QSvgRect::drawCommand(QPainter *p, QSvgExtraStates &)
         p->drawRect(m_rect);
 }
 
-bool QSvgRect::separateFillStroke(const QSvgExtraStates &) const
+bool QSvgRect::separateFillStroke(const QPainter *, const QSvgExtraStates &) const
 {
     return true;
 }
@@ -376,7 +377,7 @@ bool QSvgText::shouldDrawNode(QPainter *p, QSvgExtraStates &) const
     return true;
 }
 
-bool QSvgText::separateFillStroke(const QSvgExtraStates &) const
+bool QSvgText::separateFillStroke(const QPainter *, const QSvgExtraStates &) const
 {
     return true;
 }
