@@ -381,7 +381,8 @@ QSvgSolidColorStyle::QSvgSolidColorStyle(const QColor &color)
 }
 
 QSvgGradientStyle::QSvgGradientStyle(QGradient *grad)
-    : m_gradient(grad), m_gradientStopsSet(false)
+    : m_gradient(grad)
+    , m_gradientStopsSet(false)
 {
 }
 
