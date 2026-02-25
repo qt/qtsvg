@@ -78,7 +78,7 @@ public:
     QSize size;
     QRectF viewBox;
     QIODevice *outputDevice;
-    QTextStream *stream;
+    QTextStream *stream{nullptr};
     int resolution;
 
     QString header;
