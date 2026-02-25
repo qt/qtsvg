@@ -594,7 +594,7 @@ private:
     QGradient      *m_gradient;
     QTransform m_transform;
 
-    QSvgDocument *m_doc;
+    QSvgDocument *m_doc{nullptr};
     QString           m_link;
     bool m_gradientStopsSet;
 };
