@@ -27,12 +27,15 @@
 #include "qdir.h"
 #include "qdebug.h"
 #include "qmath.h"
+#include "qnumeric.h"
 #include <qregularexpression.h>
 #include "qtransform.h"
 #include "qvarlengtharray.h"
 #include "qimagereader.h"
 
 #include "float.h"
+
+#include <algorithm>
 
 QT_BEGIN_NAMESPACE
 
@@ -774,23 +777,23 @@ static void parsePen(QSvgNode *node,
                 QString dashArray  = attributes.strokeDashArray.toString();
                 const QChar *s = dashArray.constData();
                 QList<qreal> dashes = parseNumbersList(s);
-                bool allZeroes = true;
-                for (qreal dash : dashes) {
-                    if (dash != 0.0) {
-                        allZeroes = false;
-                        break;
-                    }
-                }
+                const bool allZeroes = std::all_of(dashes.cbegin(), dashes.cend(),
+                                                   [](qreal i) { return qFuzzyIsNull(i); });
+                const bool hasNegative = !allZeroes && std::any_of(dashes.cbegin(), dashes.cend(),
+                                                                   [](qreal i) { return i < 0.; });
 
-                // if the stroke dash array contains only zeros,
+                if (hasNegative)
+                    qCWarning(lcSvgHandler) << "QSvgHandler: Stroke dash array "
+                                               "with a negative value is invalid";
+                // if the stroke dash array contains only zeros or a negative value,
                 // force drawing of solid line.
-                if (allZeroes == false) {
+                if (allZeroes || hasNegative) {
+                    prop->setDashArrayNone();
+                } else {
                     // if the dash count is odd the dashes should be duplicated
                     if ((dashes.size() & 1) != 0)
                         dashes << QList<qreal>(dashes);
                     prop->setDashArray(dashes);
-                } else {
-                    prop->setDashArrayNone();
                 }
             }
         }
