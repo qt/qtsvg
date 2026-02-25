@@ -649,7 +649,7 @@ private:
     //comp-op attribute
     QPainter::CompositionMode m_mode;
 
-    QPainter::CompositionMode m_oldMode;
+    QPainter::CompositionMode m_oldMode{QPainter::CompositionMode_SourceOver};
 };
 
 class Q_SVG_EXPORT QSvgOffsetStyle : public QSvgStyleProperty
