@@ -17,7 +17,7 @@ QSvgAbstractAnimation::QSvgAbstractAnimation()
 
 QSvgAbstractAnimation::~QSvgAbstractAnimation()
 {
-    for (auto prop : m_properties)
+    for (const QSvgAbstractAnimatedProperty *prop : std::as_const(m_properties))
         delete prop;
 }
 
@@ -58,7 +58,7 @@ void QSvgAbstractAnimation::evaluateAnimation(qreal elapsedTime)
 
     qreal fractionOfCurrentIterationTime = fractionOfTotalTime - std::trunc(fractionOfTotalTime);
 
-    for (QSvgAbstractAnimatedProperty *animProperty : m_properties) {
+    for (const QSvgAbstractAnimatedProperty *animProperty : std::as_const(m_properties)) {
         const QList<qreal> keyFrames = animProperty->keyFrames();
         for (int i = 1; i < keyFrames.size(); i++) {
             qreal from = keyFrames.at(i - 1);

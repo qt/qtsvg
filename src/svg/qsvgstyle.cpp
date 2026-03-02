@@ -707,7 +707,7 @@ void QSvgAnimatedStyle::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates
         return;
 
     QSvgStyleState currentStyle = m_static;
-    for (auto anim : nodeAnims) {
+    for (const QSvgAbstractAnimation *anim : std::as_const(nodeAnims)) {
         if (!anim->isActive())
             continue;
 
