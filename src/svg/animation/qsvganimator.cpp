@@ -18,7 +18,7 @@ QSvgAbstractAnimator::QSvgAbstractAnimator()
 QSvgAbstractAnimator::~QSvgAbstractAnimator()
 {
     for (auto animationHash : {&m_animationsCSS, &m_animationsSMIL}) {
-        for (const auto &nodeAnimations : *std::as_const(animationHash)) {
+        for (const auto &nodeAnimations : std::as_const(*animationHash)) {
             for (QSvgAbstractAnimation *anim : nodeAnimations)
                 delete anim;
         }
@@ -46,7 +46,7 @@ void QSvgAbstractAnimator::advanceAnimations()
 {
     qreal elapsedTime = currentElapsed();
     for (auto animationHash : {&m_animationsCSS, &m_animationsSMIL}) {
-        for (const auto &nodeAnimations : *std::as_const(animationHash)) {
+        for (const auto &nodeAnimations : std::as_const(*animationHash)) {
             for (QSvgAbstractAnimation *anim : nodeAnimations)
                 anim->evaluateAnimation(elapsedTime);
         }

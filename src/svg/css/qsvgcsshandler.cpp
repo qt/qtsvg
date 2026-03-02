@@ -113,9 +113,9 @@ bool fillTransformProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimate
     // Stores each key frame's list of components
     QList<QList<QSvgAnimatedPropertyTransform::TransformComponent>> keyFramesComponents;
 
-    for (CssKeyFrameValue keyFrame : keyFrames) {
+    for (const CssKeyFrameValue &keyFrame : keyFrames) {
         QList<QSvgAnimatedPropertyTransform::TransformComponent> components;
-        for (QCss::Value val : keyFrame.values) {
+        for (const QCss::Value &val : keyFrame.values) {
             if (val.type == QCss::Value::Function) {
                 QStringList lst = val.variant.toStringList();
                 QStringView transformType = lst.value(0);
@@ -188,7 +188,7 @@ bool fillTransformProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimate
     if (!validateTransform(keyFramesComponents))
         return false;
 
-    for (auto comp : keyFramesComponents) {
+    for (const auto &comp : std::as_const(keyFramesComponents)) {
         prop->appendComponents(comp);
     }
     prop->setTransformCount(keyFramesComponents.first().size());
@@ -198,7 +198,7 @@ bool fillTransformProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimate
 
 bool fillOffsetDistanceProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimatedPropertyFloat *prop)
 {
-    for (CssKeyFrameValue keyFrame : keyFrames) {
+    for (const CssKeyFrameValue &keyFrame : keyFrames) {
         if (keyFrame.values.size() != 1)
             return false;
 
@@ -318,7 +318,7 @@ void QSvgCssHandler::collectAnimations(const QCss::StyleSheet &sheet)
     };
 
     QList<QCss::AnimationRule> animationRules = sheet.animationRules;
-    for (QCss::AnimationRule rule : animationRules) {
+    for (QCss::AnimationRule &rule : animationRules) {
         std::sort(rule.ruleSets.begin(), rule.ruleSets.end(), sortFunction);
         m_animations[rule.animName] = rule;
     }

@@ -238,11 +238,11 @@ void QSvgCssProperties::shortHandtoLonghandForm(QStringView value)
         Name = 1 << 7
     };
 
-    QList<QStringView> animations = value.split(QLatin1Char(';'), Qt::SkipEmptyParts);
-    for (QStringView animation : animations) {
+    const QList<QStringView> animations = value.split(QLatin1Char(';'), Qt::SkipEmptyParts);
+    for (const QStringView &animation : animations) {
         uchar propertyFlag = 0;
-        QList<QStringView> animationProperties = animation.split(QLatin1Char(' '), Qt::SkipEmptyParts);
-        for (QStringView property : animationProperties) {
+        const QList<QStringView> animationProperties = animation.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+        for (const QStringView &property : animationProperties) {
             if (!(propertyFlag & Property::Duration) && isTimeValue(property)) {
                 m_durations.append(property);
                 propertyFlag |= Property::Duration;
