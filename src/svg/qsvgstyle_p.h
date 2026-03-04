@@ -270,7 +270,7 @@ private:
     // fill-opacity    v 	v 	'inherit' | <OpacityValue.datatype>
     QBrush m_fill;
     QBrush m_oldFill;
-    QSvgPaintStyleProperty *m_style;
+    QSvgRefCounter<QSvgPaintStyleProperty> m_style;
 
     Qt::FillRule m_fillRule;
     Qt::FillRule m_oldFillRule;
@@ -510,7 +510,7 @@ private:
     qreal m_strokeDashOffset;
     qreal m_oldStrokeDashOffset;
 
-    QSvgPaintStyleProperty *m_style;
+    QSvgRefCounter<QSvgPaintStyleProperty> m_style;
     QString m_paintStyleId;
     uint m_paintStyleResolved : 1;
     uint m_vectorEffect : 1;
