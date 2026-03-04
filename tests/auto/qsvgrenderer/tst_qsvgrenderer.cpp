@@ -101,8 +101,10 @@ private slots:
 
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
+#  ifdef QT_BUILD_INTERNAL
     void testGzHelper_data();
     void testGzHelper();
+#  endif
 #endif
 
 private:
@@ -923,11 +925,10 @@ void tst_QSvgRenderer::testGzLoading()
     QVERIFY(autoDetectGzData.isValid());
 }
 
-#ifdef QT_BUILD_INTERNAL
+#  ifdef QT_BUILD_INTERNAL
 QT_BEGIN_NAMESPACE
 QByteArray qt_inflateGZipDataFrom(QIODevice *device);
 QT_END_NAMESPACE
-#endif
 
 void tst_QSvgRenderer::testGzHelper_data()
 {
@@ -959,7 +960,6 @@ void tst_QSvgRenderer::testGzHelper_data()
 
 void tst_QSvgRenderer::testGzHelper()
 {
-#ifdef QT_BUILD_INTERNAL
     QFETCH(QByteArray, in);
     QFETCH(QByteArray, out);
 
@@ -968,9 +968,9 @@ void tst_QSvgRenderer::testGzHelper()
     QVERIFY(buffer.isReadable());
     QByteArray result = qt_inflateGZipDataFrom(&buffer);
     QCOMPARE(result, out);
-#endif
 }
-#endif
+#  endif // #ifdef QT_BUILD_INTERNAL
+#endif // #ifndef QT_NO_COMPRESS
 
 void tst_QSvgRenderer::fillRule()
 {
