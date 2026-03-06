@@ -516,8 +516,8 @@ QTransform QSvgDocument::transformForElement(const QString &id) const
 
     node = node->parent();
     while (node) {
-        if (node->m_style.transform)
-            t *= node->m_style.transform->qtransform();
+        if (auto prop = node->m_style.property(QSvgStyleProperty::Transform))
+            t *= static_cast<QSvgTransformStyle*>(prop)->qtransform();
         node = node->parent();
     }
 

@@ -201,38 +201,7 @@ bool QSvgNode::isDescendantOf(const QSvgNode *parent) const
 
 void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop)
 {
-    switch (prop->type()) {
-    case QSvgStyleProperty::QUALITY:
-        m_style.quality.reset(static_cast<QSvgQualityStyle*>(prop));
-        return;
-    case QSvgStyleProperty::FILL:
-        m_style.fill.reset(static_cast<QSvgFillStyle*>(prop));
-        return;
-    case QSvgStyleProperty::VIEWPORT_FILL:
-        m_style.viewportFill.reset(static_cast<QSvgViewportFillStyle*>(prop));
-        return;
-    case QSvgStyleProperty::FONT:
-        m_style.font.reset(static_cast<QSvgFontStyle*>(prop));
-        return;
-    case QSvgStyleProperty::STROKE:
-        m_style.stroke.reset(static_cast<QSvgStrokeStyle*>(prop));
-        return;
-    case QSvgStyleProperty::TRANSFORM:
-        m_style.transform.reset(static_cast<QSvgTransformStyle*>(prop));
-        return;
-    case QSvgStyleProperty::OPACITY:
-        m_style.opacity.reset(static_cast<QSvgOpacityStyle*>(prop));
-        return;
-    case QSvgStyleProperty::COMP_OP:
-        m_style.compop.reset(static_cast<QSvgCompOpStyle*>(prop));
-        return;
-    case QSvgStyleProperty::OFFSET:
-        m_style.offset.reset(static_cast<QSvgOffsetStyle*>(prop));
-        return;
-    };
-    qCWarning(lcSvgDraw,
-              "QSvgNode: Trying to append unknown property %d",
-              int(prop->type()));
+    m_style.appendProperty(std::unique_ptr<QSvgStyleProperty>(prop));
 }
 
 void QSvgNode::applyStyle(QPainter *p, QSvgExtraStates &states) const
@@ -280,50 +249,17 @@ void QSvgNode::revertAnimatedStyle(QPainter *p, QSvgExtraStates &states) const
         m_animatedStyle.revert(p, states);
 }
 
-QSvgStyleProperty * QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
+QSvgStyleProperty *QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
 {
     const QSvgNode *node = this;
     while (node) {
-        switch (type) {
-        case QSvgStyleProperty::QUALITY:
-            if (node->m_style.quality)
-                return node->m_style.quality;
-            break;
-        case QSvgStyleProperty::FILL:
-            if (node->m_style.fill)
-                return node->m_style.fill;
-            break;
-        case QSvgStyleProperty::VIEWPORT_FILL:
-            if (m_style.viewportFill)
-                return node->m_style.viewportFill;
-            break;
-        case QSvgStyleProperty::FONT:
-            if (node->m_style.font)
-                return node->m_style.font;
-            break;
-        case QSvgStyleProperty::STROKE:
-            if (node->m_style.stroke)
-                return node->m_style.stroke;
-            break;
-        case QSvgStyleProperty::TRANSFORM:
-            if (node->m_style.transform)
-                return node->m_style.transform;
-            break;
-        case QSvgStyleProperty::OPACITY:
-            if (node->m_style.opacity)
-                return node->m_style.opacity;
-            break;
-        case QSvgStyleProperty::COMP_OP:
-            if (node->m_style.compop)
-                return node->m_style.compop;
-            break;
-        default:
-            break;
-        }
+        if (QSvgStyleProperty *prop = node->m_style.property(type))
+            return prop;
+
         node = node->parent();
     }
 
-    return 0;
+    return nullptr;
 }
 
 QRectF QSvgNode::internalFastBounds(QPainter *p, QSvgExtraStates &states) const

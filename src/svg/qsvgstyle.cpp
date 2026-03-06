@@ -391,32 +391,32 @@ void QSvgTransformStyle::revert(QPainter *p, QSvgExtraStates &)
 
 QSvgStyleProperty::Type QSvgQualityStyle::type() const
 {
-    return QUALITY;
+    return Quality;
 }
 
 QSvgStyleProperty::Type QSvgFillStyle::type() const
 {
-    return FILL;
+    return Fill;
 }
 
 QSvgStyleProperty::Type QSvgViewportFillStyle::type() const
 {
-    return VIEWPORT_FILL;
+    return ViewportFill;
 }
 
 QSvgStyleProperty::Type QSvgFontStyle::type() const
 {
-    return FONT;
+    return Font;
 }
 
 QSvgStyleProperty::Type QSvgStrokeStyle::type() const
 {
-    return STROKE;
+    return Stroke;
 }
 
 QSvgStyleProperty::Type QSvgTransformStyle::type() const
 {
-    return TRANSFORM;
+    return Transform;
 }
 
 
@@ -442,7 +442,7 @@ void QSvgCompOpStyle::revert(QPainter *p, QSvgExtraStates &)
 
 QSvgStyleProperty::Type QSvgCompOpStyle::type() const
 {
-    return COMP_OP;
+    return CompOp;
 }
 
 QSvgOffsetStyle::~QSvgOffsetStyle()
@@ -458,7 +458,7 @@ void QSvgOffsetStyle::revert(QPainter *, QSvgExtraStates &)
 
 QSvgStyleProperty::Type QSvgOffsetStyle::type() const
 {
-    return OFFSET;
+    return Offset;
 }
 
 QSvgOpacityStyle::QSvgOpacityStyle(qreal opacity)
@@ -483,92 +483,27 @@ void QSvgOpacityStyle::revert(QPainter *p, QSvgExtraStates &)
 
 QSvgStyleProperty::Type QSvgOpacityStyle::type() const
 {
-    return OPACITY;
+    return Opacity;
 }
 
 QSvgStaticStyle::QSvgStaticStyle()
-    : quality(0)
-    , fill(0)
-    , viewportFill(0)
-    , font(0)
-    , stroke(0)
-    , transform(0)
-    , opacity(0)
-    , compop(0)
-{
-}
-
+    = default;
 QSvgStaticStyle::~QSvgStaticStyle()
-{
-}
+    = default;
 
 void QSvgStaticStyle::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states)
 {
-    if (quality) {
-        quality->apply(p, node, states);
-    }
-
-    if (fill) {
-        fill->apply(p, node, states);
-    }
-
-    if (viewportFill) {
-        viewportFill->apply(p, node, states);
-    }
-
-    if (font) {
-        font->apply(p, node, states);
-    }
-
-    if (stroke) {
-        stroke->apply(p, node, states);
-    }
-
-    if (transform) {
-        transform->apply(p, node, states);
-    }
-
-    if (opacity) {
-        opacity->apply(p, node, states);
-    }
-
-    if (compop) {
-        compop->apply(p, node, states);
+    for (auto &prop : m_properties) {
+        if (prop)
+            prop->apply(p, node, states);
     }
 }
 
 void QSvgStaticStyle::revert(QPainter *p, QSvgExtraStates &states)
 {
-    if (quality) {
-        quality->revert(p, states);
-    }
-
-    if (fill) {
-        fill->revert(p, states);
-    }
-
-    if (viewportFill) {
-        viewportFill->revert(p, states);
-    }
-
-    if (font) {
-        font->revert(p, states);
-    }
-
-    if (stroke) {
-        stroke->revert(p, states);
-    }
-
-    if (transform) {
-        transform->revert(p, states);
-    }
-
-    if (opacity) {
-        opacity->revert(p, states);
-    }
-
-    if (compop) {
-        compop->revert(p, states);
+    for (auto &prop : m_properties) {
+        if (prop)
+            prop->revert(p, states);
     }
 }
 
@@ -638,15 +573,15 @@ void QSvgAnimatedStyle::revert(QPainter *p, QSvgExtraStates &states)
 
 void QSvgAnimatedStyle::savePaintingState(const QPainter *p, const QSvgNode *node, QSvgExtraStates &states)
 {
-    QSvgStaticStyle style = node->style();
     m_worldTransform = p->worldTransform();
-    if (style.transform)
-        m_static.transform = style.transform->qtransform();
+    if (auto prop = node->style().property(QSvgStyleProperty::Transform))
+        m_static.transform = (static_cast<QSvgTransformStyle*>(prop))->qtransform();
 
-    if (style.offset) {
-        m_static.offsetPath = style.offset->path();
-        m_static.offsetRotateType = style.offset->rotateType();
-        m_static.offsetRotate = style.offset->rotateAngle();
+    if (auto prop = node->style().property(QSvgStyleProperty::Offset)) {
+        QSvgOffsetStyle *offset = static_cast<QSvgOffsetStyle*>(prop);
+        m_static.offsetPath = offset->path();
+        m_static.offsetRotateType = offset->rotateType();
+        m_static.offsetRotate = offset->rotateAngle();
     }
 
     m_static.fill = p->brush();
