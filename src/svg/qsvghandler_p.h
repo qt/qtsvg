@@ -124,8 +124,9 @@ private:
      */
     QStack<QSvgText::WhitespaceMode> m_whitespaceMode;
 
-    QSvgRefCounter<QSvgStyleProperty> m_style;
+    QSvgStyleProperty *m_style{nullptr};
     QSvgPaintServerSharedPtr m_paintServer;
+
     QSvgUtils::LengthType m_defaultCoords;
 
     QStack<QColor> m_colorStack;

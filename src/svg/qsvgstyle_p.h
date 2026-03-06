@@ -27,6 +27,8 @@
 #include <qdebug.h>
 #include "qtsvgglobal_p.h"
 #include <QtSvg/private/qsvgpaintserver_p.h>
+#include <memory>
+#include <array>
 
 QT_BEGIN_NAMESPACE
 
@@ -133,28 +135,30 @@ struct Q_SVG_EXPORT QSvgExtraStates
     bool inUse = false; // true if currently in QSvgUseNode
 };
 
-class Q_SVG_EXPORT QSvgStyleProperty : public QSvgRefCounted
+class Q_SVG_EXPORT QSvgStyleProperty
 {
 public:
-    enum Type
+    enum Type : quint8
     {
-        QUALITY,
-        FILL,
-        VIEWPORT_FILL,
-        FONT,
-        STROKE,
-        TRANSFORM,
-        OPACITY,
-        COMP_OP,
-        OFFSET,
+        Quality,
+        Fill,
+        ViewportFill,
+        Font,
+        Stroke,
+        Transform,
+        Opacity,
+        CompOp,
+        Offset,
+
+        NumTypes
     };
 public:
     virtual ~QSvgStyleProperty();
 
     virtual void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) = 0;
-    virtual void revert(QPainter *p, QSvgExtraStates &states) =0;
-    virtual Type type() const=0;
-    bool isDefault() const { return false; } // [not virtual since called from templated class]
+    virtual void revert(QPainter *p, QSvgExtraStates &states) = 0;
+    virtual Type type() const = 0;
+    virtual bool isDefault() const { return false; }
 };
 
 class Q_SVG_EXPORT QSvgQualityStyle : public QSvgStyleProperty
@@ -211,7 +215,10 @@ public:
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
     qreal opacity() const { return m_opacity; }
-    bool isDefault() const { return qFuzzyCompare(m_opacity, qreal(1.0)); }
+    bool isDefault() const override
+    {
+        return qFuzzyCompare(m_opacity, qreal(1.0));
+    }
 
 private:
     qreal m_opacity;
@@ -533,7 +540,7 @@ public:
     {
         return m_transform;
     }
-    bool isDefault() const { return m_transform.isIdentity(); }
+    bool isDefault() const override { return m_transform.isIdentity(); }
 private:
     //7.6 The transform  attribute
     QTransform m_transform;
@@ -626,15 +633,27 @@ public:
 
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states);
     void revert(QPainter *p, QSvgExtraStates &states);
-    QSvgRefCounter<QSvgQualityStyle>      quality;
-    QSvgRefCounter<QSvgFillStyle>         fill;
-    QSvgRefCounter<QSvgViewportFillStyle> viewportFill;
-    QSvgRefCounter<QSvgFontStyle>         font;
-    QSvgRefCounter<QSvgStrokeStyle>       stroke;
-    QSvgRefCounter<QSvgTransformStyle>    transform;
-    QSvgRefCounter<QSvgOpacityStyle>      opacity;
-    QSvgRefCounter<QSvgCompOpStyle>       compop;
-    QSvgRefCounter<QSvgOffsetStyle>       offset;
+
+    void appendProperty(std::unique_ptr<QSvgStyleProperty> prop)
+    {
+        Q_ASSERT(prop->type() < QSvgStyleProperty::NumTypes);
+        m_properties[prop->type()] = std::move(prop);
+    }
+
+    QSvgStyleProperty *property(QSvgStyleProperty::Type type) const
+    {
+        Q_ASSERT(type < QSvgStyleProperty::NumTypes);
+        return m_properties.at(type).get();
+    }
+
+    bool isDefaultProperty(QSvgStyleProperty::Type type) const
+    {
+        QSvgStyleProperty *prop = property(type);
+        return !prop || prop->isDefault();
+    }
+
+private:
+    std::array<std::unique_ptr<QSvgStyleProperty>, QSvgStyleProperty::NumTypes> m_properties;
 };
 
 class QSvgAbstractAnimation;

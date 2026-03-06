@@ -340,7 +340,8 @@ void QSvgText::setTextArea(const QSizeF &size)
 
 QRectF QSvgText::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
-    QFont font = m_style.font ? m_style.font->qfont() : p->font();
+    QSvgFontStyle *fontProperty = static_cast<QSvgFontStyle *>(m_style.property(QSvgStyleProperty::Font));
+    QFont font = fontProperty ? fontProperty->qfont() : p->font();
     QFontMetricsF fm(font);
 
     int charCount = 0;
@@ -380,7 +381,7 @@ bool QSvgText::shouldDrawNode(QPainter *p, QSvgExtraStates &) const
 
         numChars += span->text().size();
 
-        QSvgFontStyle *style = static_cast<QSvgFontStyle *>(span->styleProperty(QSvgStyleProperty::FONT));
+        QSvgFontStyle *style = static_cast<QSvgFontStyle *>(span->styleProperty(QSvgStyleProperty::Font));
         if (style != nullptr && style->qfont().pointSizeF() > maxFontSize)
             maxFontSize = style->qfont().pointSizeF();
     }

@@ -1822,7 +1822,7 @@ static bool parseFontFaceNode(QSvgStyleProperty *parent,
                               const QXmlStreamAttributes &attributes,
                               QSvgHandler *)
 {
-    if (parent->type() != QSvgStyleProperty::FONT) {
+    if (parent->type() != QSvgStyleProperty::Font) {
         return false;
     }
 
@@ -1850,7 +1850,7 @@ static bool parseFontFaceNameNode(QSvgStyleProperty *parent,
                                   const QXmlStreamAttributes &attributes,
                                   QSvgHandler *)
 {
-    if (parent->type() != QSvgStyleProperty::FONT) {
+    if (parent->type() != QSvgStyleProperty::Font) {
         return false;
     }
 
@@ -1905,7 +1905,7 @@ static bool parseGlyphNode(QSvgStyleProperty *parent,
                            const QXmlStreamAttributes &attributes,
                            QSvgHandler *)
 {
-    if (parent->type() != QSvgStyleProperty::FONT) {
+    if (parent->type() != QSvgStyleProperty::Font) {
         return false;
     }
 
@@ -2136,7 +2136,7 @@ static bool parseMissingGlyphNode(QSvgStyleProperty *parent,
                                   const QXmlStreamAttributes &attributes,
                                   QSvgHandler *)
 {
-    if (parent->type() != QSvgStyleProperty::FONT) {
+    if (parent->type() != QSvgStyleProperty::Font) {
         return false;
     }
 
@@ -3673,8 +3673,8 @@ void QSvgHandler::init()
 
 static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> &linkable)
 {
-    QSvgFillStyle *fillStyle = static_cast<QSvgFillStyle*>
-        (node->styleProperty(QSvgStyleProperty::FILL));
+    const QSvgFillStyle *fillStyle = static_cast<const QSvgFillStyle*>
+        (node->styleProperty(QSvgStyleProperty::Fill));
     if (fillStyle && fillStyle->paintServer()
         && fillStyle->paintServer()->type() == QSvgPaintServer::Type::Pattern) {
         QSvgPatternPaint *patternStyle = static_cast<QSvgPatternPaint *>(fillStyle->paintServer());
@@ -3682,8 +3682,8 @@ static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> &l
             return true;
     }
 
-    QSvgStrokeStyle *strokeStyle = static_cast<QSvgStrokeStyle*>
-        (node->styleProperty(QSvgStyleProperty::STROKE));
+    const QSvgStrokeStyle *strokeStyle = static_cast<const QSvgStrokeStyle*>
+        (node->styleProperty(QSvgStyleProperty::Stroke));
     if (strokeStyle && strokeStyle->paintServer()
         && strokeStyle->paintServer()->type() == QSvgPaintServer::Type::Pattern) {
         QSvgPatternPaint *patternStyle = static_cast<QSvgPatternPaint *>(strokeStyle->paintServer());
@@ -4000,7 +4000,7 @@ bool QSvgHandler::startElement(const QStringView localName,
     } else if (StyleFactoryMethod method = findStyleFactoryMethod(localName)) {
         QSvgStyleProperty *prop = method(attributes, this);
         if (prop) {
-            m_style.reset(prop);
+            m_style = prop;
             m_nodes.top()->appendStyleProperty(prop);
         } else {
             const QByteArray msg = QByteArrayLiteral("Could not parse node: ") + localName.toLocal8Bit();
@@ -4066,7 +4066,7 @@ bool QSvgHandler::endElement(const QStringView localName)
     if (node == Graphics)
         m_nodes.pop();
     else if (m_style && !m_skipNodes.isEmpty() && m_skipNodes.top() != Style)
-        m_style.reset();
+        m_style = nullptr;
 
     return ((localName == QLatin1String("svg")) && (node != Doc));
 }
@@ -4074,7 +4074,7 @@ bool QSvgHandler::endElement(const QStringView localName)
 void QSvgHandler::resolvePaintServers()
 {
     for (QSvgStyleProperty *prop : std::as_const(m_unresolvedStyles)) {
-        if (prop->type() == QSvgStyleProperty::FILL) {
+        if (prop->type() == QSvgStyleProperty::Fill) {
             QSvgFillStyle *fill = static_cast<QSvgFillStyle *>(prop);
             QString id = fill->paintStyleId();
             QSvgPaintServerSharedPtr paintServer = m_doc->paintServer(id);
@@ -4084,7 +4084,7 @@ void QSvgHandler::resolvePaintServers()
                 qCWarning(lcSvgHandler, "%s", msgCouldNotResolveProperty(id, xml).constData());
                 fill->setBrush(Qt::NoBrush);
             }
-        } else if (prop->type() == QSvgStyleProperty::STROKE) {
+        } else if (prop->type() == QSvgStyleProperty::Stroke) {
             QSvgStrokeStyle *stroke = static_cast<QSvgStrokeStyle *>(prop);
             QString id = stroke->paintStyleId();
             QSvgPaintServerSharedPtr paintServer = m_doc->paintServer(id);
