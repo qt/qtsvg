@@ -3,7 +3,7 @@
 
 qt_examples_build_begin(EXTERNAL_BUILD)
 
-if (TARGET Qt::Widgets)
+if (TARGET Qt6::Widgets)
     add_subdirectory(svg)
 endif()
 
