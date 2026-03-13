@@ -33,8 +33,6 @@ Makefile*
 !qmake/Makefile.unix
 *.prl
 *.app
-*.pro.user
-*.qmlproject.user
 *.gcov
 bin/Qt*.dll
 bin/assistant*
@@ -231,6 +229,11 @@ src/network/lib
 src/xml/lib/
 
 .pc/
+
+# Qt Creator generated files
+*.pro.user*
+*.qmlproject.user*
+CMakeLists.txt.user*
 
 # INTEGRITY generated files
 *.gpj
