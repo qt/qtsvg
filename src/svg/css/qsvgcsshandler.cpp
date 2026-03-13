@@ -149,9 +149,10 @@ bool fillTransformProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimate
         QList<QSvgAnimatedPropertyTransform::TransformComponent> components;
         for (const QCss::Value &val : keyFrame.values) {
             if (val.type == QCss::Value::Function) {
-                QStringList lst = val.variant.toStringList();
-                QStringView transformType = lst.value(0);
-                QStringList args = lst.value(1).split(QStringLiteral(","), Qt::SkipEmptyParts);
+                const QStringList lst = val.variant.toStringList();
+                const QStringView transformType = lst.value(0);
+                const QList<QStringView> args =
+                        QStringView{ lst.value(1) }.split(QStringLiteral(","), Qt::SkipEmptyParts);
                 if (transformType == QStringLiteral("scale")) {
                     QSvgAnimatedPropertyTransform::TransformComponent component;
                     qreal scale0 = QSvgUtils::toDouble(args.value(0).trimmed());
