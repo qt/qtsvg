@@ -22,22 +22,25 @@ class QSvgIOHandlerPrivate
 {
 public:
     QSvgIOHandlerPrivate(QSvgIOHandler *qq)
-        : q(qq), loadAttempted(false), loadStatus(false), readDone(false), backColor(Qt::transparent)
+        : q(qq)
     {}
 
     bool load(QIODevice *device);
 
-    QSvgIOHandler   *q;
+    QSvgIOHandler   *q = nullptr;
     QSvgRenderer     r;
     QXmlStreamReader xmlReader;
     QSize            defaultSize;
     QRect            clipRect;
     QSize            scaledSize;
     QRect            scaledClipRect;
-    bool             loadAttempted;
-    bool             loadStatus;
-    bool             readDone;
-    QColor           backColor;
+    bool             loadAttempted = false;
+    bool             loadStatus = false;
+    bool             readDone = false;
+    int              currentFrame = 0;
+    int              frameCount = 0;
+    int              frameDelay = 0;
+    QColor           backColor = Qt::transparent;
 };
 
 
@@ -69,10 +72,17 @@ bool QSvgIOHandlerPrivate::load(QIODevice *device)
     if (res) {
         defaultSize = r.defaultSize();
         loadStatus = true;
+        if (r.animated()) {
+            const int duration = r.animationDuration();
+            const int fps = r.framesPerSecond();
+            frameCount = qMax(1, static_cast<int>(qint64(duration) * fps / 1000));
+            frameDelay = fps > 0 ? 1000 / fps : 0;
+        }
     }
 
     return loadStatus;
 }
+
 
 
 QSvgIOHandler::QSvgIOHandler()
@@ -91,9 +101,16 @@ bool QSvgIOHandler::canRead() const
 {
     if (!device())
         return false;
-    if (d->loadStatus && !d->readDone)
-        return true;        // Will happen if we have been asked for the size
 
+    if (d->loadAttempted) {
+        if (!d->loadStatus)
+            return false;
+        if (d->r.animated())
+            return d->currentFrame < d->frameCount;
+        return !d->readDone;
+    }
+
+    // Not yet loaded — probe the device to determine format
     bool isCompressed = false;
     if (QSvgDocument::isLikelySvg(device(), &isCompressed)) {
         setFormat(isCompressed ? "svgz" : "svg");
@@ -104,50 +121,63 @@ bool QSvgIOHandler::canRead() const
 
 bool QSvgIOHandler::read(QImage *image)
 {
-    if (!d->readDone && d->load(device())) {
-        bool xform = (d->clipRect.isValid() || d->scaledSize.isValid() || d->scaledClipRect.isValid());
-        QSize finalSize = d->defaultSize;
-        QRectF bounds;
-        if (xform && !d->defaultSize.isEmpty()) {
-            bounds = QRectF(QPointF(0,0), QSizeF(d->defaultSize));
-            QPoint tr1, tr2;
-            QSizeF sc(1, 1);
-            if (d->clipRect.isValid()) {
-                tr1 = -d->clipRect.topLeft();
-                finalSize = d->clipRect.size();
-            }
-            if (d->scaledSize.isValid()) {
-                sc = QSizeF(qreal(d->scaledSize.width()) / finalSize.width(),
-                            qreal(d->scaledSize.height()) / finalSize.height());
-                finalSize = d->scaledSize;
-            }
-            if (d->scaledClipRect.isValid()) {
-                tr2 = -d->scaledClipRect.topLeft();
-                finalSize = d->scaledClipRect.size();
-            }
-            QTransform t;
-            t.translate(tr2.x(), tr2.y());
-            t.scale(sc.width(), sc.height());
-            t.translate(tr1.x(), tr1.y());
-            bounds = t.mapRect(bounds);
-        }
-        if (finalSize.isEmpty()) {
-            *image = QImage();
-        } else {
-            if (qMax(finalSize.width(), finalSize.height()) > 0xffff)
-                return false; // Assume corrupted file
-            if (!QImageIOHandler::allocateImage(finalSize, QImage::Format_ARGB32_Premultiplied, image))
-                return false;
-            image->fill(d->backColor.rgba());
-            QPainter p(image);
-            d->r.render(&p, bounds);
-            p.end();
-        }
-        d->readDone = true;
-        return true;
+    if (!d->load(device()))
+        return false;
+
+    // For non-animated SVGs, preserve original single-read behavior
+    if (!d->r.animated()) {
+        if (d->readDone)
+            return false;
+    } else {
+        // For animated SVGs, set the current frame on the renderer
+        if (d->currentFrame >= d->frameCount)
+            return false;
+        d->r.setCurrentFrame(d->currentFrame);
     }
 
-    return false;
+    bool xform = (d->clipRect.isValid() || d->scaledSize.isValid() || d->scaledClipRect.isValid());
+    QSize finalSize = d->defaultSize;
+    QRectF bounds;
+    if (xform && !d->defaultSize.isEmpty()) {
+        bounds = QRectF(QPointF(0,0), QSizeF(d->defaultSize));
+        QPoint tr1, tr2;
+        QSizeF sc(1, 1);
+        if (d->clipRect.isValid()) {
+            tr1 = -d->clipRect.topLeft();
+            finalSize = d->clipRect.size();
+        }
+        if (d->scaledSize.isValid()) {
+            sc = QSizeF(qreal(d->scaledSize.width()) / finalSize.width(),
+                        qreal(d->scaledSize.height()) / finalSize.height());
+            finalSize = d->scaledSize;
+        }
+        if (d->scaledClipRect.isValid()) {
+            tr2 = -d->scaledClipRect.topLeft();
+            finalSize = d->scaledClipRect.size();
+        }
+        QTransform t;
+        t.translate(tr2.x(), tr2.y());
+        t.scale(sc.width(), sc.height());
+        t.translate(tr1.x(), tr1.y());
+        bounds = t.mapRect(bounds);
+    }
+    if (finalSize.isEmpty()) {
+        *image = QImage();
+    } else {
+        if (qMax(finalSize.width(), finalSize.height()) > 0xffff)
+            return false; // Assume corrupted file
+        if (!QImageIOHandler::allocateImage(finalSize, QImage::Format_ARGB32_Premultiplied, image))
+            return false;
+        image->fill(d->backColor.rgba());
+        QPainter p(image);
+        d->r.render(&p, bounds);
+        p.end();
+    }
+
+    d->readDone = true;
+    if (d->r.animated())
+        ++d->currentFrame;
+    return true;
 }
 
 
@@ -172,6 +202,10 @@ QVariant QSvgIOHandler::option(ImageOption option) const
         break;
     case BackgroundColor:
         return d->backColor;
+        break;
+    case Animation:
+        d->load(device());
+        return d->r.animated();
         break;
     default:
         break;
@@ -211,11 +245,50 @@ bool QSvgIOHandler::supportsOption(ImageOption option) const
     case ScaledSize:
     case ScaledClipRect:
     case BackgroundColor:
+    case Animation:
         return true;
     default:
         break;
     }
     return false;
+}
+
+
+bool QSvgIOHandler::jumpToNextImage()
+{
+    return jumpToImage(d->currentFrame + 1);
+}
+
+bool QSvgIOHandler::jumpToImage(int imageNumber)
+{
+    if (!d->load(device()) || !d->r.animated())
+        return false;
+    if (imageNumber < 0 || imageNumber >= d->frameCount)
+        return false;
+    d->currentFrame = imageNumber;
+    return true;
+}
+
+int QSvgIOHandler::loopCount() const
+{
+    return 0;
+}
+
+int QSvgIOHandler::imageCount() const
+{
+    return d->frameCount;
+}
+
+int QSvgIOHandler::nextImageDelay() const
+{
+    return d->frameDelay;
+}
+
+int QSvgIOHandler::currentImageNumber() const
+{
+    if (d->r.animated())
+        return d->readDone ? d->currentFrame : -1;
+    return 0;
 }
 
 

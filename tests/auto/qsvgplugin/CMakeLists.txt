@@ -47,6 +47,7 @@ set(resources_resource_files
     "invalid_xml.svg"
     "xml_not_svg.svg"
     "invalid_then_valid.svg"
+    "animated.svg"
 )
 
 qt_internal_add_resource(tst_qsvgplugin "resources"
