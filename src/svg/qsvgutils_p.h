@@ -38,7 +38,7 @@ enum LengthType {
 
 bool isDigit(ushort ch);
 qreal toDouble(const QChar *&str);
-qreal toDouble(QStringView str, bool *ok = NULL);
+Q_AUTOTEST_EXPORT qreal toDouble(QStringView str, bool *ok = NULL);
 qreal parseLength(QStringView str, LengthType *type, bool *ok = NULL);
 qreal convertToPixels(qreal len, bool , LengthType type);
 std::optional<qreal> parseAngle(QStringView str);
