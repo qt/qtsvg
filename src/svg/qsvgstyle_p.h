@@ -23,10 +23,10 @@
 #include "QtGui/qpen.h"
 #include "QtGui/qbrush.h"
 #include "QtGui/qtransform.h"
-#include "QtGui/qcolor.h"
 #include "QtGui/qfont.h"
 #include <qdebug.h>
 #include "qtsvgglobal_p.h"
+#include <QtSvg/private/qsvgpaintserver_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -34,7 +34,6 @@ class QPainter;
 class QSvgNode;
 class QSvgFont;
 class QSvgDocument;
-class QSvgPattern;
 
 template <class T> class QSvgRefCounter
 {
@@ -136,9 +135,6 @@ public:
         VIEWPORT_FILL,
         FONT,
         STROKE,
-        SOLID_COLOR,
-        GRADIENT,
-        PATTERN,
         TRANSFORM,
         OPACITY,
         COMP_OP,
@@ -151,16 +147,6 @@ public:
     virtual void revert(QPainter *p, QSvgExtraStates &states) =0;
     virtual Type type() const=0;
     bool isDefault() const { return false; } // [not virtual since called from templated class]
-};
-
-class Q_SVG_EXPORT QSvgPaintStyleProperty : public QSvgStyleProperty
-{
-public:
-    ~QSvgPaintStyleProperty() override;
-
-    virtual QBrush brush(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) = 0;
-    void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
-    void revert(QPainter *p, QSvgExtraStates &states) override;
 };
 
 class Q_SVG_EXPORT QSvgQualityStyle : public QSvgStyleProperty
@@ -236,7 +222,7 @@ public:
 
     void setFillRule(Qt::FillRule f);
     void setFillOpacity(qreal opacity);
-    void setFillStyle(QSvgPaintStyleProperty* style);
+    void setPaintServer(QSvgPaintServerSharedPtr paintServer);
     void setBrush(QBrush brush);
 
     const QBrush & qbrush() const
@@ -254,9 +240,9 @@ public:
         return m_fillRule;
     }
 
-    QSvgPaintStyleProperty* style() const
+    QSvgPaintServer *paintServer() const
     {
-        return m_style;
+        return m_paintServer.get();
     }
 
     void setPaintStyleId(const QString &Id)
@@ -274,12 +260,12 @@ private:
     // fill-opacity    v 	v 	'inherit' | <OpacityValue.datatype>
     QBrush m_fill;
     QBrush m_oldFill;
-    QSvgRefCounter<QSvgPaintStyleProperty> m_style;
+    QSvgPaintServerSharedPtr m_paintServer;
 
-    Qt::FillRule m_fillRule;
-    Qt::FillRule m_oldFillRule;
-    qreal m_fillOpacity;
-    qreal m_oldFillOpacity;
+    Qt::FillRule m_fillRule{Qt::WindingFill};
+    Qt::FillRule m_oldFillRule{Qt::WindingFill};
+    qreal m_fillOpacity{1.0};
+    qreal m_oldFillOpacity{0.};
 
     QString m_paintStyleId;
 
@@ -407,13 +393,13 @@ public:
     void setStroke(QBrush brush)
     {
         m_stroke.setBrush(brush);
-        m_style = nullptr;
+        m_paintServer.reset();
         m_strokeSet = 1;
     }
 
-    void setStyle(QSvgPaintStyleProperty *style)
+    void setPaintServer(QSvgPaintServerSharedPtr paintServer)
     {
-        m_style = style;
+        m_paintServer = paintServer;
         m_strokeSet = 1;
     }
 
@@ -473,9 +459,9 @@ public:
         m_vectorEffectSet = 1;
     }
 
-    QSvgPaintStyleProperty* style() const
+    QSvgPaintServer *paintServer() const
     {
-        return m_style;
+        return m_paintServer.get();
     }
 
     void setPaintStyleId(const QString &Id)
@@ -504,12 +490,12 @@ private:
     // stroke-width      v 	v 	'inherit' | <StrokeWidthValue.datatype>
     QPen m_stroke;
     QPen m_oldStroke;
-    qreal m_strokeOpacity;
-    qreal m_oldStrokeOpacity;
-    qreal m_strokeDashOffset;
-    qreal m_oldStrokeDashOffset;
+    qreal m_strokeOpacity{1.0};
+    qreal m_oldStrokeOpacity{0.};
+    qreal m_strokeDashOffset{0.};
+    qreal m_oldStrokeDashOffset{0.};
 
-    QSvgRefCounter<QSvgPaintStyleProperty> m_style;
+    QSvgPaintServerSharedPtr m_paintServer;
     QString m_paintStyleId;
     uint m_vectorEffect : 1;
     uint m_oldVectorEffect : 1;
@@ -524,93 +510,6 @@ private:
     uint m_strokeWidthSet : 1;
     uint m_vectorEffectSet : 1;
 };
-
-class Q_SVG_EXPORT QSvgSolidColorStyle : public QSvgPaintStyleProperty
-{
-public:
-    QSvgSolidColorStyle(const QColor &color);
-    ~QSvgSolidColorStyle() override;
-
-    Type type() const override;
-
-    const QColor & qcolor() const
-    {
-        return m_solidColor;
-    }
-
-    QBrush brush(QPainter *, const QSvgNode *, QSvgExtraStates &) override
-    {
-        return m_solidColor;
-    }
-
-private:
-    // solid-color       v 	x 	'inherit' | <SVGColor.datatype>
-    // solid-opacity     v 	x 	'inherit' | <OpacityValue.datatype>
-    QColor m_solidColor;
-
-    QBrush m_oldFill;
-    QPen   m_oldStroke;
-};
-
-class Q_SVG_EXPORT QSvgGradientStyle : public QSvgPaintStyleProperty
-{
-public:
-    QSvgGradientStyle(QGradient *grad);
-    ~QSvgGradientStyle() override;
-
-    Type type() const override;
-
-    void setStopLink(const QString &link, QSvgDocument *doc);
-    QString stopLink() const { return m_link; }
-    void resolveStops();
-    void resolveStops_helper(QStringList *visited);
-
-    void setTransform(const QTransform &transform);
-    QTransform qtransform() const
-    {
-        return m_transform;
-    }
-
-    QGradient *qgradient() const
-    {
-        return m_gradient;
-    }
-
-    bool gradientStopsSet() const
-    {
-        return m_gradientStopsSet;
-    }
-
-    void setGradientStopsSet(bool set)
-    {
-        m_gradientStopsSet = set;
-    }
-
-    QBrush brush(QPainter *, const QSvgNode *, QSvgExtraStates &) override;
-private:
-    QGradient      *m_gradient;
-    QTransform m_transform;
-
-    QSvgDocument *m_doc{nullptr};
-    QString           m_link;
-    bool m_gradientStopsSet;
-};
-
-class Q_SVG_EXPORT QSvgPatternStyle : public QSvgPaintStyleProperty
-{
-public:
-    QSvgPatternStyle(QSvgPattern *pattern);
-    ~QSvgPatternStyle() override;
-
-    Type type() const override;
-
-    QBrush brush(QPainter *, const QSvgNode *, QSvgExtraStates &) override;
-    QSvgPattern *patternNode() { return m_pattern; }
-private:
-    QSvgPattern *m_pattern;
-    QRectF m_parentBound;
-};
-
 
 class Q_SVG_EXPORT QSvgTransformStyle : public QSvgStyleProperty
 {
@@ -706,9 +605,9 @@ public:
 
 private:
     QPainterPath m_path;
-    qreal m_distance = 0;
-    qreal m_rotateAngle = 0;
-    QtSvg::OffsetRotateType m_rotateType = QtSvg::OffsetRotateType::Auto;
+    qreal m_distance{0.};
+    qreal m_rotateAngle{0.};
+    QtSvg::OffsetRotateType m_rotateType{QtSvg::OffsetRotateType::Auto};
 };
 
 class Q_SVG_EXPORT QSvgStaticStyle
@@ -724,9 +623,6 @@ public:
     QSvgRefCounter<QSvgViewportFillStyle> viewportFill;
     QSvgRefCounter<QSvgFontStyle>         font;
     QSvgRefCounter<QSvgStrokeStyle>       stroke;
-    QSvgRefCounter<QSvgSolidColorStyle>   solidColor;
-    QSvgRefCounter<QSvgGradientStyle>     gradient;
-    QSvgRefCounter<QSvgPatternStyle>      pattern;
     QSvgRefCounter<QSvgTransformStyle>    transform;
     QSvgRefCounter<QSvgOpacityStyle>      opacity;
     QSvgRefCounter<QSvgCompOpStyle>       compop;

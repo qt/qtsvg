@@ -30,6 +30,7 @@
 #include "qtsvgglobal_p.h"
 #include "qsvgutils_p.h"
 #include "qtsvgglobal.h"
+#include <QtSvg/private/qsvgpaintserver_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -122,7 +123,7 @@ private:
     QStack<QSvgText::WhitespaceMode> m_whitespaceMode;
 
     QSvgRefCounter<QSvgStyleProperty> m_style;
-
+    QSvgPaintServerSharedPtr m_paintServer;
     QSvgUtils::LengthType m_defaultCoords;
 
     QStack<QColor> m_colorStack;

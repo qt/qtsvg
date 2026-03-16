@@ -238,7 +238,7 @@ QSvgMarker::QSvgMarker(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF 
     // apply the svg standard style
     QSvgFillStyle *fillProp = new QSvgFillStyle();
     fillProp->setBrush(Qt::black);
-    appendStyleProperty(fillProp, QStringLiteral(""));
+    appendStyleProperty(fillProp);
 
     QSvgStrokeStyle *strokeProp = new QSvgStrokeStyle();
     strokeProp->setMiterLimit(4);
@@ -246,7 +246,7 @@ QSvgMarker::QSvgMarker(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF 
     strokeProp->setLineCap(Qt::FlatCap);
     strokeProp->setLineJoin(Qt::SvgMiterJoin);
     strokeProp->setStroke(Qt::NoBrush);
-    appendStyleProperty(strokeProp, QStringLiteral(""));
+    appendStyleProperty(strokeProp);
 }
 
 QSvgMarker::~QSvgMarker()

@@ -29,6 +29,7 @@
 #include "qsvgstyle_p.h"
 #include "qsvgfont_p.h"
 #include "private/qsvganimator_p.h"
+#include <QtSvg/private/qsvgpaintserver_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -85,8 +86,8 @@ public:
     QSvgFont *svgFont(const QString &family) const;
     void addNamedNode(const QString &id, QSvgNode *node);
     QSvgNode *namedNode(const QString &id) const;
-    void addNamedStyle(const QString &id, QSvgPaintStyleProperty *style);
-    QSvgPaintStyleProperty *namedStyle(const QString &id) const;
+    void addPaintServer(QSvgPaintServerSharedPtr paintServer, const QString &id);
+    QSvgPaintServerSharedPtr paintServer(QStringView id) const;
 
     void restartAnimation();
     inline qint64 currentElapsed() const;
@@ -113,7 +114,7 @@ private:
 
     QHash<QString, QSvgRefCounter<QSvgFont> > m_fonts;
     QHash<QString, QSvgNode *> m_namedNodes;
-    QHash<QString, QSvgRefCounter<QSvgPaintStyleProperty> > m_namedStyles;
+    std::unordered_map<QString, QSvgPaintServerSharedPtr> m_paintServers;
 
     bool  m_animated;
     int   m_fps;

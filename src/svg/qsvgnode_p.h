@@ -100,7 +100,7 @@ public:
     QSvgNode *parent() const;
     bool isDescendantOf(const QSvgNode *parent) const;
 
-    void appendStyleProperty(QSvgStyleProperty *prop, const QString &id);
+    void appendStyleProperty(QSvgStyleProperty *prop);
     void applyStyle(QPainter *p, QSvgExtraStates &states) const;
     void applyStyleRecursive(QPainter *p, QSvgExtraStates &states) const;
     void revertStyle(QPainter *p, QSvgExtraStates &states) const;

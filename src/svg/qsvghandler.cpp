@@ -36,6 +36,7 @@
 #include "float.h"
 
 #include <algorithm>
+#include <memory>
 
 QT_BEGIN_NAMESPACE
 
@@ -564,10 +565,10 @@ static void parseColor(QSvgNode *,
     }
 }
 
-static QSvgStyleProperty *styleFromUrl(QSvgNode *node, QStringView url)
+static QSvgPaintServerSharedPtr paintServerFromUrl(QSvgDocument *doc, QStringView url)
 {
     QStringView id = idFromFuncIRI(url);
-    return node ? node->document()->namedStyle(id.toString()) : nullptr;
+    return doc ? doc->paintServer(id) : nullptr;
 }
 
 static void parseBrush(QSvgNode *node,
@@ -594,11 +595,9 @@ static void parseBrush(QSvgNode *node,
         if ((!attributes.fill.isEmpty()) && (attributes.fill != QT_INHERIT) ) {
             if (attributes.fill.startsWith(QLatin1String("url"))) {
                 QStringView value = attributes.fill;
-                QSvgStyleProperty *style = styleFromUrl(node, value);
-                if (style) {
-                    if (style->type() == QSvgStyleProperty::SOLID_COLOR || style->type() == QSvgStyleProperty::GRADIENT
-                            || style->type() == QSvgStyleProperty::PATTERN)
-                        prop->setFillStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
+                QSvgPaintServerSharedPtr paintServer = paintServerFromUrl(handler->document(), value);
+                if (paintServer) {
+                    prop->setPaintServer(paintServer);
                 } else {
                     QString id = idFromFuncIRI(value).toString();
                     prop->setPaintStyleId(id);
@@ -612,7 +611,7 @@ static void parseBrush(QSvgNode *node,
                 prop->setBrush(QBrush(Qt::NoBrush));
             }
         }
-        node->appendStyleProperty(prop, attributes.id);
+        node->appendStyleProperty(prop);
     }
 }
 
@@ -758,17 +757,15 @@ static void parsePen(QSvgNode *node,
         //stroke attribute handling
         if ((!attributes.stroke.isEmpty()) && (attributes.stroke != QT_INHERIT) ) {
             if (attributes.stroke.startsWith(QLatin1String("url"))) {
-                    QStringView value = attributes.stroke;
-                    QSvgStyleProperty *style = styleFromUrl(node, value);
-                    if (style) {
-                        if (style->type() == QSvgStyleProperty::SOLID_COLOR || style->type() == QSvgStyleProperty::GRADIENT
-                            || style->type() == QSvgStyleProperty::PATTERN)
-                        prop->setStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
-                    } else {
-                        QString id = idFromFuncIRI(value).toString();
-                        prop->setPaintStyleId(id);
-                        handler->pushUnresolvedStyle(prop);
-                    }
+                QStringView value = attributes.stroke;
+                QSvgPaintServerSharedPtr paintServer = paintServerFromUrl(handler->document(), value);
+                if (paintServer) {
+                    prop->setPaintServer(paintServer);
+                } else {
+                    QString id = idFromFuncIRI(value).toString();
+                    prop->setPaintStyleId(id);
+                    handler->pushUnresolvedStyle(prop);
+                }
             } else if (attributes.stroke != QLatin1String("none")) {
                 QColor color;
                 if (resolveColor(attributes.stroke, color, handler))
@@ -852,7 +849,7 @@ static void parsePen(QSvgNode *node,
         if (!attributes.strokeOpacity.isEmpty() && attributes.strokeOpacity != QT_INHERIT)
             prop->setOpacity(qMin(qreal(1.0), qMax(qreal(0.0), QSvgUtils::toDouble(attributes.strokeOpacity))));
 
-        node->appendStyleProperty(prop, attributes.id);
+        node->appendStyleProperty(prop);
     }
 }
 
@@ -988,7 +985,7 @@ static void parseFont(QSvgNode *node,
            fontStyle->setTextAnchor(Qt::AlignRight);
     }
 
-    node->appendStyleProperty(fontStyle, attributes.id);
+    node->appendStyleProperty(fontStyle);
 }
 
 static void parseTransform(QSvgNode *node,
@@ -1000,7 +997,7 @@ static void parseTransform(QSvgNode *node,
     QTransform matrix = parseTransformationMatrix(attributes.transform.trimmed());
 
     if (!matrix.isIdentity()) {
-        node->appendStyleProperty(new QSvgTransformStyle(QTransform(matrix)), attributes.id);
+        node->appendStyleProperty(new QSvgTransformStyle(QTransform(matrix)));
     }
 
 }
@@ -1083,7 +1080,7 @@ static void parseOffsetPath(QSvgNode *node,
     offsetStyle->setRotateAngle(offset.angle);
     offsetStyle->setRotateType(offset.rotateType);
     offsetStyle->setDistance(offset.distance);
-    node->appendStyleProperty(offsetStyle, QString());
+    node->appendStyleProperty(offsetStyle);
 }
 
 #endif // QT_NO_CSSPARSER
@@ -1173,7 +1170,7 @@ static void parseOpacity(QSvgNode *node,
 
     if (ok) {
         QSvgOpacityStyle *opacity = new QSvgOpacityStyle(qBound(qreal(0.0), op, qreal(1.0)));
-        node->appendStyleProperty(opacity, attributes.id);
+        node->appendStyleProperty(opacity);
     }
 }
 
@@ -1245,7 +1242,7 @@ static void parseCompOp(QSvgNode *node,
 
     if (!value.isEmpty()) {
         QSvgCompOpStyle *compop = new QSvgCompOpStyle(svgToQtCompositionMode(value));
-        node->appendStyleProperty(compop, attributes.id);
+        node->appendStyleProperty(compop);
     }
 }
 
@@ -1346,7 +1343,7 @@ static void parseRenderingHints(QSvgNode *node,
         p->setImageRendering(QSvgQualityStyle::ImageRenderingOptimizeSpeed);
     else if (ir == QLatin1String("optimizeQuality"))
         p->setImageRendering(QSvgQualityStyle::ImageRenderingOptimizeQuality);
-    node->appendStyleProperty(p, attributes.id);
+    node->appendStyleProperty(p);
 }
 
 static bool parseStyle(QSvgNode *node,
@@ -1931,7 +1928,7 @@ static QSvgNode *createLineNode(QSvgNode *parent,
 
 
 static void parseBaseGradient(const QXmlStreamAttributes &attributes,
-                              QSvgGradientStyle *gradProp,
+                              QSvgGradientPaint *gradProp,
                               QSvgHandler *handler)
 {
     QStringView linkId                 = attributes.value(QLatin1String("xlink:href"));
@@ -1950,11 +1947,12 @@ static void parseBaseGradient(const QXmlStreamAttributes &attributes,
     QTransform matrix;
     QGradient *grad = gradProp->qgradient();
     linkId = idFromIRI(linkId);
+
     if (!linkId.isEmpty()) {
-        QSvgStyleProperty *prop = handler->document()->namedStyle(linkId.toString());
-        if (prop && prop->type() == QSvgStyleProperty::GRADIENT) {
-            QSvgGradientStyle *inherited =
-                static_cast<QSvgGradientStyle*>(prop);
+        QSvgPaintServerSharedPtr paintServer = handler->document()->paintServer(linkId);
+        if (paintServer && paintServer->type() == QSvgPaintServer::Type::Gradient) {
+            QSvgGradientPaint *inherited =
+                static_cast<QSvgGradientPaint*>(paintServer.get());
             if (!inherited->stopLink().isEmpty()) {
                 gradProp->setStopLink(inherited->stopLink(), handler->document());
             } else {
@@ -1990,8 +1988,9 @@ static void parseBaseGradient(const QXmlStreamAttributes &attributes,
     }
 }
 
-static QSvgStyleProperty *createLinearGradientNode(const QXmlStreamAttributes &attributes,
-                                                   QSvgHandler *handler)
+
+static QSvgPaintServerSharedPtr createLinearGradientNode(const QXmlStreamAttributes &attributes,
+                                                         QSvgHandler *handler)
 {
     const QStringView x1 = attributes.value(QLatin1String("x1"));
     const QStringView y1 = attributes.value(QLatin1String("y1"));
@@ -2012,12 +2011,13 @@ static QSvgStyleProperty *createLinearGradientNode(const QXmlStreamAttributes &a
     if (!y2.isEmpty())
         ny2 =  convertToNumber(y2);
 
-    QLinearGradient *grad = new QLinearGradient(nx1, ny1, nx2, ny2);
+    auto grad = std::make_unique<QLinearGradient>(nx1, ny1, nx2, ny2);
     grad->setInterpolationMode(QGradient::ComponentInterpolation);
-    QSvgGradientStyle *prop = new QSvgGradientStyle(grad);
-    parseBaseGradient(attributes, prop, handler);
 
-    return prop;
+    QSvgGradientPaintSharedPtr paintServer = std::make_shared<QSvgGradientPaint>(std::move(grad));
+    parseBaseGradient(attributes, paintServer.get(), handler);
+
+    return paintServer;
 }
 
 static bool parseMetadataNode(QSvgNode *parent,
@@ -2781,8 +2781,8 @@ static bool parsePrefetchNode(QSvgNode *parent,
     return true;
 }
 
-static QSvgStyleProperty *createRadialGradientNode(const QXmlStreamAttributes &attributes,
-                                                   QSvgHandler *handler)
+static QSvgPaintServerSharedPtr createRadialGradientNode(const QXmlStreamAttributes &attributes,
+                                                         QSvgHandler *handler)
 {
     const QStringView cx = attributes.value(QLatin1String("cx"));
     const QStringView cy = attributes.value(QLatin1String("cy"));
@@ -2810,13 +2810,13 @@ static QSvgStyleProperty *createRadialGradientNode(const QXmlStreamAttributes &a
     if (!fy.isEmpty())
         nfy = convertToNumber(fy);
 
-    QRadialGradient *grad = new QRadialGradient(ncx, ncy, nr, nfx, nfy, 0);
+    auto grad = std::make_unique<QRadialGradient>(ncx, ncy, nr, nfx, nfy, 0);
     grad->setInterpolationMode(QGradient::ComponentInterpolation);
 
-    QSvgGradientStyle *prop = new QSvgGradientStyle(grad);
-    parseBaseGradient(attributes, prop, handler);
+    QSvgGradientPaintSharedPtr paintServer = std::make_shared<QSvgGradientPaint>(std::move(grad));
+    parseBaseGradient(attributes, paintServer.get(), handler);
 
-    return prop;
+    return paintServer;
 }
 
 static QSvgNode *createRectNode(QSvgNode *parent,
@@ -2886,8 +2886,8 @@ static bool parseSetNode(QSvgNode *parent,
     return true;
 }
 
-static QSvgStyleProperty *createSolidColorNode(const QXmlStreamAttributes &attributes,
-                                               QSvgHandler *handler)
+static QSvgPaintServerSharedPtr createSolidColorNode(const QXmlStreamAttributes &attributes,
+                                                     QSvgHandler *handler)
 {
     Q_UNUSED(attributes);
     QStringView solidColorStr = attributes.value(QLatin1String("solid-color"));
@@ -2899,15 +2899,15 @@ static QSvgStyleProperty *createSolidColorNode(const QXmlStreamAttributes &attri
     QColor color;
     if (!constructColor(solidColorStr, solidOpacityStr, color, handler))
         return 0;
-    QSvgSolidColorStyle *style = new QSvgSolidColorStyle(color);
-    return style;
+    std::shared_ptr<QSvgSolidColorPaint> paintServer = std::make_shared<QSvgSolidColorPaint>(color);
+    return paintServer;
 }
 
-static bool parseStopNode(QSvgStyleProperty *parent,
+static bool parseStopNode(QSvgPaintServer *paintServer,
                           const QXmlStreamAttributes &attributes,
                           QSvgHandler *handler)
 {
-    if (parent->type() != QSvgStyleProperty::GRADIENT)
+    if (paintServer->type() != QSvgPaintServer::Type::Gradient)
         return false;
     QString nodeIdStr     = someId(attributes);
     QString xmlClassStr   = attributes.value(QLatin1String("class")).toString();
@@ -2937,8 +2937,7 @@ static bool parseStopNode(QSvgStyleProperty *parent,
     //TODO: Handle style parsing for gradients stop like the rest of the nodes.
     parseColor(&dummy, attrs, handler);
 
-    QSvgGradientStyle *gradientStyle =
-        static_cast<QSvgGradientStyle*>(parent);
+    QSvgGradientPaint *gradientStyle = static_cast<QSvgGradientPaint*>(paintServer);
     QStringView colorStr    = attrs.stopColor;
     QColor color;
 
@@ -3124,8 +3123,8 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
     QSvgPattern *node = new QSvgPattern(parent, patternRectF, viewBox, nPatternContentUnits, matrix);
 
     // Create a style node for the Pattern.
-    QSvgPatternStyle *prop = new QSvgPatternStyle(node);
-    node->appendStyleProperty(prop, someId(attributes));
+    QSvgPaintServerSharedPtr prop = std::make_shared<QSvgPatternPaint>(node);
+    handler->document()->addPaintServer(prop, someId(attributes));
 
     return node;
 }
@@ -3445,15 +3444,6 @@ static StyleFactoryMethod findStyleFactoryMethod(const QStringView name)
     case 'f':
         if (ref == QLatin1String("ont")) return createFontNode;
         break;
-    case 'l':
-        if (ref == QLatin1String("inearGradient")) return createLinearGradientNode;
-        break;
-    case 'r':
-        if (ref == QLatin1String("adialGradient")) return createRadialGradientNode;
-        break;
-    case 's':
-        if (ref == QLatin1String("olidColor")) return createSolidColorNode;
-        break;
     default:
         break;
     }
@@ -3483,6 +3473,48 @@ static StyleParseMethod findStyleUtilFactoryMethod(const QStringView name)
     case 'm':
         if (ref == QLatin1String("issing-glyph")) return parseMissingGlyphNode;
         break;
+    default:
+        break;
+    }
+    return 0;
+}
+
+typedef QSvgPaintServerSharedPtr (*PaintServerFactoryMethod)(const QXmlStreamAttributes &,
+                                                                     QSvgHandler *);
+
+static PaintServerFactoryMethod findPaintServerFactoryMethod(const QStringView name)
+{
+    if (name.isEmpty())
+        return nullptr;
+
+    QStringView ref = name.sliced(1);
+    switch (name.at(0).unicode()) {
+    case 'l':
+        if (ref == QLatin1String("inearGradient")) return createLinearGradientNode;
+        break;
+    case 'r':
+        if (ref == QLatin1String("adialGradient")) return createRadialGradientNode;
+        break;
+    case 's':
+        if (ref == QLatin1String("olidColor")) return createSolidColorNode;
+        break;
+    default:
+        break;
+    }
+    return nullptr;
+}
+
+typedef bool (*PaintServerParseMethod)(QSvgPaintServer *,
+                                 const QXmlStreamAttributes &,
+                                 QSvgHandler *);
+
+static PaintServerParseMethod findPaintServerUtilFactoryMethod(const QStringView name)
+{
+    if (name.isEmpty())
+        return 0;
+
+    QStringView ref = name.sliced(1);
+    switch (name.at(0).unicode()) {
     case 's':
         if (ref == QLatin1String("top")) return parseStopNode;
         break;
@@ -3537,16 +3569,18 @@ static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> ac
 {
     QSvgFillStyle *fillStyle = static_cast<QSvgFillStyle*>
         (node->styleProperty(QSvgStyleProperty::FILL));
-    if (fillStyle && fillStyle->style() && fillStyle->style()->type() == QSvgStyleProperty::PATTERN) {
-        QSvgPatternStyle *patternStyle = static_cast<QSvgPatternStyle *>(fillStyle->style());
+    if (fillStyle && fillStyle->paintServer()
+        && fillStyle->paintServer()->type() == QSvgPaintServer::Type::Pattern) {
+        QSvgPatternPaint *patternStyle = static_cast<QSvgPatternPaint *>(fillStyle->paintServer());
         if (active.contains(patternStyle->patternNode()))
             return true;
     }
 
     QSvgStrokeStyle *strokeStyle = static_cast<QSvgStrokeStyle*>
         (node->styleProperty(QSvgStyleProperty::STROKE));
-    if (strokeStyle && strokeStyle->style() && strokeStyle->style()->type() == QSvgStyleProperty::PATTERN) {
-        QSvgPatternStyle *patternStyle = static_cast<QSvgPatternStyle *>(strokeStyle->style());
+    if (strokeStyle && strokeStyle->paintServer()
+        && strokeStyle->paintServer()->type() == QSvgPaintServer::Type::Pattern) {
+        QSvgPatternPaint *patternStyle = static_cast<QSvgPatternPaint *>(strokeStyle->paintServer());
         if (active.contains(patternStyle->patternNode()))
             return true;
     }
@@ -3835,7 +3869,16 @@ bool QSvgHandler::startElement(const QStringView localName,
         QSvgStyleProperty *prop = method(attributes, this);
         if (prop) {
             m_style = prop;
-            m_nodes.top()->appendStyleProperty(prop, someId(attributes));
+            m_nodes.top()->appendStyleProperty(prop);
+        } else {
+            const QByteArray msg = QByteArrayLiteral("Could not parse node: ") + localName.toLocal8Bit();
+            qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
+        }
+    } else if (PaintServerFactoryMethod method = findPaintServerFactoryMethod(localName)) {
+        QSvgPaintServerSharedPtr paintServer = method(attributes, this);
+        if (paintServer) {
+            m_paintServer = paintServer;
+            m_doc->addPaintServer(paintServer, someId(attributes));
         } else {
             const QByteArray msg = QByteArrayLiteral("Could not parse node: ") + localName.toLocal8Bit();
             qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
@@ -3843,6 +3886,11 @@ bool QSvgHandler::startElement(const QStringView localName,
     } else if (StyleParseMethod method = findStyleUtilFactoryMethod(localName)) {
         if (m_style) {
             if (!method(m_style, attributes, this))
+                qCWarning(lcSvgHandler, "%s", msgProblemParsing(localName, xml).constData());
+        }
+    } else if (PaintServerParseMethod method = findPaintServerUtilFactoryMethod(localName)) {
+        if (m_paintServer) {
+            if (!method(m_paintServer.get(), attributes, this))
                 qCWarning(lcSvgHandler, "%s", msgProblemParsing(localName, xml).constData());
         }
     } else {
@@ -3897,9 +3945,9 @@ void QSvgHandler::resolvePaintServers()
         if (prop->type() == QSvgStyleProperty::FILL) {
             QSvgFillStyle *fill = static_cast<QSvgFillStyle *>(prop);
             QString id = fill->paintStyleId();
-            QSvgPaintStyleProperty *style = m_doc->namedStyle(id);
-            if (style) {
-                fill->setFillStyle(style);
+            QSvgPaintServerSharedPtr paintServer = m_doc->paintServer(id);
+            if (paintServer) {
+                fill->setPaintServer(paintServer);
             } else {
                 qCWarning(lcSvgHandler, "%s", msgCouldNotResolveProperty(id, xml).constData());
                 fill->setBrush(Qt::NoBrush);
@@ -3907,9 +3955,9 @@ void QSvgHandler::resolvePaintServers()
         } else if (prop->type() == QSvgStyleProperty::STROKE) {
             QSvgStrokeStyle *stroke = static_cast<QSvgStrokeStyle *>(prop);
             QString id = stroke->paintStyleId();
-            QSvgPaintStyleProperty *style = m_doc->namedStyle(id);
-            if (style) {
-                stroke->setStyle(style);
+            QSvgPaintServerSharedPtr paintServer = m_doc->paintServer(id);
+            if (paintServer) {
+                stroke->setPaintServer(paintServer);
             } else {
                 qCWarning(lcSvgHandler, "%s", msgCouldNotResolveProperty(id, xml).constData());
                 stroke->setStroke(Qt::NoBrush);

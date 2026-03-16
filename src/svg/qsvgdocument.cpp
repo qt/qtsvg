@@ -380,17 +380,19 @@ QSvgNode *QSvgDocument::namedNode(const QString &id) const
     return m_namedNodes.value(id);
 }
 
-void QSvgDocument::addNamedStyle(const QString &id, QSvgPaintStyleProperty *style)
+void QSvgDocument::addPaintServer(QSvgPaintServerSharedPtr paintServer, const QString &id)
 {
-    if (!m_namedStyles.contains(id))
-        m_namedStyles.insert(id, style);
-    else
+    if (id.isEmpty())
+        return;
+
+    if (!m_paintServers.insert({ id, paintServer } ).second)
         qCWarning(lcSvgHandler) << "Duplicate unique style id:" << id;
 }
 
-QSvgPaintStyleProperty *QSvgDocument::namedStyle(const QString &id) const
+QSvgPaintServerSharedPtr QSvgDocument::paintServer(QStringView id) const
 {
-    return m_namedStyles.value(id);
+    auto it = m_paintServers.find(id.toString());
+    return it != m_paintServers.end() ? it->second : nullptr;
 }
 
 void QSvgDocument::restartAnimation()

@@ -23,6 +23,7 @@ qt_internal_add_module(Svg
         qsvgstructure.cpp qsvgstructure_p.h
         qsvgfilter.cpp qsvgfilter_p.h
         qsvgstyle.cpp qsvgstyle_p.h
+        qsvgpaintserver.cpp qsvgpaintserver_p.h
         qsvgdocument.cpp qsvgdocument_p.h
         qsvganimate.cpp qsvganimate_p.h
         qsvghelper_p.h

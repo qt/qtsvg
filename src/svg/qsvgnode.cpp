@@ -6,6 +6,7 @@
 #include "qsvgnode_p.h"
 #include "qsvgdocument_p.h"
 #include "qsvggraphics_p.h"
+#include <QtSvg/private/qsvgpaintserver_p.h>
 
 #include <QLoggingCategory>
 #include<QElapsedTimer>
@@ -198,10 +199,8 @@ bool QSvgNode::isDescendantOf(const QSvgNode *parent) const
     return false;
 }
 
-void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop, const QString &id)
+void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop)
 {
-    //qDebug()<<"appending "<<prop->type()<< " ("<< id <<") "<<"to "<<this<<this->type();
-    QSvgDocument *doc;
     switch (prop->type()) {
     case QSvgStyleProperty::QUALITY:
         m_style.quality = static_cast<QSvgQualityStyle*>(prop);
@@ -217,24 +216,6 @@ void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop, const QString &id)
         break;
     case QSvgStyleProperty::STROKE:
         m_style.stroke = static_cast<QSvgStrokeStyle*>(prop);
-        break;
-    case QSvgStyleProperty::SOLID_COLOR:
-        m_style.solidColor = static_cast<QSvgSolidColorStyle*>(prop);
-        doc = document();
-        if (doc && !id.isEmpty())
-            doc->addNamedStyle(id, m_style.solidColor);
-        break;
-    case QSvgStyleProperty::GRADIENT:
-        m_style.gradient = static_cast<QSvgGradientStyle*>(prop);
-        doc = document();
-        if (doc && !id.isEmpty())
-            doc->addNamedStyle(id, m_style.gradient);
-        break;
-    case QSvgStyleProperty::PATTERN:
-        m_style.pattern = static_cast<QSvgPatternStyle*>(prop);
-        doc = document();
-        if (doc && !id.isEmpty())
-            doc->addNamedStyle(id, m_style.pattern);
         break;
     case QSvgStyleProperty::TRANSFORM:
         m_style.transform = static_cast<QSvgTransformStyle*>(prop);
@@ -323,18 +304,6 @@ QSvgStyleProperty * QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
         case QSvgStyleProperty::STROKE:
             if (node->m_style.stroke)
                 return node->m_style.stroke;
-            break;
-        case QSvgStyleProperty::SOLID_COLOR:
-            if (node->m_style.solidColor)
-                return node->m_style.solidColor;
-            break;
-        case QSvgStyleProperty::GRADIENT:
-            if (node->m_style.gradient)
-                return node->m_style.gradient;
-            break;
-        case QSvgStyleProperty::PATTERN:
-            if (node->m_style.pattern)
-                return node->m_style.pattern;
             break;
         case QSvgStyleProperty::TRANSFORM:
             if (node->m_style.transform)
