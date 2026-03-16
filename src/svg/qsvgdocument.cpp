@@ -195,7 +195,8 @@ std::unique_ptr<QSvgDocument> QSvgDocument::load(const QString &fileName, QtSvg:
     QSvgHandler handler(&file, options, type);
     if (handler.ok()) {
         doc.reset(handler.document());
-        doc->m_animator->setAnimationDuration(handler.animationDuration());
+        if (doc->m_animator)
+            doc->m_animator->setAnimationDuration(handler.animationDuration());
     } else {
         qCWarning(lcSvgHandler, "Cannot read file '%s', because: %s (line %d)",
                  qPrintable(fileName), qPrintable(handler.errorString()), handler.lineNumber());
@@ -227,7 +228,8 @@ std::unique_ptr<QSvgDocument> QSvgDocument::load(const QByteArray &contents, QtS
 
     if (handler.ok()) {
         doc.reset(handler.document());
-        doc->m_animator->setAnimationDuration(handler.animationDuration());
+        if (doc->m_animator)
+            doc->m_animator->setAnimationDuration(handler.animationDuration());
     } else {
         delete handler.document();
     }
@@ -242,7 +244,8 @@ std::unique_ptr<QSvgDocument> QSvgDocument::load(QXmlStreamReader *contents, QtS
     std::unique_ptr<QSvgDocument> doc;
     if (handler.ok()) {
         doc.reset(handler.document());
-        doc->m_animator->setAnimationDuration(handler.animationDuration());
+        if (doc->m_animator)
+            doc->m_animator->setAnimationDuration(handler.animationDuration());
     } else {
         delete handler.document();
     }
@@ -392,7 +395,8 @@ QSvgPaintStyleProperty *QSvgDocument::namedStyle(const QString &id) const
 
 void QSvgDocument::restartAnimation()
 {
-    m_animator->restartAnimation();
+    if (m_animator)
+        m_animator->restartAnimation();
 }
 
 bool QSvgDocument::animated() const
@@ -524,6 +528,9 @@ int QSvgDocument::currentFrame() const
 
 void QSvgDocument::setCurrentFrame(int frame)
 {
+    if (!m_animator)
+        return;
+
     const int totalFrames = m_fps * animationDuration() / 1000;
     if (totalFrames == 0)
         return;

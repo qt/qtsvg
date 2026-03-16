@@ -81,6 +81,7 @@ private slots:
     void tSpanLineBreak();
     void animated();
     void notAnimated();
+    void notAnimatedOption();
     void testMaskElement();
     void testSymbol();
     void testMarker();
@@ -2175,6 +2176,14 @@ void tst_QSvgRenderer::notAnimated()
     renderer.setAnimationEnabled(false);
     QVERIFY(renderer.load(QByteArray(animatedSvgContents)));
     QVERIFY(!renderer.isAnimationEnabled());
+}
+
+void tst_QSvgRenderer::notAnimatedOption()
+{
+    QSvgRenderer renderer;
+    renderer.setOptions(QtSvg::Option::DisableAnimations);
+    // Shouldn't crash accessing the animator when it's disabled.
+    QVERIFY(renderer.load(QByteArray(animatedSvgContents)));
 }
 
 void tst_QSvgRenderer::testPatternElement()

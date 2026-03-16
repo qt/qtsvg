@@ -469,7 +469,8 @@ void QSvgRenderer::render(QPainter *painter)
 {
     Q_D(QSvgRenderer);
     if (d->render) {
-        d->render->animator()->advanceAnimations();
+        if (d->render->animator())
+            d->render->animator()->advanceAnimations();
         d->render->draw(painter);
     }
 }
@@ -491,7 +492,8 @@ void QSvgRenderer::render(QPainter *painter, const QString &elementId,
 {
     Q_D(QSvgRenderer);
     if (d->render) {
-        d->render->animator()->advanceAnimations();
+        if (d->render->animator())
+            d->render->animator()->advanceAnimations();
         d->render->draw(painter, elementId, bounds);
     }
 }
@@ -506,7 +508,8 @@ void QSvgRenderer::render(QPainter *painter, const QRectF &bounds)
 {
     Q_D(QSvgRenderer);
     if (d->render) {
-        d->render->animator()->advanceAnimations();
+        if (d->render->animator())
+            d->render->animator()->advanceAnimations();
         d->render->draw(painter, bounds);
     }
 }
