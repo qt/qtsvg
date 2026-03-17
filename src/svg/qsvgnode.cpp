@@ -349,8 +349,6 @@ QSvgStyleProperty * QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
 
 QSvgPaintStyleProperty *QSvgNode::styleProperty(QStringView id) const
 {
-    if (id.startsWith(QLatin1Char('#')))
-        id.slice(1);
     QSvgDocument *doc = document();
     return doc ? doc->namedStyle(id.toString()) : 0;
 }

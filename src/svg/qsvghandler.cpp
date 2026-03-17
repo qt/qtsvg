@@ -394,22 +394,42 @@ static QList<qreal> parsePercentageList(const QChar *&str)
     return points;
 }
 
-static QStringView idFromUrl(QStringView url)
+/**
+ *  The form is <IRI>. This function parses local
+ *  IRI references, i.e, resources referenced within
+ *  the current document. e.g, href = "#id"
+*/
+static QStringView idFromIRI(QStringView iri)
 {
-    // The form is url(<IRI>), where IRI can be
-    // just an ID on #<id> form.
-    url = url.trimmed();
-    if (url.startsWith(QLatin1Char('(')))
-        url.slice(1);
-    else
+    iri = iri.trimmed();
+
+    if (!iri.startsWith(QLatin1Char('#')))
         return QStringView();
-    url = url.trimmed();
-    if (!url.startsWith(QLatin1Char('#')))
+
+    return iri.sliced(1);
+}
+
+/**
+ *  The form is <FuncIRI>, where FuncIRI takes
+ *  the form of url(<IRI>). This syntax is used
+ *  in properties that accept both strings and
+ *  IRIs, eliminating any ambiguity. e.g, fill = "url(#id)"
+*/
+static QStringView idFromFuncIRI(QStringView iri)
+{
+    iri = iri.trimmed();
+
+    if (!iri.startsWith(QLatin1StringView("url(")))
         return QStringView();
-    const qsizetype closingBracePos = url.indexOf(QLatin1Char(')'));
+
+    iri.slice(4);
+
+    const qsizetype closingBracePos = iri.indexOf(QLatin1Char(')'));
     if (closingBracePos == -1)
         return QStringView();
-    return url.first(closingBracePos).trimmed();
+
+    iri = iri.first(closingBracePos);
+    return idFromIRI(iri);
 }
 
 /**
@@ -549,7 +569,7 @@ static void parseColor(QSvgNode *,
 
 static QSvgStyleProperty *styleFromUrl(QSvgNode *node, QStringView url)
 {
-    return node ? node->styleProperty(idFromUrl(url)) : 0;
+    return node ? node->styleProperty(idFromFuncIRI(url)) : 0;
 }
 
 static void parseBrush(QSvgNode *node,
@@ -575,14 +595,14 @@ static void parseBrush(QSvgNode *node,
         //fill attribute handling
         if ((!attributes.fill.isEmpty()) && (attributes.fill != QT_INHERIT) ) {
             if (attributes.fill.startsWith(QLatin1String("url"))) {
-                QStringView value = attributes.fill.sliced(3);
+                QStringView value = attributes.fill;
                 QSvgStyleProperty *style = styleFromUrl(node, value);
                 if (style) {
                     if (style->type() == QSvgStyleProperty::SOLID_COLOR || style->type() == QSvgStyleProperty::GRADIENT
                             || style->type() == QSvgStyleProperty::PATTERN)
                         prop->setFillStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
                 } else {
-                    QString id = idFromUrl(value).toString();
+                    QString id = idFromFuncIRI(value).toString();
                     prop->setPaintStyleId(id);
                     prop->setPaintStyleResolved(false);
                 }
@@ -743,14 +763,14 @@ static void parsePen(QSvgNode *node,
         //stroke attribute handling
         if ((!attributes.stroke.isEmpty()) && (attributes.stroke != QT_INHERIT) ) {
             if (attributes.stroke.startsWith(QLatin1String("url"))) {
-                 QStringView value = attributes.stroke.sliced(3);
+                    QStringView value = attributes.stroke;
                     QSvgStyleProperty *style = styleFromUrl(node, value);
                     if (style) {
                         if (style->type() == QSvgStyleProperty::SOLID_COLOR || style->type() == QSvgStyleProperty::GRADIENT
                             || style->type() == QSvgStyleProperty::PATTERN)
                         prop->setStyle(reinterpret_cast<QSvgPaintStyleProperty *>(style));
                     } else {
-                        QString id = idFromUrl(value).toString();
+                        QString id = idFromFuncIRI(value).toString();
                         prop->setPaintStyleId(id);
                         prop->setPaintStyleResolved(false);
                     }
@@ -1295,14 +1315,7 @@ static std::optional<QStringView> getAttributeId(const QStringView &attribute)
     if (attribute.isEmpty())
         return std::nullopt;
 
-    constexpr QLatin1String urlKeyword("url");
-    QStringView attrStr = attribute.trimmed();
-    if (attrStr.startsWith(urlKeyword))
-        attrStr.slice(urlKeyword.size());
-    QStringView id = idFromUrl(attrStr);
-    if (id.startsWith(QLatin1Char('#')))
-        id.slice(1);
-    return id;
+    return idFromFuncIRI(attribute);
 }
 
 static void parseExtendedAttributes(QSvgNode *node,
@@ -1405,7 +1418,7 @@ static bool parseBaseAnimate(QSvgNode *parent,
     if (linkId.isEmpty())
         linkId = attributes.value(QLatin1String("href"));
 
-    linkId = linkId.mid(1);
+    linkId = idFromIRI(linkId);
 
     bool ok = true;
     int begin = parseClockValue(beginStr, &ok);
@@ -1930,7 +1943,7 @@ static void parseBaseGradient(QSvgNode *node,
                               QSvgGradientStyle *gradProp,
                               QSvgHandler *handler)
 {
-    const QStringView link             = attributes.value(QLatin1String("xlink:href"));
+    QStringView linkId                 = attributes.value(QLatin1String("xlink:href"));
     const QStringView trans            = attributes.value(QLatin1String("gradientTransform"));
     const QStringView spread           = attributes.value(QLatin1String("spreadMethod"));
     const QStringView units            = attributes.value(QLatin1String("gradientUnits"));
@@ -1945,8 +1958,9 @@ static void parseBaseGradient(QSvgNode *node,
 
     QTransform matrix;
     QGradient *grad = gradProp->qgradient();
-    if (node && !link.isEmpty()) {
-        QSvgStyleProperty *prop = node->styleProperty(link);
+    linkId = idFromIRI(linkId);
+    if (node && !linkId.isEmpty()) {
+        QSvgStyleProperty *prop = node->styleProperty(linkId);
         if (prop && prop->type() == QSvgStyleProperty::GRADIENT) {
             QSvgGradientStyle *inherited =
                 static_cast<QSvgGradientStyle*>(prop);
@@ -1959,7 +1973,7 @@ static void parseBaseGradient(QSvgNode *node,
 
             matrix = inherited->qtransform();
         } else {
-            gradProp->setStopLink(link.toString(), handler->document());
+            gradProp->setStopLink(linkId.toString(), handler->document());
         }
     }
 
@@ -3193,7 +3207,7 @@ static QSvgNode *createUseNode(QSvgNode *parent,
 
     if (linkId.isEmpty())
         linkId = attributes.value(QLatin1String("href"));
-    QString linkIdStr = linkId.mid(1).toString();
+    QString linkIdStr = idFromIRI(linkId).toString();
 
     switch (parent->type()) {
     case QSvgNode::Doc:
