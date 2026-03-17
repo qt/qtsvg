@@ -14,8 +14,6 @@ endif()
 qt_internal_add_test(tst_qsvghandler
     SOURCES
         tst_qsvghandler.cpp
-    DEFINES
-        SRCDIR="${CMAKE_CURRENT_SOURCE_DIR}/"
     LIBRARIES
         Qt::Svg
         Qt::SvgPrivate

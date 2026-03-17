@@ -1,7 +1,7 @@
 // Copyright (C) 2026 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only
 
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
 
 #include <QList>
 #include <QPair>
@@ -9,8 +9,8 @@
 #include <QtTypes>
 
 #ifdef QT_BUILD_INTERNAL
-#  include <private/qsvghandler_p.h>
-#  include <private/qsvgutils_p.h>
+#  include <QtSvg/private/qsvghandler_p.h>
+#  include <QtSvg/private/qsvgutils_p.h>
 #endif
 
 #include <cmath>
