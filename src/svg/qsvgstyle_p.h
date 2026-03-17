@@ -137,8 +137,6 @@ public:
         GRADIENT,
         PATTERN,
         TRANSFORM,
-        ANIMATE_TRANSFORM,
-        ANIMATE_COLOR,
         OPACITY,
         COMP_OP,
         OFFSET,
