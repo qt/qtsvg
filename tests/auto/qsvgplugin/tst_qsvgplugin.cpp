@@ -2,16 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only
 
 
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
 
 #include "../../../src/plugins/imageformats/svg/qsvgiohandler.cpp"
+#include <QFile>
 #include <QImage>
+#include <QString>
 #include <QStringList>
-
-#ifndef SRCDIR
-#define SRCDIR
-#endif
-
+#include <QSize>
+#include <QVariant>
 
 QStringList logMessages;
 

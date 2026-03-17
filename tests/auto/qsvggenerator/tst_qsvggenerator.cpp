@@ -2,11 +2,17 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only
 
 
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
 
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomNode>
+#include <QBuffer>
+#include <QByteArray>
+#include <QFile>
+#include <QFont>
+#include <QLinearGradient>
+#include <QRadialGradient>
 
 #include <qguiapplication.h>
 #include <qdebug.h>

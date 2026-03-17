@@ -2,10 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only
 
 
-#include <QtTest/QtTest>
+#include <QtTest/QTest>
+#include <QIcon>
+#include <QImage>
 #include <QImageReader>
+#include <QList>
+#include <QPixmap>
 #include <QRegularExpression>
-#include <QtGui>
+#include <QSize>
+#include <QString>
 
 class tst_QIcon_Svg : public QObject
 {
