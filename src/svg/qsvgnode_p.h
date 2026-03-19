@@ -212,6 +212,10 @@ private:
     bool           m_visible;
 
     friend class QSvgDocument;
+
+private:
+    Q_DISABLE_COPY_X(QSvgNode, "Classes inheriting from this class may contain"
+                               "a vector of unique pointers as a member variable")
 };
 
 inline QSvgNode *QSvgNode::parent() const

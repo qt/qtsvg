@@ -42,10 +42,6 @@ public:
 protected:
     std::vector<std::unique_ptr<QSvgNode>>          m_renderers;
     mutable bool              m_recursing = false;
-
-private:
-    Q_DISABLE_COPY_X(QSvgStructureNode, "Class has a vector of unique"
-                                        "pointers as member variable")
 };
 
 class Q_SVG_EXPORT QSvgG : public QSvgStructureNode
