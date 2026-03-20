@@ -347,12 +347,6 @@ QSvgStyleProperty * QSvgNode::styleProperty(QSvgStyleProperty::Type type) const
     return 0;
 }
 
-QSvgPaintStyleProperty *QSvgNode::styleProperty(QStringView id) const
-{
-    QSvgDocument *doc = document();
-    return doc ? doc->namedStyle(id.toString()) : 0;
-}
-
 QRectF QSvgNode::internalFastBounds(QPainter *p, QSvgExtraStates &states) const
 {
     return internalBounds(p, states);

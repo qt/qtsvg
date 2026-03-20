@@ -108,7 +108,6 @@ public:
     void applyAnimatedStyle(QPainter *p, QSvgExtraStates &states) const;
     void revertAnimatedStyle(QPainter *p, QSvgExtraStates &states) const;
     QSvgStyleProperty *styleProperty(QSvgStyleProperty::Type type) const;
-    QSvgPaintStyleProperty *styleProperty(QStringView id) const;
 
     QSvgDocument *document() const;
 

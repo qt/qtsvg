@@ -569,7 +569,8 @@ static void parseColor(QSvgNode *,
 
 static QSvgStyleProperty *styleFromUrl(QSvgNode *node, QStringView url)
 {
-    return node ? node->styleProperty(idFromFuncIRI(url)) : 0;
+    QStringView id = idFromFuncIRI(url);
+    return node ? node->document()->namedStyle(id.toString()) : nullptr;
 }
 
 static void parseBrush(QSvgNode *node,
@@ -1960,7 +1961,7 @@ static void parseBaseGradient(QSvgNode *node,
     QGradient *grad = gradProp->qgradient();
     linkId = idFromIRI(linkId);
     if (node && !linkId.isEmpty()) {
-        QSvgStyleProperty *prop = node->styleProperty(linkId);
+        QSvgStyleProperty *prop = handler->document()->namedStyle(linkId.toString());
         if (prop && prop->type() == QSvgStyleProperty::GRADIENT) {
             QSvgGradientStyle *inherited =
                 static_cast<QSvgGradientStyle*>(prop);
@@ -3923,7 +3924,7 @@ void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)
         QSvgFillStyle *fill = static_cast<QSvgFillStyle *>(node->styleProperty(QSvgStyleProperty::FILL));
         if (fill && !fill->isPaintStyleResolved()) {
             QString id = fill->paintStyleId();
-            QSvgPaintStyleProperty *style = structureNode->styleProperty(id);
+            QSvgPaintStyleProperty *style = m_doc->namedStyle(id);
             if (style) {
                 fill->setFillStyle(style);
             } else {
@@ -3935,7 +3936,7 @@ void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)
         QSvgStrokeStyle *stroke = static_cast<QSvgStrokeStyle *>(node->styleProperty(QSvgStyleProperty::STROKE));
         if (stroke && !stroke->isPaintStyleResolved()) {
             QString id = stroke->paintStyleId();
-            QSvgPaintStyleProperty *style = structureNode->styleProperty(id);
+            QSvgPaintStyleProperty *style = m_doc->namedStyle(id);
             if (style) {
                 stroke->setStyle(style);
             } else {

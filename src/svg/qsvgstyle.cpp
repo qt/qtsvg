@@ -557,7 +557,7 @@ void QSvgGradientStyle::resolveStops()
 void QSvgGradientStyle::resolveStops_helper(QStringList *visited)
 {
     if (!m_link.isEmpty() && m_doc) {
-        QSvgStyleProperty *prop = m_doc->styleProperty(m_link);
+        QSvgStyleProperty *prop = m_doc->namedStyle(m_link);
         if (prop && !visited->contains(m_link)) {
             visited->append(m_link);
             if (prop->type() == QSvgStyleProperty::GRADIENT) {
