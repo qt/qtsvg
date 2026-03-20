@@ -1702,21 +1702,16 @@ static QSvgNode *createEllipseNode(QSvgNode *parent,
     return ellipse;
 }
 
-static QSvgStyleProperty *createFontNode(QSvgNode *parent,
-                                         const QXmlStreamAttributes &attributes,
-                                         QSvgHandler *)
+static QSvgStyleProperty *createFontNode(const QXmlStreamAttributes &attributes,
+                                         QSvgHandler *handler)
 {
     const QStringView hax = attributes.value(QLatin1String("horiz-adv-x"));
     QString myId     = someId(attributes);
 
     qreal horizAdvX = QSvgUtils::toDouble(hax);
 
-    while (parent && parent->type() != QSvgNode::Doc) {
-        parent = parent->parent();
-    }
-
-    if (parent && !myId.isEmpty()) {
-        QSvgDocument *doc = static_cast<QSvgDocument*>(parent);
+    if (!myId.isEmpty()) {
+        QSvgDocument *doc = handler->document();
         QSvgFont *font = doc->svgFont(myId);
         if (!font) {
             font = new QSvgFont(horizAdvX);
@@ -1939,8 +1934,7 @@ static QSvgNode *createLineNode(QSvgNode *parent,
 }
 
 
-static void parseBaseGradient(QSvgNode *node,
-                              const QXmlStreamAttributes &attributes,
+static void parseBaseGradient(const QXmlStreamAttributes &attributes,
                               QSvgGradientStyle *gradProp,
                               QSvgHandler *handler)
 {
@@ -1960,7 +1954,7 @@ static void parseBaseGradient(QSvgNode *node,
     QTransform matrix;
     QGradient *grad = gradProp->qgradient();
     linkId = idFromIRI(linkId);
-    if (node && !linkId.isEmpty()) {
+    if (!linkId.isEmpty()) {
         QSvgStyleProperty *prop = handler->document()->namedStyle(linkId.toString());
         if (prop && prop->type() == QSvgStyleProperty::GRADIENT) {
             QSvgGradientStyle *inherited =
@@ -2000,8 +1994,7 @@ static void parseBaseGradient(QSvgNode *node,
     }
 }
 
-static QSvgStyleProperty *createLinearGradientNode(QSvgNode *node,
-                                                   const QXmlStreamAttributes &attributes,
+static QSvgStyleProperty *createLinearGradientNode(const QXmlStreamAttributes &attributes,
                                                    QSvgHandler *handler)
 {
     const QStringView x1 = attributes.value(QLatin1String("x1"));
@@ -2023,15 +2016,10 @@ static QSvgStyleProperty *createLinearGradientNode(QSvgNode *node,
     if (!y2.isEmpty())
         ny2 =  convertToNumber(y2);
 
-    QSvgNode *itr = node;
-    while (itr && itr->type() != QSvgNode::Doc) {
-        itr = itr->parent();
-    }
-
     QLinearGradient *grad = new QLinearGradient(nx1, ny1, nx2, ny2);
     grad->setInterpolationMode(QGradient::ComponentInterpolation);
     QSvgGradientStyle *prop = new QSvgGradientStyle(grad);
-    parseBaseGradient(node, attributes, prop, handler);
+    parseBaseGradient(attributes, prop, handler);
 
     return prop;
 }
@@ -2798,8 +2786,7 @@ static bool parsePrefetchNode(QSvgNode *parent,
     return true;
 }
 
-static QSvgStyleProperty *createRadialGradientNode(QSvgNode *node,
-                                                   const QXmlStreamAttributes &attributes,
+static QSvgStyleProperty *createRadialGradientNode(const QXmlStreamAttributes &attributes,
                                                    QSvgHandler *handler)
 {
     const QStringView cx = attributes.value(QLatin1String("cx"));
@@ -2832,7 +2819,7 @@ static QSvgStyleProperty *createRadialGradientNode(QSvgNode *node,
     grad->setInterpolationMode(QGradient::ComponentInterpolation);
 
     QSvgGradientStyle *prop = new QSvgGradientStyle(grad);
-    parseBaseGradient(node, attributes, prop, handler);
+    parseBaseGradient(attributes, prop, handler);
 
     return prop;
 }
@@ -2904,11 +2891,10 @@ static bool parseSetNode(QSvgNode *parent,
     return true;
 }
 
-static QSvgStyleProperty *createSolidColorNode(QSvgNode *parent,
-                                               const QXmlStreamAttributes &attributes,
+static QSvgStyleProperty *createSolidColorNode(const QXmlStreamAttributes &attributes,
                                                QSvgHandler *handler)
 {
-    Q_UNUSED(parent); Q_UNUSED(attributes);
+    Q_UNUSED(attributes);
     QStringView solidColorStr = attributes.value(QLatin1String("solid-color"));
     QStringView solidOpacityStr = attributes.value(QLatin1String("solid-opacity"));
 
@@ -3451,8 +3437,7 @@ static ParseMethod findUtilFactory(const QStringView name, QtSvg::Options option
     return 0;
 }
 
-typedef QSvgStyleProperty *(*StyleFactoryMethod)(QSvgNode *,
-                                                 const QXmlStreamAttributes &,
+typedef QSvgStyleProperty *(*StyleFactoryMethod)(const QXmlStreamAttributes &,
                                                  QSvgHandler *);
 
 static StyleFactoryMethod findStyleFactoryMethod(const QStringView name)
@@ -3852,7 +3837,7 @@ bool QSvgHandler::startElement(const QStringView localName,
         if (!method(m_nodes.top(), attributes, this))
             qCWarning(lcSvgHandler, "%s", msgProblemParsing(localName, xml).constData());
     } else if (StyleFactoryMethod method = findStyleFactoryMethod(localName)) {
-        QSvgStyleProperty *prop = method(m_nodes.top(), attributes, this);
+        QSvgStyleProperty *prop = method(attributes, this);
         if (prop) {
             m_style = prop;
             m_nodes.top()->appendStyleProperty(prop, someId(attributes));
