@@ -6,9 +6,12 @@
 #include <QList>
 #include <QPair>
 #include <QString>
+#include <QXmlStreamAttributes>
 #include <QtTypes>
 
 #ifdef QT_BUILD_INTERNAL
+#  include <QtSvg/private/qsvganimate_p.h>
+#  include <QtSvg/private/qsvgdocument_p.h>
 #  include <QtSvg/private/qsvghandler_p.h>
 #  include <QtSvg/private/qsvgutils_p.h>
 #endif
@@ -29,6 +32,8 @@ private slots:
 #ifdef QT_BUILD_INTERNAL
     void testToDouble_data();
     void testToDouble();
+    void testCreateAnimateTransformNode_data();
+    void testCreateAnimateTransformNode();
     void testParseNumbersList_data();
     void testParseNumbersList();
 #endif
@@ -130,6 +135,76 @@ void tst_QSvgHandler::testToDouble()
     QCOMPARE(ok, !std::isnan(value));
     if (ok)
         QCOMPARE(actual, value);
+}
+
+void tst_QSvgHandler::testCreateAnimateTransformNode_data()
+{
+    // The following inputs do not test all of createAnimateTransformNode()
+    // - These only are cases which cause the code to pass a pointer by reference into
+    //   parseNumberTriplet() and then use the pointer which was changed by that function. This
+    //   shall prevent regressions in that area. Testing parseNumberTriplet() alone would not be
+    //   sufficient because the results depend on the way both functions interact.
+    // - All inputs are well-formed and supported by the current code,
+    //   they do not test error handling
+
+    QTest::addColumn<QString>("type");
+    QTest::addColumn<QString>("values");
+    QTest::addColumn<QSvgAnimatedPropertyTransform::TransformComponent::Type>("expectedType");
+    QTest::addColumn<QList<QList<qreal>>>("expectedComponents");
+
+    QTest::newRow("translate") << "translate" << "98.7, 6.5; 1.2, 3.45"
+                               << QSvgAnimatedPropertyTransform::TransformComponent::Translate
+                               << QList<QList<qreal>>{ { 98.7, 6.5 }, { 1.2, 3.45 } };
+    QTest::newRow("translate-implicit-ty")
+            << "translate" << "4; 3.2"
+            << QSvgAnimatedPropertyTransform::TransformComponent::Translate
+            << QList<QList<qreal>>{ { 4., 0. }, { 3.2, 0. } };
+    QTest::newRow("scale") << "scale" << "9.7, 6.4; 3.1, 0.8"
+                           << QSvgAnimatedPropertyTransform::TransformComponent::Scale
+                           << QList<QList<qreal>>{ { 9.7, 6.4 }, { 3.1, 0.8 } };
+    QTest::newRow("scale-implicit-sy")
+            << "scale" << "3; 4" << QSvgAnimatedPropertyTransform::TransformComponent::Scale
+            << QList<QList<qreal>>{ { 3., 3. }, { 4., 4. } };
+    QTest::newRow("rotate") << "rotate" << "1,2.3,3;9,8,7"
+                            << QSvgAnimatedPropertyTransform::TransformComponent::Rotate
+                            << QList<QList<qreal>>{ { 1, 2.3, 3 }, { 9, 8, 7 } };
+    QTest::newRow("skewX") << "skewX" << "10;20"
+                           << QSvgAnimatedPropertyTransform::TransformComponent::Skew
+                           << QList<QList<qreal>>{ { 10, 0 }, { 20, 0 } };
+    QTest::newRow("skewY") << "skewY" << "10;20"
+                           << QSvgAnimatedPropertyTransform::TransformComponent::Skew
+                           << QList<QList<qreal>>{ { 0, 10 }, { 0, 20 } };
+}
+
+void tst_QSvgHandler::testCreateAnimateTransformNode()
+{
+    QFETCH(QString, type);
+    QFETCH(QString, values);
+    QFETCH(QSvgAnimatedPropertyTransform::TransformComponent::Type, expectedType);
+    QFETCH(QList<QList<qreal>>, expectedComponents);
+
+    QSvgDocument parent(QtSvg::Option::NoOption, QtSvg::AnimatorType::Automatic);
+    QSvgHandler handler(QByteArray(), QtSvg::Option::NoOption, QtSvg::AnimatorType::Automatic);
+    QXmlStreamAttributes attributes;
+
+    attributes.append("type", type);
+    attributes.append("values", values);
+
+    QSvgNode *node = createAnimateTransformNode(&parent, attributes, &handler);
+
+    QVERIFY(node);
+    const auto &properties = static_cast<QSvgAnimateTransform *>(node)->properties();
+    QCOMPARE(properties.size(), 1);
+    QCOMPARE(properties.first()->type(), QSvgAbstractAnimatedProperty::Transform);
+    QList<QList<qreal>> readProperty;
+    for (const auto &j :
+         static_cast<QSvgAnimatedPropertyTransform *>(properties.first())->components()) {
+        readProperty << QList(j.values.cbegin(), j.values.cend());
+        QCOMPARE(j.type, expectedType);
+    }
+    QEXPECT_FAIL("scale-implicit-sy", "incorrect default value for sy in scale", Continue);
+    QCOMPARE(readProperty, expectedComponents);
+    delete node;
 }
 
 void tst_QSvgHandler::testParseNumbersList_data()

@@ -147,6 +147,10 @@ private:
     const QtSvg::AnimatorType m_animatorType;
 };
 
+Q_AUTOTEST_EXPORT QSvgNode *createAnimateTransformNode(QSvgNode *parent,
+                                                       const QXmlStreamAttributes &attributes,
+                                                       QSvgHandler *handler);
+
 Q_DECLARE_LOGGING_CATEGORY(lcSvgHandler)
 
 QT_END_NAMESPACE

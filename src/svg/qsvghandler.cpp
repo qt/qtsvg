@@ -1529,9 +1529,9 @@ static void parseNumberTriplet(QList<qreal> &values, const QChar *&s)
         values.append(0.0);
 }
 
-static QSvgNode *createAnimateTransformNode(QSvgNode *parent,
-                                            const QXmlStreamAttributes &attributes,
-                                            QSvgHandler *handler)
+QSvgNode *createAnimateTransformNode(QSvgNode *parent,
+                                     const QXmlStreamAttributes &attributes,
+                                     QSvgHandler *handler)
 {
     const QStringView typeStr = attributes.value(QLatin1String("type"));
     const QStringView values  = attributes.value(QLatin1String("values"));
