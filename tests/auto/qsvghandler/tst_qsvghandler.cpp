@@ -267,12 +267,10 @@ void tst_QSvgHandler::testParseNumbersList()
     QFETCH(bool, pointerAdvancedToEnd);
 
     const bool testNullptr = listStr == "nullptr";
-    const QChar *str = testNullptr ? nullptr : listStr.constData();
-    QCOMPARE(parseNumbersList(str), result);
-    if (testNullptr)
-        QCOMPARE(str, nullptr);
+    QStringView listStrV{ listStr };
+    QCOMPARE(parseNumbersList(testNullptr ? nullptr : &listStrV), result);
     if (pointerAdvancedToEnd)
-        QCOMPARE(str, listStr.cend());
+        QVERIFY(listStrV.isEmpty());
 }
 #endif // QT_BUILD_INTERNAL
 

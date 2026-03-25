@@ -335,60 +335,58 @@ void QSvgAttributes::setAttributes(const QXmlStreamAttributes &attributes, QSvgH
     }
 }
 
-QList<qreal> parseNumbersList(const QChar *&str)
+QList<qreal> parseNumbersList(QStringView *str)
 {
     QList<qreal> points;
     if (!str)
         return points;
     points.reserve(32);
 
-    while (str->isSpace())
-        ++str;
-    while (QSvgUtils::isDigit(str->unicode()) ||
-           *str == QLatin1Char('-') || *str == QLatin1Char('+') ||
-           *str == QLatin1Char('.')) {
+    while (!str->isEmpty() && str->first().isSpace())
+        str->slice(1);
+    while (!str->isEmpty()
+           && (QSvgUtils::isDigit(str->first().unicode()) || str->startsWith(QLatin1Char('-'))
+               || str->startsWith(QLatin1Char('+')) || str->startsWith(QLatin1Char('.')))) {
 
         points.append(QSvgUtils::toDouble(str));
 
-        while (str->isSpace())
-            ++str;
-        if (*str == QLatin1Char(','))
-            ++str;
+        while (!str->isEmpty() && str->first().isSpace())
+            str->slice(1);
+        if (str->startsWith(QLatin1Char(',')))
+            str->slice(1);
 
         //eat the rest of space
-        while (str->isSpace())
-            ++str;
+        while (!str->isEmpty() && str->first().isSpace())
+            str->slice(1);
     }
 
     return points;
 }
 
-static QList<qreal> parsePercentageList(const QChar *&str)
+static QList<qreal> parsePercentageList(QStringView str)
 {
     QList<qreal> points;
-    if (!str)
-        return points;
 
-    while (str->isSpace())
-        ++str;
-    while ((*str >= QLatin1Char('0') && *str <= QLatin1Char('9')) ||
-           *str == QLatin1Char('-') || *str == QLatin1Char('+') ||
-           *str == QLatin1Char('.')) {
+    while (!str.isEmpty() && str.first().isSpace())
+        str.slice(1);
+    while ((!str.isEmpty() && str.first() >= QLatin1Char('0') && str.first() <= QLatin1Char('9'))
+           || str.startsWith(QLatin1Char('-')) || str.startsWith(QLatin1Char('+'))
+           || str.startsWith(QLatin1Char('.'))) {
 
-        points.append(QSvgUtils::toDouble(str));
+        points.append(QSvgUtils::toDouble(&str));
 
-        while (str->isSpace())
-            ++str;
-        if (*str == QLatin1Char('%'))
-            ++str;
-        while (str->isSpace())
-            ++str;
-        if (*str == QLatin1Char(','))
-            ++str;
+        while (!str.isEmpty() && str.first().isSpace())
+            str.slice(1);
+        if (str.startsWith(QLatin1Char('%')))
+            str.slice(1);
+        while (!str.isEmpty() && str.first().isSpace())
+            str.slice(1);
+        if (str.startsWith(QLatin1Char(',')))
+            str.slice(1);
 
         //eat the rest of space
-        while (str->isSpace())
-            ++str;
+        while (!str.isEmpty() && str.first().isSpace())
+            str.slice(1);
     }
 
     return points;
@@ -461,13 +459,12 @@ static bool resolveColor(QStringView colorStr, QColor &color, QSvgHandler *handl
                 // starts with "rgb(", ends with ")" and consists of at least 7 characters "rgb(,,)"
                 if (colorStrTr.size() >= 7 && colorStrTr.at(colorStrTr.size() - 1) == QLatin1Char(')')
                     && colorStrTr.mid(0, 4) == QLatin1String("rgb(")) {
-                    const QChar *s = colorStrTr.constData() + 4;
-                    QList<qreal> compo = parseNumbersList(s);
+                    QStringView sv{ colorStrTr.sliced(4) };
+                    QList<qreal> compo = parseNumbersList(&sv);
                     //1 means that it failed after reaching non-parsable
                     //character which is going to be "%"
                     if (compo.size() == 1) {
-                        s = colorStrTr.constData() + 4;
-                        compo = parsePercentageList(s);
+                        compo = parsePercentageList(colorStrTr.sliced(4));
                         for (int i = 0; i < compo.size(); ++i)
                             compo[i] *= (qreal)2.55;
                     }
@@ -627,12 +624,10 @@ static QTransform parseTransformationMatrix(QStringView value)
         return QTransform();
 
     QTransform matrix;
-    const QChar *str = value.constData();
-    const QChar *end = str + value.size();
 
-    while (str < end) {
-        if (str->isSpace() || *str == QLatin1Char(',')) {
-            ++str;
+    while (!value.isEmpty()) {
+        if (value.first().isSpace() || value.startsWith(QLatin1Char(','))) {
+            value.slice(1);
             continue;
         }
         enum State {
@@ -644,49 +639,49 @@ static QTransform parseTransformationMatrix(QStringView value)
             SkewY
         };
         State state = Matrix;
-        if (*str == QLatin1Char('m')) {  //matrix
+        if (value.startsWith(QLatin1Char('m'))) { //matrix
             const char *ident = "atrix";
             for (int i = 0; i < 5; ++i)
-                if (*(++str) != QLatin1Char(ident[i]))
+                if (!value.slice(1).startsWith(QLatin1Char(ident[i])))
                     goto error;
-            ++str;
+            value.slice(1);
             state = Matrix;
-        } else if (*str == QLatin1Char('t')) { //translate
+        } else if (value.startsWith(QLatin1Char('t'))) { //translate
             const char *ident = "ranslate";
             for (int i = 0; i < 8; ++i)
-                if (*(++str) != QLatin1Char(ident[i]))
+                if (!value.slice(1).startsWith(QLatin1Char(ident[i])))
                     goto error;
-            ++str;
+            value.slice(1);
             state = Translate;
-        } else if (*str == QLatin1Char('r')) { //rotate
+        } else if (value.startsWith(QLatin1Char('r'))) { //rotate
             const char *ident = "otate";
             for (int i = 0; i < 5; ++i)
-                if (*(++str) != QLatin1Char(ident[i]))
+                if (!value.slice(1).startsWith(QLatin1Char(ident[i])))
                     goto error;
-            ++str;
+            value.slice(1);
             state = Rotate;
-        } else if (*str == QLatin1Char('s')) { //scale, skewX, skewY
-            ++str;
-            if (*str == QLatin1Char('c')) {
+        } else if (value.startsWith(QLatin1Char('s'))) { //scale, skewX, skewY
+            value.slice(1);
+            if (value.startsWith(QLatin1Char('c'))) {
                 const char *ident = "ale";
                 for (int i = 0; i < 3; ++i)
-                    if (*(++str) != QLatin1Char(ident[i]))
+                    if (!value.slice(1).startsWith(QLatin1Char(ident[i])))
                         goto error;
-                ++str;
+                value.slice(1);
                 state = Scale;
-            } else if (*str == QLatin1Char('k')) {
-                if (*(++str) != QLatin1Char('e'))
+            } else if (value.startsWith(QLatin1Char('k'))) {
+                if (!value.slice(1).startsWith(QLatin1Char('e')))
                     goto error;
-                if (*(++str) != QLatin1Char('w'))
+                if (!value.slice(1).startsWith(QLatin1Char('w')))
                     goto error;
-                ++str;
-                if (*str == QLatin1Char('X'))
+                value.slice(1);
+                if (value.startsWith(QLatin1Char('X')))
                     state = SkewX;
-                else if (*str == QLatin1Char('Y'))
+                else if (value.startsWith(QLatin1Char('Y')))
                     state = SkewY;
                 else
                     goto error;
-                ++str;
+                value.slice(1);
             } else {
                 goto error;
             }
@@ -694,17 +689,16 @@ static QTransform parseTransformationMatrix(QStringView value)
             goto error;
         }
 
-
-        while (str < end && str->isSpace())
-            ++str;
-        if (*str != QLatin1Char('('))
+        while (!value.isEmpty() && value.first().isSpace())
+            value.slice(1);
+        if (!value.startsWith(QLatin1Char('(')))
             goto error;
-        ++str;
+        value.slice(1);
         QVarLengthArray<qreal, 8> points;
-        QSvgUtils::parseNumbersArray(str, points);
-        if (*str != QLatin1Char(')'))
+        QSvgUtils::parseNumbersArray(&value, points);
+        if (!value.startsWith(QLatin1Char(')')))
             goto error;
-        ++str;
+        value.slice(1);
 
         if(state == Matrix) {
             if(points.size() != 6)
@@ -795,9 +789,8 @@ static void parsePen(QSvgNode *node,
             if (attributes.strokeDashArray == QLatin1String("none")) {
                 prop->setDashArrayNone();
             } else {
-                QString dashArray  = attributes.strokeDashArray.toString();
-                const QChar *s = dashArray.constData();
-                QList<qreal> dashes = parseNumbersList(s);
+                QStringView dashArray = attributes.strokeDashArray;
+                QList<qreal> dashes = parseNumbersList(&dashArray);
                 const bool allZeroes = std::all_of(dashes.cbegin(), dashes.cend(),
                                                    [](qreal i) { return qFuzzyIsNull(i); });
                 const bool hasNegative = !allZeroes && std::any_of(dashes.cbegin(), dashes.cend(),
@@ -1521,12 +1514,17 @@ static QSvgNode *createAimateMotionNode(QSvgNode *parent,
     return nullptr;
 }
 
-static void parseNumberTriplet(QList<qreal> &values, const QChar *&s)
+static void parseNumberTriplet(QList<qreal> &values, QStringView *s)
 {
     QList<qreal> list = parseNumbersList(s);
     values << list;
     for (int i = 3 - list.size(); i > 0; --i)
         values.append(0.0);
+}
+
+static void parseNumberTriplet(QList<qreal> &values, QStringView s)
+{
+    parseNumberTriplet(values, &s);
 }
 
 QSvgNode *createAnimateTransformNode(QSvgNode *parent,
@@ -1541,13 +1539,12 @@ QSvgNode *createAnimateTransformNode(QSvgNode *parent,
 
     QList<qreal> vals;
     if (values.isEmpty()) {
-        const QChar *s;
         if (fromStr.isEmpty()) {
             if (!byStr.isEmpty()) {
                 vals.append(0.0);
                 vals.append(0.0);
                 vals.append(0.0);
-                parseNumberTriplet(vals, s = byStr.constData());
+                parseNumberTriplet(vals, byStr);
             } else {
                 // To-animation not defined.
                 return nullptr;
@@ -1555,12 +1552,12 @@ QSvgNode *createAnimateTransformNode(QSvgNode *parent,
         } else {
             if (!toStr.isEmpty()) {
                 // From-to-animation.
-                parseNumberTriplet(vals, s = fromStr.constData());
-                parseNumberTriplet(vals, s = toStr.constData());
+                parseNumberTriplet(vals, fromStr);
+                parseNumberTriplet(vals, toStr);
             } else if (!byStr.isEmpty()) {
                 // From-by-animation.
-                parseNumberTriplet(vals, s = fromStr.constData());
-                parseNumberTriplet(vals, s = byStr.constData());
+                parseNumberTriplet(vals, fromStr);
+                parseNumberTriplet(vals, byStr);
                 for (int i = vals.size() - 3; i < vals.size(); ++i)
                     vals[i] += vals[i - 3];
             } else {
@@ -1568,12 +1565,11 @@ QSvgNode *createAnimateTransformNode(QSvgNode *parent,
             }
         }
     } else {
-        const QChar *s = values.constData();
-        while (s && s != values.cend()) {
-            parseNumberTriplet(vals, s);
-            if (s == values.cend())
-                break;
-            ++s;
+        QStringView s = values;
+        while (!s.isEmpty()) {
+            parseNumberTriplet(vals, &s);
+            if (!s.isEmpty())
+                s.slice(1);
         }
     }
     if (vals.size() % 3 != 0)
@@ -2750,9 +2746,8 @@ static QSvgNode *createPolyNode(QSvgNode *parent,
                                 const QXmlStreamAttributes &attributes,
                                 bool createLine)
 {
-    const QString pointsStr = attributes.value(QLatin1String("points")).toString();
-    const QChar *s = pointsStr.constData();
-    const QList<qreal> points = parseNumbersList(s);
+    QStringView pointsStr = attributes.value(QLatin1String("points"));
+    const QList<qreal> points = parseNumbersList(&pointsStr);
     if (points.size() < 4)
         return nullptr;
     QPolygonF poly(points.size()/2);
