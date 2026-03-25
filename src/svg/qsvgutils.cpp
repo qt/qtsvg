@@ -168,42 +168,43 @@ bool isDigit(ushort ch)
     return ((ch >> 4) == 3) && (magic >> (ch & 15));
 }
 
-qreal toDouble(const QChar *&str)
+qreal toDouble(QStringView *str)
 {
     const int maxLen = 255;//technically doubles can go til 308+ but whatever
     char temp[maxLen+1];
     int pos = 0;
 
-    if (*str == QLatin1Char('-')) {
+    if (str->startsWith(QLatin1Char('-'))) {
         temp[pos++] = '-';
-        ++str;
-    } else if (*str == QLatin1Char('+')) {
-        ++str;
+        str->slice(1);
+    } else if (str->startsWith(QLatin1Char('+'))) {
+        str->slice(1);
     }
-    while (isDigit(str->unicode()) && pos < maxLen) {
-        temp[pos++] = str->toLatin1();
-        ++str;
+    while (!str->isEmpty() && isDigit(str->first().unicode()) && pos < maxLen) {
+        temp[pos++] = str->first().toLatin1();
+        str->slice(1);
     }
-    if (*str == QLatin1Char('.') && pos < maxLen) {
+    if (str->startsWith(QLatin1Char('.')) && pos < maxLen) {
         temp[pos++] = '.';
-        ++str;
+        str->slice(1);
     }
-    while (isDigit(str->unicode()) && pos < maxLen) {
-        temp[pos++] = str->toLatin1();
-        ++str;
+    while (!str->isEmpty() && isDigit(str->first().unicode()) && pos < maxLen) {
+        temp[pos++] = str->first().toLatin1();
+        str->slice(1);
     }
     bool exponent = false;
-    if ((*str == QLatin1Char('e') || *str == QLatin1Char('E')) && pos < maxLen) {
+    if ((str->startsWith(QLatin1Char('e')) || str->startsWith(QLatin1Char('E'))) && pos < maxLen) {
         exponent = true;
         temp[pos++] = 'e';
-        ++str;
-        if ((*str == QLatin1Char('-') || *str == QLatin1Char('+')) && pos < maxLen) {
-            temp[pos++] = str->toLatin1();
-            ++str;
+        str->slice(1);
+        if ((str->startsWith(QLatin1Char('-')) || str->startsWith(QLatin1Char('+')))
+            && pos < maxLen) {
+            temp[pos++] = str->first().toLatin1();
+            str->slice(1);
         }
-        while (isDigit(str->unicode()) && pos < maxLen) {
-            temp[pos++] = str->toLatin1();
-            ++str;
+        while (!str->isEmpty() && isDigit(str->first().unicode()) && pos < maxLen) {
+            temp[pos++] = str->first().toLatin1();
+            str->slice(1);
         }
     }
 
@@ -250,10 +251,9 @@ qreal toDouble(const QChar *&str)
 
 qreal toDouble(QStringView str, bool *ok)
 {
-    const QChar *c = str.constData();
-    qreal res = (c == nullptr ? qreal{} : toDouble(c));
+    const qreal res{ toDouble(&str) };
     if (ok)
-        *ok = (c == (str.constData() + str.size()));
+        *ok = str.isEmpty();
     return res;
 }
 
@@ -365,34 +365,33 @@ std::optional<qreal> parseAngle(QStringView str)
     return angle * unitFactor;
 }
 
-void parseNumbersArray(const QChar *&str, QVarLengthArray<qreal, 8> &points,
-                                     const char *pattern)
+void parseNumbersArray(QStringView *str, QVarLengthArray<qreal, 8> &points, const char *pattern)
 {
     const size_t patternLen = qstrlen(pattern);
-    while (str->isSpace())
-        ++str;
-    while (QSvgUtils::isDigit(str->unicode()) ||
-           *str == QLatin1Char('-') || *str == QLatin1Char('+') ||
-           *str == QLatin1Char('.')) {
+    while (!str->isEmpty() && str->first().isSpace())
+        str->slice(1);
+    while ((!str->isEmpty() && QSvgUtils::isDigit(str->first().unicode()))
+           || str->startsWith(QLatin1Char('-')) || str->startsWith(QLatin1Char('+'))
+           || str->startsWith(QLatin1Char('.'))) {
 
         if (patternLen && pattern[points.size() % patternLen] == 'f') {
             // flag expected, may only be 0 or 1
-            if (*str != QLatin1Char('0') && *str != QLatin1Char('1'))
+            if (!str->startsWith(QLatin1Char('0')) && !str->startsWith(QLatin1Char('1')))
                 return;
-            points.append(*str == QLatin1Char('0') ? 0.0 : 1.0);
-            ++str;
+            points.append(str->startsWith(QLatin1Char('0')) ? 0.0 : 1.0);
+            str->slice(1);
         } else {
             points.append(QSvgUtils::toDouble(str));
         }
 
-        while (str->isSpace())
-            ++str;
-        if (*str == QLatin1Char(','))
-            ++str;
+        while (!str->isEmpty() && str->first().isSpace())
+            str->slice(1);
+        if (str->startsWith(QLatin1Char(',')))
+            str->slice(1);
 
         //eat the rest of space
-        while (str->isSpace())
-            ++str;
+        while (!str->isEmpty() && str->first().isSpace())
+            str->slice(1);
     }
 }
 
@@ -406,23 +405,18 @@ std::optional<QPainterPath> parsePathDataFast(QStringView dataStr, bool limitLen
     qreal x = 0, y = 0;                // current point
     char lastMode = 0;
     QPointF ctrlPt;
-    const QChar *str = dataStr.constData();
-    const QChar *end = str + dataStr.size();
 
     QPainterPath path;
-    while (str != end) {
-        while (str->isSpace() && (str + 1) != end)
-            ++str;
-        QChar pathElem = *str;
-        ++str;
-        QChar endc = *end;
-        *const_cast<QChar *>(end) = u'\0'; // parseNumbersArray requires 0-termination that QStringView cannot guarantee
+    while (!dataStr.isEmpty()) {
+        while (dataStr.first().isSpace() && dataStr.length() > 1)
+            dataStr.slice(1);
+        QChar pathElem = dataStr.first();
+        dataStr.slice(1);
         const char *pattern = nullptr;
         if (pathElem == QLatin1Char('a') || pathElem == QLatin1Char('A'))
             pattern = "rrrffrr";
         QVarLengthArray<qreal, 8> arg;
-        parseNumbersArray(str, arg, pattern);
-        *const_cast<QChar *>(end) = endc;
+        parseNumbersArray(&dataStr, arg, pattern);
         if (pathElem == QLatin1Char('z') || pathElem == QLatin1Char('Z'))
             arg.append(0);//dummy
         const qreal *num = arg.constData();

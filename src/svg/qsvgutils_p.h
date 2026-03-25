@@ -37,13 +37,13 @@ enum LengthType {
 };
 
 bool isDigit(ushort ch);
-qreal toDouble(const QChar *&str);
+qreal toDouble(QStringView *str);
 qreal toDouble(QStringView str, bool *ok = NULL);
 qreal parseLength(QStringView str, LengthType *type, bool *ok = NULL);
 qreal convertToPixels(qreal len, bool , LengthType type);
 std::optional<qreal> parseAngle(QStringView str);
-void parseNumbersArray(const QChar *&str, QVarLengthArray<qreal, 8> &points,
-                              const char *pattern = nullptr);
+void parseNumbersArray(QStringView *str, QVarLengthArray<qreal, 8> &points,
+                       const char *pattern = nullptr);
 std::optional<QPainterPath> parsePathDataFast(QStringView dataStr, bool limitLength = true);
 
 }
