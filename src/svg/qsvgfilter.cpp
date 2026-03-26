@@ -90,7 +90,7 @@ const QSvgFeFilterPrimitive *QSvgFeFilterPrimitive::castToFilterPrimitive(const 
         node->type() == QSvgNode::FeComposite ||
         node->type() == QSvgNode::FeFlood ||
         node->type() == QSvgNode::FeBlend ) {
-        return reinterpret_cast<const QSvgFeFilterPrimitive*>(node);
+        return static_cast<const QSvgFeFilterPrimitive*>(node);
     } else {
         return nullptr;
     }
