@@ -1868,6 +1868,17 @@ void tst_QSvgRenderer::ossFuzzRender_data()
     // runtime error: signed integer overflow: -2147483648 + -1 cannot be represented in type 'int'
     QTest::newRow("excessive moveto in path") // id=406541912
             << R"(<svg><path stroke="#000" d="M- 7e8t9 ."/><marker id="c"/><use href=" c"/></svg>)"_ba;
+    // Bad-cast to QSvgMarker from QSvgLine -> Heap-buffer-overflow
+    QTest::newRow("line-as-marker") // id=496327371
+            << R"-(<svg><line x1="4" id="lledr" marker-end="url(#lledr)" stroke="#00f"/></svg>)-"_ba;
+    QTest::newRow("line-as-mask") // modeled after 496327371 to test similar problem, needs UBSAN
+            << R"-(<svg>
+                     <defs>
+                      <line x1="4" id="line"/>
+                      <mask id="mask" width="2" height="2" mask="url(#line)"/>
+                     </defs>
+                     <rect width="2" height="2" mask="url(#mask)"/>
+                   </svg>)-"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzRender()

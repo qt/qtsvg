@@ -426,9 +426,10 @@ void QSvgMarker::drawHelper(const QSvgNode *node, QPainter *p,
     const bool isPainting = (boundingRect == nullptr);
     const auto markers = markersForNode(node);
     for (auto &i : markers) {
-        QSvgMarker *markNode = static_cast<QSvgMarker*>(node->document()->namedNode(i.markerId));
-        if (!markNode)
+        QSvgNode *referencedNode = node->document()->namedNode(i.markerId);
+        if (!referencedNode || referencedNode->type() != QSvgNode::Marker)
             continue;
+        QSvgMarker *markNode = static_cast<QSvgMarker *>(referencedNode);
 
         p->save();
         p->translate(i.x, i.y);
@@ -729,8 +730,9 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
 
     // Chrome seems to return the mask of the mask if a mask is set on the mask
     if (this->hasMask()) {
-        QSvgMask *maskNode = static_cast<QSvgMask*>(document()->namedNode(this->maskId()));
-        if (maskNode) {
+        QSvgNode *referencedNode = document()->namedNode(this->maskId());
+        if (referencedNode && referencedNode->type() == QSvgNode::Mask) {
+            QSvgMask *maskNode = static_cast<QSvgMask *>(referencedNode);
             QRectF boundsRect;
             return maskNode->createMask(p, states, localRect, &boundsRect);
         }
