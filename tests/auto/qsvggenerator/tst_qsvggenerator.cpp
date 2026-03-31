@@ -183,7 +183,9 @@ void tst_QSvgGenerator::escapesDescription()
 
 void tst_QSvgGenerator::outputDevice()
 {
-    QString fileName = "outputDevice_output.svg";
+    const QString fileName = "outputDevice_output.svg";
+    const QByteArray notOpenWarning =
+            QString("QIODevice::write (QFile, \"%1\"): device not open").arg(fileName).toLatin1();
     QFile::remove(fileName);
 
     QFile file(fileName);
@@ -195,6 +197,7 @@ void tst_QSvgGenerator::outputDevice()
         QCOMPARE(generator.outputDevice(), (QIODevice *)&file);
 
         QPainter painter;
+        QTest::ignoreMessage(QtWarningMsg, notOpenWarning.constData());
         QVERIFY(painter.begin(&generator));
         QCOMPARE(file.openMode(), QIODevice::OpenMode(QIODevice::Text | QIODevice::WriteOnly));
         file.close();
@@ -208,6 +211,7 @@ void tst_QSvgGenerator::outputDevice()
         QCOMPARE(generator.outputDevice(), (QIODevice *)&file);
 
         QPainter painter;
+        QTest::ignoreMessage(QtWarningMsg, notOpenWarning.constData());
         QVERIFY(painter.begin(&generator));
         QCOMPARE(file.openMode(), QIODevice::OpenMode(QIODevice::WriteOnly));
         file.close();
@@ -222,6 +226,7 @@ void tst_QSvgGenerator::outputDevice()
 
         QPainter painter;
         QTest::ignoreMessage(QtWarningMsg, "QSvgPaintEngine::begin(), could not write to read-only output device: 'Unknown error'");
+        QTest::ignoreMessage(QtWarningMsg, "QPainter::begin(): Returned false");
         QVERIFY(!painter.begin(&generator));
         QCOMPARE(file.openMode(), QIODevice::OpenMode(QIODevice::ReadOnly));
         file.close();
