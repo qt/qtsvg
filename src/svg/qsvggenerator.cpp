@@ -1201,6 +1201,8 @@ void QSvgPaintEngine::drawPath(const QPainterPath &p)
                 *d->stream << e.x << ',' << e.y;
                 ++i;
             }
+            if (i == p.elementCount())
+                --i; // don't overshoot, outer for-loop will increment again, see QTBUG-145372
             break;
         default:
             break;
