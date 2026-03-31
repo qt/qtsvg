@@ -4,6 +4,7 @@
 
 #include <QtTest/QTest>
 
+#include <QBuffer>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomNode>
@@ -12,6 +13,7 @@
 #include <QFile>
 #include <QFont>
 #include <QLinearGradient>
+#include <QPainterPath>
 #include <QRadialGradient>
 
 #include <qguiapplication.h>
@@ -42,6 +44,7 @@ private slots:
     void titleAndDescription();
     void gradientInterpolation();
     void patternBrush();
+    void assertOnCurveToElement();
 };
 
 tst_QSvgGenerator::tst_QSvgGenerator()
@@ -509,6 +512,25 @@ void tst_QSvgGenerator::patternBrush()
         QVERIFY(byteArray.count("<g fill=\"url(#fillpattern") >= 4);
     }
 
+}
+
+void tst_QSvgGenerator::assertOnCurveToElement()
+{
+    // QTBUG-145372
+    // Tried to access QPainterPath beyond its size when closing path, needs enabled asserts
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    QSvgGenerator svg;
+    svg.setOutputDevice(&buffer);
+    QPainter painter(&svg);
+    QPainterPath path;
+    path.moveTo(100, 0);
+    path.cubicTo(100, 55, 55, 100, 0, 100);
+    path.cubicTo(55, -100, 100, -55, 100, 0);
+    painter.drawPath(path);
+    painter.end();
+    // Validate that path is still closed correctly
+    QVERIFY(byteArray.contains("M100,0 C100,55 55,100 0,100 C55,-100 100,-55 100,0 Z"));
 }
 
 QTEST_MAIN(tst_QSvgGenerator)
