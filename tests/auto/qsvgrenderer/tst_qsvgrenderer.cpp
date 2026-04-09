@@ -1815,7 +1815,7 @@ void tst_QSvgRenderer::glyphWarnings()
     QFETCH(QByteArrayList, warnings);
 
     for (const auto &w: warnings)
-        QTest::ignoreMessage(QtWarningMsg, w);
+        QTest::ignoreMessage(QtWarningMsg, w.constData());
     QSvgRenderer renderer(svgTemplate.arg(missingGlyphAttributes).arg(secondElement).toUtf8());
     QVERIFY(renderer.isValid());
 }
