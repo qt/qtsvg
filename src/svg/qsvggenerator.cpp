@@ -14,6 +14,7 @@
 #include "private/qpainter_p.h"
 #include "private/qtextengine_p.h"
 
+#include "qcompilerdetection.h"
 #include "qfile.h"
 #include "qtextstream.h"
 #include "qbuffer.h"
@@ -1177,6 +1178,7 @@ void QSvgPaintEngine::drawPath(const QPainterPath &p)
         }
     };
 
+    bool inCurveToElement = false;
     for (i = 0; i < p.elementCount(); ++i) {
         const QPainterPath::Element &e = p.elementAt(i);
         switch (e.type) {
@@ -1190,24 +1192,17 @@ void QSvgPaintEngine::drawPath(const QPainterPath &p)
             break;
         case QPainterPath::CurveToElement:
             *d->stream << 'C' << e.x << ',' << e.y;
-            ++i;
-            while (i < p.elementCount()) {
-                const QPainterPath::Element &e = p.elementAt(i);
-                if (e.type != QPainterPath::CurveToDataElement) {
-                    --i;
-                    break;
-                } else
-                    *d->stream << ' ';
+            break;
+        case QPainterPath::CurveToDataElement:
+            if (Q_LIKELY(inCurveToElement))
                 *d->stream << e.x << ',' << e.y;
-                ++i;
-            }
-            if (i == p.elementCount())
-                --i; // don't overshoot, outer for-loop will increment again, see QTBUG-145372
             break;
         default:
             break;
         }
         *d->stream << ' ';
+        if (e.type != QPainterPath::CurveToDataElement)
+            inCurveToElement = (e.type == QPainterPath::CurveToElement);
     }
     endSubPath();
 
