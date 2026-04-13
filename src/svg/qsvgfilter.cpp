@@ -812,14 +812,14 @@ QImage QSvgFeBlend::apply(const QMap<QString, QImage> &sources, QPainter *p,
                 b = (1 - alpha1) * blue2 + blue1;
                 break;
             case Mode::Multiply:
-                r = (1 - alpha1) * red2 + (1 - alpha2) * red1 + red1 * red2;
-                g = (1 - alpha1) * green2 + (1 - alpha2) * green1 + green1 * green2;
-                b = (1 - alpha1) * blue2 + (1 - alpha2) * blue1 + blue1 * blue2;
+                r = (1 - alpha1) * red2 + (1 - alpha2) * red1 + red1 * red2 / 255.;
+                g = (1 - alpha1) * green2 + (1 - alpha2) * green1 + green1 * green2 / 255.;
+                b = (1 - alpha1) * blue2 + (1 - alpha2) * blue1 + blue1 * blue2 / 255.;
                 break;
             case Mode::Screen:
-                r = red2 + red1 - red1 * red2;
-                g = green2 + green1 - green1 * green2;
-                b = blue2 + blue1 - blue1 * blue2;
+                r = red2 + red1 - red1 * red2 / 255.;
+                g = green2 + green1 - green1 * green2 / 255.;
+                b = blue2 + blue1 - blue1 * blue2 / 255.;
                 break;
             case Mode::Darken:
                 r = qMin((1 - alpha1) * red2 + red1, (1 - alpha2) * red1 + red2);
