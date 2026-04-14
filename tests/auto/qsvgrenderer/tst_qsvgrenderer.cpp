@@ -1812,7 +1812,7 @@ void tst_QSvgRenderer::glyphWarnings()
 
     QFETCH(QString, missingGlyphAttributes);
     QFETCH(QString, secondElement);
-    QFETCH(QByteArrayList, warnings);
+    QFETCH(const QByteArrayList, warnings);
 
     for (const auto &w: warnings)
         QTest::ignoreMessage(QtWarningMsg, w.constData());
