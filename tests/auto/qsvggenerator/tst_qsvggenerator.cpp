@@ -5,11 +5,10 @@
 #include <QtTest/QTest>
 
 #include <QBuffer>
+#include <QByteArray>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomNode>
-#include <QBuffer>
-#include <QByteArray>
 #include <QFile>
 #include <QFont>
 #include <QLinearGradient>
