@@ -65,7 +65,7 @@ public:
 
         attributes.document_title = QLatin1String("Qt SVG Document");
         attributes.document_description = QLatin1String("Generated with Qt");
-        attributes.font_family = QLatin1String("serif");
+        attributes.font_families << QLatin1String("serif");
         attributes.font_size = QLatin1String("10pt");
         attributes.font_style = QLatin1String("normal");
         attributes.font_weight = QLatin1String("normal");
@@ -108,7 +108,7 @@ public:
         QString document_description;
         QString font_weight;
         QString font_size;
-        QString font_family;
+        QStringList font_families;
         QString font_style;
         QString stroke, strokeOpacity;
         QString dashPattern, dashOffset;
@@ -537,10 +537,10 @@ public:
             d->attributes.font_size = QString::number(d->font.pixelSize());
 
         d->attributes.font_weight = QString::number(d->font.weight());
-        d->attributes.font_family = d->font.family();
+        d->attributes.font_families = d->font.families();
         d->attributes.font_style = d->font.italic() ? QLatin1String("italic") : QLatin1String("normal");
 
-        *d->stream << "font-family=\"" << d->attributes.font_family << "\" "
+        *d->stream << "font-family=\"" << d->attributes.font_families.join(QStringLiteral(",")) << "\" "
                       "font-size=\"" << d->attributes.font_size << "\" "
                       "font-weight=\"" << d->attributes.font_weight << "\" "
                       "font-style=\"" << d->attributes.font_style << "\" "
