@@ -4,7 +4,6 @@
 #include <QtTest/QTest>
 
 #include <QList>
-#include <QPair>
 #include <QString>
 #include <QXmlStreamAttributes>
 #include <QtTypes>
@@ -49,30 +48,34 @@ void tst_QSvgHandler::testToDouble_data()
     QTest::addColumn<QString>("numString");
     QTest::addColumn<qreal>("value");
 
-    const QList<QPair<QString, qreal>> signs{ { "", 1. }, { "+", 1. }, { "-", -1. }, { "$", NAN } };
-    const QList<QPair<QString, qreal>> digits{
+    using S = std::pair<QString, qreal>;
+
+    const QList<S> signs = { { "", 1. }, { "+", 1. }, { "-", -1. }, { "$", NAN } };
+    const QList<S> digits = {
         { "0", 0. },       { "00", 0. },    { "1", 1. },     { "01", 1. },
         { "23", 23. },     { "0023", 23. }, { "456", 456. }, { "7890", 7890. },
         { "9999", 9999. }, { "4x4", NAN },  { "acdc", NAN }, { "ACDC", NAN }
     };
 
-    QList<QPair<QString, qreal>> integer{ { "-32768", -32768. },
-                                          { "32767", 32767. },
-                                          { "+32767", 32767. } };
+    QList<S> integer = {
+        { "-32768", -32768. },
+        { "32767", 32767. },
+        { "+32767", 32767. },
+    };
     integer.reserve(integer.size() + signs.size() * digits.size());
     for (const auto &sign : signs) {
         for (const auto &digitPart : digits) {
             // TODO: Test empty string which is not a valid integer
-            integer << QPair<QString, qreal>{ sign.first + digitPart.first,
-                                              sign.second * digitPart.second };
+            integer.push_back({ sign.first + digitPart.first,
+                                sign.second * digitPart.second });
         }
     }
 
-    QList<QPair<QString, qreal>> decimal_number{ integer };
+    QList<S> decimal_number = integer;
     // limits of conforming SVG Tiny 1.2 content
-    decimal_number << QPair<QString, qreal>{ "-32767.9999", -32767.9999 };
-    decimal_number << QPair<QString, qreal>{ "32767.9999", 32767.9999 };
-    decimal_number << QPair<QString, qreal>{ "+32767.9999", 32767.9999 };
+    decimal_number.push_back({ "-32767.9999", -32767.9999 });
+    decimal_number.push_back({ "32767.9999", 32767.9999 });
+    decimal_number.push_back({ "+32767.9999", 32767.9999 });
     decimal_number.reserve(decimal_number.size()
                            + signs.size() * digits.size() * (digits.size() + 1));
     // TODO: Test decimal point without following digit which
@@ -81,13 +84,13 @@ void tst_QSvgHandler::testToDouble_data()
         for (const auto &fractDigits : digits) {
             const qreal fractPart =
                     fractDigits.second * std::pow(10., -fractDigits.first.toLatin1().length());
-            decimal_number << QPair<QString, qreal>{ sign.first + "." + fractDigits.first,
-                                                     sign.second * fractPart };
+            decimal_number.push_back({ sign.first + "." + fractDigits.first,
+                                       sign.second * fractPart });
             for (const auto &wholeDigits : digits) {
-                decimal_number << QPair<QString, qreal>{
+                decimal_number.push_back({
                     sign.first + wholeDigits.first + "." + fractDigits.first,
                     sign.second * (wholeDigits.second + fractPart)
-                };
+                });
             }
         }
     }
@@ -96,9 +99,11 @@ void tst_QSvgHandler::testToDouble_data()
     constexpr qsizetype exponentCount = 2;
     constexpr QChar exponentChars[exponentCount]{ 'E', 'e' };
     // current implementation's limits
-    QList<QPair<QString, qreal>> scientific_number{ { "-3.4028235e38", -3.4028235e38 },
-                                                    { "3.4028235e38", 3.4028235e38 },
-                                                    { "+3.4028235e38", 3.4028235e38 } };
+    QList<S> scientific_number = {
+        { "-3.4028235e38", -3.4028235e38 },
+        { "3.4028235e38", 3.4028235e38 },
+        { "+3.4028235e38", 3.4028235e38 },
+    };
     scientific_number.reserve(scientific_number.size()
                               + integer.size() * decimal_number.size() * exponentCount);
     for (const auto &exponent : std::as_const(integer)) {
@@ -116,8 +121,8 @@ void tst_QSvgHandler::testToDouble_data()
                 || std::numeric_limits<float>::max() < value)
                 continue;
             for (auto e : exponentChars)
-                scientific_number << QPair<QString, qreal>{ mantissa.first + e + exponent.first,
-                                                            value };
+                scientific_number.push_back({ mantissa.first + e + exponent.first,
+                                              value });
         }
     }
     const auto number{ decimal_number + scientific_number };
