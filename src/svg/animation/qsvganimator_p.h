@@ -21,6 +21,9 @@
 #include <QtSvg/private/qsvgnode_p.h>
 #include "qsvgabstractanimation_p.h"
 
+#include <QtCore/qhash.h>
+#include <QtCore/qlist.h>
+
 QT_BEGIN_NAMESPACE
 
 class Q_SVG_EXPORT QSvgAbstractAnimator
