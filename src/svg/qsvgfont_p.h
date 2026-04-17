@@ -17,9 +17,11 @@
 // We mean it.
 //
 
+#include <QtCore/qhash.h>
 #include "qpainterpath.h"
 #include "qlist.h"
 #include "qstring.h"
+
 #include "qsvgstyle_p.h"
 
 #include <memory>
