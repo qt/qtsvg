@@ -7,8 +7,10 @@
 #include <QtCore/qpoint.h>
 #include <QtGui/qcolor.h>
 #include <QtGui/qtransform.h>
+
 #include <QtCore/qloggingcategory.h>
 #include <QtCore/qglobalstatic.h>
+#include <QtCore/qhash.h>
 
 QT_BEGIN_NAMESPACE
 
