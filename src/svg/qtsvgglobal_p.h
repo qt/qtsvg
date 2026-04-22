@@ -33,6 +33,7 @@ enum class AnimatorType : quint32 {
     Automatic,
 };
 
+constexpr quint8 renderingMaxNestedNodes = 32;
 }
 
 QT_END_NAMESPACE

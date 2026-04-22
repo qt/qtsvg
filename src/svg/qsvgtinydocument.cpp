@@ -31,6 +31,7 @@ QSvgTinyDocument::QSvgTinyDocument(QtSvg::Options options, QtSvg::AnimatorType t
     , m_fps(30)
     , m_options(options)
 {
+    m_states.trustedSource = m_options.testFlag(QtSvg::AssumeTrustedSource);
     bool animationEnabled = !m_options.testFlag(QtSvg::DisableAnimations);
     switch (type) {
         case QtSvg::AnimatorType::Automatic:

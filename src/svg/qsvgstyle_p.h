@@ -115,6 +115,8 @@ struct Q_SVG_EXPORT QSvgExtraStates
     qreal strokeDashOffset;
     int nestedUseLevel = 0;
     int nestedUseCount = 0;
+    bool trustedSource = false;
+    quint8 remainingNestedNodes = QtSvg::renderingMaxNestedNodes;
     bool vectorEffect; // true if pen is cosmetic
     qint8 imageRendering; // QSvgQualityStyle::ImageRendering
     bool inUse = false; // true if currently in QSvgUseNode
