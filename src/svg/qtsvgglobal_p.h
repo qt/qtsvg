@@ -43,6 +43,7 @@ enum class OffsetRotateType : quint32 {
     ReverseAngle
 };
 
+constexpr quint8 renderingMaxNestedNodes = 32;
 }
 
 QT_END_NAMESPACE
