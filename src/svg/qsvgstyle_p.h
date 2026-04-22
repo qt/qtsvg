@@ -259,16 +259,6 @@ public:
         return m_paintStyleId;
     }
 
-    void setPaintStyleResolved(bool resolved)
-    {
-        m_paintStyleResolved = resolved;
-    }
-
-    bool isPaintStyleResolved() const
-    {
-        return m_paintStyleResolved;
-    }
-
 private:
     // fill            v 	v 	'inherit' | <Paint.datatype>
     // fill-opacity    v 	v 	'inherit' | <OpacityValue.datatype>
@@ -282,7 +272,6 @@ private:
     qreal m_oldFillOpacity;
 
     QString m_paintStyleId;
-    uint m_paintStyleResolved : 1;
 
     uint m_fillRuleSet : 1;
     uint m_fillOpacitySet : 1;
@@ -483,16 +472,6 @@ public:
         return m_paintStyleId;
     }
 
-    void setPaintStyleResolved(bool resolved)
-    {
-        m_paintStyleResolved = resolved;
-    }
-
-    bool isPaintStyleResolved() const
-    {
-        return m_paintStyleResolved;
-    }
-
     QPen stroke() const
     {
         return m_stroke;
@@ -516,7 +495,6 @@ private:
 
     QSvgRefCounter<QSvgPaintStyleProperty> m_style;
     QString m_paintStyleId;
-    uint m_paintStyleResolved : 1;
     uint m_vectorEffect : 1;
     uint m_oldVectorEffect : 1;
 

@@ -602,7 +602,7 @@ static void parseBrush(QSvgNode *node,
                 } else {
                     QString id = idFromFuncIRI(value).toString();
                     prop->setPaintStyleId(id);
-                    prop->setPaintStyleResolved(false);
+                    handler->pushUnresolvedStyle(prop);
                 }
             } else if (attributes.fill != QLatin1String("none")) {
                 QColor color;
@@ -767,7 +767,7 @@ static void parsePen(QSvgNode *node,
                     } else {
                         QString id = idFromFuncIRI(value).toString();
                         prop->setPaintStyleId(id);
-                        prop->setPaintStyleResolved(false);
+                        handler->pushUnresolvedStyle(prop);
                     }
             } else if (attributes.stroke != QLatin1String("none")) {
                 QColor color;
@@ -3657,7 +3657,7 @@ void QSvgHandler::parse()
             break;
         }
     }
-    resolvePaintServers(m_doc);
+    resolvePaintServers();
     resolveNodes();
     if (detectCyclesAndWarn(m_doc)) {
         delete m_doc;
@@ -3891,18 +3891,11 @@ bool QSvgHandler::endElement(const QStringView localName)
     return ((localName == QLatin1String("svg")) && (node != Doc));
 }
 
-void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)
+void QSvgHandler::resolvePaintServers()
 {
-    if (!node || (node->type() != QSvgNode::Doc && node->type() != QSvgNode::Group
-        && node->type() != QSvgNode::Defs && node->type() != QSvgNode::Switch)) {
-        return;
-    }
-
-    QSvgStructureNode *structureNode = static_cast<QSvgStructureNode *>(node);
-
-    for (auto &node : structureNode->renderers()) {
-        QSvgFillStyle *fill = static_cast<QSvgFillStyle *>(node->styleProperty(QSvgStyleProperty::FILL));
-        if (fill && !fill->isPaintStyleResolved()) {
+    for (QSvgStyleProperty *prop : std::as_const(m_unresolvedStyles)) {
+        if (prop->type() == QSvgStyleProperty::FILL) {
+            QSvgFillStyle *fill = static_cast<QSvgFillStyle *>(prop);
             QString id = fill->paintStyleId();
             QSvgPaintStyleProperty *style = m_doc->namedStyle(id);
             if (style) {
@@ -3911,10 +3904,8 @@ void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)
                 qCWarning(lcSvgHandler, "%s", msgCouldNotResolveProperty(id, xml).constData());
                 fill->setBrush(Qt::NoBrush);
             }
-        }
-
-        QSvgStrokeStyle *stroke = static_cast<QSvgStrokeStyle *>(node->styleProperty(QSvgStyleProperty::STROKE));
-        if (stroke && !stroke->isPaintStyleResolved()) {
+        } else if (prop->type() == QSvgStyleProperty::STROKE) {
+            QSvgStrokeStyle *stroke = static_cast<QSvgStrokeStyle *>(prop);
             QString id = stroke->paintStyleId();
             QSvgPaintStyleProperty *style = m_doc->namedStyle(id);
             if (style) {
@@ -3924,10 +3915,9 @@ void QSvgHandler::resolvePaintServers(QSvgNode *node, int nestedDepth)
                 stroke->setStroke(Qt::NoBrush);
             }
         }
-
-        if (nestedDepth < 2048)
-            resolvePaintServers(node.get(), nestedDepth + 1);
     }
+
+    m_unresolvedStyles.clear();
 }
 
 void QSvgHandler::resolveNodes()
@@ -4048,6 +4038,11 @@ QColor QSvgHandler::currentColor() const
         return m_colorStack.top();
     else
         return QColor(0, 0, 0);
+}
+
+void QSvgHandler::pushUnresolvedStyle(QSvgStyleProperty *prop)
+{
+    m_unresolvedStyles.append(prop);
 }
 
 #ifndef QT_NO_CSSPARSER
