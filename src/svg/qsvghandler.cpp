@@ -3639,7 +3639,7 @@ void QSvgHandler::init()
     parse();
 }
 
-static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> active = {})
+static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> &active)
 {
     QSvgFillStyle *fillStyle = static_cast<QSvgFillStyle*>
         (node->styleProperty(QSvgStyleProperty::FILL));
@@ -3660,53 +3660,83 @@ static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> ac
     return false;
 }
 
-static bool detectCycles(const QSvgNode *node, QList<const QSvgNode *> active = {})
+/* The function goes through a node and its descendants to
+ * find any circular references in the parsed SVG file. It
+ * is important for this to happen non-recursively to avoid
+ * stack overflows.
+ * The function maintains two lists of nodes. The active list
+ * is used to track patterns and uses because these are the nodes
+ * that can reference or be referenced by other nodes.
+ * Example :
+ * <pattern id="pat1" />
+ *  <rect fill="url(#pat1)" />
+ * </pattern>
+ *
+ * The other list of nodes is a stack to traverse the tree
+ * non-recursively, the std::pair stored in the stack will
+ * indicate whether a pattern or use has been visited and
+ * added to the active list or not. If the bool is set to true,
+ * this element can be popped out from the active list. */
+static bool detectCycles(const QSvgNode *n)
 {
-    if (Q_UNLIKELY(!node))
+    if (Q_UNLIKELY(!n))
         return false;
-    switch (node->type()) {
-    case QSvgNode::Doc:
-    case QSvgNode::Group:
-    case QSvgNode::Defs:
-    case QSvgNode::Pattern:
-    {
-        if (node->type() == QSvgNode::Pattern)
-            active.append(node);
 
-        auto *g = static_cast<const QSvgStructureNode*>(node);
-        for (auto &node : g->renderers()) {
-            if (detectCycles(node.get(), active))
-                return true;
-        }
-    }
-    break;
-    case QSvgNode::Use:
-    {
-        if (active.contains(node))
-            return true;
+    QList<const QSvgNode *> active;
+    using NodeState = std::pair<const QSvgNode *, bool>;
+    QStack<NodeState> nodes;
+    nodes.push({n, false});
 
-        auto *u = static_cast<const QSvgUse*>(node);
-        auto *target = u->link();
-        if (target) {
-            active.append(u);
-            if (detectCycles(target, active))
-                return true;
+    while (!nodes.isEmpty()) {
+        auto current = nodes.pop();
+        if (current.second) {
+            Q_ASSERT(!active.isEmpty() && current.first == active.back());
+            active.pop_back();
+            continue;
         }
-    }
-    break;
-    case QSvgNode::Rect:
-    case QSvgNode::Ellipse:
-    case QSvgNode::Circle:
-    case QSvgNode::Line:
-    case QSvgNode::Path:
-    case QSvgNode::Polygon:
-    case QSvgNode::Polyline:
-    case QSvgNode::Tspan:
-        if (detectPatternCycles(node, active))
-            return true;
+
+        switch (current.first->type()) {
+        case QSvgNode::Doc:
+        case QSvgNode::Group:
+        case QSvgNode::Defs:
+        case QSvgNode::Pattern:
+        {
+            if (current.first->type() == QSvgNode::Pattern) {
+                active.append(current.first);
+                nodes.push({current.first, true});
+            }
+            auto *g = static_cast<const QSvgStructureNode*>(current.first);
+            for (auto it = g->renderers().crbegin(); it != g->renderers().crend(); it++)
+                nodes.push({it->get(), false});
+        }
         break;
-    default:
+        case QSvgNode::Use:
+        {
+            if (active.contains(current.first))
+                return true;
+            auto *u = static_cast<const QSvgUse*>(current.first);
+            auto *target = u->link();
+            if (target) {
+                active.append(u);
+                nodes.push({u, true});
+                nodes.push({target, false});
+            }
+        }
         break;
+        case QSvgNode::Rect:
+        case QSvgNode::Ellipse:
+        case QSvgNode::Circle:
+        case QSvgNode::Line:
+        case QSvgNode::Path:
+        case QSvgNode::Polygon:
+        case QSvgNode::Polyline:
+        case QSvgNode::Tspan:
+            if (detectPatternCycles(current.first, active))
+                return true;
+            break;
+        default:
+            break;
+        }
     }
     return false;
 }
