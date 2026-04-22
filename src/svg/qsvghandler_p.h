@@ -67,6 +67,8 @@ public:
     void popColor();
     QColor currentColor() const;
 
+    void pushUnresolvedStyle(QSvgStyleProperty *prop);
+
 #ifndef QT_NO_CSSPARSER
     void setInStyle(bool b);
     bool inStyle() const;
@@ -100,6 +102,7 @@ private:
     // - <use> nodes which haven't been resolved yet.
     // - <filter> nodes to be checked for unsupported filter primitives.
     QList<QSvgNode *> m_toBeResolved;
+    QList<QSvgStyleProperty *> m_unresolvedStyles;
 
     enum CurrentNode
     {
@@ -131,7 +134,7 @@ private:
     QSvgCssHandler m_cssHandler;
 #endif
     void parse();
-    void resolvePaintServers(QSvgNode *node, int nestedDepth = 0);
+    void resolvePaintServers();
     void resolveNodes();
 
     QPen m_defaultPen;

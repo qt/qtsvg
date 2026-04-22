@@ -178,7 +178,7 @@ void tst_QSvgRenderer::emptyRect()
 void tst_QSvgRenderer::inexistentUrl()
 {
     const char *src = "<svg><g><path d=\"M0 0\" style=\"stroke:url(#inexistent)\"/></g></svg>";
-    QTest::ignoreMessage(QtWarningMsg, "<input>:1:66: Could not resolve property: #inexistent");
+    QTest::ignoreMessage(QtWarningMsg, "<input>:1:66: Could not resolve property: inexistent");
 
     QByteArray data(src);
     QSvgRenderer renderer(data);
@@ -2258,7 +2258,7 @@ void tst_QSvgRenderer::testMisplacedElement()
 
     QTest::ignoreMessage(QtWarningMsg, "<input>:2:68: Could not add child element to parent "
                                        "element because the types are incorrect.");
-    QTest::ignoreMessage(QtWarningMsg, "<input>:4:28: Could not resolve property: #ptn");
+    QTest::ignoreMessage(QtWarningMsg, "<input>:4:28: Could not resolve property: ptn");
 
     QSvgRenderer renderer(svg);
     QPainter painter(&image);
