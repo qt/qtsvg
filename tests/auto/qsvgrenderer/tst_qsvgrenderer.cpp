@@ -99,6 +99,9 @@ private slots:
     void testOption_data();
     void testOption();
 
+    void testDeeplyNested_data();
+    void testDeeplyNested();
+
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
     void testGzHelper_data();
@@ -2514,6 +2517,64 @@ void tst_QSvgRenderer::testOption()
     QSvgRenderer renderer;
     renderer.setOptions(option);
     QVERIFY(renderer.options().testFlag(option));
+}
+
+void tst_QSvgRenderer::testDeeplyNested_data()
+{
+    auto generateNests = [](uint count) -> QByteArray
+    {
+        QByteArray svgDoc = R"(<svg width="50" height="50">)"_ba;
+        for (uint i = 0; i < count; i++) {
+            svgDoc += R"(<g id="g)"_ba;
+            svgDoc += QByteArray::number(i);
+            svgDoc += R"(">)"_ba;
+        }
+
+        svgDoc += R"(<line id="line1" x1="10" y1="10" x2="40" y2="10" stroke="black" stroke-width="4"/>)"_ba
+                  R"(<line id="line1" x1="10" y1="20" x2="40" y2="20" stroke="black" stroke-width="4"/>)"_ba
+                  R"(<line id="line1" x1="10" y1="30" x2="40" y2="30" stroke="black" stroke-width="4"/>)"_ba;
+        for (uint i = 0; i < count; i++)
+            svgDoc += R"(</g>)"_ba;
+
+        svgDoc += R"(</svg>)"_ba;
+        return svgDoc;
+    };
+
+
+    QTest::addColumn<QByteArray>("deeplyNested");
+    QTest::addColumn<bool>("trusted");
+    QTest::newRow("8 groups") << generateNests(8) << true;
+    QTest::newRow("16 groups") << generateNests(16) << true;
+    QTest::newRow("32 groups") << generateNests(32) << true;
+    QTest::newRow("64 groups") << generateNests(64) << false;
+    QTest::newRow("128 groups") << generateNests(128) << false;
+    QTest::newRow("256 groups") << generateNests(256) << false;
+    QTest::newRow("512 groups") << generateNests(512) << false;
+    QTest::newRow("1024 groups") << generateNests(1024) << false;
+}
+
+void tst_QSvgRenderer::testDeeplyNested()
+{
+    QFETCH(QByteArray, deeplyNested);
+    QFETCH(bool, trusted);
+
+    QSvgRenderer renderer;
+    if (trusted) {
+        renderer.setOptions(QtSvg::AssumeTrustedSource);
+    } else {
+        QTest::ignoreMessage(QtWarningMsg,
+                             "Too many nested nodes at g exceeding max nested limit of 32 . "
+                             "Enable AssumeTrustedSource in QSvgHandler or set "
+                             "QT_SVG_DEFAULT_OPTIONS=2 to disable this check.");
+    }
+
+    renderer.load(deeplyNested);
+    QVERIFY(renderer.isValid());
+
+    QImage image(QSize(50, 50), QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::transparent);
+    QPainter p(&image);
+    renderer.render(&p);
 }
 
 QTEST_MAIN(tst_QSvgRenderer)
