@@ -21,6 +21,8 @@
 #include <QtSvg/private/qsvghelper_p.h>
 #include <QtCore/qlist.h>
 
+#include <list>
+
 QT_BEGIN_NAMESPACE
 
 class QSvgDocument;
@@ -39,9 +41,13 @@ public:
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QSvgNode *previousSiblingNode(QSvgNode *n) const;
-    const std::vector<std::unique_ptr<QSvgNode>> &renderers() const { return m_renderers; }
+    const std::list<std::unique_ptr<QSvgNode>> &renderers() const { return m_renderers; }
+
 protected:
-    std::vector<std::unique_ptr<QSvgNode>>          m_renderers;
+    void releaseDescendants();
+
+protected:
+    std::list<std::unique_ptr<QSvgNode>>          m_renderers;
     mutable bool              m_recursing = false;
 
 private:
