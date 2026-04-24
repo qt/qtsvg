@@ -682,6 +682,44 @@ QSvgNode* QSvgStructureNode::previousSiblingNode(QSvgNode *n) const
     return prev;
 }
 
+void QSvgStructureNode::releaseDescendants()
+{
+    // This function will release the descendants of a QSvgStructureNode from bottom to top.
+    // Destructors are never called recursively in this case and stack overflow will not
+    // happen in deeply nested trees.
+    // This function does not allocate any memory at the cost of sacrificing some performance to
+    // make it safe to be called from a destructor.
+    while (!m_renderers.empty()) {
+        auto nodes = &m_renderers;
+        bool isSubtree = true;
+        while (isSubtree) {
+            switch (nodes->front()->type()) {
+            case QSvgNode::Doc:
+            case QSvgNode::Defs:
+            case QSvgNode::Group:
+            case QSvgNode::Mask:
+            case QSvgNode::Pattern:
+            case QSvgNode::Symbol:
+            case QSvgNode::Switch:
+            case QSvgNode::Filter:
+            {
+                QSvgStructureNode *subtree = static_cast<QSvgStructureNode *>(nodes->first());
+                isSubtree = !subtree->m_renderers.empty();
+                if (isSubtree)
+                    nodes = &subtree->m_renderers;
+            }
+                break;
+            default:
+                isSubtree = false;
+                break;
+            }
+        }
+        QSvgNode *node = nodes->first();
+        delete node;
+        nodes->pop_front();
+    }
+}
+
 QSvgMask::QSvgMask(QSvgNode *parent, QSvgRectF bounds,
                    QtSvg::UnitTypes contentUnits)
     : QSvgStructureNode(parent)

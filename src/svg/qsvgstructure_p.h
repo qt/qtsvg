@@ -38,6 +38,10 @@ public:
     QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QSvgNode *previousSiblingNode(QSvgNode *n) const;
     QList<QSvgNode*> renderers() const { return m_renderers; }
+
+protected:
+    void releaseDescendants();
+
 protected:
     QList<QSvgNode*>          m_renderers;
     QHash<QString, QSvgNode*> m_scope;

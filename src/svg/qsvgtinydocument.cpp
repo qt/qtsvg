@@ -46,6 +46,10 @@ QSvgTinyDocument::QSvgTinyDocument(QtSvg::Options options, QtSvg::AnimatorType t
 
 QSvgTinyDocument::~QSvgTinyDocument()
 {
+    // Only do that when AssumeTrustedSource is set to false. Otherwise, all nodes
+    // will be deleted by recursive calls of destructors.
+    if (!m_states.trustedSource)
+        releaseDescendants();
 }
 
 static bool hasSvgHeader(const QByteArray &buf)
