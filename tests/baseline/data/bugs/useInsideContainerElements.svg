@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test that <use> works correctly inside <symbol>, <marker>, and <pattern> -->
+<svg width="300" height="100" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <!-- use inside symbol -->
+        <circle id="dot" cx="50" cy="50" r="40" fill="red"/>
+        <symbol id="dotSymbol" overflow="visible">
+            <use xlink:href="#dot"/>
+        </symbol>
+
+        <!-- use inside marker -->
+        <rect id="markerBox" x="0" y="0" width="10" height="10" fill="green"/>
+        <marker id="m" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="5" refY="5">
+            <use xlink:href="#markerBox"/>
+        </marker>
+
+        <!-- use inside pattern -->
+        <rect id="tile" width="20" height="20" fill="blue"/>
+        <pattern id="p" patternUnits="userSpaceOnUse" width="20" height="20">
+            <use xlink:href="#tile"/>
+        </pattern>
+    </defs>
+
+    <!-- symbol: red circle -->
+    <use xlink:href="#dotSymbol" x="0" y="0"/>
+
+    <!-- marker: green squares on line endpoints -->
+    <line x1="150" y1="50" x2="150" y2="50" stroke="black" stroke-width="1" marker-start="url(#m)"/>
+
+    <!-- pattern: blue tiled rectangle -->
+    <rect x="200" y="0" width="100" height="100" fill="url(#p)"/>
+</svg>

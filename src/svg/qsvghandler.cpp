@@ -3196,6 +3196,9 @@ static QSvgNode *createUseNode(QSvgNode *parent,
     case QSvgNode::Group:
     case QSvgNode::Switch:
     case QSvgNode::Mask:
+    case QSvgNode::Symbol:
+    case QSvgNode::Marker:
+    case QSvgNode::Pattern:
         group = static_cast<QSvgStructureNode*>(parent);
         break;
     default:
