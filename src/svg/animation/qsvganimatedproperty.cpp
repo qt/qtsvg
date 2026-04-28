@@ -12,6 +12,8 @@
 #include <QtCore/qglobalstatic.h>
 #include <QtCore/qhash.h>
 
+#include <optional>
+
 QT_BEGIN_NAMESPACE
 
 Q_STATIC_LOGGING_CATEGORY(lcSvgAnimatedProperty, "qt.svg.animation.properties")
@@ -99,20 +101,30 @@ QVariant QSvgAbstractAnimatedProperty::interpolatedValue() const
     return m_interpolatedValue;
 }
 
-QSvgAbstractAnimatedProperty *QSvgAbstractAnimatedProperty::createAnimatedProperty(const QString &name)
+static std::optional<QSvgAbstractAnimatedProperty::Type> name2type(const QString &name)
 {
     if (animatableProperties->isEmpty())
         initHash();
 
     if (!animatableProperties->contains(name)) {
+        return std::nullopt;
+    }
+
+    return animatableProperties->value(name);
+}
+
+QSvgAbstractAnimatedProperty *QSvgAbstractAnimatedProperty::createAnimatedProperty(const QString &name)
+{
+    const std::optional<Type> type = name2type(name);
+
+    if (!type) {
         qCDebug(lcSvgAnimatedProperty) << "Property : " << name << " is not animatable";
         return nullptr;
     }
 
-    QSvgAbstractAnimatedProperty::Type type = animatableProperties->value(name);
     QSvgAbstractAnimatedProperty *prop = nullptr;
 
-    switch (type) {
+    switch (*type) {
     case QSvgAbstractAnimatedProperty::Color:
         prop = new QSvgAnimatedPropertyColor(name);
         break;
