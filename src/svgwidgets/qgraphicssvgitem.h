@@ -27,6 +27,7 @@ class Q_SVGWIDGETS_EXPORT QGraphicsSvgItem : public QGraphicsObject
 public:
     QGraphicsSvgItem(QGraphicsItem *parentItem = nullptr);
     QGraphicsSvgItem(const QString &fileName, QGraphicsItem *parentItem = nullptr);
+    ~QGraphicsSvgItem() override;
 
     void setSharedRenderer(QSvgRenderer *renderer);
     QSvgRenderer *renderer() const;
