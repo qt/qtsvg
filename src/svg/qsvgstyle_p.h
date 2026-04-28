@@ -89,7 +89,8 @@ class Q_SVG_EXPORT QSvgRefCounted
 {
 public:
     QSvgRefCounted() { _ref = 0; }
-    virtual ~QSvgRefCounted() {}
+    virtual ~QSvgRefCounted();
+
     void ref() {
         ++_ref;
 //        qDebug() << this << ": adding ref, now " << _ref;
@@ -145,6 +146,7 @@ public:
     };
 public:
     virtual ~QSvgStyleProperty();
+
     virtual void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) = 0;
     virtual void revert(QPainter *p, QSvgExtraStates &states) =0;
     virtual Type type() const=0;
@@ -154,6 +156,8 @@ public:
 class Q_SVG_EXPORT QSvgPaintStyleProperty : public QSvgStyleProperty
 {
 public:
+    ~QSvgPaintStyleProperty() override;
+
     virtual QBrush brush(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) = 0;
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
@@ -169,6 +173,8 @@ public:
     };
 
     QSvgQualityStyle(int color);
+    ~QSvgQualityStyle() override;
+
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
@@ -205,6 +211,8 @@ class Q_SVG_EXPORT QSvgOpacityStyle : public QSvgStyleProperty
 {
 public:
     QSvgOpacityStyle(qreal opacity);
+    ~QSvgOpacityStyle() override;
+
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
@@ -220,6 +228,8 @@ class Q_SVG_EXPORT QSvgFillStyle : public QSvgStyleProperty
 {
 public:
     QSvgFillStyle();
+    ~QSvgFillStyle() override;
+
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
@@ -282,6 +292,8 @@ class Q_SVG_EXPORT QSvgViewportFillStyle : public QSvgStyleProperty
 {
 public:
     QSvgViewportFillStyle(const QBrush &brush);
+    ~QSvgViewportFillStyle() override;
+
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
@@ -306,6 +318,8 @@ public:
 
     QSvgFontStyle(QSvgFont *font, QSvgDocument *doc);
     QSvgFontStyle();
+    ~QSvgFontStyle() override;
+
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
@@ -384,6 +398,8 @@ class Q_SVG_EXPORT QSvgStrokeStyle : public QSvgStyleProperty
 {
 public:
     QSvgStrokeStyle();
+    ~QSvgStrokeStyle() override;
+
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
@@ -513,6 +529,8 @@ class Q_SVG_EXPORT QSvgSolidColorStyle : public QSvgPaintStyleProperty
 {
 public:
     QSvgSolidColorStyle(const QColor &color);
+    ~QSvgSolidColorStyle() override;
+
     Type type() const override;
 
     const QColor & qcolor() const
@@ -538,7 +556,8 @@ class Q_SVG_EXPORT QSvgGradientStyle : public QSvgPaintStyleProperty
 {
 public:
     QSvgGradientStyle(QGradient *grad);
-    ~QSvgGradientStyle() { delete m_gradient; }
+    ~QSvgGradientStyle() override;
+
     Type type() const override;
 
     void setStopLink(const QString &link, QSvgDocument *doc);
@@ -581,7 +600,8 @@ class Q_SVG_EXPORT QSvgPatternStyle : public QSvgPaintStyleProperty
 {
 public:
     QSvgPatternStyle(QSvgPattern *pattern);
-    ~QSvgPatternStyle() = default;
+    ~QSvgPatternStyle() override;
+
     Type type() const override;
 
     QBrush brush(QPainter *, const QSvgNode *, QSvgExtraStates &) override;
@@ -596,6 +616,8 @@ class Q_SVG_EXPORT QSvgTransformStyle : public QSvgStyleProperty
 {
 public:
     QSvgTransformStyle(const QTransform &transform);
+    ~QSvgTransformStyle() override;
+
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
@@ -615,6 +637,8 @@ class Q_SVG_EXPORT QSvgCompOpStyle : public QSvgStyleProperty
 {
 public:
     QSvgCompOpStyle(QPainter::CompositionMode mode);
+    ~QSvgCompOpStyle() override;
+
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
@@ -634,6 +658,8 @@ class Q_SVG_EXPORT QSvgOffsetStyle : public QSvgStyleProperty
 {
 public:
     QSvgOffsetStyle() = default;
+    ~QSvgOffsetStyle() override;
+
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states) override;
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;

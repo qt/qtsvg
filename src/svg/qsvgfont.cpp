@@ -23,6 +23,8 @@ QSvgFont::QSvgFont(qreal horizAdvX)
 {
 }
 
+QSvgFont::~QSvgFont()
+    = default;
 
 QString QSvgFont::familyName() const
 {
