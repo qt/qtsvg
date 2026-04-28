@@ -45,6 +45,7 @@ class Q_SVG_EXPORT QSvgFont : public QSvgRefCounted
 public:
     static constexpr qreal DEFAULT_UNITS_PER_EM = 1000;
     QSvgFont(qreal horizAdvX);
+    ~QSvgFont() override;
 
     void setFamilyName(const QString &name);
     QString familyName() const;
