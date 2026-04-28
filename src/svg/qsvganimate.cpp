@@ -16,6 +16,9 @@ QSvgAnimateNode::QSvgAnimateNode(QSvgNode *parent)
     m_easing = std::make_unique<QSvgLinearEasing>();
 }
 
+QSvgAnimateNode::~QSvgAnimateNode()
+    = default;
+
 void QSvgAnimateNode::setRunningTime(int startMs, int durMs, int endMs, int by)
 {
     Q_UNUSED(by)
@@ -36,5 +39,12 @@ bool QSvgAnimateNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
     Q_UNUSED(states)
     return false;
 }
+
+QSvgAnimateColor::~QSvgAnimateColor()
+    = default;
+
+
+QSvgAnimateTransform::~QSvgAnimateTransform()
+    = default;
 
 QT_END_NAMESPACE
