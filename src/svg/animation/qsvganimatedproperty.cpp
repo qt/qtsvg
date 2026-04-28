@@ -16,20 +16,25 @@
 
 QT_BEGIN_NAMESPACE
 
+using namespace Qt::StringLiterals;
+
 Q_STATIC_LOGGING_CATEGORY(lcSvgAnimatedProperty, "qt.svg.animation.properties")
 
-typedef QHash<QString, QSvgAbstractAnimatedProperty::Type> AnimatableHashType;
-Q_GLOBAL_STATIC(AnimatableHashType, animatableProperties)
-
-static void initHash()
+static std::optional<QSvgAbstractAnimatedProperty::Type> name2type(const QString &name)
 {
-    animatableProperties->insert(QStringLiteral("fill"), QSvgAbstractAnimatedProperty::Color);
-    animatableProperties->insert(QStringLiteral("fill-opacity"), QSvgAbstractAnimatedProperty::Float);
-    animatableProperties->insert(QStringLiteral("stroke-opacity"), QSvgAbstractAnimatedProperty::Float);
-    animatableProperties->insert(QStringLiteral("stroke"), QSvgAbstractAnimatedProperty::Color);
-    animatableProperties->insert(QStringLiteral("opacity"), QSvgAbstractAnimatedProperty::Float);
-    animatableProperties->insert(QStringLiteral("transform"), QSvgAbstractAnimatedProperty::Transform);
-    animatableProperties->insert(QStringLiteral("offset-distance"), QSvgAbstractAnimatedProperty::Float);
+    static const QHash<QString, QSvgAbstractAnimatedProperty::Type> hash = {
+        { u"fill"_s, QSvgAbstractAnimatedProperty::Color },
+        { u"fill-opacity"_s, QSvgAbstractAnimatedProperty::Float },
+        { u"stroke-opacity"_s, QSvgAbstractAnimatedProperty::Float },
+        { u"stroke"_s, QSvgAbstractAnimatedProperty::Color },
+        { u"opacity"_s, QSvgAbstractAnimatedProperty::Float },
+        { u"transform"_s, QSvgAbstractAnimatedProperty::Transform },
+        { u"offset-distance"_s, QSvgAbstractAnimatedProperty::Float },
+    };
+    auto it = hash.find(name);
+    if (it == hash.end())
+        return std::nullopt;
+    return *it;
 }
 
 static qreal q_lerp(qreal a, qreal b, qreal t)
@@ -99,18 +104,6 @@ QSvgAbstractAnimatedProperty::Type QSvgAbstractAnimatedProperty::type() const
 QVariant QSvgAbstractAnimatedProperty::interpolatedValue() const
 {
     return m_interpolatedValue;
-}
-
-static std::optional<QSvgAbstractAnimatedProperty::Type> name2type(const QString &name)
-{
-    if (animatableProperties->isEmpty())
-        initHash();
-
-    if (!animatableProperties->contains(name)) {
-        return std::nullopt;
-    }
-
-    return animatableProperties->value(name);
 }
 
 QSvgAbstractAnimatedProperty *QSvgAbstractAnimatedProperty::createAnimatedProperty(const QString &name)
