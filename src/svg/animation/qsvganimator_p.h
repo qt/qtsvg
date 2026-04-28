@@ -28,6 +28,7 @@ QT_BEGIN_NAMESPACE
 
 class Q_SVG_EXPORT QSvgAbstractAnimator
 {
+    Q_DISABLE_COPY_MOVE(QSvgAbstractAnimator)
 public:
     QSvgAbstractAnimator();
     virtual ~QSvgAbstractAnimator();
