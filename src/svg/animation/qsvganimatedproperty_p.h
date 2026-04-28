@@ -30,6 +30,7 @@ QT_BEGIN_NAMESPACE
 
 class Q_SVG_EXPORT QSvgAbstractAnimatedProperty
 {
+    Q_DISABLE_COPY_MOVE(QSvgAbstractAnimatedProperty)
 public:
     enum Type
     {
@@ -63,10 +64,6 @@ protected:
 private:
     QString m_propertyName;
     Type m_type;
-
-private:
-    Q_DISABLE_COPY_X(QSvgAbstractAnimatedProperty, "Class has a vector of unique"
-                                        "pointers as member variable")
 };
 
 class Q_SVG_EXPORT QSvgAnimatedPropertyColor : public QSvgAbstractAnimatedProperty
