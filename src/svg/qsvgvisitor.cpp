@@ -7,6 +7,9 @@
 
 QT_BEGIN_NAMESPACE
 
+QSvgVisitor::~QSvgVisitor()
+    = default;
+
 void QSvgVisitor::traverse(const QSvgStructureNode *node)
 {
     switch (node->type()) {
