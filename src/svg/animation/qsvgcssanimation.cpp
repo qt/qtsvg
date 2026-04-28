@@ -11,6 +11,9 @@ QSvgCssAnimation::QSvgCssAnimation()
 {
 }
 
+QSvgCssAnimation::~QSvgCssAnimation()
+    = default;
+
 QSvgCssAnimation::AnimationType QSvgCssAnimation::animationType() const
 {
     return AnimationType::CSS;

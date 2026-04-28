@@ -27,6 +27,8 @@ class Q_SVG_EXPORT QSvgCssAnimation : public QSvgAbstractAnimation
 {
 public:
     QSvgCssAnimation();
+    ~QSvgCssAnimation() override;
+
     virtual AnimationType animationType() const override;
 };
 
