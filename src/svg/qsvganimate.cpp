@@ -7,6 +7,9 @@
 
 QT_BEGIN_NAMESPACE
 
+QSvgLinearEasing::~QSvgLinearEasing()
+    = default;
+
 QSvgAnimateNode::QSvgAnimateNode(QSvgNode *parent)
     : QSvgNode(parent)
     , m_end(0)
