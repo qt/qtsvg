@@ -122,6 +122,11 @@ QGraphicsSvgItem::QGraphicsSvgItem(const QString &fileName, QGraphicsItem *paren
     d->updateDefaultSize();
 }
 
+QGraphicsSvgItem::~QGraphicsSvgItem()
+{
+    // must be empty until Qt 7 (used to be inline)
+}
+
 /*!
     Returns the currently use QSvgRenderer.
 */
