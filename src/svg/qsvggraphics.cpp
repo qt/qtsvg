@@ -29,6 +29,9 @@ Q_LOGGING_CATEGORY(lcSvgDraw, "qt.svg.draw")
 #define QT_SVG_MAX_LAYOUT_SIZE (qint64(QFIXED_MAX / 2))
 #endif
 
+QSvgDummyNode::~QSvgDummyNode()
+    = default;
+
 void QSvgDummyNode::drawCommand(QPainter *, QSvgExtraStates &)
 {
     qWarning("Dummy node not meant to be drawn");
@@ -38,6 +41,9 @@ QSvgEllipse::QSvgEllipse(QSvgNode *parent, const QRectF &rect)
     : QSvgNode(parent), m_bounds(rect)
 {
 }
+
+QSvgEllipse::~QSvgEllipse()
+    = default;
 
 QRectF QSvgEllipse::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
@@ -88,6 +94,9 @@ QSvgImage::QSvgImage(QSvgNode *parent,
         m_bounds.setHeight(static_cast<qreal>(m_image.height()));
 }
 
+QSvgImage::~QSvgImage()
+    = default;
+
 void QSvgImage::drawCommand(QPainter *p, QSvgExtraStates &)
 {
     p->drawImage(m_bounds, m_image);
@@ -97,6 +106,9 @@ QSvgLine::QSvgLine(QSvgNode *parent, const QLineF &line)
     : QSvgNode(parent), m_line(line)
 {
 }
+
+QSvgLine::~QSvgLine()
+    = default;
 
 void QSvgLine::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
@@ -116,6 +128,9 @@ QSvgPath::QSvgPath(QSvgNode *parent, const QPainterPath &qpath)
     : QSvgNode(parent), m_path(qpath)
 {
 }
+
+QSvgPath::~QSvgPath()
+    = default;
 
 void QSvgPath::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
@@ -171,6 +186,9 @@ QSvgPolygon::QSvgPolygon(QSvgNode *parent, const QPolygonF &poly)
 {
 }
 
+QSvgPolygon::~QSvgPolygon()
+    = default;
+
 QRectF QSvgPolygon::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
     return p->transform().mapRect(m_poly.boundingRect());
@@ -225,6 +243,9 @@ QSvgPolyline::QSvgPolyline(QSvgNode *parent, const QPolygonF &poly)
 
 }
 
+QSvgPolyline::~QSvgPolyline()
+    = default;
+
 void QSvgPolyline::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
     if (p->brush().style() != Qt::NoBrush) {
@@ -248,6 +269,9 @@ QSvgRect::QSvgRect(QSvgNode *node, const QRectF &rect, qreal rx, qreal ry)
       m_rect(rect), m_rx(rx), m_ry(ry)
 {
 }
+
+QSvgRect::~QSvgRect()
+    = default;
 
 QRectF QSvgRect::internalFastBounds(QPainter *p, QSvgExtraStates &) const
 {
@@ -561,11 +585,17 @@ void QSvgText::addText(QStringView text)
     m_tspans.back()->addText(text);
 }
 
+QSvgTspan::~QSvgTspan()
+    = default;
+
 QSvgUse::QSvgUse(const QPointF &start, QSvgNode *parent, QSvgNode *node)
     : QSvgNode(parent), m_link(node), m_start(start), m_recursing(false)
 {
 
 }
+
+QSvgUse::~QSvgUse()
+    = default;
 
 void QSvgUse::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
@@ -602,6 +632,10 @@ QSvgNode::Type QSvgDummyNode::type() const
 {
     return FeUnsupported;
 }
+
+
+QSvgCircle::~QSvgCircle()
+    = default;
 
 QSvgNode::Type QSvgCircle::type() const
 {
@@ -652,6 +686,9 @@ QSvgNode::Type QSvgUse::type() const
 {
     return Use;
 }
+
+QSvgVideo::~QSvgVideo()
+    = default;
 
 QSvgNode::Type QSvgVideo::type() const
 {

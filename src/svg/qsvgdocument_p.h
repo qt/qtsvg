@@ -49,7 +49,8 @@ public:
     static bool isLikelySvg(QIODevice *device, bool *isCompressed = nullptr);
 public:
     QSvgDocument(QtSvg::Options options, QtSvg::AnimatorType type);
-    ~QSvgDocument();
+    ~QSvgDocument() override;
+
     Type type() const override;
 
     inline QSize size() const;

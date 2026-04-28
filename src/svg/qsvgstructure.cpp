@@ -28,9 +28,8 @@ QSvgG::QSvgG(QSvgNode *parent)
 
 }
 
-QSvgStructureNode::~QSvgStructureNode()
-{
-}
+QSvgG::~QSvgG()
+    = default;
 
 void QSvgG::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
@@ -61,6 +60,9 @@ QSvgStructureNode::QSvgStructureNode(QSvgNode *parent)
 
 }
 
+QSvgStructureNode::~QSvgStructureNode()
+    = default;
+
 QSvgNode * QSvgStructureNode::scopeNode(const QString &id) const
 {
     QSvgDocument *doc = document();
@@ -83,6 +85,9 @@ QSvgDefs::QSvgDefs(QSvgNode *parent)
 {
 }
 
+QSvgDefs::~QSvgDefs()
+    = default;
+
 bool QSvgDefs::shouldDrawNode(QPainter *, QSvgExtraStates &) const
 {
     return false;
@@ -104,6 +109,9 @@ QSvgSymbolLike::QSvgSymbolLike(QSvgNode *parent, QRectF bounds, QRectF viewBox, 
 {
 
 }
+
+QSvgSymbolLike::~QSvgSymbolLike()
+    = default;
 
 QRectF QSvgSymbolLike::decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const
 {
@@ -197,6 +205,9 @@ QSvgSymbol::QSvgSymbol(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF 
 {
 }
 
+QSvgSymbol::~QSvgSymbol()
+    = default;
+
 void QSvgSymbol::drawCommand(QPainter *p, QSvgExtraStates &states)
 {
     if (!states.inUse) //Symbol is only drawn when within a use node.
@@ -238,6 +249,9 @@ QSvgMarker::QSvgMarker(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF 
     appendStyleProperty(strokeProp, QStringLiteral(""));
 }
 
+QSvgMarker::~QSvgMarker()
+    = default;
+
 QSvgFilterContainer::QSvgFilterContainer(QSvgNode *parent, const QSvgRectF &bounds,
                                          QtSvg::UnitTypes filterUnits, QtSvg::UnitTypes primitiveUnits)
     : QSvgStructureNode(parent)
@@ -248,6 +262,9 @@ QSvgFilterContainer::QSvgFilterContainer(QSvgNode *parent, const QSvgRectF &boun
 {
 
 }
+
+QSvgFilterContainer::~QSvgFilterContainer()
+    = default;
 
 bool QSvgFilterContainer::shouldDrawNode(QPainter *, QSvgExtraStates &) const
 {
@@ -577,6 +594,9 @@ QSvgSwitch::QSvgSwitch(QSvgNode *parent)
     init();
 }
 
+QSvgSwitch::~QSvgSwitch()
+    = default;
+
 QSvgNode *QSvgSwitch::childToRender() const
 {
     auto itr = m_renderers.begin();
@@ -698,6 +718,9 @@ QSvgMask::QSvgMask(QSvgNode *parent, QSvgRectF bounds,
 {
 }
 
+QSvgMask::~QSvgMask()
+    = default;
+
 bool QSvgMask::shouldDrawNode(QPainter *, QSvgExtraStates &) const
 {
     return false;
@@ -811,6 +834,9 @@ QSvgPattern::QSvgPattern(QSvgNode *parent, QSvgRectF bounds, QRectF viewBox,
 {
 
 }
+
+QSvgPattern::~QSvgPattern()
+    = default;
 
 bool QSvgPattern::shouldDrawNode(QPainter *, QSvgExtraStates &) const
 {
