@@ -64,6 +64,7 @@ class Q_SVG_EXPORT QSvgAnimatedPropertyColor : public QSvgAbstractAnimatedProper
 {
 public:
     QSvgAnimatedPropertyColor(const QString &name);
+    ~QSvgAnimatedPropertyColor() override;
 
     void setColors(const QList<QColor> &colors);
     void appendColor(const QColor &color);
@@ -79,6 +80,7 @@ class Q_SVG_EXPORT QSvgAnimatedPropertyFloat : public QSvgAbstractAnimatedProper
 {
 public:
     QSvgAnimatedPropertyFloat(const QString &name);
+    ~QSvgAnimatedPropertyFloat() override;
 
     void setValues(const QList<qreal> &values);
     void appendValue(const qreal value);
@@ -107,6 +109,7 @@ public:
 
 public:
     QSvgAnimatedPropertyTransform(const QString &name);
+    ~QSvgAnimatedPropertyTransform() override;
 
     void setTransformCount(quint32 count);
     quint32 transformCount() const;

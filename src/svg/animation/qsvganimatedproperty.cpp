@@ -123,6 +123,9 @@ QSvgAnimatedPropertyColor::QSvgAnimatedPropertyColor(const QString &name)
 {
 }
 
+QSvgAnimatedPropertyColor::~QSvgAnimatedPropertyColor()
+    = default;
+
 void QSvgAnimatedPropertyColor::setColors(const QList<QColor> &colors)
 {
     m_colors = colors;
@@ -155,6 +158,9 @@ QSvgAnimatedPropertyFloat::QSvgAnimatedPropertyFloat(const QString &name)
     : QSvgAbstractAnimatedProperty(name, QSvgAbstractAnimatedProperty::Float)
 {
 }
+
+QSvgAnimatedPropertyFloat::~QSvgAnimatedPropertyFloat()
+    = default;
 
 void QSvgAnimatedPropertyFloat::setValues(const QList<qreal> &values)
 {
@@ -189,6 +195,9 @@ QSvgAnimatedPropertyTransform::QSvgAnimatedPropertyTransform(const QString &name
 {
 
 }
+
+QSvgAnimatedPropertyTransform::~QSvgAnimatedPropertyTransform()
+    = default;
 
 void QSvgAnimatedPropertyTransform::setTransformCount(quint32 count)
 {
