@@ -8,9 +8,9 @@
 #include <QtGui/qcolor.h>
 #include <QtGui/qtransform.h>
 
+#include <QtCore/qlatin1stringview.h>
 #include <QtCore/qloggingcategory.h>
-#include <QtCore/qglobalstatic.h>
-#include <QtCore/qhash.h>
+#include <QtCore/qstring.h>
 
 #include <optional>
 
@@ -22,19 +22,33 @@ Q_STATIC_LOGGING_CATEGORY(lcSvgAnimatedProperty, "qt.svg.animation.properties")
 
 static std::optional<QSvgAbstractAnimatedProperty::Type> name2type(const QString &name)
 {
-    static const QHash<QString, QSvgAbstractAnimatedProperty::Type> hash = {
-        { u"fill"_s, QSvgAbstractAnimatedProperty::Color },
-        { u"fill-opacity"_s, QSvgAbstractAnimatedProperty::Float },
-        { u"stroke-opacity"_s, QSvgAbstractAnimatedProperty::Float },
-        { u"stroke"_s, QSvgAbstractAnimatedProperty::Color },
-        { u"opacity"_s, QSvgAbstractAnimatedProperty::Float },
-        { u"transform"_s, QSvgAbstractAnimatedProperty::Transform },
-        { u"offset-distance"_s, QSvgAbstractAnimatedProperty::Float },
+    // Perfect hashing:
+    //
+    //   the length of the string uniquely identifies the property name
+    //   (compiler guarantees, otherwise it would complain about duplicate case
+    //   labels):
+    constexpr auto hash = [](QStringView s) {
+        return s.size();
     };
-    auto it = hash.find(name);
-    if (it == hash.end())
-        return std::nullopt;
-    return *it;
+
+    switch (hash(name)) {
+#define CASE(str, type) \
+    case hash(u"" #str): \
+        if (name == #str ## _L1) \
+            return QSvgAbstractAnimatedProperty:: type ; \
+        break; \
+    /* end */
+
+    CASE(fill, Color)
+    CASE(fill-opacity, Float)
+    CASE(stroke-opacity, Float)
+    CASE(stroke, Color)
+    CASE(opacity, Float)
+    CASE(transform, Transform)
+    CASE(offset-distance, Float)
+#undef CASE
+    };
+    return std::nullopt;
 }
 
 static qreal q_lerp(qreal a, qreal b, qreal t)
