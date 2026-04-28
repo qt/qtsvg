@@ -103,6 +103,9 @@ private slots:
     void testOption_data();
     void testOption();
 
+    void testUseInsideContainerElement_data();
+    void testUseInsideContainerElement();
+
 #ifndef QT_NO_COMPRESS
     void testGzLoading();
 #  ifdef QT_BUILD_INTERNAL
@@ -2526,6 +2529,67 @@ void tst_QSvgRenderer::testOption()
     QSvgRenderer renderer;
     renderer.setOptions(option);
     QVERIFY(renderer.options().testFlag(option));
+}
+
+void tst_QSvgRenderer::testUseInsideContainerElement_data()
+{
+    QTest::addColumn<QByteArray>("svgDoc");
+
+    // <use> inside <symbol>
+    QTest::newRow("use-in-symbol")
+            << R"(<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" xmlns:xlink="http://www.w3.org/1999/xlink">
+                  <defs>
+                    <symbol id="dot" overflow="visible">
+                      <circle cx="50" cy="50" r="50" fill="red"/>
+                    </symbol>
+                    <symbol id="dots" overflow="visible">
+                      <use xlink:href="#dot"/>
+                    </symbol>
+                  </defs>
+                  <use xlink:href="#dots" x="0" y="0"/>
+                </svg>)"_ba;
+
+    // <use> inside <marker>
+    QTest::newRow("use-in-marker")
+            << R"-(<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" xmlns:xlink="http://www.w3.org/1999/xlink">
+                  <defs>
+                    <rect id="box" x="0" y="0" width="100" height="100" fill="red"/>
+                    <marker id="m" viewBox="0 0 100 100" markerWidth="100" markerHeight="100" refX="50" refY="50">
+                      <use xlink:href="#box"/>
+                    </marker>
+                  </defs>
+                  <line x1="50" y1="50" x2="50" y2="50" stroke="white" stroke-width="1" marker-start="url(#m)"/>
+                </svg>)-"_ba;
+
+    // <use> inside <pattern>
+    QTest::newRow("use-in-pattern")
+            << R"-(<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" xmlns:xlink="http://www.w3.org/1999/xlink">
+                  <defs>
+                    <rect id="tile" width="100" height="100" fill="red"/>
+                    <pattern id="p" patternUnits="userSpaceOnUse" width="100" height="100">
+                      <use xlink:href="#tile"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100" height="100" fill="url(#p)"/>
+                </svg>)-"_ba;
+}
+
+void tst_QSvgRenderer::testUseInsideContainerElement()
+{
+    QFETCH(QByteArray, svgDoc);
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+
+    QImage image(100, 100, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+
+    QPainter p(&image);
+    renderer.render(&p);
+    p.end();
+
+    // The center pixel must be red — that confirms <use> was resolved correctly
+    QVERIFY(image.pixelColor(50, 50) == QColor(Qt::red));
 }
 
 QTEST_MAIN(tst_QSvgRenderer)
