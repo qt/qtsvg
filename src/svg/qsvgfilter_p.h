@@ -31,6 +31,8 @@ class Q_SVG_EXPORT QSvgFeFilterPrimitive : public QSvgStructureNode
 public:
     QSvgFeFilterPrimitive(QSvgNode *parent, const QString &input,
                           const QString &result, const QSvgRectF &rect);
+    ~QSvgFeFilterPrimitive() override;
+
     void drawCommand(QPainter *, QSvgExtraStates &) override {};
     bool shouldDrawNode(QPainter *, QSvgExtraStates &) const override;
     QRectF internalFastBounds(QPainter *, QSvgExtraStates &) const override { return QRectF(); }
@@ -72,6 +74,8 @@ public:
 
     QSvgFeColorMatrix(QSvgNode *parent, const QString &input, const QString &result,
                       const QSvgRectF &rect, ColorShiftType type, const Matrix &matrix);
+    ~QSvgFeColorMatrix() override;
+
     Type type() const override;
     QImage apply(const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
@@ -97,6 +101,8 @@ public:
     QSvgFeGaussianBlur(QSvgNode *parent, const QString &input, const QString &result,
                        const QSvgRectF &rect, qreal stdDeviationX, qreal stdDeviationY,
                        EdgeMode edgemode);
+    ~QSvgFeGaussianBlur() override;
+
     Type type() const override;
     QImage apply(const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
@@ -117,6 +123,8 @@ class Q_SVG_EXPORT QSvgFeOffset : public QSvgFeFilterPrimitive
 public:
     QSvgFeOffset(QSvgNode *parent, const QString &input, const QString &result,
                  const QSvgRectF &rect, qreal dx, qreal dy);
+    ~QSvgFeOffset() override;
+
     Type type() const override;
     QImage apply(const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
@@ -135,6 +143,8 @@ class Q_SVG_EXPORT QSvgFeMerge : public QSvgFeFilterPrimitive
 public:
     QSvgFeMerge(QSvgNode *parent, const QString &input,
                 const QString &result, const QSvgRectF &rect);
+    ~QSvgFeMerge() override;
+
     Type type() const override;
     QImage apply(const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
@@ -147,6 +157,8 @@ class Q_SVG_EXPORT QSvgFeMergeNode : public QSvgFeFilterPrimitive
 public:
     QSvgFeMergeNode(QSvgNode *parent, const QString &input,
                     const QString &result, const QSvgRectF &rect);
+    ~QSvgFeMergeNode() override;
+
     Type type() const override;
     QImage apply(const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
@@ -167,6 +179,8 @@ public:
     };
     QSvgFeComposite(QSvgNode *parent, const QString &input, const QString &result,
                     const QSvgRectF &rect, const QString &input2, Operator op, const QVector4D &k);
+    ~QSvgFeComposite() override;
+
     Type type() const override;
     QImage apply(const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
@@ -188,6 +202,8 @@ class Q_SVG_EXPORT QSvgFeFlood : public QSvgFeFilterPrimitive
 public:
     QSvgFeFlood(QSvgNode *parent, const QString &input, const QString &result,
                 const QSvgRectF &rect, const QColor &color);
+    ~QSvgFeFlood() override;
+
     Type type() const override;
     QImage apply(const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
@@ -210,6 +226,8 @@ public:
     };
     QSvgFeBlend(QSvgNode *parent, const QString &input, const QString &result,
                 const QSvgRectF &rect, const QString &input2, Mode mode);
+    ~QSvgFeBlend() override;
+
     Type type() const override;
     QImage apply(const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,
@@ -230,6 +248,8 @@ class Q_SVG_EXPORT QSvgFeUnsupported : public QSvgFeFilterPrimitive
 public:
     QSvgFeUnsupported(QSvgNode *parent, const QString &input,
                       const QString &result, const QSvgRectF &rect);
+    ~QSvgFeUnsupported() override;
+
     Type type() const override;
     QImage apply(const QMap<QString, QImage> &sources,
                  QPainter *p, const QRectF &itemBounds, const QRectF &filterBounds,

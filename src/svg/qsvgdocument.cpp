@@ -44,8 +44,7 @@ QSvgDocument::QSvgDocument(QtSvg::Options options, QtSvg::AnimatorType type)
 }
 
 QSvgDocument::~QSvgDocument()
-{
-}
+    = default;
 
 static bool hasSvgHeader(const QByteArray &buf)
 {
