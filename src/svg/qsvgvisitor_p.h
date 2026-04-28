@@ -28,10 +28,10 @@ QT_BEGIN_NAMESPACE
 
 class Q_SVG_EXPORT QSvgVisitor {
 public:
+    virtual ~QSvgVisitor();
+
     virtual void traverse(const QSvgStructureNode *node);
     virtual void traverse(const QSvgNode *node);
-
-    virtual ~QSvgVisitor() {}
 
 protected:
     virtual void visitNode(const QSvgNode *) {}
