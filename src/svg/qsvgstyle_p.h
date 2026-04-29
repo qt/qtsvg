@@ -86,6 +86,7 @@ private:
 
 class Q_SVG_EXPORT QSvgRefCounted
 {
+    Q_DISABLE_COPY_MOVE(QSvgRefCounted)
 public:
     QSvgRefCounted() { _ref = 0; }
     virtual ~QSvgRefCounted();
