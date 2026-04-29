@@ -22,7 +22,8 @@ QSvgCssValues::EasingFunction QSvgCssEasing::easingFunction() const
     return m_easingFunction;
 }
 
-QSvgCssCubicBezierEasing::QSvgCssCubicBezierEasing(QSvgCssValues::EasingFunction easingFunction, const QPointF &c1, const QPointF &c2)
+QSvgCssCubicBezierEasing::QSvgCssCubicBezierEasing(QSvgCssValues::EasingFunction easingFunction,
+                                                   QPointF c1, QPointF c2)
     : QSvgCssEasing(easingFunction)
     , m_c1(c1)
     , m_c2(c2)
