@@ -13,10 +13,12 @@ class QSvgIconEnginePrivate;
 
 class QSvgIconEngine : public QIconEngine
 {
+protected:
+    QSvgIconEngine(const QSvgIconEngine &other);
 public:
     QSvgIconEngine();
-    QSvgIconEngine(const QSvgIconEngine &other);
     ~QSvgIconEngine();
+
     void paint(QPainter *painter, const QRect &rect,
                QIcon::Mode mode, QIcon::State state) override;
     QSize actualSize(const QSize &size, QIcon::Mode mode,
