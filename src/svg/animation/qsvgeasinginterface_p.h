@@ -24,8 +24,10 @@ QT_BEGIN_NAMESPACE
 
 class Q_SVG_EXPORT QSvgEasingInterface
 {
+    Q_DISABLE_COPY_MOVE(QSvgEasingInterface)
 public:
-    virtual ~QSvgEasingInterface() = default;
+    QSvgEasingInterface() = default;
+    virtual ~QSvgEasingInterface();
     virtual qreal progress(qreal t) const = 0;
 };
 
