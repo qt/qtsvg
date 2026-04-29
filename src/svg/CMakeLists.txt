@@ -31,7 +31,7 @@ qt_internal_add_module(Svg
         qtsvgglobal.h qtsvgglobal_p.h
         animation/qsvganimator.cpp animation/qsvganimator_p.h
         animation/qsvgabstractanimation.cpp animation/qsvgabstractanimation_p.h
-        animation/qsvgeasinginterface_p.h
+        animation/qsvgeasinginterface.cpp animation/qsvgeasinginterface_p.h
         animation/qsvganimatedproperty.cpp animation/qsvganimatedproperty_p.h
         animation/qsvgcssanimation.cpp animation/qsvgcssanimation_p.h
         qsvgutils_p.h qsvgutils.cpp
