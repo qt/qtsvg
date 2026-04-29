@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 // Qt-Security score:significant reason:default
 
-
-#ifndef QSVGIOHANDLER_H
-#define QSVGIOHANDLER_H
+#pragma once
 
 #include <QtGui/qimageiohandler.h>
 
@@ -37,4 +35,3 @@ private:
 QT_END_NAMESPACE
 
 #endif // QT_NO_SVGRENDERER
-#endif // QSVGIOHANDLER_H
