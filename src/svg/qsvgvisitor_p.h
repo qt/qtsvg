@@ -27,7 +27,9 @@
 QT_BEGIN_NAMESPACE
 
 class Q_SVG_EXPORT QSvgVisitor {
+    Q_DISABLE_COPY_MOVE(QSvgVisitor)
 public:
+    QSvgVisitor() = default;
     virtual ~QSvgVisitor();
 
     virtual void traverse(const QSvgStructureNode *node);
