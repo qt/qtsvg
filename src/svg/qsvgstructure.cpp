@@ -20,7 +20,13 @@
 #include <qscopedvaluerollback.h>
 #include <QtGui/qimageiohandler.h>
 
+#include <QtCore/qlatin1stringview.h>
+#include <QtCore/qstringview.h>
+#include <QtCore/private/qoffsetstringarray_p.h>
+
 QT_BEGIN_NAMESPACE
+
+using namespace Qt::StringLiterals;
 
 QSvgG::QSvgG(QSvgNode *parent)
     : QSvgStructureNode(parent)
@@ -554,32 +560,44 @@ QSvgNode::Type QSvgFilterContainer::type() const
 }
 
 
-inline static bool isSupportedSvgFeature(const QString &str)
+inline static bool isSupportedSvgFeature(QStringView str)
 {
-    static const QStringList wordList = {
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#Text"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#Shape"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#SVG"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#Structure"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#SolidColor"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#Hyperlinking"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#CoreAttribute"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#XlinkAttribute"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#SVG-static"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#OpacityAttribute"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#Gradient"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#Font"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#Image"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#ConditionalProcessing"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#Extensibility"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#GraphicsAttribute"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#Prefetch"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#PaintAttribute"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#ConditionalProcessingAttribute"),
-        QStringLiteral("http://www.w3.org/Graphics/SVG/feature/1.2/#ExternalResourcesRequiredAttribute")
-    };
+    constexpr auto prefix_1_2 = "http://www.w3.org/Graphics/SVG/feature/1.2/#"_L1;
+    if (str.startsWith(prefix_1_2)) {
+        const auto suffix = str.sliced(prefix_1_2.size());
 
-    return wordList.contains(str);
+        constexpr auto features = qOffsetStringArray(
+            "Text",
+            "Shape",
+            "SVG",
+            "Structure",
+            "SolidColor",
+            "Hyperlinking",
+            "CoreAttribute",
+            "XlinkAttribute",
+            "SVG-static",
+            "OpacityAttribute",
+            "Gradient",
+            "Font",
+            "Image",
+            "ConditionalProcessing",
+            "Extensibility",
+            "GraphicsAttribute",
+            "Prefetch",
+            "PaintAttribute",
+            "ConditionalProcessingAttribute",
+            "ExternalResourcesRequiredAttribute"
+        );
+
+        // This is
+        //    return features.contains(suffix);
+        // but QOffsetStringArray does't support heterogeneous contains()
+        for (int i = 0; i < features.count(); ++i)
+            if (suffix == QLatin1StringView{features.at(i)})
+                return true;
+    } // 1.2
+
+    return false;
 }
 
 static inline bool isSupportedSvgExtension(const QString &)
