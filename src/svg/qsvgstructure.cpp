@@ -599,8 +599,6 @@ QSvgSwitch::~QSvgSwitch()
 
 QSvgNode *QSvgSwitch::childToRender() const
 {
-    auto itr = m_renderers.begin();
-
     for (const auto &node : renderers()) {
         if (node->isVisible() && (node->displayMode() != QSvgNode::NoneMode)) {
             const QStringList &features  = node->requiredFeatures();
@@ -650,8 +648,6 @@ QSvgNode *QSvgSwitch::childToRender() const
             if (okToRender)
                 return node.get();
         }
-
-        ++itr;
     }
 
     return nullptr;
