@@ -26,6 +26,7 @@ QT_BEGIN_NAMESPACE
 
 class Q_SVG_EXPORT QSvgAbstractAnimation
 {
+    Q_DISABLE_COPY_MOVE(QSvgAbstractAnimation)
 public:
     enum AnimationType
     {
