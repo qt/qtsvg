@@ -35,7 +35,7 @@ public:
 
     bool isNull() override;
     QString key() const override;
-    QIconEngine *clone() const override;
+    QSvgIconEngine *clone() const override;
     bool read(QDataStream &in) override;
     bool write(QDataStream &out) const override;
 private:

@@ -307,7 +307,7 @@ QString QSvgIconEngine::key() const
     return QLatin1String("svg");
 }
 
-QIconEngine *QSvgIconEngine::clone() const
+QSvgIconEngine *QSvgIconEngine::clone() const
 {
     return new QSvgIconEngine(*this);
 }
