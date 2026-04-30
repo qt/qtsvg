@@ -88,7 +88,7 @@ QSize QSvgIconEngine::actualSize(const QSize &size, QIcon::Mode mode,
     if (!d->addedPixmaps.isEmpty()) {
         const auto key = d->hashKey(mode, state);
         auto it = d->addedPixmaps.constFind(key);
-        while (it != d->addedPixmaps.end() && it.key() == key) {
+        while (it != d->addedPixmaps.cend() && it.key() == key) {
             const auto &pm = it.value();
             if (!pm.isNull() && pm.size() == size)
                 return size;
@@ -189,7 +189,7 @@ QPixmap QSvgIconEngine::scaledPixmap(const QSize &size, QIcon::Mode mode, QIcon:
         const auto realSize = size * scale;
         const auto key = d->hashKey(mode, state);
         auto it = d->addedPixmaps.constFind(key);
-        while (it != d->addedPixmaps.end() && it.key() == key) {
+        while (it != d->addedPixmaps.cend() && it.key() == key) {
             const auto &pm = it.value();
             if (!pm.isNull()) {
                 // we don't care about dpr here - don't use QSvgIconEngine when
