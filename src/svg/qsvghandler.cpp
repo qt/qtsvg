@@ -40,10 +40,15 @@
 
 QT_BEGIN_NAMESPACE
 
+using namespace Qt::StringLiterals;
+
 Q_LOGGING_CATEGORY(lcSvgHandler, "qt.svg")
 
-static const char *qt_inherit_text = "inherit";
-#define QT_INHERIT QLatin1String(qt_inherit_text)
+namespace {
+namespace tokens {
+constexpr auto inherit = "inherit"_L1;
+} // namespace tokens
+} // unnamed namespace
 
 static QByteArray prefixMessage(const QByteArray &msg, const QXmlStreamReader *r)
 {
@@ -488,7 +493,7 @@ bool resolveColor(QStringView colorStr, QColor &color, QSvgHandler *handler)
             }
             break;
         case 'i':
-            if (colorStrTr == QT_INHERIT)
+            if (colorStrTr == tokens::inherit)
                 return false;
             break;
         default:
@@ -579,7 +584,7 @@ static void parseBrush(QSvgNode *node,
         QSvgFillStyle *prop = new QSvgFillStyle;
 
         //fill-rule attribute handling
-        if (!attributes.fillRule.isEmpty() && attributes.fillRule != QT_INHERIT) {
+        if (!attributes.fillRule.isEmpty() && attributes.fillRule != tokens::inherit) {
             if (attributes.fillRule == QLatin1String("evenodd"))
                 prop->setFillRule(Qt::OddEvenFill);
             else if (attributes.fillRule == QLatin1String("nonzero"))
@@ -587,12 +592,12 @@ static void parseBrush(QSvgNode *node,
         }
 
         //fill-opacity attribute handling
-        if (!attributes.fillOpacity.isEmpty() && attributes.fillOpacity != QT_INHERIT) {
+        if (!attributes.fillOpacity.isEmpty() && attributes.fillOpacity != tokens::inherit) {
             prop->setFillOpacity(qMin(qreal(1.0), qMax(qreal(0.0), QSvgUtils::toDouble(attributes.fillOpacity))));
         }
 
         //fill attribute handling
-        if ((!attributes.fill.isEmpty()) && (attributes.fill != QT_INHERIT) ) {
+        if (!attributes.fill.isEmpty() && attributes.fill != tokens::inherit) {
             if (attributes.fill.startsWith(QLatin1String("url"))) {
                 QStringView value = attributes.fill;
                 QSvgPaintServerSharedPtr paintServer = paintServerFromUrl(handler->document(), value);
@@ -755,7 +760,7 @@ static void parsePen(QSvgNode *node,
         QSvgStrokeStyle *prop = new QSvgStrokeStyle;
 
         //stroke attribute handling
-        if ((!attributes.stroke.isEmpty()) && (attributes.stroke != QT_INHERIT) ) {
+        if (!attributes.stroke.isEmpty() && attributes.stroke != tokens::inherit) {
             if (attributes.stroke.startsWith(QLatin1String("url"))) {
                 QStringView value = attributes.stroke;
                 QSvgPaintServerSharedPtr paintServer = paintServerFromUrl(handler->document(), value);
@@ -776,13 +781,13 @@ static void parsePen(QSvgNode *node,
         }
 
         //stroke-width handling
-        if (!attributes.strokeWidth.isEmpty() && attributes.strokeWidth != QT_INHERIT) {
+        if (!attributes.strokeWidth.isEmpty() && attributes.strokeWidth != tokens::inherit) {
             QSvgUtils::LengthType lt;
             prop->setWidth(QSvgUtils::parseLength(attributes.strokeWidth, &lt));
         }
 
         //stroke-dasharray
-        if (!attributes.strokeDashArray.isEmpty() && attributes.strokeDashArray != QT_INHERIT) {
+        if (!attributes.strokeDashArray.isEmpty() && attributes.strokeDashArray != tokens::inherit) {
             if (attributes.strokeDashArray == QLatin1String("none")) {
                 prop->setDashArrayNone();
             } else {
@@ -830,7 +835,7 @@ static void parsePen(QSvgNode *node,
         }
 
         //stroke-dashoffset attribute handling
-        if (!attributes.strokeDashOffset.isEmpty() && attributes.strokeDashOffset != QT_INHERIT)
+        if (!attributes.strokeDashOffset.isEmpty() && attributes.strokeDashOffset != tokens::inherit)
             prop->setDashOffset(QSvgUtils::toDouble(attributes.strokeDashOffset));
 
         //vector-effect attribute handling
@@ -842,11 +847,11 @@ static void parsePen(QSvgNode *node,
         }
 
         //stroke-miterlimit
-        if (!attributes.strokeMiterLimit.isEmpty() && attributes.strokeMiterLimit != QT_INHERIT)
+        if (!attributes.strokeMiterLimit.isEmpty() && attributes.strokeMiterLimit != tokens::inherit)
             prop->setMiterLimit(QSvgUtils::toDouble(attributes.strokeMiterLimit));
 
         //stroke-opacity atttribute handling
-        if (!attributes.strokeOpacity.isEmpty() && attributes.strokeOpacity != QT_INHERIT)
+        if (!attributes.strokeOpacity.isEmpty() && attributes.strokeOpacity != tokens::inherit)
             prop->setOpacity(qMin(qreal(1.0), qMax(qreal(0.0), QSvgUtils::toDouble(attributes.strokeOpacity))));
 
         node->appendStyleProperty(prop);
@@ -915,14 +920,14 @@ static void parseFont(QSvgNode *node,
     }
     if (!fontStyle)
         fontStyle = new QSvgFontStyle;
-    if (!attributes.fontFamily.isEmpty() && attributes.fontFamily != QT_INHERIT) {
+    if (!attributes.fontFamily.isEmpty() && attributes.fontFamily != tokens::inherit) {
         QStringView family = attributes.fontFamily.trimmed();
         if (!family.isEmpty() && (family.at(0) == QLatin1Char('\'') || family.at(0) == QLatin1Char('\"')))
             family = family.mid(1, family.size() - 2);
         fontStyle->setFamily(family.toString());
     }
 
-    if (!attributes.fontSize.isEmpty() && attributes.fontSize != QT_INHERIT) {
+    if (!attributes.fontSize.isEmpty() && attributes.fontSize != tokens::inherit) {
         // TODO: Support relative sizes 'larger' and 'smaller'.
         const FontSizeSpec spec = fontSizeSpec(attributes.fontSize);
         switch (spec) {
@@ -941,7 +946,7 @@ static void parseFont(QSvgNode *node,
         }
     }
 
-    if (!attributes.fontStyle.isEmpty() && attributes.fontStyle != QT_INHERIT) {
+    if (!attributes.fontStyle.isEmpty() && attributes.fontStyle != tokens::inherit) {
         if (attributes.fontStyle == QLatin1String("normal")) {
             fontStyle->setStyle(QFont::StyleNormal);
         } else if (attributes.fontStyle == QLatin1String("italic")) {
@@ -951,7 +956,7 @@ static void parseFont(QSvgNode *node,
         }
     }
 
-    if (!attributes.fontWeight.isEmpty() && attributes.fontWeight != QT_INHERIT) {
+    if (!attributes.fontWeight.isEmpty() && attributes.fontWeight != tokens::inherit) {
         bool ok = false;
         const int weightNum = attributes.fontWeight.toInt(&ok);
         if (ok) {
@@ -969,14 +974,14 @@ static void parseFont(QSvgNode *node,
         }
     }
 
-    if (!attributes.fontVariant.isEmpty() && attributes.fontVariant != QT_INHERIT) {
+    if (!attributes.fontVariant.isEmpty() && attributes.fontVariant != tokens::inherit) {
         if (attributes.fontVariant == QLatin1String("normal"))
             fontStyle->setVariant(QFont::MixedCase);
         else if (attributes.fontVariant == QLatin1String("small-caps"))
             fontStyle->setVariant(QFont::SmallCaps);
     }
 
-    if (!attributes.textAnchor.isEmpty() && attributes.textAnchor != QT_INHERIT) {
+    if (!attributes.textAnchor.isEmpty() && attributes.textAnchor != tokens::inherit) {
         if (attributes.textAnchor == QLatin1String("start"))
             fontStyle->setTextAnchor(Qt::AlignLeft);
         if (attributes.textAnchor == QLatin1String("middle"))
@@ -1008,7 +1013,7 @@ static void parseVisibility(QSvgNode *node,
 {
     QSvgNode *parent = node->parent();
 
-    if (parent && (attributes.visibility.isEmpty() || attributes.visibility == QT_INHERIT))
+    if (parent && (attributes.visibility.isEmpty() || attributes.visibility == tokens::inherit))
         node->setVisible(parent->isVisible());
     else if (attributes.visibility == QLatin1String("hidden") || attributes.visibility == QLatin1String("collapse")) {
         node->setVisible(false);
@@ -1282,7 +1287,7 @@ static QSvgNode::DisplayMode displayStringToEnum(const QStringView str)
         return QSvgNode::TableCaptionMode;
     } else if (str == QLatin1String("none")) {
         return QSvgNode::NoneMode;
-    } else if (str == QT_INHERIT) {
+    } else if (str == tokens::inherit) {
         return QSvgNode::InheritMode;
     }
     return QSvgNode::BlockMode;
