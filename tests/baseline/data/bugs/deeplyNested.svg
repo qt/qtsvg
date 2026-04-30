@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360">
+  <rect width="360" height="360" fill="white"/>
+  <text x="10" y="10" font-family="Arial" font-size="10">"g1" to "g30" must be visible.</text>
+  <text x="10" y="20" font-family="Arial" font-size="10">"g31" and higher may be dropped to avoid too deep nesting.</text>
+  <g id="g1">
+  <text x="30" y="30" font-family="Arial" font-size="10">g1</text>
+    <g id="g2">
+    <text x="40" y="40" font-family="Arial" font-size="10">g2</text>
+      <g id="g3">
+      <text x="50" y="50" font-family="Arial" font-size="10">g3</text>
+        <g id="g4">
+        <text x="60" y="60" font-family="Arial" font-size="10">g4</text>
+          <g id="g5">
+          <text x="70" y="70" font-family="Arial" font-size="10">g5</text>
+            <g id="g6">
+            <text x="80" y="80" font-family="Arial" font-size="10">g6</text>
+              <g id="g7">
+              <text x="90" y="90" font-family="Arial" font-size="10">g7</text>
+                <g id="g8">
+                <text x="100" y="100" font-family="Arial" font-size="10">g8</text>
+                  <g id="g9">
+                  <text x="110" y="110" font-family="Arial" font-size="10">g9</text>
+                    <g id="g10">
+                    <text x="120" y="120" font-family="Arial" font-size="10">g10</text>
+                      <g id="g11">
+                      <text x="130" y="130" font-family="Arial" font-size="10">g11</text>
+                        <g id="g12">
+                        <text x="140" y="140" font-family="Arial" font-size="10">g12</text>
+                          <g id="g13">
+                          <text x="150" y="150" font-family="Arial" font-size="10">g13</text>
+                            <g id="g14">
+                            <text x="160" y="160" font-family="Arial" font-size="10">g14</text>
+                              <g id="g15">
+                              <text x="170" y="170" font-family="Arial" font-size="10">g15</text>
+                                <g id="g16">
+                                <text x="180" y="180" font-family="Arial" font-size="10">g16</text>
+                                  <g id="g17">
+                                  <text x="190" y="190" font-family="Arial" font-size="10">g17</text>
+                                    <g id="g18">
+                                    <text x="200" y="200" font-family="Arial" font-size="10">g18</text>
+                                      <g id="g19">
+                                      <text x="210" y="210" font-family="Arial" font-size="10">g19</text>
+                                        <g id="g20">
+                                        <text x="220" y="220" font-family="Arial" font-size="10">g20</text>
+                                          <g id="g21">
+                                          <text x="230" y="230" font-family="Arial" font-size="10">g21</text>
+                                            <g id="g22">
+                                            <text x="240" y="240" font-family="Arial" font-size="10">g22</text>
+                                              <g id="g23">
+                                              <text x="250" y="250" font-family="Arial" font-size="10">g23</text>
+                                                <g id="g24">
+                                                <text x="260" y="260" font-family="Arial" font-size="10">g24</text>
+                                                  <g id="g25">
+                                                  <text x="270" y="270" font-family="Arial" font-size="10">g25</text>
+                                                    <g id="g26">
+                                                    <text x="280" y="280" font-family="Arial" font-size="10">g26</text>
+                                                      <g id="g27">
+                                                      <text x="290" y="290" font-family="Arial" font-size="10">g27</text>
+                                                        <g id="g28">
+                                                        <text x="300" y="300" font-family="Arial" font-size="10">g28</text>
+                                                          <g id="g29">
+                                                          <text x="310" y="310" font-family="Arial" font-size="10">g29</text>
+                                                            <g id="g30">
+                                                            <text x="320" y="320" font-family="Arial" font-size="10">g30</text>
+                                                              <g id="g31">
+                                                              <text x="330" y="330" font-family="Arial" font-size="10">g31</text>
+                                                                <g id="g32">
+                                                                <text x="340" y="340" font-family="Arial" font-size="10">g32</text>
+                                                                </g>
+                                                              </g>
+                                                            </g>
+                                                          </g>
+                                                        </g>
+                                                      </g>
+                                                    </g>
+                                                  </g>
+                                                </g>
+                                              </g>
+                                            </g>
+                                          </g>
+                                        </g>
+                                      </g>
+                                    </g>
+                                  </g>
+                                </g>
+                              </g>
+                            </g>
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
