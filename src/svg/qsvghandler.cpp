@@ -2322,8 +2322,8 @@ static QSvgNode *createFeGaussianBlurNode(QSvgNode *parent,
     qreal stdDeviationX = 0;
     qreal stdDeviationY = 0;
     if (stdDeviationString.contains(QStringLiteral(" "))){
-        stdDeviationX = qMax(0., QSvgUtils::toDouble(stdDeviationString.split(u" ").first()));
-        stdDeviationY = qMax(0., QSvgUtils::toDouble(stdDeviationString.split(u" ").last()));
+        stdDeviationX = qMax(0., QSvgUtils::toDouble(stdDeviationString.split(u" ").constFirst()));
+        stdDeviationY = qMax(0., QSvgUtils::toDouble(stdDeviationString.split(u" ").constLast()));
     } else {
         stdDeviationY = stdDeviationX = qMax(0., QSvgUtils::toDouble(stdDeviationString));
     }
