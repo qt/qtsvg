@@ -52,7 +52,7 @@ bool fillPropertyEasing(const QList<CssKeyFrameValue> &keyFrames, QSvgAbstractAn
 
 bool fillColorProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimatedPropertyColor *prop)
 {
-    for (CssKeyFrameValue keyFrame : keyFrames) {
+    for (const CssKeyFrameValue &keyFrame : keyFrames) {
         if (keyFrame.values.size() != 1)
             return false;
 
@@ -67,7 +67,7 @@ bool fillColorProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimatedPro
 
 bool fillOpacityProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimatedPropertyFloat *prop)
 {
-    for (CssKeyFrameValue keyFrame : keyFrames) {
+    for (const CssKeyFrameValue &keyFrame : keyFrames) {
         if (keyFrame.values.size() != 1)
             return false;
 
@@ -280,7 +280,7 @@ QSvgCssAnimation *QSvgCssHandler::createAnimation(QStringView name)
     // we store the key frames and values for each property for easier parsing.
     QHash<QString, QList<CssKeyFrameValue>> keyFrameValues;
     for (const auto &ruleSet : std::as_const(animationRule.ruleSets)) {
-        for (QCss::Declaration decl : ruleSet.declarations) {
+        for (const QCss::Declaration &decl : ruleSet.declarations) {
             QCss::Value timingFunction;
             CssKeyFrameValue keyFrameValue = {ruleSet.keyFrame, decl.d->values, ruleSet.timingFunction};
             QList<CssKeyFrameValue> &value = keyFrameValues[decl.d->property];
