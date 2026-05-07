@@ -217,9 +217,9 @@ void QSvgFontStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &states
 
     if (m_weightSet) {
         if (m_weight == BOLDER) {
-            states.fontWeight = qMin(states.fontWeight + 100, static_cast<int>(QFont::Black));
+            states.fontWeight = qMin(states.fontWeight, QFont::Weight::Black - 100) + 100;
         } else if (m_weight == LIGHTER) {
-            states.fontWeight = qMax(states.fontWeight - 100, static_cast<int>(QFont::Thin));
+            states.fontWeight = qMax(states.fontWeight, QFont::Weight::Thin + 100) - 100;
         } else {
             states.fontWeight = m_weight;
         }

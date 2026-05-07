@@ -1921,6 +1921,9 @@ void tst_QSvgRenderer::ossFuzzLoad_data()
     // resulted in memory leak, reported when configured with "-sanitize address"
     QTest::newRow("animation-without-target") // id=456050169
             << R"-(<svg><animateTransform type="rotate" from=" " to=" " href="#X">)-"_ba;
+    // resulted in signed integer overflow, reported when configured with "-sanitize undefined"
+    QTest::newRow("extreme-font-weights") // id=510580899
+            << R"(<svg><style>*{font-weight:2147483647}<g>*{font-weight:1}<g><symbol>)"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzLoad()
