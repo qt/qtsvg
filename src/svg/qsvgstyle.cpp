@@ -124,14 +124,14 @@ void QSvgFillStyle::setFillOpacity(qreal opacity)
 
 void QSvgFillStyle::setFillStyle(QSvgPaintStyleProperty* style)
 {
-    m_style = style;
+    m_style.reset(style);
     m_fillSet = 1;
 }
 
 void QSvgFillStyle::setBrush(QBrush brush)
 {
     m_fill = std::move(brush);
-    m_style = nullptr;
+    m_style.reset();
     m_fillSet = 1;
 }
 
