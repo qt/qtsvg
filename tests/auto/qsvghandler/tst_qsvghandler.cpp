@@ -3,6 +3,7 @@
 
 #include <QtTest/QTest>
 
+#include <QColor>
 #include <QList>
 #include <QString>
 #include <QXmlStreamAttributes>
@@ -35,6 +36,8 @@ private slots:
     void testCreateAnimateTransformNode();
     void testParseNumbersList_data();
     void testParseNumbersList();
+    void testResolveColor_data();
+    void testResolveColor();
 #endif
 };
 
@@ -277,6 +280,34 @@ void tst_QSvgHandler::testParseNumbersList()
     if (pointerAdvancedToEnd)
         QVERIFY(listStrV.isEmpty());
 }
+
+void tst_QSvgHandler::testResolveColor_data()
+{
+    QTest::addColumn<QString>("colorStr");
+    QTest::addColumn<bool>("returnVal");
+    QTest::addColumn<QColor>("expectedColor");
+
+    QTest::newRow("rgb-numbers") << "rgb(1,2,3)" << true << QColor{ 1, 2, 3 };
+    QTest::newRow("rgb-numbers-invalid") << "rgb(1,x,3)" << false << QColor();
+    QTest::newRow("rgb-numbers-too-large") << "rgb(1,256,3)" << false << QColor();
+    QTest::newRow("rgb-numbers-illegal-float") << "rgb(1,2.4,3)" << false << QColor();
+}
+
+void tst_QSvgHandler::testResolveColor()
+{
+    QFETCH(QString, colorStr);
+    QFETCH(bool, returnVal);
+    QFETCH(QColor, expectedColor);
+
+    QSvgHandler handler(QByteArray(), QtSvg::Option::NoOption, QtSvg::AnimatorType::Automatic);
+    QColor actualColor;
+    QEXPECT_FAIL("rgb-numbers-too-large", "accepted too large value", Continue);
+    QEXPECT_FAIL("rgb-numbers-illegal-float", "accepted float where it's not allowed", Continue);
+    QCOMPARE(resolveColor(colorStr, actualColor, &handler), returnVal);
+    if (returnVal)
+        QCOMPARE(actualColor, expectedColor);
+}
+
 #endif // QT_BUILD_INTERNAL
 
 QTEST_MAIN(tst_QSvgHandler)

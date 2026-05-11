@@ -435,7 +435,7 @@ static QStringView idFromFuncIRI(QStringView iri)
  * returns true when successfully set the color. false signifies
  * that the color should be inherited
  */
-static bool resolveColor(QStringView colorStr, QColor &color, QSvgHandler *handler)
+bool resolveColor(QStringView colorStr, QColor &color, QSvgHandler *handler)
 {
     QStringView colorStrTr = colorStr.trimmed();
     if (colorStrTr.isEmpty())

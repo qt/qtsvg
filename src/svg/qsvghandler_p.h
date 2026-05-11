@@ -19,6 +19,7 @@
 
 #include "QtCore/qxmlstream.h"
 #include "QtCore/qstack.h"
+#include "QtCore/qstringview.h"
 #include <QtCore/QLoggingCategory>
 #include "qsvgstyle_p.h"
 #if QT_CONFIG(cssparser)
@@ -40,6 +41,7 @@ class QSvgHandler;
 class QColor;
 
 Q_AUTOTEST_EXPORT QList<qreal> parseNumbersList(QStringView *str);
+Q_AUTOTEST_EXPORT bool resolveColor(QStringView colorStr, QColor &color, QSvgHandler *handler);
 
 class Q_SVG_EXPORT QSvgHandler
 {
