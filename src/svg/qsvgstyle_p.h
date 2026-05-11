@@ -45,12 +45,17 @@ public:
         if (t)
             t->ref();
     }
+
     QSvgRefCounter(const QSvgRefCounter &other)
     {
         t = other.t;
         if (t)
             t->ref();
     }
+
+    QSvgRefCounter(QSvgRefCounter &&other) noexcept
+        : t{std::exchange(other.t, nullptr)} {}
+
     QSvgRefCounter &operator =(const QSvgRefCounter &other)
     {
         if(other.t)
@@ -60,6 +65,11 @@ public:
         t = other.t;
         return *this;
     }
+
+    // both T and users are a bounded set, so we can use PURE_SWAP,
+    // and manage expectations
+    QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QSvgRefCounter)
+
     ~QSvgRefCounter()
     {
         if (t)
