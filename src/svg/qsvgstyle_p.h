@@ -40,7 +40,7 @@ template <class T> class QSvgRefCounter
 {
 public:
     QSvgRefCounter() { t = nullptr; }
-    QSvgRefCounter(T *_t)
+    explicit QSvgRefCounter(T *_t)
     {
         t = _t;
         if (t)

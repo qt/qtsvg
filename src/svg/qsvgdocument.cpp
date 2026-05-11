@@ -367,7 +367,7 @@ QtSvg::Options QSvgDocument::options() const
 
 void QSvgDocument::addSvgFont(QSvgFont *font)
 {
-    m_fonts.insert(font->familyName(), font);
+    m_fonts.emplace(font->familyName(), font);
 }
 
 QSvgFont * QSvgDocument::svgFont(const QString &family) const
@@ -388,7 +388,7 @@ QSvgNode *QSvgDocument::namedNode(const QString &id) const
 void QSvgDocument::addNamedStyle(const QString &id, QSvgPaintStyleProperty *style)
 {
     if (!m_namedStyles.contains(id))
-        m_namedStyles.insert(id, style);
+        m_namedStyles.emplace(id, style);
     else
         qCWarning(lcSvgHandler) << "Duplicate unique style id:" << id;
 }
