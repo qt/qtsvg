@@ -522,7 +522,7 @@ QImage QSvgFilterContainer::applyFilter(const QImage &buffer, QPainter *p, const
         proxyAlpha.setOffset(proxy.offset());
         if (proxyAlpha.isNull())
             return buffer;
-        buffers[QStringLiteral("SourceAlpha")] = proxyAlpha;
+        buffers[QStringLiteral("SourceAlpha")] = std::move(proxyAlpha);
     }
 
     QImage result;
