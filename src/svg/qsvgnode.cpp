@@ -204,35 +204,35 @@ void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop)
     switch (prop->type()) {
     case QSvgStyleProperty::QUALITY:
         m_style.quality = static_cast<QSvgQualityStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::FILL:
         m_style.fill = static_cast<QSvgFillStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::VIEWPORT_FILL:
         m_style.viewportFill = static_cast<QSvgViewportFillStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::FONT:
         m_style.font = static_cast<QSvgFontStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::STROKE:
         m_style.stroke = static_cast<QSvgStrokeStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::TRANSFORM:
         m_style.transform = static_cast<QSvgTransformStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::OPACITY:
         m_style.opacity = static_cast<QSvgOpacityStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::COMP_OP:
         m_style.compop = static_cast<QSvgCompOpStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::OFFSET:
         m_style.offset = static_cast<QSvgOffsetStyle*>(prop);
-        break;
-    default:
-        qDebug("QSvgNode: Trying to append unknown property!");
-        break;
-    }
+        return;
+    };
+    qCWarning(lcSvgDraw,
+              "QSvgNode: Trying to append unknown property %d",
+              int(prop->type()));
 }
 
 void QSvgNode::applyStyle(QPainter *p, QSvgExtraStates &states) const
