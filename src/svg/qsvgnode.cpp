@@ -205,53 +205,53 @@ void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop, const QString &id)
     switch (prop->type()) {
     case QSvgStyleProperty::QUALITY:
         m_style.quality = static_cast<QSvgQualityStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::FILL:
         m_style.fill = static_cast<QSvgFillStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::VIEWPORT_FILL:
         m_style.viewportFill = static_cast<QSvgViewportFillStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::FONT:
         m_style.font = static_cast<QSvgFontStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::STROKE:
         m_style.stroke = static_cast<QSvgStrokeStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::SOLID_COLOR:
         m_style.solidColor = static_cast<QSvgSolidColorStyle*>(prop);
         doc = document();
         if (doc && !id.isEmpty())
             doc->addNamedStyle(id, m_style.solidColor);
-        break;
+        return;
     case QSvgStyleProperty::GRADIENT:
         m_style.gradient = static_cast<QSvgGradientStyle*>(prop);
         doc = document();
         if (doc && !id.isEmpty())
             doc->addNamedStyle(id, m_style.gradient);
-        break;
+        return;
     case QSvgStyleProperty::PATTERN:
         m_style.pattern = static_cast<QSvgPatternStyle*>(prop);
         doc = document();
         if (doc && !id.isEmpty())
             doc->addNamedStyle(id, m_style.pattern);
-        break;
+        return;
     case QSvgStyleProperty::TRANSFORM:
         m_style.transform = static_cast<QSvgTransformStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::OPACITY:
         m_style.opacity = static_cast<QSvgOpacityStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::COMP_OP:
         m_style.compop = static_cast<QSvgCompOpStyle*>(prop);
-        break;
+        return;
     case QSvgStyleProperty::OFFSET:
         m_style.offset = static_cast<QSvgOffsetStyle*>(prop);
-        break;
-    default:
-        qDebug("QSvgNode: Trying to append unknown property!");
-        break;
-    }
+        return;
+    };
+    qCWarning(lcSvgDraw,
+              "QSvgNode: Trying to append unknown property %d",
+              int(prop->type()));
 }
 
 void QSvgNode::applyStyle(QPainter *p, QSvgExtraStates &states) const
