@@ -93,9 +93,9 @@ public:
     virtual void drawCommand(QPainter *p, QSvgExtraStates &states) = 0;
     void fillThenStroke(QPainter *p, QSvgExtraStates &states);
     QImage drawIntoBuffer(QPainter *p, QSvgExtraStates &states, const QRect &boundsRect);
-    void applyMaskToBuffer(QImage *proxy, QImage mask) const;
+    void applyMaskToBuffer(QImage *proxy, const QImage &mask) const;
     void drawWithMask(QPainter *p, QSvgExtraStates &states, const QImage &mask, const QRect &boundsRect);
-    void applyBufferToCanvas(QPainter *p, QImage proxy) const;
+    void applyBufferToCanvas(QPainter *p, const QImage &proxy) const;
 
     QSvgNode *parent() const;
     bool isDescendantOf(const QSvgNode *parent) const;

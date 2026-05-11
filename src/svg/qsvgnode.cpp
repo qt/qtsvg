@@ -171,7 +171,7 @@ QImage QSvgNode::drawIntoBuffer(QPainter *p, QSvgExtraStates &states, const QRec
     return proxy;
 }
 
-void QSvgNode::applyMaskToBuffer(QImage *proxy, QImage mask) const
+void QSvgNode::applyMaskToBuffer(QImage *proxy, const QImage &mask) const
 {
     QPainter proxyPainter(proxy);
     proxyPainter.setCompositionMode(QPainter::CompositionMode_DestinationOut);
@@ -179,7 +179,7 @@ void QSvgNode::applyMaskToBuffer(QImage *proxy, QImage mask) const
     proxyPainter.drawImage(QRect(0, 0, mask.width(), mask.height()), mask);
 }
 
-void QSvgNode::applyBufferToCanvas(QPainter *p, QImage proxy) const
+void QSvgNode::applyBufferToCanvas(QPainter *p, const QImage &proxy) const
 {
     QTransform xf = p->transform();
     p->resetTransform();
