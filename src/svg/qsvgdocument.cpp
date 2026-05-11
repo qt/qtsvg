@@ -367,7 +367,7 @@ QtSvg::Options QSvgDocument::options() const
 
 void QSvgDocument::addSvgFont(QSvgFont *font)
 {
-    m_fonts.insert(font->familyName(), font);
+    m_fonts.emplace(font->familyName(), font);
 }
 
 QSvgFont * QSvgDocument::svgFont(const QString &family) const
