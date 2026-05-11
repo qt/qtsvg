@@ -469,8 +469,8 @@ public:
             stream() << "fill=\"" << color << "\" "
                         "fill-opacity=\""
                      << colorOpacity << "\" ";
-            d_func()->attributes.fill = color;
-            d_func()->attributes.fillOpacity = colorOpacity;
+            d_func()->attributes.fill = std::move(color);
+            d_func()->attributes.fillOpacity = std::move(colorOpacity);
         }
             break;
         case Qt::Dense1Pattern:
@@ -493,8 +493,8 @@ public:
                                                                        : savePatternBrush(color, sbrush);
             QString patternRef = QString(QStringLiteral("url(#%1)")).arg(patternId);
             stream() << "fill=\"" << patternRef << "\" fill-opacity=\"" << colorOpacity << "\" ";
-            d_func()->attributes.fill = patternRef;
-            d_func()->attributes.fillOpacity = colorOpacity;
+            d_func()->attributes.fill = std::move(patternRef);
+            d_func()->attributes.fillOpacity = std::move(colorOpacity);
             break;
         }
         case Qt::LinearGradientPattern:
