@@ -203,31 +203,31 @@ void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop)
 {
     switch (prop->type()) {
     case QSvgStyleProperty::QUALITY:
-        m_style.quality = static_cast<QSvgQualityStyle*>(prop);
+        m_style.quality.reset(static_cast<QSvgQualityStyle*>(prop));
         return;
     case QSvgStyleProperty::FILL:
-        m_style.fill = static_cast<QSvgFillStyle*>(prop);
+        m_style.fill.reset(static_cast<QSvgFillStyle*>(prop));
         return;
     case QSvgStyleProperty::VIEWPORT_FILL:
-        m_style.viewportFill = static_cast<QSvgViewportFillStyle*>(prop);
+        m_style.viewportFill.reset(static_cast<QSvgViewportFillStyle*>(prop));
         return;
     case QSvgStyleProperty::FONT:
-        m_style.font = static_cast<QSvgFontStyle*>(prop);
+        m_style.font.reset(static_cast<QSvgFontStyle*>(prop));
         return;
     case QSvgStyleProperty::STROKE:
-        m_style.stroke = static_cast<QSvgStrokeStyle*>(prop);
+        m_style.stroke.reset(static_cast<QSvgStrokeStyle*>(prop));
         return;
     case QSvgStyleProperty::TRANSFORM:
-        m_style.transform = static_cast<QSvgTransformStyle*>(prop);
+        m_style.transform.reset(static_cast<QSvgTransformStyle*>(prop));
         return;
     case QSvgStyleProperty::OPACITY:
-        m_style.opacity = static_cast<QSvgOpacityStyle*>(prop);
+        m_style.opacity.reset(static_cast<QSvgOpacityStyle*>(prop));
         return;
     case QSvgStyleProperty::COMP_OP:
-        m_style.compop = static_cast<QSvgCompOpStyle*>(prop);
+        m_style.compop.reset(static_cast<QSvgCompOpStyle*>(prop));
         return;
     case QSvgStyleProperty::OFFSET:
-        m_style.offset = static_cast<QSvgOffsetStyle*>(prop);
+        m_style.offset.reset(static_cast<QSvgOffsetStyle*>(prop));
         return;
     };
     qCWarning(lcSvgDraw,

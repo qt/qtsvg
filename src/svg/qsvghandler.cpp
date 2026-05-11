@@ -3907,7 +3907,7 @@ bool QSvgHandler::startElement(const QStringView localName,
     } else if (StyleFactoryMethod method = findStyleFactoryMethod(localName)) {
         QSvgStyleProperty *prop = method(attributes, this);
         if (prop) {
-            m_style = prop;
+            m_style.reset(prop);
             m_nodes.top()->appendStyleProperty(prop);
         } else {
             const QByteArray msg = QByteArrayLiteral("Could not parse node: ") + localName.toLocal8Bit();
@@ -3973,7 +3973,7 @@ bool QSvgHandler::endElement(const QStringView localName)
     if (node == Graphics)
         m_nodes.pop();
     else if (m_style && !m_skipNodes.isEmpty() && m_skipNodes.top() != Style)
-        m_style = 0;
+        m_style.reset();
 
     return ((localName == QLatin1String("svg")) && (node != Doc));
 }

@@ -51,15 +51,6 @@ public:
         if (t)
             t->ref();
     }
-    QSvgRefCounter &operator =(T *_t)
-    {
-        if(_t)
-            _t->ref();
-        if (t)
-            t->deref();
-        t = _t;
-        return *this;
-    }
     QSvgRefCounter &operator =(const QSvgRefCounter &other)
     {
         if(other.t)
@@ -74,6 +65,12 @@ public:
         if (t)
             t->deref();
     }
+
+    void swap(QSvgRefCounter &other) noexcept
+    { qt_ptr_swap(t, other.t); }
+
+    void reset(T *other = nullptr)
+    { QSvgRefCounter(other).swap(*this); }
 
     inline T *operator->() const { return t; }
     inline operator T*() const { return t; }
