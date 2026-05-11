@@ -400,7 +400,7 @@ public:
 
     void setPaintServer(QSvgPaintServerSharedPtr paintServer)
     {
-        m_paintServer = paintServer;
+        m_paintServer = std::move(paintServer);
         m_strokeSet = 1;
     }
 

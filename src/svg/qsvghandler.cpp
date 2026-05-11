@@ -602,7 +602,7 @@ static void parseBrush(QSvgNode *node,
                 QStringView value = attributes.fill;
                 QSvgPaintServerSharedPtr paintServer = paintServerFromUrl(handler->document(), value);
                 if (paintServer) {
-                    prop->setPaintServer(paintServer);
+                    prop->setPaintServer(std::move(paintServer));
                 } else {
                     QString id = idFromFuncIRI(value).toString();
                     prop->setPaintStyleId(id);
@@ -765,7 +765,7 @@ static void parsePen(QSvgNode *node,
                 QStringView value = attributes.stroke;
                 QSvgPaintServerSharedPtr paintServer = paintServerFromUrl(handler->document(), value);
                 if (paintServer) {
-                    prop->setPaintServer(paintServer);
+                    prop->setPaintServer(std::move(paintServer));
                 } else {
                     QString id = idFromFuncIRI(value).toString();
                     prop->setPaintStyleId(id);
@@ -3129,7 +3129,7 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
 
     // Create a style node for the Pattern.
     QSvgPaintServerSharedPtr prop = std::make_shared<QSvgPatternPaint>(node);
-    handler->document()->addPaintServer(prop, someId(attributes));
+    handler->document()->addPaintServer(std::move(prop), someId(attributes));
 
     return node;
 }
@@ -3885,7 +3885,7 @@ bool QSvgHandler::startElement(const QStringView localName,
         QSvgPaintServerSharedPtr paintServer = method(attributes, this);
         if (paintServer) {
             m_paintServer = paintServer;
-            m_doc->addPaintServer(paintServer, someId(attributes));
+            m_doc->addPaintServer(std::move(paintServer), someId(attributes));
         } else {
             const QByteArray msg = QByteArrayLiteral("Could not parse node: ") + localName.toLocal8Bit();
             qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
@@ -3954,7 +3954,7 @@ void QSvgHandler::resolvePaintServers()
             QString id = fill->paintStyleId();
             QSvgPaintServerSharedPtr paintServer = m_doc->paintServer(id);
             if (paintServer) {
-                fill->setPaintServer(paintServer);
+                fill->setPaintServer(std::move(paintServer));
             } else {
                 qCWarning(lcSvgHandler, "%s", msgCouldNotResolveProperty(id, xml).constData());
                 fill->setBrush(Qt::NoBrush);
@@ -3964,7 +3964,7 @@ void QSvgHandler::resolvePaintServers()
             QString id = stroke->paintStyleId();
             QSvgPaintServerSharedPtr paintServer = m_doc->paintServer(id);
             if (paintServer) {
-                stroke->setPaintServer(paintServer);
+                stroke->setPaintServer(std::move(paintServer));
             } else {
                 qCWarning(lcSvgHandler, "%s", msgCouldNotResolveProperty(id, xml).constData());
                 stroke->setStroke(Qt::NoBrush);
