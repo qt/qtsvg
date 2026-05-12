@@ -939,7 +939,10 @@ static std::optional<qreal> parseFontSize(QStringView s)
         return std::nullopt;
     case FontSizeValue: {
         QSvgUtils::LengthType type;
-        qreal fs = QSvgUtils::parseLength(s, &type);
+        bool ok = false;
+        qreal fs = QSvgUtils::parseLength(s, &type, &ok);
+        if (!ok)
+            return std::nullopt;
         fs = QSvgUtils::convertToPixels(fs, true, type);
         return (std::min)(fs, qreal(0xffff));
     }
