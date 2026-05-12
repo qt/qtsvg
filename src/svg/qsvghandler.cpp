@@ -921,13 +921,43 @@ static std::optional<QFont::Style> parseFontStyle(QStringView s)
     return std::nullopt; // incl. empty and tokens::inherit
 }
 
+static std::optional<qreal> parseFontSize(QStringView s)
+{
+    // https://www.w3.org/TR/2018/REC-css-fonts-3-20180920/#font-size-prop
+    //   Value:           <absolute-size> | <relative-size> | <length-percentage>
+    //   <absolute-size>: [ xx-small | x-small | small | medium | large | x-large | xx-large ]
+    //   <relative-size>: [ larger | smaller ]
+
+    // TODO: Support <relative-size>s
+
+    if (s.isEmpty() || s == tokens::inherit)
+        return std::nullopt;
+
+    const FontSizeSpec spec = fontSizeSpec(s);
+    switch (spec) {
+    case FontSizeNone:
+        return std::nullopt;
+    case FontSizeValue: {
+        QSvgUtils::LengthType type;
+        qreal fs = QSvgUtils::parseLength(s, &type);
+        fs = QSvgUtils::convertToPixels(fs, true, type);
+        return (std::min)(fs, qreal(0xffff));
+    }
+    default:
+        return sizeTable[spec];
+    }
+
+    Q_UNREACHABLE_RETURN(std::nullopt);
+}
+
 static void parseFont(QSvgNode *node,
                       const QSvgAttributes &attributes,
                       QSvgHandler *)
 {
+    auto parsedFontSize = parseFontSize(attributes.fontSize);
     auto parsedFontStyle = parseFontStyle(attributes.fontStyle);
 
-    if (attributes.fontFamily.isEmpty() && attributes.fontSize.isEmpty() && !parsedFontStyle &&
+    if (attributes.fontFamily.isEmpty() && !parsedFontSize && !parsedFontStyle &&
         attributes.fontWeight.isEmpty() && attributes.fontVariant.isEmpty() && attributes.textAnchor.isEmpty())
         return;
 
@@ -949,24 +979,8 @@ static void parseFont(QSvgNode *node,
         fontStyle->setFamily(family.toString());
     }
 
-    if (!attributes.fontSize.isEmpty() && attributes.fontSize != tokens::inherit) {
-        // TODO: Support relative sizes 'larger' and 'smaller'.
-        const FontSizeSpec spec = fontSizeSpec(attributes.fontSize);
-        switch (spec) {
-        case FontSizeNone:
-            break;
-        case FontSizeValue: {
-            QSvgUtils::LengthType type;
-            qreal fs = QSvgUtils::parseLength(attributes.fontSize, &type);
-            fs = QSvgUtils::convertToPixels(fs, true, type);
-            fontStyle->setSize(qMin(fs, qreal(0xffff)));
-        }
-            break;
-        default:
-            fontStyle->setSize(sizeTable[spec]);
-            break;
-        }
-    }
+    if (parsedFontSize)
+        fontStyle->setSize(*parsedFontSize);
 
     if (parsedFontStyle)
         fontStyle->setStyle(*parsedFontStyle);
