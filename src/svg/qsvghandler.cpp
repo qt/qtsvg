@@ -56,6 +56,8 @@ constexpr auto oblique = "oblique"_L1;
 constexpr auto bold = "bold"_L1;
 constexpr auto bolder = "bolder"_L1;
 constexpr auto lighter = "lighter"_L1;
+// font-variant
+constexpr auto small_caps = "small-caps"_L1;
 } // namespace tokens
 } // unnamed namespace
 
@@ -982,6 +984,41 @@ static std::optional<int> parseFontWeight(QStringView s)
     return std::nullopt;
 }
 
+static std::optional<QFont::Capitalization> parseFontVariant(const QSvgAttributes &attributes)
+{
+    // https://www.w3.org/TR/2018/REC-css-fonts-3-20180920/#font-variant-prop
+    //   Value: normal |
+    //          none |
+    //          [
+    //              <common-lig-values> ||
+    //              <discretionary-lig-values> ||
+    //              <historical-lig-values> ||
+    //              <contextual-alt-values> ||
+    //              [ small-caps | all-small-caps | petite-caps | all-petite-caps | unicase | titling-caps ] ||
+    //              <numeric-figure-values> ||
+    //              <numeric-spacing-values> ||
+    //              <numeric-fraction-values> ||
+    //              ordinal ||
+    //              slashed-zero ||
+    //              <east-asian-variant-values> ||
+    //              <east-asian-width-values> ||
+    //              ruby ||
+    //              [ sub | super ]
+    //          ]
+
+    // TODO: implement parsing of sub-properties, and values other than normal and small-caps
+
+    auto s = attributes.fontVariant;
+
+    if (s == tokens::normal)
+        return QFont::MixedCase;
+    if (s == tokens::small_caps)
+        return QFont::SmallCaps;
+
+    return std::nullopt; // incl. empty and tokens::inherit
+}
+
+
 static void parseFont(QSvgNode *node,
                       const QSvgAttributes &attributes,
                       QSvgHandler *)
@@ -989,9 +1026,10 @@ static void parseFont(QSvgNode *node,
     auto parsedFontSize = parseFontSize(attributes.fontSize);
     auto parsedFontStyle = parseFontStyle(attributes.fontStyle);
     auto parsedFontWeight = parseFontWeight(attributes.fontWeight);
+    auto parsedFontVariant = parseFontVariant(attributes);
 
     if (attributes.fontFamily.isEmpty() && !parsedFontSize && !parsedFontStyle &&
-        !parsedFontWeight && attributes.fontVariant.isEmpty() && attributes.textAnchor.isEmpty())
+        !parsedFontWeight && !parsedFontVariant && attributes.textAnchor.isEmpty())
         return;
 
     QSvgFontStyle *fontStyle = nullptr;
@@ -1021,12 +1059,8 @@ static void parseFont(QSvgNode *node,
     if (parsedFontWeight)
         fontStyle->setWeight(*parsedFontWeight);
 
-    if (!attributes.fontVariant.isEmpty() && attributes.fontVariant != tokens::inherit) {
-        if (attributes.fontVariant == QLatin1String("normal"))
-            fontStyle->setVariant(QFont::MixedCase);
-        else if (attributes.fontVariant == QLatin1String("small-caps"))
-            fontStyle->setVariant(QFont::SmallCaps);
-    }
+    if (parsedFontVariant)
+        fontStyle->setVariant(*parsedFontVariant);
 
     if (!attributes.textAnchor.isEmpty() && attributes.textAnchor != tokens::inherit) {
         if (attributes.textAnchor == QLatin1String("start"))
