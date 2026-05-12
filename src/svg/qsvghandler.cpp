@@ -58,6 +58,10 @@ constexpr auto bolder = "bolder"_L1;
 constexpr auto lighter = "lighter"_L1;
 // font-variant
 constexpr auto small_caps = "small-caps"_L1;
+// text-anchor
+constexpr auto start = "start"_L1;
+constexpr auto middle = "middle"_L1;
+constexpr auto end = "end"_L1;
 } // namespace tokens
 } // unnamed namespace
 
@@ -1018,6 +1022,23 @@ static std::optional<QFont::Capitalization> parseFontVariant(const QSvgAttribute
     return std::nullopt; // incl. empty and tokens::inherit
 }
 
+static std::optional<Qt::Alignment> parseTextAnchor(QStringView s)
+{
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-anchor#formal_syntax
+    //   text-anchor =
+    //      start   |
+    //      middle  |
+    //      end
+
+    if (s == tokens::start)
+        return Qt::AlignLeft;
+    if (s == tokens::middle)
+        return Qt::AlignHCenter;
+    if (s == tokens::end)
+        return Qt::AlignRight;
+
+    return std::nullopt; // incl. empty and tokens::inherit
+}
 
 static void parseFont(QSvgNode *node,
                       const QSvgAttributes &attributes,
@@ -1027,9 +1048,10 @@ static void parseFont(QSvgNode *node,
     auto parsedFontStyle = parseFontStyle(attributes.fontStyle);
     auto parsedFontWeight = parseFontWeight(attributes.fontWeight);
     auto parsedFontVariant = parseFontVariant(attributes);
+    auto parsedTextAnchor = parseTextAnchor(attributes.textAnchor);
 
     if (attributes.fontFamily.isEmpty() && !parsedFontSize && !parsedFontStyle &&
-        !parsedFontWeight && !parsedFontVariant && attributes.textAnchor.isEmpty())
+        !parsedFontWeight && !parsedFontVariant && !parsedTextAnchor)
         return;
 
     QSvgFontStyle *fontStyle = nullptr;
@@ -1062,14 +1084,8 @@ static void parseFont(QSvgNode *node,
     if (parsedFontVariant)
         fontStyle->setVariant(*parsedFontVariant);
 
-    if (!attributes.textAnchor.isEmpty() && attributes.textAnchor != tokens::inherit) {
-        if (attributes.textAnchor == QLatin1String("start"))
-            fontStyle->setTextAnchor(Qt::AlignLeft);
-        if (attributes.textAnchor == QLatin1String("middle"))
-           fontStyle->setTextAnchor(Qt::AlignHCenter);
-        else if (attributes.textAnchor == QLatin1String("end"))
-           fontStyle->setTextAnchor(Qt::AlignRight);
-    }
+    if (parsedTextAnchor)
+        fontStyle->setTextAnchor(*parsedTextAnchor);
 
     node->appendStyleProperty(fontStyle);
 }
