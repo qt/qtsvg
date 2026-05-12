@@ -45,7 +45,12 @@ Q_LOGGING_CATEGORY(lcSvgHandler, "qt.svg")
 
 namespace {
 namespace tokens {
+// common
 constexpr auto inherit = "inherit"_L1;
+constexpr auto normal = "normal"_L1;
+// font-style
+constexpr auto italic = "italic"_L1;
+constexpr auto oblique = "oblique"_L1;
 } // namespace tokens
 } // unnamed namespace
 
@@ -883,11 +888,28 @@ static FontSizeSpec fontSizeSpec(QStringView spec)
     return FontSizeValue;
 }
 
+static std::optional<QFont::Style> parseFontStyle(QStringView s)
+{
+    // https://www.w3.org/TR/2018/REC-css-fonts-3-20180920/#font-style-prop
+    //   Value: normal | italic | oblique
+
+    if (s == tokens::normal)
+        return QFont::StyleNormal;
+    if (s == tokens::italic)
+        return QFont::StyleItalic;
+    if (s == tokens::oblique)
+        return QFont::StyleOblique;
+
+    return std::nullopt; // incl. empty and tokens::inherit
+}
+
 static void parseFont(QSvgNode *node,
                       const QSvgAttributes &attributes,
                       QSvgHandler *)
 {
-    if (attributes.fontFamily.isEmpty() && attributes.fontSize.isEmpty() && attributes.fontStyle.isEmpty() &&
+    auto parsedFontStyle = parseFontStyle(attributes.fontStyle);
+
+    if (attributes.fontFamily.isEmpty() && attributes.fontSize.isEmpty() && !parsedFontStyle &&
         attributes.fontWeight.isEmpty() && attributes.fontVariant.isEmpty() && attributes.textAnchor.isEmpty())
         return;
 
@@ -928,15 +950,8 @@ static void parseFont(QSvgNode *node,
         }
     }
 
-    if (!attributes.fontStyle.isEmpty() && attributes.fontStyle != tokens::inherit) {
-        if (attributes.fontStyle == QLatin1String("normal")) {
-            fontStyle->setStyle(QFont::StyleNormal);
-        } else if (attributes.fontStyle == QLatin1String("italic")) {
-            fontStyle->setStyle(QFont::StyleItalic);
-        } else if (attributes.fontStyle == QLatin1String("oblique")) {
-            fontStyle->setStyle(QFont::StyleOblique);
-        }
-    }
+    if (parsedFontStyle)
+        fontStyle->setStyle(*parsedFontStyle);
 
     if (!attributes.fontWeight.isEmpty() && attributes.fontWeight != tokens::inherit) {
         bool ok = false;
