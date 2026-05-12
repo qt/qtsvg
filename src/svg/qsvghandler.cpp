@@ -1950,9 +1950,11 @@ static QSvgNode *createImageNode(QSvgNode *parent,
     if (image.format() == QImage::Format_ARGB32)
         image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
+    if (filenameType != LoadedFromFile)
+        filename = QString();
     QSvgNode *img = new QSvgImage(parent,
                                   image,
-                                  filenameType == LoadedFromFile ? filename : QString{},
+                                  filename,
                                   QRectF(nx,
                                          ny,
                                          nwidth,
