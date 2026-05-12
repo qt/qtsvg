@@ -51,6 +51,10 @@ constexpr auto normal = "normal"_L1;
 // font-style
 constexpr auto italic = "italic"_L1;
 constexpr auto oblique = "oblique"_L1;
+// font-weight
+constexpr auto bold = "bold"_L1;
+constexpr auto bolder = "bolder"_L1;
+constexpr auto lighter = "lighter"_L1;
 } // namespace tokens
 } // unnamed namespace
 
@@ -935,15 +939,41 @@ static std::optional<qreal> parseFontSize(QStringView s)
     Q_UNREACHABLE_RETURN(std::nullopt);
 }
 
+static std::optional<int> parseFontWeight(QStringView s)
+{
+    // https://www.w3.org/TR/2018/REC-css-fonts-3-20180920/#font-weight-prop
+    //   Value: normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
+
+    if (s.isEmpty() || s == tokens::inherit)
+        return std::nullopt;
+
+    if (s == tokens::normal)
+        return QFont::Normal;
+    if (s == tokens::bold)
+        return QFont::Bold;
+    if (s == tokens::bolder)
+        return QSvgFontStyle::BOLDER;
+    if (s == tokens::lighter)
+        return QSvgFontStyle::LIGHTER;
+
+    bool ok = false;
+    const int num = s.toInt(&ok);
+    if (ok)
+        return num;
+
+    return std::nullopt;
+}
+
 static void parseFont(QSvgNode *node,
                       const QSvgAttributes &attributes,
                       QSvgHandler *)
 {
     auto parsedFontSize = parseFontSize(attributes.fontSize);
     auto parsedFontStyle = parseFontStyle(attributes.fontStyle);
+    auto parsedFontWeight = parseFontWeight(attributes.fontWeight);
 
     if (attributes.fontFamily.isEmpty() && !parsedFontSize && !parsedFontStyle &&
-        attributes.fontWeight.isEmpty() && attributes.fontVariant.isEmpty() && attributes.textAnchor.isEmpty())
+        !parsedFontWeight && attributes.fontVariant.isEmpty() && attributes.textAnchor.isEmpty())
         return;
 
     QSvgFontStyle *fontStyle = nullptr;
@@ -970,23 +1000,8 @@ static void parseFont(QSvgNode *node,
     if (parsedFontStyle)
         fontStyle->setStyle(*parsedFontStyle);
 
-    if (!attributes.fontWeight.isEmpty() && attributes.fontWeight != tokens::inherit) {
-        bool ok = false;
-        const int weightNum = attributes.fontWeight.toInt(&ok);
-        if (ok) {
-            fontStyle->setWeight(weightNum);
-        } else {
-            if (attributes.fontWeight == QLatin1String("normal")) {
-                fontStyle->setWeight(QFont::Normal);
-            } else if (attributes.fontWeight == QLatin1String("bold")) {
-                fontStyle->setWeight(QFont::Bold);
-            } else if (attributes.fontWeight == QLatin1String("bolder")) {
-                fontStyle->setWeight(QSvgFontStyle::BOLDER);
-            } else if (attributes.fontWeight == QLatin1String("lighter")) {
-                fontStyle->setWeight(QSvgFontStyle::LIGHTER);
-            }
-        }
-    }
+    if (parsedFontWeight)
+        fontStyle->setWeight(*parsedFontWeight);
 
     if (!attributes.fontVariant.isEmpty() && attributes.fontVariant != tokens::inherit) {
         if (attributes.fontVariant == QLatin1String("normal"))
