@@ -69,12 +69,6 @@ QSvgStructureNode::QSvgStructureNode(QSvgNode *parent)
 QSvgStructureNode::~QSvgStructureNode()
     = default;
 
-QSvgNode * QSvgStructureNode::scopeNode(const QString &id) const
-{
-    QSvgDocument *doc = document();
-    return doc ? doc->namedNode(id) : 0;
-}
-
 void QSvgStructureNode::addChild(std::unique_ptr<QSvgNode> child, const QString &id)
 {
     if (!id.isEmpty()) {
