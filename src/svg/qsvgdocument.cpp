@@ -280,7 +280,7 @@ void QSvgDocument::draw(QPainter *p, const QRectF &bounds)
 void QSvgDocument::draw(QPainter *p, const QString &id,
                             const QRectF &bounds)
 {
-    QSvgNode *node = scopeNode(id);
+    QSvgNode *node = namedNode(id);
 
     if (!node) {
         qCDebug(lcSvgHandler, "Couldn't find node %s. Skipping rendering.", qPrintable(id));
@@ -490,7 +490,7 @@ void QSvgDocument::mapSourceToTarget(QPainter *p, const QRectF &targetRect, cons
 
 QRectF QSvgDocument::boundsOnElement(const QString &id) const
 {
-    const QSvgNode *node = scopeNode(id);
+    const QSvgNode *node = namedNode(id);
     if (!node)
         node = this;
     return node->bounds();
@@ -498,14 +498,12 @@ QRectF QSvgDocument::boundsOnElement(const QString &id) const
 
 bool QSvgDocument::elementExists(const QString &id) const
 {
-    QSvgNode *node = scopeNode(id);
-
-    return (node!=0);
+    return bool(namedNode(id));
 }
 
 QTransform QSvgDocument::transformForElement(const QString &id) const
 {
-    QSvgNode *node = scopeNode(id);
+    QSvgNode *node = namedNode(id);
 
     if (!node) {
         qCDebug(lcSvgHandler, "Couldn't find node %s. Skipping rendering.", qPrintable(id));
