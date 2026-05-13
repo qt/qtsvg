@@ -3283,7 +3283,7 @@ static QSvgNode *createTspanNode(QSvgNode *parent,
 
 static QSvgNode *createUseNode(QSvgNode *parent,
                                const QXmlStreamAttributes &attributes,
-                               QSvgHandler *)
+                               QSvgHandler *handler)
 {
     QStringView linkId     = attributes.value(QLatin1String("xlink:href"));
     const QStringView xStr = attributes.value(QLatin1String("x"));
@@ -3321,7 +3321,7 @@ static QSvgNode *createUseNode(QSvgNode *parent,
             pt = QPointF(nx, ny);
         }
 
-        QSvgNode *link = group->scopeNode(linkIdStr);
+        QSvgNode *link = handler->document()->namedNode(linkIdStr);
         if (link) {
             if (parent->isDescendantOf(link))
                 qCWarning(lcSvgHandler, "link %ls is recursive!", qUtf16Printable(linkIdStr));
@@ -3819,6 +3819,10 @@ void QSvgHandler::parse()
             break;
         }
     }
+
+    if (!m_doc)
+        return;
+
     resolvePaintServers();
     resolveNodes();
     if (detectCyclesAndWarn(m_doc)) {
@@ -4109,8 +4113,7 @@ void QSvgHandler::resolveNodes()
             if (t != QSvgNode::Doc && t != QSvgNode::Defs && t != QSvgNode::Group && t != QSvgNode::Switch)
                 continue;
 
-            QSvgStructureNode *group = static_cast<QSvgStructureNode *>(parent);
-            QSvgNode *link = group->scopeNode(useNode->linkId());
+            QSvgNode *link = m_doc->namedNode(useNode->linkId());
             if (!link) {
                 qCWarning(lcSvgHandler, "link #%s is undefined!", qPrintable(useNode->linkId()));
                 continue;
