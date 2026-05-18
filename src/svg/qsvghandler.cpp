@@ -3067,14 +3067,10 @@ static bool parseStyleNode(QSvgNode *parent,
                            QSvgHandler *handler)
 {
     Q_UNUSED(parent);
-#ifdef QT_NO_CSSPARSER
-    Q_UNUSED(attributes);
-    Q_UNUSED(handler);
-#else
+
     const QStringView type = attributes.value(QLatin1String("type"));
     if (type.compare(QLatin1String("text/css"), Qt::CaseInsensitive) == 0 || type.isNull())
-        handler->setInStyle(true);
-#endif
+        handler->readStyle();
 
     return true;
 }
@@ -3755,9 +3751,6 @@ static const int unfinishedElementsLimit = 2048;
 void QSvgHandler::parse()
 {
     xml->setNamespaceProcessing(false);
-#ifndef QT_NO_CSSPARSER
-    m_inStyle = false;
-#endif
     bool done = false;
     int remainingUnfinishedElements = unfinishedElementsLimit;
     while (!xml->atEnd() && !done) {
@@ -4026,13 +4019,6 @@ bool QSvgHandler::endElement(const QStringView localName)
     if (node == Unknown)
         return false;
 
-#ifdef QT_NO_CSSPARSER
-    Q_UNUSED(localName);
-#else
-    if (m_inStyle && localName == QLatin1String("style"))
-        m_inStyle = false;
-#endif
-
     if (node == Graphics)
         m_nodes.pop();
 
@@ -4125,12 +4111,6 @@ void QSvgHandler::resolveNodes()
 
 bool QSvgHandler::characters(const QStringView str)
 {
-#ifndef QT_NO_CSSPARSER
-    if (m_inStyle) {
-        m_cssHandler.parseStyleSheet(str);
-        return true;
-    }
-#endif
     if (m_skipNodes.isEmpty() || m_skipNodes.top() == Unknown || m_nodes.isEmpty())
         return true;
 
@@ -4212,16 +4192,6 @@ void QSvgHandler::setCurrentSvgFontFamily(QStringView family)
 
 #ifndef QT_NO_CSSPARSER
 
-void QSvgHandler::setInStyle(bool b)
-{
-    m_inStyle = b;
-}
-
-bool QSvgHandler::inStyle() const
-{
-    return m_inStyle;
-}
-
 QSvgCssHandler &QSvgHandler::cssHandler()
 {
     return m_cssHandler;
@@ -4270,6 +4240,16 @@ bool QSvgHandler::processingInstruction(const QStringView target, const QStringV
 #endif
 
     return true;
+}
+
+void QSvgHandler::readStyle()
+{
+#ifndef QT_NO_CSSPARSER
+    QString css = xml->readElementText();
+    m_cssHandler.parseStyleSheet(css);
+#else
+    xml->skipCurrentElement();
+#endif
 }
 
 void QSvgHandler::setAnimPeriod(int start, int end)

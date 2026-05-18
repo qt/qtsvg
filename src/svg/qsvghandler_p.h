@@ -82,9 +82,6 @@ public:
     void setCurrentSvgFontFamily(QStringView family);
 
 #ifndef QT_NO_CSSPARSER
-    void setInStyle(bool b);
-    bool inStyle() const;
-
     QSvgCssHandler &cssHandler();
 #endif
 
@@ -103,6 +100,7 @@ public:
     bool endElement(const QStringView localName);
     bool characters(const QStringView str);
     bool processingInstruction(const QStringView target, const QStringView data);
+    void readStyle();
 
 private:
     void init();
@@ -160,7 +158,6 @@ private:
 
     QXmlStreamReader *const xml;
 #ifndef QT_NO_CSSPARSER
-    bool m_inStyle;
     QSvgCssHandler m_cssHandler;
 #endif
     void parse();
