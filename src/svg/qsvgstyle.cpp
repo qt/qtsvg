@@ -163,6 +163,9 @@ void QSvgViewportFillStyle::revert(QPainter *p, QSvgExtraStates &)
     p->setBrush(m_oldFill);
 }
 
+const int QSvgFontStyle::LIGHTER;
+const int QSvgFontStyle::BOLDER;
+
 QSvgFontStyle::QSvgFontStyle(QSvgFont *font, QSvgDocument *doc)
     : m_svgFont(font)
     , m_doc(doc)
