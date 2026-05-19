@@ -596,7 +596,7 @@ static void parseBrush(QSvgNode *node,
                        QSvgHandler *handler)
 {
     if (!attributes.fill.isEmpty() || !attributes.fillRule.isEmpty() || !attributes.fillOpacity.isEmpty()) {
-        QSvgFillStyle *prop = new QSvgFillStyle;
+        QSvgFillStylePtr prop = std::make_unique<QSvgFillStyle>();
 
         //fill-rule attribute handling
         if (!attributes.fillRule.isEmpty() && attributes.fillRule != tokens::inherit) {
@@ -621,7 +621,7 @@ static void parseBrush(QSvgNode *node,
                 } else {
                     QString id = idFromFuncIRI(value).toString();
                     prop->setPaintStyleId(id);
-                    handler->pushUnresolvedStyle(prop);
+                    handler->pushUnresolvedStyle(prop.get());
                 }
             } else if (attributes.fill != QLatin1String("none")) {
                 QColor color;
@@ -631,7 +631,7 @@ static void parseBrush(QSvgNode *node,
                 prop->setBrush(QBrush(Qt::NoBrush));
             }
         }
-        node->appendStyleProperty(prop);
+        node->appendStyleProperty(std::move(prop));
     }
 }
 
@@ -772,7 +772,7 @@ static void parsePen(QSvgNode *node,
         || !attributes.strokeLineJoin.isEmpty() || !attributes.strokeMiterLimit.isEmpty() || !attributes.strokeOpacity.isEmpty() || !attributes.strokeWidth.isEmpty()
         || !attributes.vectorEffect.isEmpty()) {
 
-        QSvgStrokeStyle *prop = new QSvgStrokeStyle;
+        QSvgStrokeStylePtr prop = std::make_unique<QSvgStrokeStyle>();
 
         //stroke attribute handling
         if (!attributes.stroke.isEmpty() && attributes.stroke != tokens::inherit) {
@@ -784,7 +784,7 @@ static void parsePen(QSvgNode *node,
                 } else {
                     QString id = idFromFuncIRI(value).toString();
                     prop->setPaintStyleId(id);
-                    handler->pushUnresolvedStyle(prop);
+                    handler->pushUnresolvedStyle(prop.get());
                 }
             } else if (attributes.stroke != QLatin1String("none")) {
                 QColor color;
@@ -869,7 +869,7 @@ static void parsePen(QSvgNode *node,
         if (!attributes.strokeOpacity.isEmpty() && attributes.strokeOpacity != tokens::inherit)
             prop->setOpacity(qMin(qreal(1.0), qMax(qreal(0.0), QSvgUtils::toDouble(attributes.strokeOpacity))));
 
-        node->appendStyleProperty(prop);
+        node->appendStyleProperty(std::move(prop));
     }
 }
 
@@ -1054,17 +1054,17 @@ static void parseFont(QSvgNode *node,
         !parsedFontWeight && !parsedFontVariant && !parsedTextAnchor)
         return;
 
-    QSvgFontStyle *fontStyle = nullptr;
+    QSvgFontStylePtr fontStyle;
     if (!attributes.fontFamily.isEmpty()) {
         QSvgDocument *doc = node->document();
         if (doc) {
             QSvgFont *svgFont = doc->svgFont(attributes.fontFamily.toString());
             if (svgFont)
-                fontStyle = new QSvgFontStyle(svgFont, doc);
+                fontStyle = std::make_unique<QSvgFontStyle>(svgFont, doc);
         }
     }
     if (!fontStyle)
-        fontStyle = new QSvgFontStyle;
+        fontStyle = std::make_unique<QSvgFontStyle>();
     if (!attributes.fontFamily.isEmpty() && attributes.fontFamily != tokens::inherit) {
         QStringView family = attributes.fontFamily.trimmed();
         if (!family.isEmpty() && (family.at(0) == QLatin1Char('\'') || family.at(0) == QLatin1Char('\"')))
@@ -1087,7 +1087,7 @@ static void parseFont(QSvgNode *node,
     if (parsedTextAnchor)
         fontStyle->setTextAnchor(*parsedTextAnchor);
 
-    node->appendStyleProperty(fontStyle);
+    node->appendStyleProperty(std::move(fontStyle));
 }
 
 static void parseTransform(QSvgNode *node,
@@ -1099,7 +1099,7 @@ static void parseTransform(QSvgNode *node,
     QTransform matrix = parseTransformationMatrix(attributes.transform.trimmed());
 
     if (!matrix.isIdentity()) {
-        node->appendStyleProperty(new QSvgTransformStyle(QTransform(matrix)));
+        node->appendStyleProperty(std::make_unique<QSvgTransformStyle>(QTransform(matrix)));
     }
 
 }
@@ -1177,12 +1177,12 @@ static void parseOffsetPath(QSvgNode *node,
     if (!offset.path)
         return;
 
-    QSvgOffsetStyle *offsetStyle = new QSvgOffsetStyle();
+    QSvgOffsetStylePtr offsetStyle = std::make_unique<QSvgOffsetStyle>();
     offsetStyle->setPath(offset.path.value());
     offsetStyle->setRotateAngle(offset.angle);
     offsetStyle->setRotateType(offset.rotateType);
     offsetStyle->setDistance(offset.distance);
-    node->appendStyleProperty(offsetStyle);
+    node->appendStyleProperty(std::move(offsetStyle));
 }
 
 #endif // QT_NO_CSSPARSER
@@ -1271,8 +1271,8 @@ static void parseOpacity(QSvgNode *node,
     qreal op = value.toDouble(&ok);
 
     if (ok) {
-        QSvgOpacityStyle *opacity = new QSvgOpacityStyle(qBound(qreal(0.0), op, qreal(1.0)));
-        node->appendStyleProperty(opacity);
+        QSvgOpacityStylePtr opacity = std::make_unique<QSvgOpacityStyle>(qBound(qreal(0.0), op, qreal(1.0)));
+        node->appendStyleProperty(std::move(opacity));
     }
 }
 
@@ -1343,8 +1343,8 @@ static void parseCompOp(QSvgNode *node,
     QStringView value = attributes.compOp.trimmed();
 
     if (!value.isEmpty()) {
-        QSvgCompOpStyle *compop = new QSvgCompOpStyle(svgToQtCompositionMode(value));
-        node->appendStyleProperty(compop);
+        QSvgCompOpStylePtr compop = std::make_unique<QSvgCompOpStyle>(svgToQtCompositionMode(value));
+        node->appendStyleProperty(std::move(compop));
     }
 }
 
@@ -1438,14 +1438,14 @@ static void parseRenderingHints(QSvgNode *node,
         return;
 
     QStringView ir = attributes.imageRendering.trimmed();
-    QSvgQualityStyle *p = new QSvgQualityStyle(0);
+    QSvgQualityStylePtr quality = std::make_unique<QSvgQualityStyle>(0);
     if (ir == QLatin1String("auto"))
-        p->setImageRendering(QSvgQualityStyle::ImageRenderingAuto);
+        quality->setImageRendering(QSvgQualityStyle::ImageRenderingAuto);
     else if (ir == QLatin1String("optimizeSpeed"))
-        p->setImageRendering(QSvgQualityStyle::ImageRenderingOptimizeSpeed);
+        quality->setImageRendering(QSvgQualityStyle::ImageRenderingOptimizeSpeed);
     else if (ir == QLatin1String("optimizeQuality"))
-        p->setImageRendering(QSvgQualityStyle::ImageRenderingOptimizeQuality);
-    node->appendStyleProperty(p);
+        quality->setImageRendering(QSvgQualityStyle::ImageRenderingOptimizeQuality);
+    node->appendStyleProperty(std::move(quality));
 }
 
 static bool parseStyle(QSvgNode *node,
@@ -4001,7 +4001,7 @@ bool QSvgHandler::startElement(const QStringView localName,
         QSvgStyleProperty *prop = method(attributes, this);
         if (prop) {
             m_style = prop;
-            m_nodes.top()->appendStyleProperty(prop);
+            m_nodes.top()->appendStyleProperty(std::unique_ptr<QSvgStyleProperty>(prop));
         } else {
             const QByteArray msg = QByteArrayLiteral("Could not parse node: ") + localName.toLocal8Bit();
             qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
