@@ -236,17 +236,17 @@ QSvgMarker::QSvgMarker(QSvgNode *parent, QRectF bounds, QRectF viewBox, QPointF 
     , m_markerUnits(markerUnits)
 {
     // apply the svg standard style
-    QSvgFillStyle *fillProp = new QSvgFillStyle();
+    QSvgFillStylePtr fillProp = std::make_unique<QSvgFillStyle>();
     fillProp->setBrush(Qt::black);
-    appendStyleProperty(fillProp);
+    appendStyleProperty(std::move(fillProp));
 
-    QSvgStrokeStyle *strokeProp = new QSvgStrokeStyle();
+    QSvgStrokeStylePtr strokeProp = std::make_unique<QSvgStrokeStyle>();
     strokeProp->setMiterLimit(4);
     strokeProp->setWidth(1);
     strokeProp->setLineCap(Qt::FlatCap);
     strokeProp->setLineJoin(Qt::SvgMiterJoin);
     strokeProp->setStroke(Qt::NoBrush);
-    appendStyleProperty(strokeProp);
+    appendStyleProperty(std::move(strokeProp));
 }
 
 QSvgMarker::~QSvgMarker()

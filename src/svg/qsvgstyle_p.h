@@ -625,6 +625,17 @@ private:
     QtSvg::OffsetRotateType m_rotateType{QtSvg::OffsetRotateType::Auto};
 };
 
+using QSvgStylePropertyPtr = std::unique_ptr<QSvgStyleProperty>;
+using QSvgQualityStylePtr = std::unique_ptr<QSvgQualityStyle>;
+using QSvgOpacityStylePtr = std::unique_ptr<QSvgOpacityStyle>;
+using QSvgFillStylePtr = std::unique_ptr<QSvgFillStyle>;
+using QSvgViewportFillStylePtr = std::unique_ptr<QSvgViewportFillStyle>;
+using QSvgFontStylePtr = std::unique_ptr<QSvgFontStyle>;
+using QSvgStrokeStylePtr = std::unique_ptr<QSvgStrokeStyle>;
+using QSvgTransformStylePtr = std::unique_ptr<QSvgTransformStyle>;
+using QSvgCompOpStylePtr = std::unique_ptr<QSvgCompOpStyle>;
+using QSvgOffsetStylePtr = std::unique_ptr<QSvgOffsetStyle>;
+
 class Q_SVG_EXPORT QSvgStaticStyle
 {
 public:
@@ -634,7 +645,7 @@ public:
     void apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states);
     void revert(QPainter *p, QSvgExtraStates &states);
 
-    void appendProperty(std::unique_ptr<QSvgStyleProperty> prop)
+    void appendProperty(QSvgStylePropertyPtr prop)
     {
         Q_ASSERT(prop->type() < QSvgStyleProperty::NumTypes);
         m_properties[prop->type()] = std::move(prop);
@@ -653,7 +664,7 @@ public:
     }
 
 private:
-    std::array<std::unique_ptr<QSvgStyleProperty>, QSvgStyleProperty::NumTypes> m_properties;
+    std::array<QSvgStylePropertyPtr, QSvgStyleProperty::NumTypes> m_properties;
 };
 
 class QSvgAbstractAnimation;

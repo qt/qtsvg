@@ -199,9 +199,9 @@ bool QSvgNode::isDescendantOf(const QSvgNode *parent) const
     return false;
 }
 
-void QSvgNode::appendStyleProperty(QSvgStyleProperty *prop)
+void QSvgNode::appendStyleProperty(QSvgStylePropertyPtr prop)
 {
-    m_style.appendProperty(std::unique_ptr<QSvgStyleProperty>(prop));
+    m_style.appendProperty(std::move(prop));
 }
 
 void QSvgNode::applyStyle(QPainter *p, QSvgExtraStates &states) const
