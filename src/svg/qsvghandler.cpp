@@ -61,6 +61,33 @@ constexpr auto small_caps = "small-caps"_L1;
 constexpr auto start = "start"_L1;
 constexpr auto middle = "middle"_L1;
 constexpr auto end = "end"_L1;
+// comp-op
+namespace compOp{
+constexpr auto clear = "clear"_L1;
+constexpr auto src = "src"_L1;
+constexpr auto dst = "dst"_L1;
+constexpr auto srcOver = "src-over"_L1;
+constexpr auto dstOver = "dst-over"_L1;
+constexpr auto srcIn = "src-in"_L1;
+constexpr auto dstIn = "dst-in"_L1;
+constexpr auto srcOut = "src-out"_L1;
+constexpr auto dstOut = "dst-out"_L1;
+constexpr auto srcAtop = "src-atop"_L1;
+constexpr auto dstAtop = "dst-atop"_L1;
+constexpr auto xorOp = "xor"_L1;
+constexpr auto plus = "plus"_L1;
+constexpr auto multiply = "multiply"_L1;
+constexpr auto screen = "screen"_L1;
+constexpr auto overlay = "overlay"_L1;
+constexpr auto darken = "darken"_L1;
+constexpr auto lighten = "lighten"_L1;
+constexpr auto colorDodge = "color-dodge"_L1;
+constexpr auto colorBurn = "color-burn"_L1;
+constexpr auto hardLight = "hard-light"_L1;
+constexpr auto softLight = "soft-light"_L1;
+constexpr auto difference = "difference"_L1;
+constexpr auto exclusion = "exclusion"_L1;
+} // namespace compOp
 } // namespace tokens
 } // unnamed namespace
 
@@ -1260,59 +1287,56 @@ static void parseOpacity(QSvgNode *node,
 
 static QPainter::CompositionMode svgToQtCompositionMode(const QStringView op)
 {
-#define NOOP qDebug()<<"Operation: "<<op<<" is not implemented"
-    if (op == QLatin1String("clear")) {
+    if (op == tokens::compOp::clear)
         return QPainter::CompositionMode_Clear;
-    } else if (op == QLatin1String("src")) {
+    else if (op == tokens::compOp::src)
         return QPainter::CompositionMode_Source;
-    } else if (op == QLatin1String("dst")) {
+    else if (op == tokens::compOp::dst)
         return QPainter::CompositionMode_Destination;
-    } else if (op == QLatin1String("src-over")) {
+    else if (op == tokens::compOp::srcOver)
         return QPainter::CompositionMode_SourceOver;
-    } else if (op == QLatin1String("dst-over")) {
+    else if (op == tokens::compOp::dstOver)
         return QPainter::CompositionMode_DestinationOver;
-    } else if (op == QLatin1String("src-in")) {
+    else if (op == tokens::compOp::srcIn)
         return QPainter::CompositionMode_SourceIn;
-    } else if (op == QLatin1String("dst-in")) {
+    else if (op == tokens::compOp::dstIn)
         return QPainter::CompositionMode_DestinationIn;
-    } else if (op == QLatin1String("src-out")) {
+    else if (op == tokens::compOp::srcOut)
         return QPainter::CompositionMode_SourceOut;
-    } else if (op == QLatin1String("dst-out")) {
+    else if (op == tokens::compOp::dstOut)
         return QPainter::CompositionMode_DestinationOut;
-    } else if (op == QLatin1String("src-atop")) {
+    else if (op == tokens::compOp::srcAtop)
         return QPainter::CompositionMode_SourceAtop;
-    } else if (op == QLatin1String("dst-atop")) {
+    else if (op == tokens::compOp::dstAtop)
         return QPainter::CompositionMode_DestinationAtop;
-    } else if (op == QLatin1String("xor")) {
+    else if (op == tokens::compOp::xorOp)
         return QPainter::CompositionMode_Xor;
-    } else if (op == QLatin1String("plus")) {
+    else if (op == tokens::compOp::plus)
         return QPainter::CompositionMode_Plus;
-    } else if (op == QLatin1String("multiply")) {
+    else if (op == tokens::compOp::multiply)
         return QPainter::CompositionMode_Multiply;
-    } else if (op == QLatin1String("screen")) {
+    else if (op == tokens::compOp::screen)
         return QPainter::CompositionMode_Screen;
-    } else if (op == QLatin1String("overlay")) {
+    else if (op == tokens::compOp::overlay)
         return QPainter::CompositionMode_Overlay;
-    } else if (op == QLatin1String("darken")) {
+    else if (op == tokens::compOp::darken)
         return QPainter::CompositionMode_Darken;
-    } else if (op == QLatin1String("lighten")) {
+    else if (op == tokens::compOp::lighten)
         return QPainter::CompositionMode_Lighten;
-    } else if (op == QLatin1String("color-dodge")) {
+    else if (op == tokens::compOp::colorDodge)
         return QPainter::CompositionMode_ColorDodge;
-    } else if (op == QLatin1String("color-burn")) {
+    else if (op == tokens::compOp::colorBurn)
         return QPainter::CompositionMode_ColorBurn;
-    } else if (op == QLatin1String("hard-light")) {
+    else if (op == tokens::compOp::hardLight)
         return QPainter::CompositionMode_HardLight;
-    } else if (op == QLatin1String("soft-light")) {
+    else if (op == tokens::compOp::softLight)
         return QPainter::CompositionMode_SoftLight;
-    } else if (op == QLatin1String("difference")) {
+    else if (op == tokens::compOp::difference)
         return QPainter::CompositionMode_Difference;
-    } else if (op == QLatin1String("exclusion")) {
+    else if (op == tokens::compOp::exclusion)
         return QPainter::CompositionMode_Exclusion;
-    } else {
-        NOOP;
-    }
 
+    qCWarning(lcSvgHandler) << "Composition mode not supported : "_L1 << op;
     return QPainter::CompositionMode_SourceOver;
 }
 
