@@ -873,35 +873,42 @@ void tst_QSvgRenderer::recursiveRefs_data()
 {
     QTest::addColumn<QByteArray>("svg");
 
-    QTest::newRow("single") << QByteArray(R"(<svg>
-                                          <linearGradient id="0" xlink:href="#0"/>
-                                          <rect x="0" y="0" width="20" height="20" fill="url(#0) "/>
-                                          </svg>)");
+    QTest::newRow("single") << R"(<svg><linearGradient id="0" xlink:href="#0"/>
+                                  <rect x="0" y="0" width="20" height="20" fill="url(#0) "/>
+                                  </svg>)"_ba;
 
-    QTest::newRow("double") << QByteArray(R"(<svg>
-                                          <linearGradient id="0" xlink:href="#1"/>
-                                          <linearGradient id="1" xlink:href="#0"/>
-                                          <rect x="0" y="0" width="20" height="20" fill="url(#0) "/>
-                                          </svg>)");
+    QTest::newRow("double") << R"(<svg><linearGradient id="0" xlink:href="#1"/>
+                                  <linearGradient id="1" xlink:href="#0"/>
+                                  <rect x="0" y="0" width="20" height="20" fill="url(#0) "/>
+                                  </svg>)"_ba;
 
-    QTest::newRow("triple") << QByteArray(R"(<svg>
-                                          <linearGradient id="0" xlink:href="#1"/>
-                                          <linearGradient id="1" xlink:href="#2"/>
-                                          <linearGradient id="2" xlink:href="#0"/>
-                                          <rect x="0" y="0" width="20" height="20" fill="url(#0) "/>
-                                          </svg>)");
+    QTest::newRow("triple") << R"(<svg>
+                                  <linearGradient id="0" xlink:href="#1"/>
+                                  <linearGradient id="1" xlink:href="#2"/>
+                                  <linearGradient id="2" xlink:href="#0"/>
+                                  <rect x="0" y="0" width="20" height="20" fill="url(#0) "/>
+                                  </svg>)"_ba;
 
-    QTest::newRow("pattern") << QByteArray(R"(<svg><pattern id="pattern" width="4" height="4"
-                                              fill="url(#pattern) ">
-                                              <rect width="2" height="2" fill=" "/></pattern>
-                                              <rect width="2" height="2" fill="url(#pattern) "/>
-                                              </svg>)");
+    QTest::newRow("pattern") << R"(<svg><pattern id="pattern" width="4" height="4"
+                                   fill="url(#pattern) ">
+                                   <rect width="2" height="2" fill=" "/></pattern>
+                                   <rect width="2" height="2" fill="url(#pattern) "/>
+                                   </svg>)"_ba;
 
     // lead to division by zero in QSvgPattern::patternImage while loading document
-    QTest::newRow("pattern-no-elements") << QByteArray(R"(<svg>
-                                                          <pattern id="pattern" width="4" height="4"
-                                                           fill="url(#pattern) "/>
-                                                          </svg>)");
+    QTest::newRow("pattern-no-elements") << R"(<svg><pattern id="pattern" width="4" height="4"
+                                               fill="url(#pattern) "/>
+                                               </svg>)"_ba;
+
+    QTest::newRow("markers") << R"(<svg><marker id="mark" markerWidth="10" markerHeight="10"
+                                    viewBox="0 0 1 1" refX="0" refY="0.5">
+                                    <rect x="0" y="0" width="1" height="1" fill="red"
+                                    marker-end="url(#mark)/></marker>
+                                    </svg>)"_ba;
+
+    QTest::newRow("symbol") << R"(<svg><symbol id="dot" width="100" height="100" viewBox="0 0 1 1">
+                                  <use href="#dot" x="0" y="0"/></symbol>
+                                  </svg>)"_ba;
 }
 
 void tst_QSvgRenderer::recursiveRefs()
