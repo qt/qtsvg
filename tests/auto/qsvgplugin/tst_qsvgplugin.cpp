@@ -12,15 +12,7 @@
 #include <QSize>
 #include <QVariant>
 
-QStringList logMessages;
-
-static void messageHandler(QtMsgType pType, const QMessageLogContext& pContext, const QString& pMsg)
-{
-    Q_UNUSED(pType);
-    Q_UNUSED(pContext);
-    logMessages.append(pMsg);
-}
-
+using namespace Qt::StringLiterals;
 
 class tst_QSvgPlugin : public QObject
 {
@@ -41,12 +33,10 @@ private slots:
 
 
 tst_QSvgPlugin::tst_QSvgPlugin()
-{
-}
+    = default;
 
 tst_QSvgPlugin::~tst_QSvgPlugin()
-{
-}
+    = default;
 
 void tst_QSvgPlugin::checkSize_data()
 {
@@ -106,6 +96,16 @@ void tst_QSvgPlugin::checkImageInclude()
     const QString filename(QFINDTESTDATA("imageInclude.svg"));
     const QString path = filename.left(filename.size() - strlen("imageInclude.svg"));
 
+    QString msg = uR"(Could not create image from "%1%2notExisting.svg")"_s;
+    QTest::ignoreMessage(QtWarningMsg, msg.arg(path, "").toUtf8().data());
+    QTest::ignoreMessage(QtWarningMsg, msg.arg(path, "./").toUtf8().data());
+    QTest::ignoreMessage(QtWarningMsg, msg.arg(path, "../").toUtf8().data());
+    QTest::ignoreMessage(QtWarningMsg, msg.arg(QDir::rootPath(), "").toUtf8().data());
+    QTest::ignoreMessage(QtWarningMsg, msg.arg(":/", "").toUtf8().data());
+    QTest::ignoreMessage(QtWarningMsg, msg.arg("qrc:///", "").toUtf8().data());
+    QTest::ignoreMessage(QtWarningMsg, msg.arg("file:///", "").toUtf8().data());
+    QTest::ignoreMessage(QtWarningMsg, msg.arg("http://qt.io/", "").toUtf8().data());
+
     QFile file(filename);
     QVERIFY(file.open(QIODevice::ReadOnly));
 
@@ -113,23 +113,9 @@ void tst_QSvgPlugin::checkImageInclude()
     plugin.setDevice(&file);
 
     QImage image;
-    qInstallMessageHandler(messageHandler);
     plugin.read(&image);
-    qInstallMessageHandler(nullptr);
 
     file.close();
-
-    QCOMPARE(logMessages.size(), 8);
-    QCOMPARE(logMessages.at(0), QString("Could not create image from \"%1notExisting.svg\"").arg(path));
-    QCOMPARE(logMessages.at(1), QString("Could not create image from \"%1./notExisting.svg\"").arg(path));
-    QCOMPARE(logMessages.at(2), QString("Could not create image from \"%1../notExisting.svg\"").arg(path));
-    QCOMPARE(logMessages.at(3), QString("Could not create image from \"%1notExisting.svg\"").arg(QDir::rootPath()));
-    QCOMPARE(logMessages.at(4), QLatin1String("Could not create image from \":/notExisting.svg\""));
-    QCOMPARE(logMessages.at(5), QLatin1String("Could not create image from \"qrc:///notExisting.svg\""));
-    QCOMPARE(logMessages.at(6), QLatin1String("Could not create image from \"file:///notExisting.svg\""));
-    QCOMPARE(logMessages.at(7), QLatin1String("Could not create image from \"http://qt.io/notExisting.svg\""));
-
-    logMessages.clear();
 }
 
 void tst_QSvgPlugin::encodings_data()
