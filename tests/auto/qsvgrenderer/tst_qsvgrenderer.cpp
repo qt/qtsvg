@@ -2622,14 +2622,10 @@ void tst_QSvgRenderer::testDeeplyNested_data()
 
     QTest::addColumn<QByteArray>("deeplyNested");
     QTest::addColumn<bool>("trusted");
-    QTest::newRow("8 groups") << generateNests(8) << true;
-    QTest::newRow("16 groups") << generateNests(16) << true;
-    QTest::newRow("32 groups") << generateNests(32) << true;
-    QTest::newRow("64 groups") << generateNests(64) << false;
-    QTest::newRow("128 groups") << generateNests(128) << false;
-    QTest::newRow("256 groups") << generateNests(256) << false;
-    QTest::newRow("512 groups") << generateNests(512) << false;
-    QTest::newRow("1024 groups") << generateNests(1024) << false;
+    for (int i = 8; i <= 4096; i *= 2) {
+        QTest::newRow((QString::number(i) + " groups").toStdString().c_str())
+                << generateNests(i) << (i <= 32);
+    }
 }
 
 void tst_QSvgRenderer::testDeeplyNested()
