@@ -689,35 +689,41 @@ void QSvgStructureNode::releaseDescendants()
     // happen in deeply nested trees.
     // This function does not allocate any memory at the cost of sacrificing some performance to
     // make it safe to be called from a destructor.
-    while (!m_renderers.empty()) {
-        auto nodes = &m_renderers;
-        bool isSubtree = true;
-        while (isSubtree) {
-            switch (nodes->front()->type()) {
-            case QSvgNode::Doc:
-            case QSvgNode::Defs:
-            case QSvgNode::Group:
-            case QSvgNode::Mask:
-            case QSvgNode::Pattern:
-            case QSvgNode::Symbol:
-            case QSvgNode::Switch:
-            case QSvgNode::Filter:
-            {
-                QSvgStructureNode *subtree = static_cast<QSvgStructureNode *>(nodes->first());
-                isSubtree = !subtree->m_renderers.empty();
-                if (isSubtree)
-                    nodes = &subtree->m_renderers;
-            }
-                break;
-            default:
-                isSubtree = false;
-                break;
+    QSvgNode *currentParent = this;
+    while (currentParent) {
+        switch (currentParent->type()) {
+        case QSvgNode::Doc:
+        case QSvgNode::Defs:
+        case QSvgNode::Group:
+        case QSvgNode::Mask:
+        case QSvgNode::Pattern:
+        case QSvgNode::Symbol:
+        case QSvgNode::Switch:
+        case QSvgNode::Filter:
+        {
+            QSvgStructureNode *currentParentSN = static_cast<QSvgStructureNode *>(currentParent);
+            if (currentParentSN->m_renderers.empty()) {
+                currentParent = currentParent->parent();
+                if (currentParent) {
+                    delete static_cast<QSvgStructureNode *>(currentParent)->m_renderers.first();
+                    static_cast<QSvgStructureNode *>(currentParent)->m_renderers.pop_front();
+                }
+            } else {
+                Q_ASSERT(currentParentSN->m_renderers.first()->parent() == currentParent);
+                currentParent = currentParentSN->m_renderers.first();
             }
         }
-        QSvgNode *node = nodes->first();
-        delete node;
-        nodes->pop_front();
+            break;
+        default:
+            currentParent = currentParent->parent();
+            if (currentParent) {
+                delete static_cast<QSvgStructureNode *>(currentParent)->m_renderers.first();
+                static_cast<QSvgStructureNode *>(currentParent)->m_renderers.pop_front();
+            }
+            break;
+        }
     }
+    Q_ASSERT(this->m_renderers.empty());
 }
 
 QSvgMask::QSvgMask(QSvgNode *parent, QSvgRectF bounds,
