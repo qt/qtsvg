@@ -55,8 +55,11 @@ private slots:
     void gradientRefs();
     void recursiveRefs_data();
     void recursiveRefs();
+    void fillRule_data();
     void fillRule();
+    void opacity_data();
     void opacity();
+    void groupOpacity();
     void paths();
     void paths2();
     void emptyPath_data();
@@ -979,73 +982,129 @@ void tst_QSvgRenderer::testGzHelper()
 #  endif // #ifdef QT_BUILD_INTERNAL
 #endif // #ifndef QT_NO_COMPRESS
 
+void tst_QSvgRenderer::fillRule_data()
+{
+    QTest::addColumn<const QByteArray>("svg");
+    QTest::addColumn<bool>("nonzero");
+
+    QTest::newRow("paths-default")
+        << R"(<svg><rect x="0" y="0" height="30" width="30" fill="blue"/>)"_ba
+           R"(<path d="M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z" )"_ba
+           R"(fill="red"/></svg>)"_ba << true;
+
+    QTest::newRow("paths-nonzero")
+        << R"(<svg><rect x="0" y="0" height="30" width="30" fill="blue"/>)"_ba
+           R"(<path d="M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z" )"_ba
+           R"(fill="red" fill-rule="nonzero"/></svg>)"_ba << true;
+
+    QTest::newRow("paths-evenodd")
+        << R"(<svg><rect x="0" y="0" height="30" width="30" fill="blue"/>)"_ba
+           R"(<path d="M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z" )"_ba
+           R"(fill="red" fill-rule="evenodd"/></svg>)"_ba << false;
+
+    QTest::newRow("polygons-default")
+        << R"(<svg><rect x="0" y="0" height="30" width="30" fill="blue"/>)"_ba
+           R"(<polygon points="10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20" )"_ba
+           R"(fill="red"/></svg>)"_ba << true;
+
+    QTest::newRow("polygons-nonzero")
+        << R"(<svg><rect x="0" y="0" height="30" width="30" fill="blue"/>)"_ba
+           R"(<polygon points="10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20" )"_ba
+           R"(fill="red" fill-rule="nonzero"/></svg>)"_ba << true;
+
+    QTest::newRow("polygons-evenodd")
+        << R"(<svg><rect x="0" y="0" height="30" width="30" fill="blue"/>)"_ba
+           R"(<polygon points="10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20" )"_ba
+           R"(fill="red" fill-rule="evenodd"/></svg>)"_ba << false;
+}
+
 void tst_QSvgRenderer::fillRule()
 {
-    static const char *svgs[] = {
-        // Paths
-        // Default fill-rule (nonzero)
-        R"(<svg>
-           <rect x="0" y="0" height="30" width="30" fill="blue" />
-           <path d="M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z" fill="red" />
-        </svg>)",
-        // nonzero
-        R"(<svg>
-           <rect x="0" y="0" height="30" width="30" fill="blue" />
-           <path d="M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z" fill="red" fill-rule="nonzero" />
-        </svg>)",
-        // evenodd
-        R"(<svg>
-           <rect x="0" y="0" height="30" width="30" fill="blue" />
-           <path d="M10 0 L30 0 L30 30 L0 30 L0 10 L20 10 L20 20 L10 20 Z" fill="red" fill-rule="evenodd" />
-        </svg>)",
+    QFETCH(const QByteArray, svg);
+    QFETCH(bool, nonzero);
 
-        // Polygons
-        // Default fill-rule (nonzero)
-        R"(<svg>
-           <rect x="0" y="0" height="30" width="30" fill="blue" />
-           <polygon points="10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20" fill="red" />
-        </svg>)",
-        // nonzero
-        R"(<svg>
-           <rect x="0" y="0" height="30" width="30" fill="blue" />
-           <polygon points="10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20" fill="red" fill-rule="nonzero" />
-        </svg>)",
-        // evenodd
-        R"(<svg>
-           <rect x="0" y="0" height="30" width="30" fill="blue" />
-           <polygon points="10 0 30 0 30 30 0 30 0 10 20 10 20 20 10 20" fill="red" fill-rule="evenodd" />
-        </svg>)"
-    };
+    QImage refImage(30, 30, QImage::Format_ARGB32_Premultiplied);
 
-    const int COUNT = sizeof(svgs) / sizeof(svgs[0]);
-    QImage refImageNonZero(30, 30, QImage::Format_ARGB32_Premultiplied);
-    QImage refImageEvenOdd(30, 30, QImage::Format_ARGB32_Premultiplied);
-    refImageNonZero.fill(0xffff0000);
-    refImageEvenOdd.fill(0xffff0000);
-    QPainter p;
-    p.begin(&refImageNonZero);
-    p.fillRect(QRectF(0, 0, 10, 10), Qt::blue);
-    p.end();
-    p.begin(&refImageEvenOdd);
-    p.fillRect(QRectF(0, 0, 10, 10), Qt::blue);
-    p.fillRect(QRectF(10, 10, 10, 10), Qt::blue);
-    p.end();
+    {
+        refImage.fill(0xffff0000);
+        QPainter p(&refImage);
+        if (nonzero) {
+            p.fillRect(QRectF(0, 0, 10, 10), Qt::blue);
+        } else {
+            p.fillRect(QRectF(0, 0, 10, 10), Qt::blue);
+            p.fillRect(QRectF(10, 10, 10, 10), Qt::blue);
+        }
+    }
 
-    for (int i = 0; i < COUNT; ++i) {
-        QByteArray data(svgs[i]);
-        QSvgRenderer renderer(data);
-        QImage image(30, 30, QImage::Format_ARGB32_Premultiplied);
-        image.fill(0);
-        p.begin(&image);
-        renderer.render(&p);
-        p.end();
-        QCOMPARE(image, i % 3 == 2 ? refImageEvenOdd : refImageNonZero);
+    QByteArray data(svg);
+    QSvgRenderer renderer(data);
+    QImage image(30, 30, QImage::Format_ARGB32_Premultiplied);
+    image.fill(0);
+    QPainter p(&image);
+    renderer.render(&p);
+    QCOMPARE(image, refImage);
+}
+
+void tst_QSvgRenderer::opacity_data()
+{
+    QTest::addColumn<const QByteArray>("svg");
+
+    constexpr uint count = 5;
+    constexpr std::array<QByteArrayView, count> opacities{"-1.4641"_L1, "0"_L1, "0.5"_L1, "1"_L1, "1.337"_L1};
+    constexpr std::array<QByteArrayView, count> colors1{"#7f7f7f"_L1, "#7f7f7f"_L1, "#402051"_L1, "blue"_L1, "#123456"_L1};
+    constexpr std::array<QByteArrayView, count> colors2{"red"_L1, "#bad"_L1, "#bedead"_L1, "#7f7f7f"_L1, "#7f7f7f"_L1};
+
+    for (uint i = 0; i < count; i++) {
+        QByteArray data = R"(<svg><rect x="0" y="0" height="10" width="10" )"_ba
+                          R"(fill=")"_ba + colors1[i] + R"("/>)"_ba
+                          R"(<rect x="0" y="0" height="10" width="10" )"_ba
+                          R"(fill=")"_ba + colors2[i] + R"(" )"_ba
+                          R"(fill-opacity=")"_ba + opacities[i] + R"("/></svg>)"_ba;
+
+        QTest::newRow(("fill-opacity" + QString::number(i + 1)).toStdString().c_str()) << data;
+    }
+
+    for (uint i = 0; i < count; i++) {
+        QByteArray data = R"(<svg viewBox="0 0 10 10"><polyline points="0 5 10 5" fill="none" )"_ba
+                          R"(stroke=")"_ba + colors1[i] + R"(" stroke-width="10"/>)"_ba
+                          R"(<line x1="5" y1="0" x2="5" y2="10" fill="none" )"_ba
+                          R"(stroke=")"_ba + colors2[i] + R"(" stroke-width="10" )"_ba
+                          R"(stroke-opacity=")"_ba + opacities[i] + R"("/></svg>)"_ba;
+
+        QTest::newRow(("stroke-opacity" + QString::number(i + 1)).toStdString().c_str()) << data;
+    }
+
+    for (uint i = 0; i < count; i++) {
+        QByteArray data = R"(<svg><defs><linearGradient id="gradient">)"_ba
+                          R"(<stop offset="0" stop-color=")"_ba + colors2[i] + R"("/>)"_ba
+                          R"(<stop offset="1" stop-color=")"_ba + colors2[i] + R"("/>)"_ba
+                          R"(</linearGradient></defs><rect x="0" y="0" height="10" width="10" )"_ba
+                          R"(fill=")"_ba + colors1[i] + R"("/>)"_ba
+                          R"(<rect x="0" y="0" height="10" width="10" fill="url(#gradient) " )"_ba
+                          R"(fill-opacity=")"_ba + opacities[i] + R"("/></svg>)"_ba;
+
+        QTest::newRow(("grads-fill-opacity" + QString::number(i + 1)).toStdString().c_str()) << data;
+    }
+
+    for (uint i = 0; i < count; i++) {
+        QByteArray data = R"(<svg viewBox="0 0 10 10"><defs><linearGradient id="grad">)"_ba
+                          R"(<stop offset="0" stop-color=")"_ba + colors2[i] + R"("/>)"_ba
+                          R"(<stop offset="1" stop-color=")"_ba + colors2[i] + R"("/>)"_ba
+                          R"(</linearGradient></defs><polyline points="0 5 10 5" fill="none" )"_ba
+                          R"(stroke=")"_ba + colors1[i] + R"(" stroke-width="10"/>)"_ba
+                          R"(<line x1="5" y1="0" x2="5" y2="10" fill="none" )"_ba
+                          R"(stroke="url(#grad) " stroke-width="10" )"_ba
+                          R"(stroke-opacity=")"_ba + opacities[i] + R"("/></svg>)"_ba;
+
+        QTest::newRow(("grads-stroke-opacity" + QString::number(i + 1)).toStdString().c_str()) << data;
     }
 }
 
-static void opacity_drawSvgAndVerify(const QByteArray &data)
+void tst_QSvgRenderer::opacity()
 {
-    QSvgRenderer renderer(data);
+    QFETCH(const QByteArray, svg);
+
+    QSvgRenderer renderer(svg);
     QVERIFY(renderer.isValid());
     QImage image(10, 10, QImage::Format_ARGB32_Premultiplied);
     image.fill(0xffff00ff);
@@ -1055,64 +1114,10 @@ static void opacity_drawSvgAndVerify(const QByteArray &data)
     QCOMPARE(image.pixel(5, 5), 0xff7f7f7f);
 }
 
-void tst_QSvgRenderer::opacity()
+void tst_QSvgRenderer::groupOpacity()
 {
-    static const char *opacities[] = {"-1.4641", "0", "0.5", "1", "1.337"};
-    static const char *firstColors[] = {"#7f7f7f", "#7f7f7f", "#402051", "blue", "#123456"};
-    static const char *secondColors[] = {"red", "#bad", "#bedead", "#7f7f7f", "#7f7f7f"};
-
-    // Fill-opacity
-    for (int i = 0; i < 5; ++i) {
-        QByteArray data("<svg><rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"");
-        data.append(firstColors[i]);
-        data.append("\"/><rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"");
-        data.append(secondColors[i]);
-        data.append("\" fill-opacity=\"");
-        data.append(opacities[i]);
-        data.append("\"/></svg>");
-        opacity_drawSvgAndVerify(data);
-    }
-    // Stroke-opacity
-    for (int i = 0; i < 5; ++i) {
-        QByteArray data("<svg viewBox=\"0 0 10 10\"><polyline points=\"0 5 10 5\" fill=\"none\" stroke=\"");
-        data.append(firstColors[i]);
-        data.append("\" stroke-width=\"10\"/><line x1=\"5\" y1=\"0\" x2=\"5\" y2=\"10\" fill=\"none\" stroke=\"");
-        data.append(secondColors[i]);
-        data.append("\" stroke-width=\"10\" stroke-opacity=\"");
-        data.append(opacities[i]);
-        data.append("\"/></svg>");
-        opacity_drawSvgAndVerify(data);
-    }
-    // As gradients:
-    // Fill-opacity
-    for (int i = 0; i < 5; ++i) {
-        QByteArray data("<svg><defs><linearGradient id=\"gradient\"><stop offset=\"0\" stop-color=\"");
-        data.append(secondColors[i]);
-        data.append("\"/><stop offset=\"1\" stop-color=\"");
-        data.append(secondColors[i]);
-        data.append("\"/></linearGradient></defs><rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"");
-        data.append(firstColors[i]);
-        data.append("\"/><rect x=\"0\" y=\"0\" height=\"10\" width=\"10\" fill=\"url(#gradient)\" fill-opacity=\"");
-        data.append(opacities[i]);
-        data.append("\"/></svg>");
-        opacity_drawSvgAndVerify(data);
-    }
-    // Stroke-opacity
-    for (int i = 0; i < 5; ++i) {
-        QByteArray data("<svg viewBox=\"0 0 10 10\"><defs><linearGradient id=\"grad\"><stop offset=\"0\" stop-color=\"");
-        data.append(secondColors[i]);
-        data.append("\"/><stop offset=\"1\" stop-color=\"");
-        data.append(secondColors[i]);
-        data.append("\"/></linearGradient></defs><polyline points=\"0 5 10 5\" fill=\"none\" stroke=\"");
-        data.append(firstColors[i]);
-        data.append("\" stroke-width=\"10\" /><line x1=\"5\" y1=\"0\" x2=\"5\" y2=\"10\" fill=\"none\" stroke=\"url(#grad)\" stroke-width=\"10\" stroke-opacity=\"");
-        data.append(opacities[i]);
-        data.append("\" /></svg>");
-        opacity_drawSvgAndVerify(data);
-    }
-
     // group opacity QTBUG-122310
-    const char *svg = R"svg(
+    const QByteArray data = R"svg(
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 37 37">
     <g transform="translate(0, 0)">
         <rect fill="#808080" x="0" y="0" width="10" height="10" fill-opacity="0.5"/>
@@ -1131,9 +1136,8 @@ void tst_QSvgRenderer::opacity()
         <rect fill="#808080" x="5" y="5" width="10" height="10"/>
     </g>
     </svg>
-    )svg";
+    )svg"_ba;
 
-    QByteArray data(svg);
     QSvgRenderer renderer(data);
     QVERIFY(renderer.isValid());
 
