@@ -38,16 +38,14 @@ private slots:
     void invalidUrl();
     void testStrokeWidth();
 #if QT_CONFIG(picture)
+    void constructorQXmlStreamReader() const;
+    void loadQXmlStreamReader() const;
+    void nestedQXmlStreamReader() const;
     void testMapViewBoxToTarget();
     void testRenderElement();
 #endif
     void testRenderElementToBounds();
     void testRenderDocumentWithSizeToBounds();
-#if QT_CONFIG(picture)
-    void constructorQXmlStreamReader() const;
-    void loadQXmlStreamReader() const;
-    void nestedQXmlStreamReader() const;
-#endif
     void stylePropagation() const;
     void transformForElement() const;
     void boundsOnElement() const;
@@ -272,6 +270,59 @@ void tst_QSvgRenderer::testStrokeWidth()
 }
 
 #if QT_CONFIG(picture)
+void tst_QSvgRenderer::constructorQXmlStreamReader() const
+{
+    const QByteArray data(src);
+
+    QXmlStreamReader reader(data);
+
+    QPicture picture;
+    QPainter painter(&picture);
+    QSvgRenderer rend(&reader);
+    rend.render(&painter, "foo"_L1);
+    painter.end();
+    QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
+}
+
+void tst_QSvgRenderer::loadQXmlStreamReader() const
+{
+    const QByteArray data(src);
+
+    QXmlStreamReader reader(data);
+    QPicture picture;
+    QPainter painter(&picture);
+    QSvgRenderer rend;
+    rend.load(&reader);
+    rend.render(&painter, "foo"_L1);
+    painter.end();
+    QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
+}
+
+void tst_QSvgRenderer::nestedQXmlStreamReader() const
+{
+    const QByteArray data(QByteArray("<bar>") + QByteArray(src) + QByteArray("</bar>"));
+
+    QXmlStreamReader reader(data);
+
+    QCOMPARE(reader.readNext(), QXmlStreamReader::StartDocument);
+    QCOMPARE(reader.readNext(), QXmlStreamReader::StartElement);
+    QCOMPARE(reader.name().toString(), "bar"_L1);
+
+    QPicture picture;
+    QPainter painter(&picture);
+    QSvgRenderer renderer(&reader);
+    renderer.render(&painter, "foo"_L1);
+    painter.end();
+    QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
+
+    QCOMPARE(reader.readNext(), QXmlStreamReader::EndElement);
+    QCOMPARE(reader.name().toString(), "bar"_L1);
+    QCOMPARE(reader.readNext(), QXmlStreamReader::EndDocument);
+
+    QVERIFY(reader.atEnd());
+    QVERIFY(!reader.hasError());
+}
+
 void tst_QSvgRenderer::testMapViewBoxToTarget()
 {
     const char *src = R"(<svg><g><rect x="250" y="250" width="500" height="500" /></g></svg>)";
@@ -463,61 +514,6 @@ void tst_QSvgRenderer::testRenderDocumentWithSizeToBounds()
 
     QCOMPARE(reference, rendering);
 }
-
-#if QT_CONFIG(picture)
-void tst_QSvgRenderer::constructorQXmlStreamReader() const
-{
-    const QByteArray data(src);
-
-    QXmlStreamReader reader(data);
-
-    QPicture picture;
-    QPainter painter(&picture);
-    QSvgRenderer rend(&reader);
-    rend.render(&painter, "foo"_L1);
-    painter.end();
-    QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
-}
-
-void tst_QSvgRenderer::loadQXmlStreamReader() const
-{
-    const QByteArray data(src);
-
-    QXmlStreamReader reader(data);
-    QPicture picture;
-    QPainter painter(&picture);
-    QSvgRenderer rend;
-    rend.load(&reader);
-    rend.render(&painter, "foo"_L1);
-    painter.end();
-    QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
-}
-
-void tst_QSvgRenderer::nestedQXmlStreamReader() const
-{
-    const QByteArray data(QByteArray("<bar>") + QByteArray(src) + QByteArray("</bar>"));
-
-    QXmlStreamReader reader(data);
-
-    QCOMPARE(reader.readNext(), QXmlStreamReader::StartDocument);
-    QCOMPARE(reader.readNext(), QXmlStreamReader::StartElement);
-    QCOMPARE(reader.name().toString(), "bar"_L1);
-
-    QPicture picture;
-    QPainter painter(&picture);
-    QSvgRenderer renderer(&reader);
-    renderer.render(&painter, "foo"_L1);
-    painter.end();
-    QCOMPARE(picture.boundingRect(), QRect(0, 0, 100, 100));
-
-    QCOMPARE(reader.readNext(), QXmlStreamReader::EndElement);
-    QCOMPARE(reader.name().toString(), "bar"_L1);
-    QCOMPARE(reader.readNext(), QXmlStreamReader::EndDocument);
-
-    QVERIFY(reader.atEnd());
-    QVERIFY(!reader.hasError());
-}
-#endif
 
 void tst_QSvgRenderer::stylePropagation() const
 {
