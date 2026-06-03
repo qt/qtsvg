@@ -182,6 +182,10 @@ void tst_QSvgHandler::testCreateAnimateTransformNode_data()
     QTest::newRow("skewY") << "skewY" << "10;20"
                            << QSvgAnimatedPropertyTransform::TransformComponent::Skew
                            << QList<QList<qreal>>{ { 0, 10 }, { 0, 20 } };
+    QTest::newRow("empty-after-semicolon")
+            << "rotate" << "1,2,3;4,5,6;"
+            << QSvgAnimatedPropertyTransform::TransformComponent::Rotate
+            << QList<QList<qreal>>{ { 1, 2, 3 }, { 4, 5, 6 } };
 }
 
 void tst_QSvgHandler::testCreateAnimateTransformNode()
