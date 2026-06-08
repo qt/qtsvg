@@ -34,8 +34,6 @@ private slots:
     void getSetCheck();
     void emptyRect_data();
     void emptyRect();
-    void inexistentUrl();
-    void emptyUrl();
     void invalidUrl_data();
     void invalidUrl();
     void testStrokeWidth();
@@ -181,28 +179,6 @@ void tst_QSvgRenderer::emptyRect()
     QVERIFY(renderer.isValid());
 }
 
-void tst_QSvgRenderer::inexistentUrl()
-{
-    const char *src = "<svg><g><path d=\"M0 0\" style=\"stroke:url(#inexistent)\"/></g></svg>";
-    QTest::ignoreMessage(QtWarningMsg, "<input>:1:66: Could not resolve property: inexistent");
-
-    QByteArray data(src);
-    QSvgRenderer renderer(data);
-
-    QVERIFY(renderer.isValid());
-}
-
-void tst_QSvgRenderer::emptyUrl()
-{
-    const char *src = "<svg><text fill=\"url()\" /></svg>";
-    QTest::ignoreMessage(QtWarningMsg, "<input>:1:32: Could not resolve property: ");
-
-    QByteArray data(src);
-    QSvgRenderer renderer(data);
-
-    QVERIFY(renderer.isValid());
-}
-
 void tst_QSvgRenderer::invalidUrl_data()
 {
     QTest::addColumn<QByteArray>("svg");
@@ -233,11 +209,15 @@ void tst_QSvgRenderer::invalidUrl_data()
             << R"(<svg><linearGradient id="blabla"/><circle fill="url(blabla) "/></svg>)"_ba;
     QTest::newRow("url(#blabla")
             << R"(<svg><linearGradient id="blabla"/><circle fill="url(#blabla" /></svg>)"_ba;
+    QTest::newRow("inexistent")
+            << R"svg(<svg><g><path d="M0 0" style="stroke:url(#inexistent)"/></g></svg>)svg"_ba;
+    QTest::newRow("emptyUrl")
+            << R"svg(<svg><text fill="url()"/></svg>)svg"_ba;
 }
 
 void tst_QSvgRenderer::invalidUrl()
 {
-    QFETCH(QByteArray, svg);
+    QFETCH(const QByteArray, svg);
 
 #if QT_CONFIG(regularexpression)
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Could not resolve property"));
