@@ -8,10 +8,8 @@
 
 #include "qsvgdocument_p.h"
 #include "qsvgstructure_p.h"
-#include "qsvggraphics_p.h"
 #include "qsvgfilter_p.h"
 #include "qsvgnode_p.h"
-#include "qsvgfont_p.h"
 #include "qsvganimate_p.h"
 
 #include "qpen.h"
@@ -1075,7 +1073,7 @@ static std::optional<Qt::Alignment> parseTextAnchor(QStringView s)
 
 static void parseFont(QSvgNode *node,
                       const QSvgAttributes &attributes,
-                      QSvgHandler *handler)
+                      QSvgHandler *)
 {
     auto parsedFontSize = parseFontSize(attributes.fontSize);
     auto parsedFontStyle = parseFontStyle(attributes.fontStyle);
@@ -1087,17 +1085,8 @@ static void parseFont(QSvgNode *node,
         !parsedFontWeight && !parsedFontVariant && !parsedTextAnchor)
         return;
 
-    QSvgFontStylePtr fontStyle;
-    if (!attributes.fontFamily.isEmpty()) {
-        QSvgDocument *doc = handler->document();
-        if (doc) {
-            QSvgFont *svgFont = doc->svgFont(attributes.fontFamily.toString());
-            if (svgFont)
-                fontStyle = std::make_unique<QSvgFontStyle>(svgFont);
-        }
-    }
-    if (!fontStyle)
-        fontStyle = std::make_unique<QSvgFontStyle>();
+    QSvgFontStylePtr fontStyle = std::make_unique<QSvgFontStyle>();
+
     if (!attributes.fontFamily.isEmpty() && attributes.fontFamily != tokens::inherit) {
         QStringView family = attributes.fontFamily.trimmed();
         if (!family.isEmpty() && (family.at(0) == QLatin1Char('\'') || family.at(0) == QLatin1Char('\"')))
@@ -1827,38 +1816,25 @@ static QSvgNode *createEllipseNode(QSvgNode *parent,
     return ellipse;
 }
 
-static QSvgStyleProperty *createFontNode(const QXmlStreamAttributes &attributes,
-                                         QSvgHandler *handler)
+static QSvgFontPtr createFontNode(const QXmlStreamAttributes &attributes,
+                                  QSvgHandler *)
 {
     const QStringView hax = attributes.value(QLatin1String("horiz-adv-x"));
-    QString myId     = someId(attributes);
 
     qreal horizAdvX = QGuiSvg::toDouble(hax);
 
-    if (!myId.isEmpty()) {
-        QSvgDocument *doc = handler->document();
-        QSvgFont *font = doc->svgFont(myId);
-        if (!font) {
-            font = new QSvgFont(horizAdvX);
-            font->setFamilyName(myId);
-            doc->addSvgFont(font);
-        }
-        return new QSvgFontStyle(font);
-    }
-    return nullptr;
+    return std::make_unique<QSvgFont>(horizAdvX);
 }
 
-static bool parseFontFaceNode(QSvgStyleProperty *parent,
+static bool parseFontFaceNode(QSvgFont *parent,
                               const QXmlStreamAttributes &attributes,
                               QSvgHandler *handler)
 {
-    if (parent->type() != QSvgStyleProperty::Font) {
-        return false;
-    }
-
-    QSvgFontStyle *style = static_cast<QSvgFontStyle*>(parent);
-    QSvgFont *font = style->svgFont();
     const QStringView name = attributes.value(QLatin1String("font-family"));
+
+    if (name.isEmpty())
+         return false;
+
     const QStringView unitsPerEmStr = attributes.value(QLatin1String("units-per-em"));
 
     /*TODO: Fix toDouble and use the ok flag for testing instead because 0 is a valid
@@ -1867,41 +1843,22 @@ static bool parseFontFaceNode(QSvgStyleProperty *parent,
     bool ok = false;
     qreal unitsPerEm = QGuiSvg::toDouble(unitsPerEmStr, &ok);
     if (!qFuzzyIsNull(unitsPerEm))
-        font->setUnitsPerEm(unitsPerEm);
+        parent->setUnitsPerEm(unitsPerEm);
 
-    if (!name.isEmpty())
-        font->setFamilyName(name.toString());
-
-    if (!font->familyName().isEmpty())
-        if (!handler->document()->svgFont(font->familyName()))
-            handler->document()->addSvgFont(font);
+    handler->setCurrentSvgFontFamily(name);
 
     return true;
 }
 
-static bool parseFontFaceNameNode(QSvgStyleProperty *parent,
+static bool parseFontFaceNameNode(QSvgFont *parent,
                                   const QXmlStreamAttributes &attributes,
-                                  QSvgHandler *handler)
+                                  QSvgHandler *)
 {
-    if (parent->type() != QSvgStyleProperty::Font) {
-        return false;
-    }
-
-    QSvgFontStyle *style = static_cast<QSvgFontStyle*>(parent);
-    QSvgFont *font = style->svgFont();
-    const QStringView name = attributes.value(QLatin1String("name"));
-
-    if (!name.isEmpty())
-        font->setFamilyName(name.toString());
-
-    if (!font->familyName().isEmpty())
-        if (!handler->document()->svgFont(font->familyName()))
-            handler->document()->addSvgFont(font);
-
+    Q_UNUSED(parent); Q_UNUSED(attributes);
     return true;
 }
 
-static bool parseFontFaceSrcNode(QSvgStyleProperty *parent,
+static bool parseFontFaceSrcNode(QSvgFont *parent,
                                  const QXmlStreamAttributes &attributes,
                                  QSvgHandler *)
 {
@@ -1909,12 +1866,26 @@ static bool parseFontFaceSrcNode(QSvgStyleProperty *parent,
     return true;
 }
 
-static bool parseFontFaceUriNode(QSvgStyleProperty *parent,
+static bool parseFontFaceUriNode(QSvgFont *parent,
                                  const QXmlStreamAttributes &attributes,
                                  QSvgHandler *)
 {
     Q_UNUSED(parent); Q_UNUSED(attributes);
     return true;
+}
+
+static bool parseGlyphNode(QSvgFont *parent,
+                           const QXmlStreamAttributes &attributes,
+                           QSvgHandler *)
+{
+    return createSvgGlyph(parent, attributes, false);
+}
+
+static bool parseMissingGlyphNode(QSvgFont *parent,
+                                  const QXmlStreamAttributes &attributes,
+                                  QSvgHandler *)
+{
+    return createSvgGlyph(parent, attributes, true);
 }
 
 static bool parseForeignObjectNode(QSvgNode *parent,
@@ -1932,19 +1903,6 @@ static QSvgNode *createGNode(QSvgNode *parent,
     Q_UNUSED(attributes);
     QSvgG *node = new QSvgG(parent);
     return node;
-}
-
-static bool parseGlyphNode(QSvgStyleProperty *parent,
-                           const QXmlStreamAttributes &attributes,
-                           QSvgHandler *)
-{
-    if (parent->type() != QSvgStyleProperty::Font) {
-        return false;
-    }
-
-    QSvgFontStyle *style = static_cast<QSvgFontStyle*>(parent);
-    QSvgFont *font = style->svgFont();
-    return createSvgGlyph(font, attributes, false);
 }
 
 static bool parseHandlerNode(QSvgNode *parent,
@@ -2163,19 +2121,6 @@ static bool parseMetadataNode(QSvgNode *parent,
 {
     Q_UNUSED(parent); Q_UNUSED(attributes);
     return true;
-}
-
-static bool parseMissingGlyphNode(QSvgStyleProperty *parent,
-                                  const QXmlStreamAttributes &attributes,
-                                  QSvgHandler *)
-{
-    if (parent->type() != QSvgStyleProperty::Font) {
-        return false;
-    }
-
-    QSvgFontStyle *style = static_cast<QSvgFontStyle*>(parent);
-    QSvgFont *font = style->svgFont();
-    return createSvgGlyph(font, attributes, true);
 }
 
 static bool parseMpathNode(QSvgNode *parent,
@@ -3565,33 +3510,25 @@ static ParseMethod findUtilFactory(const QStringView name, QtSvg::Options option
     return 0;
 }
 
-typedef QSvgStyleProperty *(*StyleFactoryMethod)(const QXmlStreamAttributes &,
-                                                 QSvgHandler *);
+typedef QSvgFontPtr (*FontFactoryMethod)(const QXmlStreamAttributes &,
+                                         QSvgHandler *);
 
-static StyleFactoryMethod findStyleFactoryMethod(const QStringView name)
+static FontFactoryMethod findFontFactoryMethod(const QStringView name)
 {
-    if (name.isEmpty())
-        return 0;
+    if (name == "font"_L1)
+        return createFontNode;
 
-    QStringView ref = name.mid(1);
-    switch (name.at(0).unicode()) {
-    case 'f':
-        if (ref == QLatin1String("ont")) return createFontNode;
-        break;
-    default:
-        break;
-    }
-    return 0;
+    return nullptr;
 }
 
-typedef bool (*StyleParseMethod)(QSvgStyleProperty *,
+typedef bool (*FontParseMethod)(QSvgFont *,
                                  const QXmlStreamAttributes &,
                                  QSvgHandler *);
 
-static StyleParseMethod findStyleUtilFactoryMethod(const QStringView name)
+static FontParseMethod findFontParseFactoryMethod(const QStringView name)
 {
     if (name.isEmpty())
-        return 0;
+        return nullptr;
 
     QStringView ref = name.mid(1);
     switch (name.at(0).unicode()) {
@@ -3610,7 +3547,7 @@ static StyleParseMethod findStyleUtilFactoryMethod(const QStringView name)
     default:
         break;
     }
-    return 0;
+    return nullptr;
 }
 
 typedef QSvgPaintServerSharedPtr (*PaintServerFactoryMethod)(const QXmlStreamAttributes &,
@@ -4028,11 +3965,10 @@ bool QSvgHandler::startElement(const QStringView localName,
         Q_ASSERT(!m_nodes.isEmpty());
         if (!method(m_nodes.top(), attributes, this))
             qCWarning(lcSvgHandler, "%s", msgProblemParsing(localName, xml).constData());
-    } else if (StyleFactoryMethod method = findStyleFactoryMethod(localName)) {
-        QSvgStyleProperty *prop = method(attributes, this);
-        if (prop) {
-            m_style = prop;
-            m_nodes.top()->appendStyleProperty(std::unique_ptr<QSvgStyleProperty>(prop));
+    } else if (FontFactoryMethod method = findFontFactoryMethod(localName)) {
+        QSvgFontPtr font = method(attributes, this);
+        if (font) {
+            m_currentSvgFontData.font = std::move(font);
         } else {
             const QByteArray msg = QByteArrayLiteral("Could not parse node: ") + localName.toLocal8Bit();
             qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
@@ -4046,9 +3982,9 @@ bool QSvgHandler::startElement(const QStringView localName,
             const QByteArray msg = QByteArrayLiteral("Could not parse node: ") + localName.toLocal8Bit();
             qCWarning(lcSvgHandler, "%s", prefixMessage(msg, xml).constData());
         }
-    } else if (StyleParseMethod method = findStyleUtilFactoryMethod(localName)) {
-        if (m_style) {
-            if (!method(m_style, attributes, this))
+    } else if (FontParseMethod method = findFontParseFactoryMethod(localName)) {
+        if (m_currentSvgFontData.font) {
+            if (!method(m_currentSvgFontData.font.get(), attributes, this))
                 qCWarning(lcSvgHandler, "%s", msgProblemParsing(localName, xml).constData());
         }
     } else if (PaintServerParseMethod method = findPaintServerUtilFactoryMethod(localName)) {
@@ -4096,8 +4032,14 @@ bool QSvgHandler::endElement(const QStringView localName)
 
     if (node == Graphics)
         m_nodes.pop();
-    else if (m_style && !m_skipNodes.isEmpty() && m_skipNodes.top() != Style)
-        m_style = nullptr;
+
+    if (localName == "font"_L1) {
+        if (!m_currentSvgFontData.isEmpty()) {
+            document()->addSvgFont(m_currentSvgFontData.fontFamily,
+                                   std::move(m_currentSvgFontData.font));
+        }
+        m_currentSvgFontData.reset();
+    }
 
     return ((localName == QLatin1String("svg")) && (node != Doc));
 }
@@ -4258,6 +4200,11 @@ QColor QSvgHandler::currentColor() const
 void QSvgHandler::pushUnresolvedStyle(QSvgStyleProperty *prop)
 {
     m_unresolvedStyles.append(prop);
+}
+
+void QSvgHandler::setCurrentSvgFontFamily(QStringView family)
+{
+    m_currentSvgFontData.fontFamily = family.toString();
 }
 
 #ifndef QT_NO_CSSPARSER

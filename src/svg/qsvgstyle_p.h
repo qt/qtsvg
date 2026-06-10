@@ -37,84 +37,6 @@ class QSvgNode;
 class QSvgFont;
 class QSvgDocument;
 
-template <class T> class QSvgRefCounter
-{
-public:
-    QSvgRefCounter() { t = nullptr; }
-    explicit QSvgRefCounter(T *_t)
-    {
-        t = _t;
-        if (t)
-            t->ref();
-    }
-
-    QSvgRefCounter(const QSvgRefCounter &other)
-    {
-        t = other.t;
-        if (t)
-            t->ref();
-    }
-
-    QSvgRefCounter(QSvgRefCounter &&other) noexcept
-        : t{std::exchange(other.t, nullptr)} {}
-
-    QSvgRefCounter &operator =(const QSvgRefCounter &other)
-    {
-        if(other.t)
-            other.t->ref();
-        if (t)
-            t->deref();
-        t = other.t;
-        return *this;
-    }
-
-    // both T and users are a bounded set, so we can use PURE_SWAP,
-    // and manage expectations
-    QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QSvgRefCounter)
-
-    ~QSvgRefCounter()
-    {
-        if (t)
-            t->deref();
-    }
-
-    void swap(QSvgRefCounter &other) noexcept
-    { qt_ptr_swap(t, other.t); }
-
-    void reset(T *other = nullptr)
-    { QSvgRefCounter(other).swap(*this); }
-
-    inline T *operator->() const { return t; }
-    inline operator T*() const { return t; }
-
-    inline bool isDefault() const { return !t || t->isDefault(); }
-
-private:
-    T *t;
-};
-
-class Q_SVG_EXPORT QSvgRefCounted
-{
-    Q_DISABLE_COPY_MOVE(QSvgRefCounted)
-public:
-    QSvgRefCounted() { _ref = 0; }
-    virtual ~QSvgRefCounted();
-
-    void ref() {
-        ++_ref;
-//        qDebug() << this << ": adding ref, now " << _ref;
-    }
-    void deref() {
-//        qDebug() << this << ": removing ref, now " << _ref;
-        if(!--_ref) {
-//            qDebug("     deleting");
-            delete this;
-        }
-    }
-private:
-    int _ref;
-};
-
 struct Q_SVG_EXPORT QSvgExtraStates
 {
     QSvgExtraStates();
@@ -317,7 +239,6 @@ public:
     static const int LIGHTER = -1;
     static const int BOLDER = 1;
 
-    QSvgFontStyle(QSvgFont *font);
     QSvgFontStyle();
     ~QSvgFontStyle() override;
 
@@ -362,18 +283,12 @@ public:
         m_weightSet = 1;
     }
 
-    QSvgFont * svgFont() const
-    {
-        return m_svgFont;
-    }
-
     const QFont &qfont() const
     {
         return m_qfont;
     }
 
 private:
-    QSvgFont *m_svgFont;
     QFont m_qfont;
 
     int m_weight = 0;

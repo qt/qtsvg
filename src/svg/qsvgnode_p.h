@@ -62,7 +62,8 @@ public:
         FeComposite,
         FeFlood,
         FeBlend,
-        FeUnsupported
+        FeUnsupported,
+        Font,
     };
     enum DisplayMode {
         InlineMode,

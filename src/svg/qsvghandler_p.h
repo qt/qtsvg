@@ -28,6 +28,7 @@
 #include <QtSvg/private/qsvgcssvalues_p.h>
 #endif
 #include "qsvggraphics_p.h"
+#include "qsvgfont_p.h"
 #include "qtsvgglobal_p.h"
 #include "qtsvgglobal.h"
 #include <QtSvg/private/qsvgpaintserver_p.h>
@@ -77,6 +78,8 @@ public:
     QColor currentColor() const;
 
     void pushUnresolvedStyle(QSvgStyleProperty *prop);
+
+    void setCurrentSvgFontFamily(QStringView family);
 
 #ifndef QT_NO_CSSPARSER
     void setInStyle(bool b);
@@ -128,7 +131,24 @@ private:
      */
     QStack<QSvgText::WhitespaceMode> m_whitespaceMode;
 
-    QSvgStyleProperty *m_style{nullptr};
+    struct SvgFontData
+    {
+        QSvgFontPtr font;
+        QString fontFamily;
+
+        bool isEmpty() const
+        {
+            return !font || fontFamily.isEmpty();
+        }
+
+        void reset()
+        {
+            font = nullptr;
+            fontFamily.clear();
+        }
+    };
+
+    SvgFontData m_currentSvgFontData;
     QSvgPaintServerSharedPtr m_paintServer;
 
     QGuiSvg::LengthType m_defaultCoords;

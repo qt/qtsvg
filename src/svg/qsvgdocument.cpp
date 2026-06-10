@@ -360,14 +360,19 @@ QtSvg::Options QSvgDocument::options() const
     return m_options;
 }
 
-void QSvgDocument::addSvgFont(QSvgFont *font)
+void QSvgDocument::addSvgFont(const QString &name, QSvgFontPtr font)
 {
-    m_fonts.emplace(font->familyName(), font);
+    if (name.isEmpty())
+        return;
+
+    if (!m_fonts.insert({ name, std::move(font) }).second)
+        qCWarning(lcSvgHandler) << "Font Family already added: " << name;
 }
 
-QSvgFont * QSvgDocument::svgFont(const QString &family) const
+QSvgFont *QSvgDocument::svgFont(const QString &family) const
 {
-    return m_fonts[family];
+    auto it = m_fonts.find(family);
+    return it != m_fonts.end() ? it->second.get() : nullptr;
 }
 
 void QSvgDocument::addNamedNode(const QString &id, QSvgNode *node)
@@ -385,7 +390,7 @@ void QSvgDocument::addPaintServer(QSvgPaintServerSharedPtr paintServer, const QS
     if (id.isEmpty())
         return;
 
-    if (!m_paintServers.insert({ id, paintServer } ).second)
+    if (!m_paintServers.insert({ id, paintServer }).second)
         qCWarning(lcSvgHandler) << "Duplicate unique style id:" << id;
 }
 
