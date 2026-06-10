@@ -352,6 +352,7 @@ QLatin1StringView QSvgNode::typeName() const
     case FeFlood: return "feFlood"_L1;
     case FeBlend: return "feBlend"_L1;
     case FeUnsupported: return "feUnsupported"_L1;
+    case Font: return "font"_L1;
     }
     return "unknown"_L1;
 }

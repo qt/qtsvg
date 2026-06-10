@@ -5,19 +5,14 @@
 
 #include "qsvgstyle_p.h"
 
-#include "qsvgfont_p.h"
 #include "qsvgnode_p.h"
 #include "private/qsvganimate_p.h"
 #include "qsvgdocument_p.h"
 
 #include "qpainter.h"
 #include "qcolor.h"
-#include "qdebug.h"
 
 QT_BEGIN_NAMESPACE
-
-QSvgRefCounted::~QSvgRefCounted()
-    = default;
 
 QSvgExtraStates::QSvgExtraStates()
     : fillOpacity(1.0),
@@ -166,20 +161,8 @@ void QSvgViewportFillStyle::revert(QPainter *p, QSvgExtraStates &)
 const int QSvgFontStyle::LIGHTER;
 const int QSvgFontStyle::BOLDER;
 
-QSvgFontStyle::QSvgFontStyle(QSvgFont *font)
-    : m_svgFont(font)
-    , m_familySet(0)
-    , m_sizeSet(0)
-    , m_styleSet(0)
-    , m_variantSet(0)
-    , m_weightSet(0)
-    , m_textAnchorSet(0)
-{
-}
-
 QSvgFontStyle::QSvgFontStyle()
-    : m_svgFont(0)
-    , m_familySet(0)
+    : m_familySet(0)
     , m_sizeSet(0)
     , m_styleSet(0)
     , m_variantSet(0)
@@ -191,7 +174,7 @@ QSvgFontStyle::QSvgFontStyle()
 QSvgFontStyle::~QSvgFontStyle()
     = default;
 
-void QSvgFontStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &states)
+void QSvgFontStyle::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states)
 {
     m_oldQFont = p->font();
     m_oldSvgFont = states.svgFont;
@@ -203,8 +186,8 @@ void QSvgFontStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &states
 
     QFont font = m_oldQFont;
     if (m_familySet) {
-        states.svgFont = m_svgFont;
         font.setFamilies(m_qfont.families());
+        states.svgFont = node->document()->svgFont(m_qfont.family());
     }
 
     if (m_sizeSet)

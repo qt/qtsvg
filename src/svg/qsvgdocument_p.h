@@ -82,7 +82,7 @@ public:
     QRectF boundsOnElement(const QString &id) const;
     bool   elementExists(const QString &id) const;
 
-    void addSvgFont(QSvgFont *);
+    void addSvgFont(const QString &name, QSvgFontPtr font);
     QSvgFont *svgFont(const QString &family) const;
     void addNamedNode(const QString &id, QSvgNode *node);
     QSvgNode *namedNode(const QString &id) const;
@@ -112,7 +112,7 @@ private:
     mutable QRectF m_viewBox;
     bool m_preserveAspectRatio = false;
 
-    QHash<QString, QSvgRefCounter<QSvgFont> > m_fonts;
+    std::unordered_map<QString, QSvgFontPtr> m_fonts;
     QHash<QString, QSvgNode *> m_namedNodes;
     std::unordered_map<QString, QSvgPaintServerSharedPtr> m_paintServers;
 

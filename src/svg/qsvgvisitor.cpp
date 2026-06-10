@@ -174,8 +174,9 @@ void QSvgVisitor::traverse(const QSvgNode *node)
         visitVideoNode(static_cast<const QSvgVideo *>(node));
         break;
 
-        // Enum values that don't have any QSvgNode classes yet:
+        // Enum values that are either not supported or should not be visited:
     case QSvgNode::FeUnsupported:
+    case QSvgNode::Font:
         qDebug() << "Unhandled type in switch" << node->type();
         break;
     }

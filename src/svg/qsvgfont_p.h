@@ -22,7 +22,7 @@
 #include "qlist.h"
 #include "qstring.h"
 
-#include "qsvgstyle_p.h"
+#include <QtSvg/private/qsvgnode_p.h>
 
 #include <memory>
 
@@ -40,20 +40,19 @@ public:
 };
 
 
-class Q_SVG_EXPORT QSvgFont : public QSvgRefCounted
+class Q_SVG_EXPORT QSvgFont : public QSvgNode
 {
 public:
     QSvgFont(qreal horizAdvX);
     ~QSvgFont() override;
 
-    void setFamilyName(const QString &name);
-    QString familyName() const;
-
+    Type type() const override { return Font; }
     void setUnitsPerEm(qreal upem);
 
     void addGlyph(const QString &unicode, const QPainterPath &path, qreal horizAdvX = -1);
     bool addMissingGlyph(const QPainterPath &path, qreal horizAdvX);
 
+    void drawCommand(QPainter *, QSvgExtraStates &) override {};
     void draw(QPainter *p, const QPointF &point, const QList<const QSvgGlyph *> &glyphs,
               qreal pixelSize, Qt::Alignment alignment) const;
     QRectF boundingRect(QPainter *p, const QPointF &point, const QList<const QSvgGlyph *> &glyphs,
@@ -62,7 +61,6 @@ public:
     QList<const QSvgGlyph *> toGlyphs(QStringView text) const;
 
 public:
-    QString m_familyName;
     qreal m_unitsPerEm{1000};
     qreal m_horizAdvX;
     // not about a missing <glyph> element, but the font's <missing-glyph> element:
@@ -82,6 +80,8 @@ private:
                      const QList<const QSvgGlyph *> &glyphs, qreal pixelSize,
                      Qt::Alignment alignment, QRectF *boundingRect = nullptr) const;
 };
+
+using QSvgFontPtr = std::unique_ptr<QSvgFont>;
 
 QT_END_NAMESPACE
 
