@@ -3671,14 +3671,14 @@ void QSvgHandler::init()
     parse();
 }
 
-static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> &active)
+static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> &linkable)
 {
     QSvgFillStyle *fillStyle = static_cast<QSvgFillStyle*>
         (node->styleProperty(QSvgStyleProperty::FILL));
     if (fillStyle && fillStyle->paintServer()
         && fillStyle->paintServer()->type() == QSvgPaintServer::Type::Pattern) {
         QSvgPatternPaint *patternStyle = static_cast<QSvgPatternPaint *>(fillStyle->paintServer());
-        if (active.contains(patternStyle->patternNode()))
+        if (linkable.contains(patternStyle->patternNode()))
             return true;
     }
 
@@ -3687,7 +3687,7 @@ static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> &a
     if (strokeStyle && strokeStyle->paintServer()
         && strokeStyle->paintServer()->type() == QSvgPaintServer::Type::Pattern) {
         QSvgPatternPaint *patternStyle = static_cast<QSvgPatternPaint *>(strokeStyle->paintServer());
-        if (active.contains(patternStyle->patternNode()))
+        if (linkable.contains(patternStyle->patternNode()))
             return true;
     }
 
@@ -3698,9 +3698,9 @@ static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> &a
  * find any circular references in the parsed SVG file. It
  * is important for this to happen non-recursively to avoid
  * stack overflows.
- * The function maintains two lists of nodes. The active list
+ * The function maintains two lists of nodes. The list "linkable"
  * is used to track patterns and uses because these are the nodes
- * that can reference or be referenced by other nodes.
+ * that can be referenced by other nodes.
  * Example :
  * <pattern id="pat1" />
  *  <rect fill="url(#pat1)" />
@@ -3709,14 +3709,14 @@ static bool detectPatternCycles(const QSvgNode *node, QList<const QSvgNode *> &a
  * The other list of nodes is a stack to traverse the tree
  * non-recursively, the std::pair stored in the stack will
  * indicate whether a pattern or use has been visited and
- * added to the active list or not. If the bool is set to true,
- * this element can be popped out from the active list. */
+ * added to the "linkable" list or not. If the bool is set to true,
+ * this element can be popped out from the "linkable" list. */
 static bool detectCycles(const QSvgNode *n)
 {
     if (Q_UNLIKELY(!n))
         return false;
 
-    QList<const QSvgNode *> active;
+    QList<const QSvgNode *> linkable;
     using NodeState = std::pair<const QSvgNode *, bool>;
     QStack<NodeState> nodes;
     nodes.push({n, false});
@@ -3724,8 +3724,8 @@ static bool detectCycles(const QSvgNode *n)
     while (!nodes.isEmpty()) {
         auto current = nodes.pop();
         if (current.second) {
-            Q_ASSERT(!active.isEmpty() && current.first == active.back());
-            active.pop_back();
+            Q_ASSERT(!linkable.isEmpty() && current.first == linkable.back());
+            linkable.pop_back();
             continue;
         }
 
@@ -3736,7 +3736,7 @@ static bool detectCycles(const QSvgNode *n)
         case QSvgNode::Pattern:
         {
             if (current.first->type() == QSvgNode::Pattern) {
-                active.append(current.first);
+                linkable.append(current.first);
                 nodes.push({current.first, true});
             }
             auto *g = static_cast<const QSvgStructureNode*>(current.first);
@@ -3746,12 +3746,12 @@ static bool detectCycles(const QSvgNode *n)
         break;
         case QSvgNode::Use:
         {
-            if (active.contains(current.first))
+            if (linkable.contains(current.first))
                 return true;
             auto *u = static_cast<const QSvgUse*>(current.first);
             auto *target = u->link();
             if (target) {
-                active.append(u);
+                linkable.append(u);
                 nodes.push({u, true});
                 nodes.push({target, false});
             }
@@ -3765,7 +3765,7 @@ static bool detectCycles(const QSvgNode *n)
         case QSvgNode::Polygon:
         case QSvgNode::Polyline:
         case QSvgNode::Tspan:
-            if (detectPatternCycles(current.first, active))
+            if (detectPatternCycles(current.first, linkable))
                 return true;
             break;
         default:
