@@ -219,9 +219,7 @@ void tst_QSvgRenderer::invalidUrl()
 {
     QFETCH(const QByteArray, svg);
 
-#if QT_CONFIG(regularexpression)
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Could not resolve property"));
-#endif
     QSvgRenderer renderer(svg);
     QVERIFY(renderer.isValid());
 }
@@ -2293,9 +2291,7 @@ void tst_QSvgRenderer::testCycles_data()
 void tst_QSvgRenderer::testCycles()
 {
     QFETCH(QByteArray, svgDoc);
-#if QT_CONFIG(regularexpression)
     QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Cycles detected in SVG"));
-#endif
     QSvgRenderer renderer(svgDoc);
     QVERIFY(!renderer.isValid());
 }
