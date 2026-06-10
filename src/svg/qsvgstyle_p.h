@@ -317,7 +317,7 @@ public:
     static const int LIGHTER = -1;
     static const int BOLDER = 1;
 
-    QSvgFontStyle(QSvgFont *font, QSvgDocument *doc);
+    QSvgFontStyle(QSvgFont *font);
     QSvgFontStyle();
     ~QSvgFontStyle() override;
 
@@ -372,11 +372,8 @@ public:
         return m_qfont;
     }
 
-    QSvgDocument *doc() const {return m_doc;}
-
 private:
     QSvgFont *m_svgFont;
-    QSvgDocument *m_doc;
     QFont m_qfont;
 
     int m_weight = 0;
