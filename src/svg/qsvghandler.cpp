@@ -1087,7 +1087,7 @@ static void parseFont(QSvgNode *node,
         if (doc) {
             QSvgFont *svgFont = doc->svgFont(attributes.fontFamily.toString());
             if (svgFont)
-                fontStyle = std::make_unique<QSvgFontStyle>(svgFont, doc);
+                fontStyle = std::make_unique<QSvgFontStyle>(svgFont);
         }
     }
     if (!fontStyle)
@@ -1837,14 +1837,14 @@ static QSvgStyleProperty *createFontNode(const QXmlStreamAttributes &attributes,
             font->setFamilyName(myId);
             doc->addSvgFont(font);
         }
-        return new QSvgFontStyle(font, doc);
+        return new QSvgFontStyle(font);
     }
     return nullptr;
 }
 
 static bool parseFontFaceNode(QSvgStyleProperty *parent,
                               const QXmlStreamAttributes &attributes,
-                              QSvgHandler *)
+                              QSvgHandler *handler)
 {
     if (parent->type() != QSvgStyleProperty::Font) {
         return false;
@@ -1867,15 +1867,15 @@ static bool parseFontFaceNode(QSvgStyleProperty *parent,
         font->setFamilyName(name.toString());
 
     if (!font->familyName().isEmpty())
-        if (!style->doc()->svgFont(font->familyName()))
-            style->doc()->addSvgFont(font);
+        if (!handler->document()->svgFont(font->familyName()))
+            handler->document()->addSvgFont(font);
 
     return true;
 }
 
 static bool parseFontFaceNameNode(QSvgStyleProperty *parent,
                                   const QXmlStreamAttributes &attributes,
-                                  QSvgHandler *)
+                                  QSvgHandler *handler)
 {
     if (parent->type() != QSvgStyleProperty::Font) {
         return false;
@@ -1889,8 +1889,8 @@ static bool parseFontFaceNameNode(QSvgStyleProperty *parent,
         font->setFamilyName(name.toString());
 
     if (!font->familyName().isEmpty())
-        if (!style->doc()->svgFont(font->familyName()))
-            style->doc()->addSvgFont(font);
+        if (!handler->document()->svgFont(font->familyName()))
+            handler->document()->addSvgFont(font);
 
     return true;
 }

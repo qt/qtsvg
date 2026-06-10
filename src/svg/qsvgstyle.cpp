@@ -166,9 +166,8 @@ void QSvgViewportFillStyle::revert(QPainter *p, QSvgExtraStates &)
 const int QSvgFontStyle::LIGHTER;
 const int QSvgFontStyle::BOLDER;
 
-QSvgFontStyle::QSvgFontStyle(QSvgFont *font, QSvgDocument *doc)
+QSvgFontStyle::QSvgFontStyle(QSvgFont *font)
     : m_svgFont(font)
-    , m_doc(doc)
     , m_familySet(0)
     , m_sizeSet(0)
     , m_styleSet(0)
@@ -180,7 +179,6 @@ QSvgFontStyle::QSvgFontStyle(QSvgFont *font, QSvgDocument *doc)
 
 QSvgFontStyle::QSvgFontStyle()
     : m_svgFont(0)
-    , m_doc(0)
     , m_familySet(0)
     , m_sizeSet(0)
     , m_styleSet(0)
