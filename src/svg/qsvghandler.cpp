@@ -3721,7 +3721,7 @@ static bool detectCycles(const QSvgNode *n)
     QStack<NodeState> nodes;
     nodes.push({n, false});
 
-    while (!nodes.isEmpty()) {
+    do {
         auto current = nodes.pop();
         if (current.second) {
             Q_ASSERT(!linkable.isEmpty() && current.first == linkable.back());
@@ -3771,7 +3771,7 @@ static bool detectCycles(const QSvgNode *n)
         default:
             break;
         }
-    }
+    } while (!nodes.isEmpty());
     return false;
 }
 
