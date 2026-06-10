@@ -43,7 +43,6 @@ public:
 class Q_SVG_EXPORT QSvgFont : public QSvgRefCounted
 {
 public:
-    static constexpr qreal DEFAULT_UNITS_PER_EM = 1000;
     QSvgFont(qreal horizAdvX);
     ~QSvgFont() override;
 
@@ -64,7 +63,7 @@ public:
 
 public:
     QString m_familyName;
-    qreal m_unitsPerEm = DEFAULT_UNITS_PER_EM;
+    qreal m_unitsPerEm{1000};
     qreal m_horizAdvX;
     // not about a missing <glyph> element, but the font's <missing-glyph> element:
     std::unique_ptr<const QSvgGlyph> m_missingGlyph;

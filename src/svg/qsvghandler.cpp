@@ -1855,13 +1855,16 @@ static bool parseFontFaceNode(QSvgStyleProperty *parent,
     const QStringView name = attributes.value(QLatin1String("font-family"));
     const QStringView unitsPerEmStr = attributes.value(QLatin1String("units-per-em"));
 
-    qreal unitsPerEm = QSvgUtils::toDouble(unitsPerEmStr);
-    if (!unitsPerEm)
-        unitsPerEm = QSvgFont::DEFAULT_UNITS_PER_EM;
+    /*TODO: Fix toDouble and use the ok flag for testing instead because 0 is a valid
+     *      value for unitsPerEm. "units-per-em: <number>" as per definition
+     */
+    bool ok = false;
+    qreal unitsPerEm = QSvgUtils::toDouble(unitsPerEmStr, &ok);
+    if (!qFuzzyIsNull(unitsPerEm))
+        font->setUnitsPerEm(unitsPerEm);
 
     if (!name.isEmpty())
         font->setFamilyName(name.toString());
-    font->setUnitsPerEm(unitsPerEm);
 
     if (!font->familyName().isEmpty())
         if (!style->doc()->svgFont(font->familyName()))
