@@ -186,6 +186,14 @@ void tst_QSvgHandler::testCreateAnimateTransformNode_data()
             << "rotate" << "1,2,3;4,5,6;"
             << QSvgAnimatedPropertyTransform::TransformComponent::Rotate
             << QList<QList<qreal>>{ { 1, 2, 3 }, { 4, 5, 6 } };
+
+    // The specification is not explicit about this case but we understand that spaces are allowed
+    // as separators. Our reasoning is explained in the commit message.
+    // If somebody finds a spec which clearly requires a different behavior, please adjust the test.
+    QTest::newRow("vectorlike-values-separated-by-spaces")
+            << "rotate" << "1 2\t3;4\n5\r6"
+            << QSvgAnimatedPropertyTransform::TransformComponent::Rotate
+            << QList<QList<qreal>>{ { 1, 2, 3 }, { 4, 5, 6 } };
 }
 
 void tst_QSvgHandler::testCreateAnimateTransformNode()
