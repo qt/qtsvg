@@ -69,9 +69,14 @@ qreal QSvgCssStepsEasing::progress(qreal t) const
     return interval * incr;
 }
 
-QSvgCssValues::StepPosition QSvgCssStepsEasing::stepPosition()
+QSvgCssValues::StepPosition QSvgCssStepsEasing::stepPosition() const
 {
     return m_stepPosition;
+}
+
+quint32 QSvgCssStepsEasing::stops() const
+{
+    return m_stops;
 }
 
 QT_END_NAMESPACE

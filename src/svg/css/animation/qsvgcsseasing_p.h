@@ -60,7 +60,7 @@ public:
 
     virtual qreal progress(qreal t) const override;
     quint32 stops() const;
-    QSvgCssValues::StepPosition stepPosition();
+    QSvgCssValues::StepPosition stepPosition() const;
 
 private:
     quint32 m_stops;
