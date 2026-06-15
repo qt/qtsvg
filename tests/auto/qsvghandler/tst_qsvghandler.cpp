@@ -195,14 +195,14 @@ void tst_QSvgHandler::testCreateAnimateTransformNode()
     QFETCH(QSvgAnimatedPropertyTransform::TransformComponent::Type, expectedType);
     QFETCH(QList<QList<qreal>>, expectedComponents);
 
-    QSvgDocument parent(QtSvg::Option::NoOption, QtSvg::AnimatorType::Automatic);
-    QSvgHandler handler(QByteArray(), QtSvg::Option::NoOption, QtSvg::AnimatorType::Automatic);
     QXmlStreamAttributes attributes;
+    QSvgHandler handler(QByteArray(), QtSvg::Option::NoOption, QtSvg::AnimatorType::Automatic);
+    handler.startElement(QStringLiteral("svg"), attributes); // create a QSvgDocument in the handler
 
     attributes.append("type", type);
     attributes.append("values", values);
 
-    QSvgNode *node = createAnimateTransformNode(&parent, attributes, &handler);
+    QSvgNode *node = createAnimateTransformNode(handler.document(), attributes, &handler);
 
     QVERIFY(node);
     const auto &properties = static_cast<QSvgAnimateTransform *>(node)->properties();
