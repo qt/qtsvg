@@ -1069,7 +1069,7 @@ static std::optional<Qt::Alignment> parseTextAnchor(QStringView s)
 
 static void parseFont(QSvgNode *node,
                       const QSvgAttributes &attributes,
-                      QSvgHandler *)
+                      QSvgHandler *handler)
 {
     auto parsedFontSize = parseFontSize(attributes.fontSize);
     auto parsedFontStyle = parseFontStyle(attributes.fontStyle);
@@ -1083,7 +1083,7 @@ static void parseFont(QSvgNode *node,
 
     QSvgFontStylePtr fontStyle;
     if (!attributes.fontFamily.isEmpty()) {
-        QSvgDocument *doc = node->document();
+        QSvgDocument *doc = handler->document();
         if (doc) {
             QSvgFont *svgFont = doc->svgFont(attributes.fontFamily.toString());
             if (svgFont)
@@ -1519,7 +1519,7 @@ static bool parseAnchorNode(QSvgNode *parent,
     return true;
 }
 
-static bool parseBaseAnimate(QSvgNode *parent,
+static bool parseBaseAnimate(QSvgNode *,
                              const QXmlStreamAttributes &attributes,
                              QSvgAnimateNode *anim,
                              QSvgHandler *handler)
@@ -1562,7 +1562,7 @@ static bool parseBaseAnimate(QSvgNode *parent,
     anim->setAdditiveType(additive);
     anim->setLinkId(linkId.toString());
 
-    parent->document()->setAnimated(true);
+    handler->document()->setAnimated(true);
 
     handler->setAnimPeriod(begin, begin + dur);
     return true;
