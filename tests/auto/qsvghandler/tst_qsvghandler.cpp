@@ -152,46 +152,57 @@ void tst_QSvgHandler::testCreateAnimateTransformNode_data()
     //   parseNumberTriplet() and then use the pointer which was changed by that function. This
     //   shall prevent regressions in that area. Testing parseNumberTriplet() alone would not be
     //   sufficient because the results depend on the way both functions interact.
-    // - All inputs are well-formed and supported by the current code,
-    //   they do not test error handling
 
     QTest::addColumn<QString>("type");
     QTest::addColumn<QString>("values");
+    QTest::addColumn<bool>("isValid");
     QTest::addColumn<QSvgAnimatedPropertyTransform::TransformComponent::Type>("expectedType");
     QTest::addColumn<QList<QList<qreal>>>("expectedComponents");
 
-    QTest::newRow("translate") << "translate" << "98.7, 6.5; 1.2, 3.45"
+    QTest::newRow("translate") << "translate" << "98.7, 6.5; 1.2, 3.45" << true
                                << QSvgAnimatedPropertyTransform::TransformComponent::Translate
                                << QList<QList<qreal>>{ { 98.7, 6.5 }, { 1.2, 3.45 } };
     QTest::newRow("translate-implicit-ty")
-            << "translate" << "4; 3.2"
+            << "translate" << "4; 3.2" << true
             << QSvgAnimatedPropertyTransform::TransformComponent::Translate
             << QList<QList<qreal>>{ { 4., 0. }, { 3.2, 0. } };
-    QTest::newRow("scale") << "scale" << "9.7, 6.4; 3.1, 0.8"
+    QTest::newRow("scale") << "scale" << "9.7, 6.4; 3.1, 0.8" << true
                            << QSvgAnimatedPropertyTransform::TransformComponent::Scale
                            << QList<QList<qreal>>{ { 9.7, 6.4 }, { 3.1, 0.8 } };
     QTest::newRow("scale-implicit-sy")
-            << "scale" << "3; 4" << QSvgAnimatedPropertyTransform::TransformComponent::Scale
+            << "scale" << "3; 4" << true << QSvgAnimatedPropertyTransform::TransformComponent::Scale
             << QList<QList<qreal>>{ { 3., 3. }, { 4., 4. } };
-    QTest::newRow("rotate") << "rotate" << "1,2.3,3;9,8,7"
+    QTest::newRow("rotate") << "rotate" << "1,2.3,3;9,8,7" << true
                             << QSvgAnimatedPropertyTransform::TransformComponent::Rotate
                             << QList<QList<qreal>>{ { 1, 2.3, 3 }, { 9, 8, 7 } };
-    QTest::newRow("skewX") << "skewX" << "10;20"
+    QTest::newRow("skewX") << "skewX" << "10;20" << true
                            << QSvgAnimatedPropertyTransform::TransformComponent::Skew
                            << QList<QList<qreal>>{ { 10, 0 }, { 20, 0 } };
-    QTest::newRow("skewY") << "skewY" << "10;20"
+    QTest::newRow("skewY") << "skewY" << "10;20" << true
                            << QSvgAnimatedPropertyTransform::TransformComponent::Skew
                            << QList<QList<qreal>>{ { 0, 10 }, { 0, 20 } };
+    QTest::newRow("empty-in-commas")
+            << "rotate" << "1,,3;4,5,6" << false
+            << QSvgAnimatedPropertyTransform::TransformComponent::Rotate << QList<QList<qreal>>{};
+    QTest::newRow("space-in-commas")
+            << "rotate" << "1, ,3;4,5,6" << false
+            << QSvgAnimatedPropertyTransform::TransformComponent::Rotate << QList<QList<qreal>>{};
     QTest::newRow("empty-after-semicolon")
-            << "rotate" << "1,2,3;4,5,6;"
+            << "rotate" << "1,2,3;4,5,6;" << true
             << QSvgAnimatedPropertyTransform::TransformComponent::Rotate
             << QList<QList<qreal>>{ { 1, 2, 3 }, { 4, 5, 6 } };
+    QTest::newRow("empty-after-comma")
+            << "rotate" << "1,2,3;4,5," << false
+            << QSvgAnimatedPropertyTransform::TransformComponent::Rotate << QList<QList<qreal>>{};
+    QTest::newRow("space-after-comma")
+            << "rotate" << "1,2,3;4,5, " << false
+            << QSvgAnimatedPropertyTransform::TransformComponent::Rotate << QList<QList<qreal>>{};
 
     // The specification is not explicit about this case but we understand that spaces are allowed
     // as separators. Our reasoning is explained in the commit message.
     // If somebody finds a spec which clearly requires a different behavior, please adjust the test.
     QTest::newRow("vectorlike-values-separated-by-spaces")
-            << "rotate" << "1 2\t3;4\n5\r6"
+            << "rotate" << "1 2\t3;4\n5\r6" << true
             << QSvgAnimatedPropertyTransform::TransformComponent::Rotate
             << QList<QList<qreal>>{ { 1, 2, 3 }, { 4, 5, 6 } };
 }
@@ -200,6 +211,7 @@ void tst_QSvgHandler::testCreateAnimateTransformNode()
 {
     QFETCH(QString, type);
     QFETCH(QString, values);
+    QFETCH(bool, isValid);
     QFETCH(QSvgAnimatedPropertyTransform::TransformComponent::Type, expectedType);
     QFETCH(QList<QList<qreal>>, expectedComponents);
 
@@ -212,7 +224,13 @@ void tst_QSvgHandler::testCreateAnimateTransformNode()
 
     QSvgNode *node = createAnimateTransformNode(handler.document(), attributes, &handler);
 
-    QVERIFY(node);
+    QEXPECT_FAIL("empty-in-commas", "consecutive commas accepted as valid", Abort);
+    QEXPECT_FAIL("space-in-commas", "only space in commas accepted as valid", Abort);
+    QEXPECT_FAIL("empty-after-comma", "trailing comma accepted as valid", Abort);
+    QEXPECT_FAIL("space-after-comma", "comma followed by space only accepted as valid", Abort);
+    QCOMPARE(bool(node), isValid);
+    if (!node)
+        return;
     const auto &properties = static_cast<QSvgAnimateTransform *>(node)->properties();
     QCOMPARE(properties.size(), 1);
     QCOMPARE(properties.first()->type(), QSvgAbstractAnimatedProperty::Transform);
