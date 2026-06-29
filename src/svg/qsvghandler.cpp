@@ -3860,7 +3860,7 @@ bool QSvgHandler::startElement(const QStringView localName,
                 if (node) {
                     QSvgStructureNode *group =
                         static_cast<QSvgStructureNode*>(m_nodes.top());
-                    group->addChild(std::unique_ptr<QSvgNode>(node), someId(attributes));
+                    group->addChild(m_doc.get(), std::unique_ptr<QSvgNode>(node), someId(attributes));
                 }
             }
                 break;
@@ -3897,9 +3897,9 @@ bool QSvgHandler::startElement(const QStringView localName,
             }
             node = method(m_nodes.top(), attributes, this);
             if (node) {
-                QSvgStructureNode *group =
-                    static_cast<QSvgStructureNode*>(m_nodes.top());
-                group->addChild(std::unique_ptr<QSvgNode>(node), someId(attributes));
+                QSvgStructureNode *group = static_cast<QSvgStructureNode *>(m_nodes.top());
+                if (m_doc)
+                    group->addChild(m_doc.get(), std::unique_ptr<QSvgNode>(node), someId(attributes));
             }
         }
             break;
@@ -3941,9 +3941,9 @@ bool QSvgHandler::startElement(const QStringView localName,
             (m_nodes.top()->type() == QSvgNode::FeMerge && localName == QLatin1String("feMergeNode"))) {
             node = method(m_nodes.top(), attributes, this);
             if (node) {
-                QSvgStructureNode *container =
-                    static_cast<QSvgStructureNode*>(m_nodes.top());
-                container->addChild(std::unique_ptr<QSvgNode>(node), someId(attributes));
+                QSvgStructureNode *container = static_cast<QSvgStructureNode *>(m_nodes.top());
+                if (m_doc)
+                    container->addChild(m_doc.get(), std::unique_ptr<QSvgNode>(node), someId(attributes));
             }
         } else {
             const QByteArray msg = QByteArrayLiteral("Could not add child element to parent element because the types are incorrect.");

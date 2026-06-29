@@ -37,7 +37,7 @@ public:
     QSvgStructureNode(QSvgNode *parent);
     ~QSvgStructureNode() override;
 
-    void addChild(std::unique_ptr<QSvgNode> child, const QString &id);
+    void addChild(QSvgDocument *doc, std::unique_ptr<QSvgNode> child, const QString &id);
     QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const override;
     QSvgNode *previousSiblingNode(QSvgNode *n) const;

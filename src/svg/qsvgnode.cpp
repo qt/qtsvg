@@ -61,9 +61,10 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
 
         applyStyle(p, states);
         applyAnimatedStyle(p, states);
-        QSvgNode *maskNode = this->hasMask() ? document()->namedNode(this->maskId()) : nullptr;
-        QSvgFilterContainer *filterNode = this->hasFilter() ? static_cast<QSvgFilterContainer*>(document()->namedNode(this->filterId()))
-                                                            : nullptr;
+        QSvgNode *maskNode = this->hasMask() ? states.doc()->namedNode(this->maskId()) : nullptr;
+        QSvgFilterContainer *filterNode = this->hasFilter()
+                ? static_cast<QSvgFilterContainer *>(states.doc()->namedNode(this->filterId()))
+                : nullptr;
         if (filterNode && filterNode->type() == QSvgNode::Filter && filterNode->supported()) {
             QTransform xf = p->transform();
             p->resetTransform();
@@ -252,13 +253,13 @@ void QSvgNode::revertStyleRecursive(QPainter *p, QSvgExtraStates &states) const
 
 void QSvgNode::applyAnimatedStyle(QPainter *p, QSvgExtraStates &states) const
 {
-    if (document()->animated())
+    if (states.doc()->animated())
         m_animatedStyle.apply(p, this, states);
 }
 
 void QSvgNode::revertAnimatedStyle(QPainter *p, QSvgExtraStates &states) const
 {
-    if (document()->animated())
+    if (states.doc()->animated())
         m_animatedStyle.revert(p, states);
 }
 
@@ -285,7 +286,7 @@ QRectF QSvgNode::internalBounds(QPainter *, QSvgExtraStates &) const
     return QRectF(0, 0, 0, 0);
 }
 
-QRectF QSvgNode::bounds() const
+QRectF QSvgNode::bounds(const QSvgDocument *doc) const
 {
     if (!m_cachedBounds.isEmpty())
         return m_cachedBounds;
@@ -293,7 +294,7 @@ QRectF QSvgNode::bounds() const
     QImage dummy(1, 1, QImage::Format_RGB32);
     QPainter p(&dummy);
     initPainter(&p);
-    QSvgExtraStates states;
+    QSvgExtraStates states(doc);
 
     if (parent())
         parent()->applyStyleRecursive(&p, states);
@@ -429,7 +430,7 @@ QRectF QSvgNode::bounds(QPainter *p, QSvgExtraStates &states) const
 
 QRectF QSvgNode::decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const
 {
-    return filterRegion(internalBounds(p, states));
+    return filterRegion(states.doc(), internalBounds(p, states));
 }
 
 QRectF QSvgNode::decoratedBounds(QPainter *p, QSvgExtraStates &states) const
@@ -586,7 +587,7 @@ bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
     if (m_displayMode == DisplayMode::NoneMode)
         return false;
 
-    if (document() && states.trustedSource)
+    if (states.doc() && states.trustedSource)
         return true;
 
     QRectF brect = internalFastBounds(p, states);
@@ -599,11 +600,10 @@ bool QSvgNode::shouldDrawNode(QPainter *p, QSvgExtraStates &states) const
     }
 }
 
-QRectF QSvgNode::filterRegion(QRectF bounds) const
+QRectF QSvgNode::filterRegion(const QSvgDocument *doc, QRectF bounds) const
 {
-    QSvgFilterContainer *filterNode = hasFilter()
-            ? static_cast<QSvgFilterContainer*>(document()->namedNode(filterId()))
-            : nullptr;
+    QSvgFilterContainer *filterNode =
+            hasFilter() ? static_cast<QSvgFilterContainer *>(doc->namedNode(filterId())) : nullptr;
 
     if (filterNode && filterNode->type() == QSvgNode::Filter && filterNode->supported())
         return filterNode->filterRegion(bounds);

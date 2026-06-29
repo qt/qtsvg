@@ -180,7 +180,7 @@ QSvgFontStyle::QSvgFontStyle()
 QSvgFontStyle::~QSvgFontStyle()
     = default;
 
-void QSvgFontStyle::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states)
+void QSvgFontStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &states)
 {
     m_oldQFont = p->font();
     m_oldSvgFont = states.svgFont;
@@ -193,7 +193,7 @@ void QSvgFontStyle::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &st
     QFont font = m_oldQFont;
     if (m_familySet) {
         font.setFamilies(m_qfont.families());
-        states.svgFont = node->document()->svgFont(m_qfont.family());
+        states.svgFont = states.doc()->svgFont(m_qfont.family());
     }
 
     if (m_sizeSet)
@@ -530,7 +530,7 @@ QSvgAnimatedStyle::~QSvgAnimatedStyle()
 
 void QSvgAnimatedStyle::apply(QPainter *p, const QSvgNode *node, QSvgExtraStates &states)
 {
-    QSharedPointer<QSvgAbstractAnimator> animator = node->document()->animator();
+    QSharedPointer<QSvgAbstractAnimator> animator = states.doc()->animator();
     QList<QSvgAbstractAnimation *> nodeAnims = animator->animationsForNode(node);
 
     savePaintingState(p, node, states);

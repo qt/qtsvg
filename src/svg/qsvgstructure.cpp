@@ -69,13 +69,11 @@ QSvgStructureNode::QSvgStructureNode(QSvgNode *parent)
 QSvgStructureNode::~QSvgStructureNode()
     = default;
 
-void QSvgStructureNode::addChild(std::unique_ptr<QSvgNode> child, const QString &id)
+void QSvgStructureNode::addChild(QSvgDocument *doc, std::unique_ptr<QSvgNode> child,
+                                 const QString &id)
 {
-    if (!id.isEmpty()) {
-        QSvgDocument *doc = document();
-        if (doc)
-            doc->addNamedNode(id, child.get());
-    }
+    if (!id.isEmpty())
+        doc->addNamedNode(id, child.get());
 
     m_renderers.push_back(std::move(child));
 }
@@ -443,7 +441,7 @@ void QSvgMarker::drawHelper(const QSvgNode *node, QPainter *p,
     const bool isPainting = (boundingRect == nullptr);
     const auto markers = markersForNode(node);
     for (auto &i : markers) {
-        QSvgNode *referencedNode = node->document()->namedNode(i.markerId);
+        QSvgNode *referencedNode = states.doc()->namedNode(i.markerId);
         if (!referencedNode || referencedNode->type() != QSvgNode::Marker)
             continue;
         QSvgMarker *markNode = static_cast<QSvgMarker *>(referencedNode);
@@ -801,7 +799,7 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
 
     // Chrome seems to return the mask of the mask if a mask is set on the mask
     if (this->hasMask()) {
-        QSvgNode *referencedNode = document()->namedNode(this->maskId());
+        QSvgNode *referencedNode = states.doc()->namedNode(this->maskId());
         if (referencedNode && referencedNode->type() == QSvgNode::Mask) {
             QSvgMask *maskNode = static_cast<QSvgMask *>(referencedNode);
             QRectF boundsRect;
@@ -819,7 +817,7 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
     QPainter painter(&mask);
     initPainter(&painter);
 
-    QSvgExtraStates maskNodeStates;
+    QSvgExtraStates maskNodeStates(states.doc());
     maskNodeStates.trustedSource = states.trustedSource;
     maskNodeStates.remainingNestedNodes = states.remainingNestedNodes;
     applyStyleRecursive(&painter, maskNodeStates);
@@ -948,7 +946,7 @@ QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSv
         return QImage(); // Avoid division by zero in calculateAppliedTransform()
 
     calculateAppliedTransform(t, peBoundingBox, imageSize);
-    if (document()->isCalculatingImplicitViewBox())
+    if (states.doc()->isCalculatingImplicitViewBox())
         return QImage(imageSize, QImage::Format_ARGB32); // dummy image to avoid endless recursion
     else
         return renderPattern(imageSize, std::make_pair(contentScaleFactorX, contentScaleFactorY), states);
@@ -981,7 +979,7 @@ QImage QSvgPattern::renderPattern(QSize size, std::pair<qreal, qreal> scale, con
 
     // Draw the pattern using our QPainter.
     QPainter patternPainter(&pattern);
-    QSvgExtraStates patternStates;
+    QSvgExtraStates patternStates(states.doc());
     patternStates.trustedSource = states.trustedSource;
     patternStates.remainingNestedNodes = states.remainingNestedNodes;
     initPainter(&patternPainter);

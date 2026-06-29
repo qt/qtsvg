@@ -59,14 +59,14 @@ QRectF QSvgEllipse::internalBounds(QPainter *p, QSvgExtraStates &) const
                             : boundsOnStroke(p, path, sw, BoundsMode::Simplistic);
 }
 
-QRectF QSvgEllipse::decoratedInternalBounds(QPainter *p, QSvgExtraStates &) const
+QRectF QSvgEllipse::decoratedInternalBounds(QPainter *p, QSvgExtraStates &s) const
 {
     QPainterPath path;
     path.addEllipse(m_bounds);
     qreal sw = strokeWidth(p);
     QRectF rect = qFuzzyIsNull(sw) ? p->transform().map(path).boundingRect()
                                    : boundsOnStroke(p, path, sw, BoundsMode::IncludeMiterLimit);
-    return filterRegion(rect);
+    return filterRegion(s.doc(), rect);
 }
 
 void QSvgEllipse::drawCommand(QPainter *p, QSvgExtraStates &)
@@ -173,7 +173,7 @@ QRectF QSvgPath::decoratedInternalBounds(QPainter *p, QSvgExtraStates &s) const
     QRectF rect = qFuzzyIsNull(sw) ? p->transform().map(m_path).boundingRect()
                                    : boundsOnStroke(p, m_path, sw, BoundsMode::IncludeMiterLimit);
     rect |= QSvgMarker::markersBoundsForNode(this, p, s);
-    return filterRegion(rect);
+    return filterRegion(s.doc(), rect);
 }
 
 bool QSvgPath::requiresGroupRendering() const
@@ -203,7 +203,7 @@ QRectF QSvgPolygon::decoratedInternalBounds(QPainter *p, QSvgExtraStates &s) con
 {
     QRectF rect = internalBounds(p, s, BoundsMode::IncludeMiterLimit);
     rect |= QSvgMarker::markersBoundsForNode(this, p, s);
-    return filterRegion(rect);
+    return filterRegion(s.doc(), rect);
 }
 
 bool QSvgPolygon::requiresGroupRendering() const
@@ -285,7 +285,7 @@ QRectF QSvgRect::internalBounds(QPainter *p, QSvgExtraStates &s) const
 
 QRectF QSvgRect::decoratedInternalBounds(QPainter *p, QSvgExtraStates &s) const
 {
-    return filterRegion(internalBounds(p, s, BoundsMode::IncludeMiterLimit));
+    return filterRegion(s.doc(), internalBounds(p, s, BoundsMode::IncludeMiterLimit));
 }
 
 QRectF QSvgRect::internalBounds(QPainter *p, QSvgExtraStates &, BoundsMode mode) const
@@ -734,7 +734,7 @@ QRectF QSvgPolyline::decoratedInternalBounds(QPainter *p, QSvgExtraStates &s) co
 {
     QRectF rect = internalBounds(p, s, BoundsMode::IncludeMiterLimit);
     rect |= QSvgMarker::markersBoundsForNode(this, p, s);
-    return filterRegion(rect);
+    return filterRegion(s.doc(), rect);
 }
 
 bool QSvgPolyline::requiresGroupRendering() const
@@ -779,7 +779,7 @@ QRectF QSvgLine::decoratedInternalBounds(QPainter *p, QSvgExtraStates &s) const
 {
     QRectF rect = internalBounds(p, s, BoundsMode::IncludeMiterLimit);
     rect |= QSvgMarker::markersBoundsForNode(this, p, s);
-    return filterRegion(rect);
+    return filterRegion(s.doc(), rect);
 }
 
 bool QSvgLine::requiresGroupRendering() const

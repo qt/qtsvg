@@ -2617,7 +2617,7 @@ void tst_QSvgRenderer::testDeeplyNested_data()
 
     QTest::addColumn<QByteArray>("deeplyNested");
     QTest::addColumn<bool>("trusted");
-    for (int i = 8; i <= 16384; i *= 2) {
+    for (int i = 8; i <= 65536; i *= 2) {
         QTest::newRow((QString::number(i) + " groups").toStdString().c_str())
                 << generateNests(i) << (i <= 32);
     }
@@ -2642,6 +2642,8 @@ void tst_QSvgRenderer::testDeeplyNested()
     QEXPECT_FAIL("4096 groups", failMessage.constData(), Abort);
     QEXPECT_FAIL("8192 groups", failMessage.constData(), Abort);
     QEXPECT_FAIL("16384 groups",failMessage.constData(), Abort);
+    QEXPECT_FAIL("32768 groups",failMessage.constData(), Abort);
+    QEXPECT_FAIL("65536 groups",failMessage.constData(), Abort);
     QVERIFY(renderer.isValid());
 
     if (!trusted) {
