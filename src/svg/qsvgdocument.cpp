@@ -28,6 +28,7 @@ QSvgDocument::QSvgDocument(QtSvg::Options options, QtSvg::AnimatorType type)
     , m_heightPercent(false)
     , m_animated(false)
     , m_fps(30)
+    , m_states(this)
     , m_options(options)
 {
     m_states.trustedSource = m_options.testFlag(QtSvg::AssumeTrustedSource);
@@ -287,7 +288,7 @@ void QSvgDocument::draw(QPainter *p, const QString &id,
 
     p->save();
 
-    const QRectF elementBounds = node->bounds();
+    const QRectF elementBounds = node->bounds(this);
 
     mapSourceToTarget(p, bounds, elementBounds);
     QTransform originalTransform = p->worldTransform();
@@ -495,7 +496,7 @@ QRectF QSvgDocument::boundsOnElement(const QString &id) const
     const QSvgNode *node = namedNode(id);
     if (!node)
         node = this;
-    return node->bounds();
+    return node->bounds(this);
 }
 
 bool QSvgDocument::elementExists(const QString &id) const

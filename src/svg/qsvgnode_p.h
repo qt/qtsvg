@@ -110,6 +110,8 @@ public:
     void revertAnimatedStyle(QPainter *p, QSvgExtraStates &states) const;
     QSvgStyleProperty *styleProperty(QSvgStyleProperty::Type type) const;
 
+    // This is slow. Avoid use by all means.
+    // TODO: Remove when qtdeclarative stopped using it.
     QSvgDocument *document() const;
 
     virtual Type type() const = 0;
@@ -117,7 +119,7 @@ public:
     virtual QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const;
     virtual QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const;
-    QRectF bounds() const;
+    QRectF bounds(const QSvgDocument *doc) const;
     virtual QRectF decoratedInternalBounds(QPainter *p, QSvgExtraStates &states) const;
     virtual QRectF decoratedBounds(QPainter *p, QSvgExtraStates &states) const;
 
@@ -178,7 +180,7 @@ protected:
     mutable QSvgStaticStyle m_style;
     mutable QSvgAnimatedStyle m_animatedStyle;
 
-    QRectF filterRegion(QRectF bounds) const;
+    QRectF filterRegion(const QSvgDocument *doc, QRectF bounds) const;
 
     static qreal strokeWidth(QPainter *p);
     static void initPainter(QPainter *p);

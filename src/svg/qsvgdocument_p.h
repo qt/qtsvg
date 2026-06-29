@@ -67,7 +67,7 @@ public:
 
     inline QRectF viewBox() const;
     void setViewBox(const QRectF &rect);
-    bool isCalculatingImplicitViewBox() { return m_calculatingImplicitViewBox; }
+    bool isCalculatingImplicitViewBox() const { return m_calculatingImplicitViewBox; }
 
     QtSvg::Options options() const;
 
@@ -177,7 +177,7 @@ inline QRectF QSvgDocument::viewBox() const
 {
     if (m_viewBox.isNull()) {
         QScopedValueRollback<bool> guard(m_calculatingImplicitViewBox, true);
-        m_viewBox = bounds();
+        m_viewBox = bounds(this);
         m_implicitViewBox = true;
     }
 
