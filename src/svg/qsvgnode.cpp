@@ -551,8 +551,6 @@ void QSvgNode::setMaskId(const QString &str)
 
 bool QSvgNode::hasMask() const
 {
-    if (document()->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-        return false;
     return !m_maskId.isEmpty();
 }
 
@@ -568,8 +566,6 @@ void QSvgNode::setFilterId(const QString &str)
 
 bool QSvgNode::hasFilter() const
 {
-    if (document()->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-        return false;
     return !m_filterId.isEmpty();
 }
 
@@ -585,8 +581,6 @@ void QSvgNode::setMarkerStartId(const QString &str)
 
 bool QSvgNode::hasMarkerStart() const
 {
-    if (document()->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-        return false;
     return !m_markerStartId.isEmpty();
 }
 
@@ -602,8 +596,6 @@ void QSvgNode::setMarkerMidId(const QString &str)
 
 bool QSvgNode::hasMarkerMid() const
 {
-    if (document()->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-        return false;
     return !m_markerMidId.isEmpty();
 }
 
@@ -619,15 +611,11 @@ void QSvgNode::setMarkerEndId(const QString &str)
 
 bool QSvgNode::hasMarkerEnd() const
 {
-    if (document()->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-        return false;
     return !m_markerEndId.isEmpty();
 }
 
 bool QSvgNode::hasAnyMarker() const
 {
-    if (document()->options().testFlag(QtSvg::Tiny12FeaturesOnly))
-        return false;
     return hasMarkerStart() || hasMarkerMid() || hasMarkerEnd();
 }
 
