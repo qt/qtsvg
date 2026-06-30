@@ -16,6 +16,8 @@
 
 #include <QtGui/private/qoutlinemapper_p.h>
 
+#include <vector>
+
 QT_BEGIN_NAMESPACE
 
 #ifndef QT_NO_DEBUG
@@ -220,9 +222,16 @@ void QSvgNode::applyStyle(QPainter *p, QSvgExtraStates &states) const
 */
 void QSvgNode::applyStyleRecursive(QPainter *p, QSvgExtraStates &states) const
 {
-    if (parent())
-        parent()->applyStyleRecursive(p, states);
-    applyStyle(p, states);
+    std::vector<const QSvgNode *> parents;
+
+    const QSvgNode *current = this;
+    do {
+        parents.push_back(current);
+        current = current->parent();
+    } while (current);
+
+    for (auto i = parents.crbegin(); i != parents.crend(); ++i)
+        (*i)->applyStyle(p, states);
 }
 
 void QSvgNode::revertStyle(QPainter *p, QSvgExtraStates &states) const
@@ -232,9 +241,11 @@ void QSvgNode::revertStyle(QPainter *p, QSvgExtraStates &states) const
 
 void QSvgNode::revertStyleRecursive(QPainter *p, QSvgExtraStates &states) const
 {
-    revertStyle(p, states);
-    if (parent())
-        parent()->revertStyleRecursive(p, states);
+    const QSvgNode *current = this;
+    do {
+        current->revertStyle(p, states);
+        current = current->parent();
+    } while (current);
 }
 
 void QSvgNode::applyAnimatedStyle(QPainter *p, QSvgExtraStates &states) const
