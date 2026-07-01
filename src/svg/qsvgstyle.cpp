@@ -27,6 +27,12 @@ QSvgExtraStates::QSvgExtraStates()
 {
 }
 
+QSvgExtraStates::QSvgExtraStates(const QSvgDocument *doc) : QSvgExtraStates()
+{
+    Q_ASSERT(doc);
+    m_doc = doc;
+}
+
 QSvgStyleProperty::~QSvgStyleProperty()
     = default;
 

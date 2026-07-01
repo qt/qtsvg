@@ -39,7 +39,10 @@ class QSvgDocument;
 
 struct Q_SVG_EXPORT QSvgExtraStates
 {
-    QSvgExtraStates();
+    QSvgExtraStates();  // TODO: When qtdeclarative stopped using this, make it
+                        // private to make sure m_doc is initialized to non-null
+    explicit QSvgExtraStates(const QSvgDocument *doc);
+    const QSvgDocument *doc() const { return m_doc; }
 
     qreal fillOpacity;
     qreal strokeOpacity;
@@ -55,6 +58,9 @@ struct Q_SVG_EXPORT QSvgExtraStates
     bool vectorEffect; // true if pen is cosmetic
     qint8 imageRendering; // QSvgQualityStyle::ImageRendering
     bool inUse = false; // true if currently in QSvgUseNode
+
+private:
+    const QSvgDocument *m_doc = nullptr;
 };
 
 class Q_SVG_EXPORT QSvgStyleProperty
