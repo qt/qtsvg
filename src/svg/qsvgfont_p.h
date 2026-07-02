@@ -63,6 +63,8 @@ public:
 public:
     qreal m_unitsPerEm{1000};
     qreal m_horizAdvX;
+
+private:
     // not about a missing <glyph> element, but the font's <missing-glyph> element:
     std::unique_ptr<const QSvgGlyph> m_missingGlyph;
     // The following needs to preserve the order of glyphs because
@@ -71,7 +73,6 @@ public:
     // 'glyph' element to its last in logical order"
     QList<QSvgGlyph> m_glyphs;
 
-private:
     // to speed up finding glyphs
     mutable QHash<char32_t, QList<qsizetype>> m_possibleGlyphIndicesForChar;
     mutable qsizetype m_firstUnscannedGlyphIdx = 0;
