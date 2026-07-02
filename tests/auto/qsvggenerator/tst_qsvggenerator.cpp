@@ -6,6 +6,8 @@
 
 #include <QBuffer>
 #include <QByteArray>
+#include <QDir>
+#include <QTemporaryDir>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomNode>
@@ -30,6 +32,7 @@ public:
     virtual ~tst_QSvgGenerator();
 
 private slots:
+    void initTestCase();
     void construction();
     void fileName();
     void escapesTitle();
@@ -44,6 +47,12 @@ private slots:
     void gradientInterpolation();
     void patternBrush();
     void assertOnCurveToElement();
+
+private:
+    // The generated .svg files are written to the current working directory,
+    // which is not writable on all platforms (e.g. VxWorks). Redirect the
+    // working directory to a temporary one for the duration of the test.
+    QTemporaryDir m_tempDir;
 };
 
 tst_QSvgGenerator::tst_QSvgGenerator()
@@ -52,9 +61,12 @@ tst_QSvgGenerator::tst_QSvgGenerator()
 
 tst_QSvgGenerator::~tst_QSvgGenerator()
 {
-    QFile::remove(QLatin1String("fileName_output.svg"));
-    QFile::remove(QLatin1String("outputDevice_output.svg"));
-    QFile::remove(QLatin1String("radial_gradient.svg"));
+}
+
+void tst_QSvgGenerator::initTestCase()
+{
+    QVERIFY2(m_tempDir.isValid(), qPrintable(m_tempDir.errorString()));
+    QVERIFY(QDir::setCurrent(m_tempDir.path()));
 }
 
 void tst_QSvgGenerator::construction()
