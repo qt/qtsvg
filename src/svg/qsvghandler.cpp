@@ -965,7 +965,13 @@ static std::optional<qreal> parseFontSize(QStringView s)
         fs = QSvgUtils::convertToPixels(fs, true, type);
         return (std::min)(fs, qreal(0xffff));
     }
-    default:
+    case XXSmall:
+    case XSmall:
+    case Small:
+    case Medium:
+    case Large:
+    case XLarge:
+    case XXLarge:
         return sizeTable[spec];
     }
 
