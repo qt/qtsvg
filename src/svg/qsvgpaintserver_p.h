@@ -18,6 +18,7 @@
 //
 
 #include <memory>
+#include <QtSvg/private/qtsvgglobal_p.h>
 #include <QtCore/qrect.h>
 #include <QtCore/qset.h>
 #include <QtCore/qstring.h>
@@ -26,7 +27,6 @@
 #include <QtGui/qpainter.h>
 #include <QtGui/qpen.h>
 #include <QtGui/qtransform.h>
-#include "qtsvgexports.h"
 
 QT_BEGIN_NAMESPACE
 
