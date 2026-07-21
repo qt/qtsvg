@@ -2629,17 +2629,27 @@ void tst_QSvgRenderer::testDeeplyNested()
     QFETCH(bool, trusted);
 
     QSvgRenderer renderer;
-    if (trusted) {
+
+    if (trusted)
         renderer.setOptions(QtSvg::AssumeTrustedSource);
-    } else {
+
+    renderer.load(deeplyNested);
+
+    // Remove after reintroducing "Removing Parsing Limit in QSvgHandler" and no risk for regressions.
+    QByteArrayView failMessage = "This test is expected to fail due to reverting \"Removing Parsing"
+                                 "Limit in QSvgHandler\" commit. "_ba;
+    QEXPECT_FAIL("2048 groups", failMessage.constData(), Abort);
+    QEXPECT_FAIL("4096 groups", failMessage.constData(), Abort);
+    QEXPECT_FAIL("8192 groups", failMessage.constData(), Abort);
+    QEXPECT_FAIL("16384 groups",failMessage.constData(), Abort);
+    QVERIFY(renderer.isValid());
+
+    if (!trusted) {
         QTest::ignoreMessage(QtWarningMsg,
                              "Too many nested nodes at g exceeding max nested limit of 32 . "
                              "Enable AssumeTrustedSource in QSvgHandler or set "
                              "QT_SVG_DEFAULT_OPTIONS=2 to disable this check.");
     }
-
-    renderer.load(deeplyNested);
-    QVERIFY(renderer.isValid());
 
     QImage image(QSize(50, 50), QImage::Format_ARGB32_Premultiplied);
     image.fill(Qt::transparent);
