@@ -30,8 +30,6 @@ public:
     QSvgStyleSelector();
     virtual ~QSvgStyleSelector();
 
-    QString nodeToName(QSvgNode *node) const;
-
     QSvgNode *svgNode(NodePtr node) const;
     QSvgStructureNode *nodeToStructure(QSvgNode *n) const;
 
