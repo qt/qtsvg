@@ -18,11 +18,6 @@ QSvgStyleSelector::~QSvgStyleSelector()
 {
 }
 
-QString QSvgStyleSelector::nodeToName(QSvgNode *node) const
-{
-    return node->typeName();
-}
-
 QSvgNode *QSvgStyleSelector::svgNode(NodePtr node) const
 {
     return (QSvgNode*)node.ptr;
@@ -52,8 +47,7 @@ bool QSvgStyleSelector::nodeNameEquals(NodePtr node, const QString &nodeName) co
     QSvgNode *n = svgNode(node);
     if (!n)
         return false;
-    QString name = nodeToName(n);
-    return QString::compare(name, nodeName, Qt::CaseInsensitive) == 0;
+    return QString::compare(n->typeName(), nodeName, Qt::CaseInsensitive) == 0;
 }
 
 QString QSvgStyleSelector::attributeValue(NodePtr node, const QCss::AttributeSelector &asel) const
@@ -89,7 +83,7 @@ QStringList QSvgStyleSelector::nodeNames(NodePtr node) const
 {
     QSvgNode *n = svgNode(node);
     if (n)
-        return QStringList(nodeToName(n));
+        return QStringList(n->typeName());
     return QStringList();
 }
 
