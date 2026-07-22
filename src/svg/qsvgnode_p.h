@@ -112,7 +112,7 @@ public:
     QSvgDocument *document() const;
 
     virtual Type type() const = 0;
-    QString typeName() const;
+    QLatin1StringView typeName() const;
     virtual QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const;
     virtual QRectF internalBounds(QPainter *p, QSvgExtraStates &states) const;
     QRectF bounds(QPainter *p, QSvgExtraStates &states) const;
