@@ -4,40 +4,10 @@
 
 
 #include "qsvgvisitor_p.h"
+
 #include <QDebug>
 
 QT_BEGIN_NAMESPACE
-
-static const char *nodeTypeStrings[] = {
-    "DOC",
-    "G",
-    "DEFS",
-    "SWITCH",
-    "ANIMATION",
-    "ARC",
-    "CIRCLE",
-    "ELLIPSE",
-    "IMAGE",
-    "LINE",
-    "PATH",
-    "POLYGON",
-    "POLYLINE",
-    "RECT",
-    "TEXT",
-    "TEXTAREA",
-    "TSPAN",
-    "USE",
-    "VIDEO"
-};
-
-// TODO: something like this is needed in several places. Make a common version.
-static const char *typeName(const QSvgNode *node)
-{
-    constexpr int typeNameCount = sizeof(nodeTypeStrings) / sizeof(const char *);
-    if (node->type() < typeNameCount)
-        return nodeTypeStrings[node->type()];
-    return "UNKNOWN";
-}
 
 class SvgDebugVisitor : public QSvgVisitor
 {
@@ -72,7 +42,7 @@ private:
 
 void SvgDebugVisitor::handleBaseNode(const QSvgNode *node)
 {
-    debug << indent() << typeName(node) << "node, ID:" << node->nodeId();
+    debug << indent() << node->typeName() << "node, ID:" << node->nodeId();
     nodeCounter++;
 }
 
@@ -84,7 +54,7 @@ void SvgDebugVisitor::visitNode(const QSvgNode *node)
 
 bool SvgDebugVisitor::visitStructureNodeStart(const QSvgStructureNode *node)
 {
-    debug << indent() << "START node" << node->nodeId() << "type" << typeName(node) << node->type() << Qt::endl;
+    debug << indent() << "START node" << node->nodeId() << "type" << node->typeName() << node->type() << Qt::endl;
     m_indentLevel++;
     return true;
 }

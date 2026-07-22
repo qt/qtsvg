@@ -20,6 +20,8 @@
 
 QT_BEGIN_NAMESPACE
 
+using namespace Qt::StringLiterals;
+
 #ifndef QT_NO_DEBUG
 Q_STATIC_LOGGING_CATEGORY(lcSvgTiming, "qt.svg.timing")
 #endif
@@ -51,7 +53,7 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
                                                      : states.remainingNestedNodes - 1;
         QScopedValueRollback<quint8> nestedNodesGuard(states.remainingNestedNodes, remainingDepth);
         if (states.remainingNestedNodes == 0) {
-            qCWarning(lcSvgDraw) << "Too many nested nodes at" << qPrintable(typeName())
+            qCWarning(lcSvgDraw).noquote() << "Too many nested nodes at" << typeName()
                                  << "exceeding max nested limit of" << QtSvg::renderingMaxNestedNodes << "."
                                  << "Enable AssumeTrustedSource in QSvgHandler or set QT_SVG_DEFAULT_OPTIONS=2 to disable this check.";
             return;
@@ -314,44 +316,44 @@ QSvgDocument * QSvgNode::document() const
     return doc;
 }
 
-QString QSvgNode::typeName() const
+QLatin1StringView QSvgNode::typeName() const
 {
     switch (type()) {
-        case Doc: return QStringLiteral("svg");
-        case Group: return QStringLiteral("g");
-        case Defs: return QStringLiteral("defs");
-        case Switch: return QStringLiteral("switch");
-        case AnimateColor: return QStringLiteral("animateColor");
-        case AnimateTransform: return QStringLiteral("animateTransform");
-        case Circle: return QStringLiteral("circle");
-        case Ellipse: return QStringLiteral("ellipse");
-        case Image: return QStringLiteral("image");
-        case Line: return QStringLiteral("line");
-        case Path: return QStringLiteral("path");
-        case Polygon: return QStringLiteral("polygon");
-        case Polyline: return QStringLiteral("polyline");
-        case Rect: return QStringLiteral("rect");
-        case Text: return QStringLiteral("text");
-        case Textarea: return QStringLiteral("textarea");
-        case Tspan: return QStringLiteral("tspan");
-        case Use: return QStringLiteral("use");
-        case Video: return QStringLiteral("video");
-        case Mask: return QStringLiteral("mask");
-        case Symbol: return QStringLiteral("symbol");
-        case Marker: return QStringLiteral("marker");
-        case Pattern: return QStringLiteral("pattern");
-        case Filter: return QStringLiteral("filter");
-        case FeMerge: return QStringLiteral("feMerge");
-        case FeMergenode: return QStringLiteral("feMergeNode");
-        case FeColormatrix: return QStringLiteral("feColorMatrix");
-        case FeGaussianblur: return QStringLiteral("feGaussianBlur");
-        case FeOffset: return QStringLiteral("feOffset");
-        case FeComposite: return QStringLiteral("feComposite");
-        case FeFlood: return QStringLiteral("feFlood");
-        case FeBlend: return QStringLiteral("feBlend");
-        case FeUnsupported: return QStringLiteral("feUnsupported");
+    case Doc: return "svg"_L1;
+    case Group: return "g"_L1;
+    case Defs: return "defs"_L1;
+    case Switch: return "switch"_L1;
+    case AnimateColor: return "animateColor"_L1;
+    case AnimateTransform: return "animateTransform"_L1;
+    case Circle: return "circle"_L1;
+    case Ellipse: return "ellipse"_L1;
+    case Image: return "image"_L1;
+    case Line: return "line"_L1;
+    case Path: return "path"_L1;
+    case Polygon: return "polygon"_L1;
+    case Polyline: return "polyline"_L1;
+    case Rect: return "rect"_L1;
+    case Text: return "text"_L1;
+    case Textarea: return "textarea"_L1;
+    case Tspan: return "tspan"_L1;
+    case Use: return "use"_L1;
+    case Video: return "video"_L1;
+    case Mask: return "mask"_L1;
+    case Symbol: return "symbol"_L1;
+    case Marker: return "marker"_L1;
+    case Pattern: return "pattern"_L1;
+    case Filter: return "filter"_L1;
+    case FeMerge: return "feMerge"_L1;
+    case FeMergenode: return "feMergeNode"_L1;
+    case FeColormatrix: return "feColorMatrix"_L1;
+    case FeGaussianblur: return "feGaussianBlur"_L1;
+    case FeOffset: return "feOffset"_L1;
+    case FeComposite: return "feComposite"_L1;
+    case FeFlood: return "feFlood"_L1;
+    case FeBlend: return "feBlend"_L1;
+    case FeUnsupported: return "feUnsupported"_L1;
     }
-    return QStringLiteral("unknown");
+    return "unknown"_L1;
 }
 
 void QSvgNode::setRequiredFeatures(const QStringList &lst)
