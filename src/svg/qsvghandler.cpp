@@ -3321,7 +3321,6 @@ static QSvgNode *createUseNode(QSvgNode *parent,
     QStringView linkId     = attributes.value(QLatin1String("xlink:href"));
     const QStringView xStr = attributes.value(QLatin1String("x"));
     const QStringView yStr = attributes.value(QLatin1String("y"));
-    QSvgStructureNode *group = nullptr;
 
     if (linkId.isEmpty())
         linkId = attributes.value(QLatin1String("href"));
@@ -3336,38 +3335,33 @@ static QSvgNode *createUseNode(QSvgNode *parent,
     case QSvgNode::Symbol:
     case QSvgNode::Marker:
     case QSvgNode::Pattern:
-        group = static_cast<QSvgStructureNode*>(parent);
         break;
     default:
-        break;
+        qCWarning(lcSvgHandler, "<use> element %ls in wrong context!", qUtf16Printable(linkIdStr));
+        return 0;
     }
 
-    if (group) {
-        QPointF pt;
-        if (!xStr.isNull() || !yStr.isNull()) {
-            QSvgUtils::LengthType type;
-            qreal nx = QSvgUtils::parseLength(xStr, &type);
-            nx = QSvgUtils::convertToPixels(nx, true, type);
+    QPointF pt;
+    if (!xStr.isNull() || !yStr.isNull()) {
+        QSvgUtils::LengthType type;
+        qreal nx = QSvgUtils::parseLength(xStr, &type);
+        nx = QSvgUtils::convertToPixels(nx, true, type);
 
-            qreal ny = QSvgUtils::parseLength(yStr, &type);
-            ny = QSvgUtils::convertToPixels(ny, true, type);
-            pt = QPointF(nx, ny);
-        }
-
-        QSvgNode *link = handler->document()->namedNode(linkIdStr);
-        if (link) {
-            if (parent->isDescendantOf(link))
-                qCWarning(lcSvgHandler, "link %ls is recursive!", qUtf16Printable(linkIdStr));
-
-            return new QSvgUse(pt, parent, link);
-        }
-
-        //delay link resolving, link might have not been created yet
-        return new QSvgUse(pt, parent, linkIdStr);
+        qreal ny = QSvgUtils::parseLength(yStr, &type);
+        ny = QSvgUtils::convertToPixels(ny, true, type);
+        pt = QPointF(nx, ny);
     }
 
-    qCWarning(lcSvgHandler, "<use> element %ls in wrong context!", qUtf16Printable(linkIdStr));
-    return 0;
+    QSvgNode *link = handler->document()->namedNode(linkIdStr);
+    if (link) {
+        if (parent->isDescendantOf(link))
+            qCWarning(lcSvgHandler, "link %ls is recursive!", qUtf16Printable(linkIdStr));
+
+        return new QSvgUse(pt, parent, link);
+    }
+
+    //delay link resolving, link might have not been created yet
+    return new QSvgUse(pt, parent, linkIdStr);
 }
 
 static QSvgNode *createVideoNode(QSvgNode *parent,
