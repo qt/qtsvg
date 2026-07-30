@@ -22,6 +22,7 @@
 #include <QtCore/qlist.h>
 
 #include <list>
+#include <utility>
 
 QT_BEGIN_NAMESPACE
 
@@ -293,7 +294,7 @@ public:
     const QTransform& appliedTransform() const { return m_appliedTransform; }
 
 private:
-    QImage renderPattern(QSize size, qreal contentScaleX, qreal contentScaleY);
+    QImage renderPattern(QSize size, std::pair<qreal, qreal> contentScale, const QSvgExtraStates &states);
     void calculateAppliedTransform(QTransform& worldTransform, QRectF peLocalBB, QSize imageSize);
 
 private:
