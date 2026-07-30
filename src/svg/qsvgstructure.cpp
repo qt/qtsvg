@@ -785,6 +785,8 @@ QImage QSvgMask::createMask(QPainter *p, QSvgExtraStates &states, const QRectF &
     initPainter(&painter);
 
     QSvgExtraStates maskNodeStates;
+    maskNodeStates.trustedSource = states.trustedSource;
+    maskNodeStates.remainingNestedNodes = states.remainingNestedNodes;
     applyStyleRecursive(&painter, maskNodeStates);
 
     // The transformation of the mask node is not relevant. What matters are the contentUnits
@@ -910,7 +912,7 @@ QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSv
         return QImage(); // Avoid division by zero in calculateAppliedTransform()
 
     calculateAppliedTransform(t, peBoundingBox, imageSize);
-    return renderPattern(imageSize, contentScaleFactorX, contentScaleFactorY);
+    return renderPattern(imageSize, std::make_pair(contentScaleFactorX, contentScaleFactorY), states);
 }
 
 QSvgNode::Type QSvgPattern::type() const
@@ -918,9 +920,9 @@ QSvgNode::Type QSvgPattern::type() const
     return Pattern;
 }
 
-QImage QSvgPattern::renderPattern(QSize size, qreal contentScaleX, qreal contentScaleY)
+QImage QSvgPattern::renderPattern(QSize size, std::pair<qreal, qreal> scale, const QSvgExtraStates &states)
 {
-    if (size.isEmpty() || !qIsFinite(contentScaleX) || !qIsFinite(contentScaleY))
+    if (size.isEmpty() || !qIsFinite(scale.first) || !qIsFinite(scale.second))
         return defaultPattern();
 
     // Allocate a QImage to draw the pattern in with the calculated size.
@@ -941,6 +943,8 @@ QImage QSvgPattern::renderPattern(QSize size, qreal contentScaleX, qreal content
     // Draw the pattern using our QPainter.
     QPainter patternPainter(&pattern);
     QSvgExtraStates patternStates;
+    patternStates.trustedSource = states.trustedSource;
+    patternStates.remainingNestedNodes = states.remainingNestedNodes;
     initPainter(&patternPainter);
     applyStyleRecursive(&patternPainter, patternStates);
     patternPainter.resetTransform();
@@ -948,13 +952,13 @@ QImage QSvgPattern::renderPattern(QSize size, qreal contentScaleX, qreal content
     // According to the <pattern> definition, if viewBox exists then patternContentUnits
     // is ignored
     if (m_viewBox.isNull())
-        patternPainter.scale(contentScaleX, contentScaleY);
+        patternPainter.scale(scale.first, scale.second);
     else
         patternPainter.setWindow(m_viewBox.toRect());
 
     // Draw all this Pattern children nodes with our QPainter,
     // no need to use any Extra States
-    for (QSvgNode *node : m_renderers)
+    for (QSvgNode *node : std::as_const(m_renderers))
         node->draw(&patternPainter, patternStates);
 
     revertStyleRecursive(&patternPainter, patternStates);
