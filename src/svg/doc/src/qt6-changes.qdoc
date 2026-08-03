@@ -19,6 +19,6 @@
 
     \section1 Library split
 
-    The QtSvg module has been split into two libraries, with those classes
+    The \l{Qt SVG C++ Classes}{QtSvg} module has been split into two libraries, with those classes
     depending on QtWidgets living in a separate library, QtSvgWidgets.
 */
