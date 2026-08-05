@@ -14,6 +14,8 @@
 #include <QtGui/qimageiohandler.h>
 #include <QVector4D>
 
+#include <memory>
+
 QT_BEGIN_NAMESPACE
 
 QSvgFeFilterPrimitive::QSvgFeFilterPrimitive(QSvgNode *parent, const QString &input,
@@ -353,7 +355,7 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
     copyPainter.drawImage(source.offset(), source);
     copyPainter.end();
 
-    QVarLengthArray<ColorValues, 32 * 32> buffer(tempSource.width() * tempSource.height());
+    const auto buffer = std::make_unique<ColorValues[]>(tempSource.width() * tempSource.height());
 
     const int sourceHeight = tempSource.height();
     const int sourceWidth = tempSource.width();
