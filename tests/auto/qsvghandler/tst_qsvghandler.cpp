@@ -18,6 +18,7 @@
 
 #include <cmath>
 #include <limits>
+#include <memory>
 #include <utility>
 
 class tst_QSvgHandler : public QObject
@@ -222,7 +223,8 @@ void tst_QSvgHandler::testCreateAnimateTransformNode()
     attributes.append("type", type);
     attributes.append("values", values);
 
-    QSvgNode *node = createAnimateTransformNode(handler.document(), attributes, &handler);
+    const auto node = std::unique_ptr<QSvgNode>{createAnimateTransformNode(handler.document(),
+                                                                           attributes, &handler)};
 
     QEXPECT_FAIL("empty-in-commas", "consecutive commas accepted as valid", Abort);
     QEXPECT_FAIL("space-in-commas", "only space in commas accepted as valid", Abort);
@@ -231,7 +233,7 @@ void tst_QSvgHandler::testCreateAnimateTransformNode()
     QCOMPARE(bool(node), isValid);
     if (!node)
         return;
-    const auto &properties = static_cast<QSvgAnimateTransform *>(node)->properties();
+    const auto &properties = static_cast<QSvgAnimateTransform *>(node.get())->properties();
     QCOMPARE(properties.size(), 1);
     QCOMPARE(properties.first()->type(), QSvgAbstractAnimatedProperty::Transform);
     QList<QList<qreal>> readProperty;
@@ -242,7 +244,6 @@ void tst_QSvgHandler::testCreateAnimateTransformNode()
     }
     QEXPECT_FAIL("scale-implicit-sy", "incorrect default value for sy in scale", Continue);
     QCOMPARE(readProperty, expectedComponents);
-    delete node;
 }
 
 void tst_QSvgHandler::testParseNumbersList_data()
