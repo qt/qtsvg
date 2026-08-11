@@ -31,6 +31,8 @@
 #include "qsvgutils_p.h"
 #include "qtsvgglobal.h"
 
+#include <memory>
+
 QT_BEGIN_NAMESPACE
 
 class QSvgNode;
@@ -51,6 +53,8 @@ public:
 
     QIODevice *device() const;
     QSvgDocument *document() const;
+    // resets the stored document: afterwards document() == nullptr and ok() == false
+    [[nodiscard]] std::unique_ptr<QSvgDocument> takeDocument();
 
     inline bool ok() const {
         return document() != 0 && !xml->hasError();
@@ -95,7 +99,7 @@ public:
 private:
     void init();
 
-    QSvgDocument *m_doc;
+    std::unique_ptr<QSvgDocument> m_doc;
     QStack<QSvgNode *> m_nodes;
     // TODO: This is only needed during parsing, so it unnecessarily takes up space after that.
     // Temporary container for :

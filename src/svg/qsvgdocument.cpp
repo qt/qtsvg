@@ -199,13 +199,12 @@ std::unique_ptr<QSvgDocument> QSvgDocument::load(const QString &fileName, QtSvg:
 
     QSvgHandler handler(&file, options, type);
     if (handler.ok()) {
-        doc.reset(handler.document());
+        doc = handler.takeDocument();
         if (doc->m_animator)
             doc->m_animator->setAnimationDuration(handler.animationDuration());
     } else {
         qCWarning(lcSvgHandler, "Cannot read file '%s', because: %s (line %d)",
                  qPrintable(fileName), qPrintable(handler.errorString()), handler.lineNumber());
-        delete handler.document();
     }
     return doc;
 }
@@ -232,11 +231,9 @@ std::unique_ptr<QSvgDocument> QSvgDocument::load(const QByteArray &contents, QtS
     QSvgHandler handler(&buffer, options, type);
 
     if (handler.ok()) {
-        doc.reset(handler.document());
+        doc = handler.takeDocument();
         if (doc->m_animator)
             doc->m_animator->setAnimationDuration(handler.animationDuration());
-    } else {
-        delete handler.document();
     }
     return doc;
 }
@@ -248,11 +245,9 @@ std::unique_ptr<QSvgDocument> QSvgDocument::load(QXmlStreamReader *contents, QtS
 
     std::unique_ptr<QSvgDocument> doc;
     if (handler.ok()) {
-        doc.reset(handler.document());
+        doc = handler.takeDocument();
         if (doc->m_animator)
             doc->m_animator->setAnimationDuration(handler.animationDuration());
-    } else {
-        delete handler.document();
     }
     return doc;
 }
