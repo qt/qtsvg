@@ -3690,7 +3690,6 @@ QSvgHandler::QSvgHandler(QXmlStreamReader *const reader, QtSvg::Options options,
 
 void QSvgHandler::init()
 {
-    m_doc = 0;
     m_animEnd = 0;
     m_defaultCoords = QSvgUtils::LT_PX;
     m_defaultPen = QPen(Qt::black, 1, Qt::SolidLine, Qt::FlatCap, Qt::SvgMiterJoin);
@@ -3835,8 +3834,7 @@ void QSvgHandler::parse()
             if (remainingUnfinishedElements && startElement(xml->name(), xml->attributes())) {
                 --remainingUnfinishedElements;
             } else {
-                delete m_doc;
-                m_doc = nullptr;
+                m_doc.reset();
                 return;
             }
             break;
@@ -3860,10 +3858,8 @@ void QSvgHandler::parse()
 
     resolvePaintServers();
     resolveNodes();
-    if (detectCyclesAndWarn(m_doc)) {
-        delete m_doc;
-        m_doc = nullptr;
-    }
+    if (detectCyclesAndWarn(m_doc.get()))
+        m_doc.reset();
 }
 
 bool QSvgHandler::startElement(const QStringView localName,
@@ -3910,7 +3906,7 @@ bool QSvgHandler::startElement(const QStringView localName,
             node = method(nullptr, attributes, this);
             if (node) {
                 Q_ASSERT(node->type() == QSvgNode::Doc);
-                m_doc = static_cast<QSvgDocument*>(node);
+                m_doc.reset(static_cast<QSvgDocument*>(node));
             }
         } else {
             switch (m_nodes.top()->type()) {
@@ -4209,7 +4205,12 @@ QIODevice *QSvgHandler::device() const
 
 QSvgDocument *QSvgHandler::document() const
 {
-    return m_doc;
+    return m_doc.get();
+}
+
+std::unique_ptr<QSvgDocument> QSvgHandler::takeDocument()
+{
+    return std::move(m_doc);
 }
 
 QSvgUtils::LengthType QSvgHandler::defaultCoordinateSystem() const
