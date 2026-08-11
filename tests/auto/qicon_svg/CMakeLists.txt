@@ -28,6 +28,15 @@ qt_internal_add_test(tst_qicon_svg
     TESTDATA ${test_data}
 )
 
+# The test loads SVGs through QImageReader and QIcon, so both plugins have to
+# exist at run time. They are not linked, so make the dependency explicit.
+if(TARGET QSvgPlugin)
+    add_dependencies(tst_qicon_svg QSvgPlugin)
+endif()
+if(TARGET QSvgIconPlugin)
+    add_dependencies(tst_qicon_svg QSvgIconPlugin)
+endif()
+
 # Resources:
 set(tst_qicon_svg_resource_files
     "icons/heart.svg"
