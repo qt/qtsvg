@@ -29,9 +29,9 @@
 #endif
 #include "qsvggraphics_p.h"
 #include "qtsvgglobal_p.h"
-#include "qsvgutils_p.h"
 #include "qtsvgglobal.h"
 #include <QtSvg/private/qsvgpaintserver_p.h>
+#include <QtGui/private/qguisvg_p.h>
 
 #include <memory>
 
@@ -68,8 +68,8 @@ public:
     inline QString errorString() const { return xml->errorString(); }
     inline int lineNumber() const { return xml->lineNumber(); }
 
-    void setDefaultCoordinateSystem(QSvgUtils::LengthType type);
-    QSvgUtils::LengthType defaultCoordinateSystem() const;
+    void setDefaultCoordinateSystem(QGuiSvg::LengthType type);
+    QGuiSvg::LengthType defaultCoordinateSystem() const;
 
     void pushColor(const QColor &color);
     void pushColorCopy();
@@ -131,7 +131,7 @@ private:
     QSvgStyleProperty *m_style{nullptr};
     QSvgPaintServerSharedPtr m_paintServer;
 
-    QSvgUtils::LengthType m_defaultCoords;
+    QGuiSvg::LengthType m_defaultCoords;
 
     QStack<QColor> m_colorStack;
     QStack<int>    m_colorTagCount;

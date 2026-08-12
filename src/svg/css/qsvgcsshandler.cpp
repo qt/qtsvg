@@ -5,8 +5,8 @@
 #include "qsvgcsshandler_p.h"
 #include <QtSvg/private/qsvgstyleselector_p.h>
 #include <QtSvg/private/qsvganimatedproperty_p.h>
-#include <QtSvg/private/qsvgutils_p.h>
 #include <QtGui/private/qmath_p.h>
+#include <QtGui/private/qguisvg_p.h>
 #include <QtCore/qlist.h>
 
 QT_BEGIN_NAMESPACE
@@ -155,26 +155,26 @@ bool fillTransformProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimate
                         QStringView{ lst.value(1) }.split(QStringLiteral(","), Qt::SkipEmptyParts);
                 if (transformType == QStringLiteral("scale")) {
                     QSvgAnimatedPropertyTransform::TransformComponent component;
-                    qreal scale0 = QSvgUtils::toDouble(args.value(0).trimmed());
-                    qreal scale1 = QSvgUtils::toDouble(args.value(1).trimmed());
+                    qreal scale0 = QGuiSvg::toDouble(args.value(0).trimmed());
+                    qreal scale1 = QGuiSvg::toDouble(args.value(1).trimmed());
                     component.type = QSvgAnimatedPropertyTransform::TransformComponent::Scale;
                     component.values.append(scale0);
                     component.values.append(scale1);
                     components.append(component);
                 } else if (transformType == QStringLiteral("translate")) {
                     QSvgAnimatedPropertyTransform::TransformComponent component;
-                    QSvgUtils::LengthType type;
-                    qreal translate0 = QSvgUtils::parseLength(args.value(0), &type);
-                    translate0 = QSvgUtils::convertToPixels(translate0, false, type);
-                    qreal translate1 = QSvgUtils::parseLength(args.value(1), &type);
-                    translate1 = QSvgUtils::convertToPixels(translate1, false, type);
+                    QGuiSvg::LengthType type;
+                    qreal translate0 = QGuiSvg::parseLength(args.value(0), &type);
+                    translate0 = QGuiSvg::convertToPixels(translate0, false, type);
+                    qreal translate1 = QGuiSvg::parseLength(args.value(1), &type);
+                    translate1 = QGuiSvg::convertToPixels(translate1, false, type);
                     component.type = QSvgAnimatedPropertyTransform::TransformComponent::Translate;
                     component.values.append(translate0);
                     component.values.append(translate1);
                     components.append(component);
                 } else if (transformType == QStringLiteral("rotate")) {
                     QSvgAnimatedPropertyTransform::TransformComponent component;
-                    qreal rotationAngle = QSvgUtils::parseAngle(args.value(0)).value_or(0);
+                    qreal rotationAngle = QGuiSvg::parseAngle(args.value(0)).value_or(0);
                     component.type = QSvgAnimatedPropertyTransform::TransformComponent::Rotate;
                     component.values.append(rotationAngle);
                     component.values.append(0);
@@ -182,23 +182,23 @@ bool fillTransformProperty(const QList<CssKeyFrameValue> &keyFrames, QSvgAnimate
                     components.append(component);
                 } else if (transformType == QStringLiteral("skew")) {
                     QSvgAnimatedPropertyTransform::TransformComponent component;
-                    qreal skew0 = QSvgUtils::parseAngle(args.value(0)).value_or(0);
-                    qreal skew1 = QSvgUtils::parseAngle(args.value(1)).value_or(0);
+                    qreal skew0 = QGuiSvg::parseAngle(args.value(0)).value_or(0);
+                    qreal skew1 = QGuiSvg::parseAngle(args.value(1)).value_or(0);
                     component.type = QSvgAnimatedPropertyTransform::TransformComponent::Skew;
                     component.values.append(skew0);
                     component.values.append(skew1);
                     components.append(component);
                 } else if (transformType == QStringLiteral("matrix")) {
                     QSvgAnimatedPropertyTransform::TransformComponent component1, component2, component3;
-                    QSvgUtils::LengthType type;
-                    qreal translate0 = QSvgUtils::parseLength(args.value(4), &type);
-                    translate0 = QSvgUtils::convertToPixels(translate0, false, type);
-                    qreal translate1 = QSvgUtils::parseLength(args.value(5), &type);
-                    translate1 = QSvgUtils::convertToPixels(translate1, false, type);
-                    qreal scale0 = QSvgUtils::toDouble(args.value(0).trimmed());
-                    qreal scale1 = QSvgUtils::toDouble(args.value(3).trimmed());
-                    qreal skew0 = QSvgUtils::toDouble((args.value(1).trimmed()));
-                    qreal skew1 = QSvgUtils::toDouble((args.value(2).trimmed()));
+                    QGuiSvg::LengthType type;
+                    qreal translate0 = QGuiSvg::parseLength(args.value(4), &type);
+                    translate0 = QGuiSvg::convertToPixels(translate0, false, type);
+                    qreal translate1 = QGuiSvg::parseLength(args.value(5), &type);
+                    translate1 = QGuiSvg::convertToPixels(translate1, false, type);
+                    qreal scale0 = QGuiSvg::toDouble(args.value(0).trimmed());
+                    qreal scale1 = QGuiSvg::toDouble(args.value(3).trimmed());
+                    qreal skew0 = QGuiSvg::toDouble((args.value(1).trimmed()));
+                    qreal skew1 = QGuiSvg::toDouble((args.value(2).trimmed()));
                     component1.type = QSvgAnimatedPropertyTransform::TransformComponent::Translate;
                     component1.values.append(translate0);
                     component1.values.append(translate1);
