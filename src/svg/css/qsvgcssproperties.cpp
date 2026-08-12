@@ -3,8 +3,7 @@
 // Qt-Security score:critical reason:data-parser
 
 #include "qsvgcssproperties_p.h"
-#include <QtSvg/private/qsvgutils_p.h>
-
+#include <QtGui/private/qguisvg_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -185,31 +184,31 @@ QSvgOffsetProperty QSvgCssProperties::offset() const
 {
     QSvgOffsetProperty offset;
 
-    offset.path = QSvgUtils::parsePathDataFast(m_offsetPath);
+    offset.path = QGuiSvg::parsePath(m_offsetPath);
 
     qsizetype index;
     Qt::CaseSensitivity cs = Qt::CaseInsensitive;
     if ((index = m_offsetRotate.indexOf("auto"_L1, 0, cs)) >= 0) {
-        std::optional<qreal> angle = QSvgUtils::parseAngle(m_offsetRotate.sliced(index + 4));
+        std::optional<qreal> angle = QGuiSvg::parseAngle(m_offsetRotate.sliced(index + 4));
         offset.rotateType = angle ? QtSvg::OffsetRotateType::AutoAngle :
                                 QtSvg::OffsetRotateType::Auto;
         offset.angle = angle.value_or(0);
     } else if ((index = m_offsetRotate.indexOf("reverse"_L1, 0, cs)) >= 0) {
-        std::optional<qreal> angle = QSvgUtils::parseAngle(m_offsetRotate.sliced(index + 7));
+        std::optional<qreal> angle = QGuiSvg::parseAngle(m_offsetRotate.sliced(index + 7));
         offset.rotateType = angle ? QtSvg::OffsetRotateType::ReverseAngle :
                                 QtSvg::OffsetRotateType::Reverse;
         offset.angle = angle.value_or(0);
     } else {
-        std::optional<qreal> angle = QSvgUtils::parseAngle(m_offsetRotate);
+        std::optional<qreal> angle = QGuiSvg::parseAngle(m_offsetRotate);
         offset.rotateType = angle ? QtSvg::OffsetRotateType::Angle :
                                 QtSvg::OffsetRotateType::Auto;
         offset.angle = angle.value_or(0);
     }
 
-    QSvgUtils::LengthType type;
+    QGuiSvg::LengthType type;
     bool *ok = nullptr;
-    offset.distance= QSvgUtils::parseLength(m_offsetDistance, &type, ok);
-    if (type == QSvgUtils::LengthType::LT_PERCENT) {
+    offset.distance= QGuiSvg::parseLength(m_offsetDistance, &type, ok);
+    if (type == QGuiSvg::LengthType::LT_PERCENT) {
         offset.distance = offset.distance / 100.0;
     }
 
