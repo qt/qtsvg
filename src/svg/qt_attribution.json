@@ -9,5 +9,6 @@
     "License": "Historical Permission Notice and Disclaimer - sell variant",
     "LicenseId": "HPND-sell-variant",
     "LicenseFile": "XSVG_LICENSE.txt",
+    "Comment": "No relevant PURL or CPE set, because the dependency is a single file",
     "Copyright": "Copyright 2002 USC/Information Sciences Institute"
 }

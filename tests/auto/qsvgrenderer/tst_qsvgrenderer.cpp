@@ -27,6 +27,8 @@ public:
 
 private slots:
     void getSetCheck();
+    void emptyRect_data();
+    void emptyRect();
     void inexistentUrl();
     void emptyUrl();
     void invalidUrl_data();
@@ -62,6 +64,7 @@ private slots:
     void oss_fuzz_24131();
     void oss_fuzz_24738();
     void imageRendering();
+    void imageMalformedDataUrl();
     void illegalAnimateTransform_data();
     void illegalAnimateTransform();
     void tSpanLineBreak();
@@ -101,6 +104,29 @@ void tst_QSvgRenderer::getSetCheck()
     QCOMPARE(0, obj1.framesPerSecond()); // Can't have a negative framerate
     obj1.setFramesPerSecond(INT_MAX);
     QCOMPARE(INT_MAX, obj1.framesPerSecond());
+}
+
+void tst_QSvgRenderer::emptyRect_data()
+{
+    // Testing rects with zero width or height or no given value
+    // Those caused divisions by zero, e.g. QTBUG-49160 and oss-fuzz issue 23588
+    // UBSAN is required to see those divisions by zero
+    QTest::addColumn<QByteArray>("svg");
+    QTest::newRow("nothing") << QByteArray(R"(<svg><rect/></svg>)");
+    QTest::newRow("no width zero height") << QByteArray(R"(<svg><rect height="0"/></svg>)");
+    QTest::newRow("zero width no height") << QByteArray(R"(<svg><rect width="0"/></svg>)");
+    QTest::newRow("no width") << QByteArray(R"(<svg><rect height="1"/></svg>)");
+    QTest::newRow("no height") << QByteArray(R"(<svg><rect width="1"/></svg>)");
+    QTest::newRow("both zero") << QByteArray(R"(<svg><rect width="0" height="0"/></svg>)");
+    QTest::newRow("zero width") << QByteArray(R"(<svg><rect width="0" height="1"/></svg>)");
+    QTest::newRow("zero heigth") << QByteArray(R"(<svg><rect width="1" height="0"/></svg>)");
+}
+
+void tst_QSvgRenderer::emptyRect()
+{
+    QFETCH(QByteArray, svg);
+    QSvgRenderer renderer(svg);
+    QVERIFY(renderer.isValid());
 }
 
 void tst_QSvgRenderer::inexistentUrl()
@@ -1691,6 +1717,16 @@ void tst_QSvgRenderer::imageRendering() {
         p2.end();
         QCOMPARE(img1, img2);
     }
+}
+
+void tst_QSvgRenderer::imageMalformedDataUrl()
+{
+    // The input below triggered an assert in qDecodeDataUrl() which is used when creating svg
+    // nodes. That assert is fixed and tested in qtbase. Still, the input is invalid and should be
+    // treated as such. The test makes sure that QSvgRenderer properly warns about it.
+    QTest::ignoreMessage(QtWarningMsg, R"(Could not create image from "data:charset,")");
+    QVERIFY(QSvgRenderer().load(
+            QByteArray("<svg><image width=\"1\" height=\"1\" xlink:href=\"data:charset,\"/></svg>")));
 }
 
 void tst_QSvgRenderer::illegalAnimateTransform_data()
