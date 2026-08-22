@@ -276,21 +276,26 @@ int QSvgIOHandler::loopCount() const
 
 int QSvgIOHandler::imageCount() const
 {
-    return d->frameCount;
+    if (!d->load(device()))
+        return 0;
+    if (d->r.animated())
+        return d->frameCount;
+    return 1;
 }
 
 int QSvgIOHandler::nextImageDelay() const
 {
-    return d->frameDelay;
+    if (d->load(device()) && d->r.animated())
+        return d->frameDelay;
+    return 0;
 }
 
 int QSvgIOHandler::currentImageNumber() const
 {
-    if (d->r.animated())
-        return d->readDone ? d->currentFrame : -1;
+    if (d->load(device()) && d->r.animated())
+        return d->currentFrame - 1;  // currentFrame is the *next* frame to read
     return 0;
 }
-
 
 bool QSvgIOHandler::canRead(QIODevice *device)
 {

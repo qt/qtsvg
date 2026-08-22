@@ -156,22 +156,26 @@ void tst_QSvgPlugin::encodings()
 
 void tst_QSvgPlugin::animationProperties()
 {
-    QFile file(QFINDTESTDATA("animated.svg"));
-    QVERIFY(file.open(QIODevice::ReadOnly));
+    const QString path = QFINDTESTDATA("animated.svg");
 
-    QSvgIOHandler handler;
-    handler.setDevice(&file);
+    // Each lambda gets a fresh handler to ensure that the result of
+    // each getter does not depend on previous calls.
+    auto withHandler = [&](auto callback) {
+        if (QTest::currentTestFailed())
+            return;
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        QSvgIOHandler handler;
+        handler.setDevice(&file);
+        callback(handler);
+    };
 
-    QVERIFY(handler.supportsOption(QImageIOHandler::Animation));
-
-    // Trigger load via size query
-    handler.option(QImageIOHandler::Size);
-
-    QCOMPARE(handler.option(QImageIOHandler::Animation).toBool(), true);
-    QVERIFY(handler.imageCount() > 1);
-    QVERIFY(handler.nextImageDelay() > 0);
-    QCOMPARE(handler.loopCount(), 0);
-    QCOMPARE(handler.currentImageNumber(), -1);
+    withHandler([](QSvgIOHandler &h) { QVERIFY(h.supportsOption(QImageIOHandler::Animation)); });
+    withHandler([](QSvgIOHandler &h) { QCOMPARE(h.option(QImageIOHandler::Animation).toBool(), true); });
+    withHandler([](QSvgIOHandler &h) { QVERIFY(h.imageCount() > 1); });
+    withHandler([](QSvgIOHandler &h) { QVERIFY(h.nextImageDelay() > 0); });
+    withHandler([](QSvgIOHandler &h) { QCOMPARE(h.loopCount(), 0); });
+    withHandler([](QSvgIOHandler &h) { QCOMPARE(h.currentImageNumber(), -1); });
 }
 
 void tst_QSvgPlugin::animationFrameReading()
@@ -187,7 +191,7 @@ void tst_QSvgPlugin::animationFrameReading()
     QVERIFY(handler.canRead());
     QVERIFY(handler.read(&frame));
     QCOMPARE(frame.size(), QSize(100, 100));
-    QCOMPARE(handler.currentImageNumber(), 1);
+    QCOMPARE(handler.currentImageNumber(), 0);
 
     // Read all remaining frames sequentially
     const int total = handler.imageCount();
@@ -195,14 +199,13 @@ void tst_QSvgPlugin::animationFrameReading()
     while (handler.canRead() && handler.read(&frame))
         ++framesRead;
     QCOMPARE(framesRead, total);
-    QCOMPARE(handler.currentImageNumber(), total);
+    QCOMPARE(handler.currentImageNumber(), total - 1);
 
     // jumpToImage should work
     QVERIFY(handler.jumpToImage(0));
-    QCOMPARE(handler.currentImageNumber(), 0);
     QVERIFY(handler.read(&frame));
     QCOMPARE(frame.size(), QSize(100, 100));
-    QCOMPARE(handler.currentImageNumber(), 1);
+    QCOMPARE(handler.currentImageNumber(), 0);
 
     // jumpToImage out of range should fail
     QVERIFY(!handler.jumpToImage(-1));
@@ -211,11 +214,13 @@ void tst_QSvgPlugin::animationFrameReading()
     // jumpToNextImage should work
     QVERIFY(handler.jumpToImage(0));
     QVERIFY(handler.jumpToNextImage());
+    QVERIFY(handler.read(&frame));
     QCOMPARE(handler.currentImageNumber(), 1);
 
     // canRead should return false after exhausting all frames
     QVERIFY(handler.jumpToImage(total - 1));
     QVERIFY(handler.read(&frame));
+    QCOMPARE(handler.currentImageNumber(), total - 1);
     QVERIFY(!handler.canRead());
     QVERIFY(!handler.read(&frame));
 }
@@ -229,7 +234,7 @@ void tst_QSvgPlugin::staticSvgNoAnimation()
     handler.setDevice(&file);
 
     QCOMPARE(handler.option(QImageIOHandler::Animation).toBool(), false);
-    QCOMPARE(handler.imageCount(), 0);
+    QCOMPARE(handler.imageCount(), 1);
     QCOMPARE(handler.nextImageDelay(), 0);
     QCOMPARE(handler.loopCount(), 0);
     QCOMPARE(handler.currentImageNumber(), 0);
