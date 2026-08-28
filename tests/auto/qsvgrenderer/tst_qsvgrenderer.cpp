@@ -1930,6 +1930,11 @@ void tst_QSvgRenderer::ossFuzzLoad_data()
     // resulted in signed integer overflow, reported when configured with "-sanitize undefined"
     QTest::newRow("extreme-font-weights") // id=510580899
             << R"(<svg><style>*{font-weight:2147483647}<g>*{font-weight:1}<g><symbol>)"_ba;
+    // resulted in failed assert when assigning to int in qCeil()
+    QTest::newRow("excessive-pattern-size") // id=553133837
+            << R"-(<svg><pattern height="2" width="7149" id="c"/><path d="l496795-" stroke="url(#c)"/></svg>)-"_ba;
+    QTest::newRow("excessive-pattern-size-oom") // found by local fuzzing after partially fixing 553133837
+            << R"-(<svg><pattern height="2" width="7149" id="c"/><path d="t3 633333" stroke="url(#c)"/></svg>)-"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzLoad()
