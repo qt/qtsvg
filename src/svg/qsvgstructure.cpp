@@ -24,6 +24,8 @@
 #include <QtCore/qstringview.h>
 #include <QtCore/private/qoffsetstringarray_p.h>
 
+#include <limits>
+
 QT_BEGIN_NAMESPACE
 
 using namespace Qt::StringLiterals;
@@ -940,16 +942,31 @@ QImage QSvgPattern::patternImage(QPainter *p, QSvgExtraStates &states, const QSv
     QRectF patternBoundingBox = m_rect.resolveRelativeLengths(peBoundingBox);
 
     QSize imageSize;
-    imageSize.setWidth(qCeil(patternBoundingBox.width() * t.m11() * m_transform.m11()));
-    imageSize.setHeight(qCeil(patternBoundingBox.height() * t.m22() * m_transform.m22()));
+    auto patternWidth = patternBoundingBox.width() * t.m11() * m_transform.m11();
+    auto patternHeight = patternBoundingBox.height() * t.m22() * m_transform.m22();
+    constexpr auto maxVal = std::numeric_limits<int>::max();
+    if (patternWidth > maxVal) {
+        qCWarning(lcSvgDraw) << "The requested pattern width is too big, clamping to int::max";
+        patternWidth = maxVal;
+    }
+    if (patternHeight > maxVal) {
+        qCWarning(lcSvgDraw) << "The requested pattern height is too big, clamping to int::max";
+        patternHeight = maxVal;
+    }
+    imageSize.setWidth(qCeil(patternWidth));
+    imageSize.setHeight(qCeil(patternHeight));
     if (imageSize.isEmpty())
         return QImage(); // Avoid division by zero in calculateAppliedTransform()
 
     calculateAppliedTransform(t, peBoundingBox, imageSize);
-    if (states.doc()->isCalculatingImplicitViewBox())
-        return QImage(imageSize, QImage::Format_ARGB32); // dummy image to avoid endless recursion
-    else
+    if (states.doc()->isCalculatingImplicitViewBox()) {
+        QImage pattern; // allocate dummy image to avoid endless recursion, only size matters
+        if (!QImageIOHandler::allocateImage(imageSize, QImage::Format_ARGB32, &pattern))
+            qCWarning(lcSvgDraw) << "The requested pattern size is too big, ignoring";
+        return pattern;
+    } else {
         return renderPattern(imageSize, std::make_pair(contentScaleFactorX, contentScaleFactorY), states);
+    }
 }
 
 QSvgNode::Type QSvgPattern::type() const
