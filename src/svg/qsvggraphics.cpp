@@ -433,28 +433,47 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
         bool appendSpace = false;
         QStringList paragraphs;
         QList<QList<QTextLayout::FormatRange> > formatRanges(1);
+        // Parallel to 'paragraphs': the absolute position of a paragraph whose leading
+        // tspan carried x/y, or nullopt for a paragraph that flows from the previous one.
+        QList<std::optional<QPointF>> paragraphPos;
         paragraphs.push_back(QString());
+        paragraphPos.push_back(std::nullopt);
 
         for (int i = 0; i < m_tspans.size(); ++i) {
             if (m_tspans[i] == LINEBREAK) {
-                if (m_type == Textarea) {
-                    if (paragraphs.back().isEmpty()) {
-                        font.setPixelSize(font.pointSizeF());
-                        font.setHintingPreference(QFont::PreferNoHinting);
+                // A line break starts a new paragraph. For a text area, an empty paragraph
+                // must be padded with a space so the blank line is preserved;
+                // plain text (e.g. multi-line tspans) just needs a fresh paragraph.
+                if (m_type == Textarea && paragraphs.back().isEmpty()) {
+                    font.setPixelSize(font.pointSizeF());
+                    font.setHintingPreference(QFont::PreferNoHinting);
 
-                        QTextLayout::FormatRange range;
-                        range.start = 0;
-                        range.length = 1;
-                        range.format.setFont(font);
-                        formatRanges.back().append(range);
+                    QTextLayout::FormatRange range;
+                    range.start = 0;
+                    range.length = 1;
+                    range.format.setFont(font);
+                    formatRanges.back().append(range);
 
-                        paragraphs.back().append(QLatin1Char(' '));;
+                    paragraphs.back().append(QLatin1Char(' '));;
+                }
+                appendSpace = false;
+                paragraphs.push_back(QString());
+                formatRanges.resize(formatRanges.size() + 1);
+                paragraphPos.push_back(std::nullopt);
+            } else {
+                // A tspan carrying an absolute x/y starts a new positioned run: a fresh
+                // paragraph anchored at that user-space coordinate. An unset axis falls
+                // back to the enclosing <text> element's origin.
+                if (m_tspans[i]->isTspan() && m_tspans[i]->hasPosition()) {
+                    if (!paragraphs.back().isEmpty()) {
+                        paragraphs.push_back(QString());
+                        formatRanges.resize(formatRanges.size() + 1);
+                        paragraphPos.push_back(std::nullopt);
                     }
                     appendSpace = false;
-                    paragraphs.push_back(QString());
-                    formatRanges.resize(formatRanges.size() + 1);
+                    paragraphPos.back() = QPointF(m_tspans[i]->hasX() ? m_tspans[i]->x() : m_coord.x(),
+                                                  m_tspans[i]->hasY() ? m_tspans[i]->y() : m_coord.y());
                 }
-            } else {
                 WhitespaceMode mode = m_tspans[i]->whitespaceMode();
                 m_tspans[i]->applyStyle(p, states);
 
@@ -534,9 +553,16 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
                 }
                 tl.endLayout();
 
+                // A paragraph with an explicit position is drawn at that absolute user-space
+                // coordinate; otherwise it flows below the previous one from the text origin.
+                const bool positioned = paragraphPos[i].has_value();
+                const qreal originX = positioned ? paragraphPos[i]->x() : px;
+                const qreal originY = positioned ? paragraphPos[i]->y() : py;
+                qreal localY = 0; // baseline offset within a positioned paragraph
+
                 bool endOfBoundsReached = false;
-                for (int i = 0; i < tl.lineCount(); ++i) {
-                    QTextLine line = tl.lineAt(i);
+                for (int j = 0; j < tl.lineCount(); ++j) {
+                    QTextLine line = tl.lineAt(j);
 
                     qreal x = 0;
                     if (alignment == Qt::AlignHCenter)
@@ -544,12 +570,23 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
                     else if (alignment == Qt::AlignRight)
                         x -= line.naturalTextWidth();
 
+                    if (positioned) {
+                        // The tspan's y is a baseline; QTextLine is placed by its top-left,
+                        // so offset the first line up by its ascent.
+                        if (j == 0)
+                            localY -= line.ascent();
+                        line.setPosition(QPointF(x, localY));
+                        brect |= line.naturalTextRect().translated(originX, originY);
+                        localY += 1.1 * line.height();
+                        continue;
+                    }
+
                     if (initial && m_type == Text)
                         y -= line.ascent();
                     initial = false;
 
                     line.setPosition(QPointF(x, y));
-                    brect |= line.naturalTextRect();
+                    brect |= line.naturalTextRect().translated(originX, originY);
 
                     // Check if the current line fits into the bounding rectangle.
                     if ((m_size.width() != 0 && line.naturalTextWidth() > m_size.width())
@@ -564,13 +601,12 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
                     y += 1.1 * line.height();
                 }
                 if (isPainting)
-                    tl.draw(p, QPointF(px, py), QList<QTextLayout::FormatRange>(), bounds);
+                    tl.draw(p, QPointF(originX, originY), QList<QTextLayout::FormatRange>(), bounds);
 
                 if (endOfBoundsReached)
                     break;
             }
             if (boundingRect) {
-                brect.translate(m_coord);
                 if (bounds.height() > 0)
                     brect.setBottom(qMin(brect.bottom(), bounds.bottom()));
                 *boundingRect = brect;

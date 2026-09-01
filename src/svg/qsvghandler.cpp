@@ -3253,10 +3253,29 @@ static QSvgNode *createTextAreaNode(QSvgNode *parent,
 }
 
 static QSvgNode *createTspanNode(QSvgNode *parent,
-                                    const QXmlStreamAttributes &,
-                                    QSvgHandler *)
+                                    const QXmlStreamAttributes &attributes,
+                                    QSvgHandler *handler)
 {
-    return new QSvgTspan(parent);
+    QSvgTspan *tspan = new QSvgTspan(parent);
+    if (handler->options().testFlag(QtSvg::Tiny12FeaturesOnly))
+        return tspan;
+    // A <tspan> may carry absolute x/y coordinates in the current user coordinate system
+    // (the same space as the enclosing <text> element's x/y). We take them at face value:
+    // the run's first glyph is positioned there. This is how tools such as Inkscape lay
+    // out multi-line text (one <tspan> per line, each with its own y).
+    const QStringView x = attributes.value(QLatin1String("x"));
+    if (!x.isEmpty()) {
+        QGuiSvg::LengthType type;
+        qreal nx = QGuiSvg::parseLength(x, &type);
+        tspan->setX(QGuiSvg::convertToPixels(nx, true, type));
+    }
+    const QStringView y = attributes.value(QLatin1String("y"));
+    if (!y.isEmpty()) {
+        QGuiSvg::LengthType type;
+        qreal ny = QGuiSvg::parseLength(y, &type);
+        tspan->setY(QGuiSvg::convertToPixels(ny, false, type));
+    }
+    return tspan;
 }
 
 static QSvgNode *createUseNode(QSvgNode *parent,

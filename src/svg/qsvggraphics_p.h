@@ -23,6 +23,7 @@
 #include "QtGui/qimage.h"
 #include "QtGui/qtextlayout.h"
 #include "QtCore/qloggingcategory.h"
+#include "QtCore/qnumeric.h"
 
 #include <optional>
 
@@ -253,10 +254,24 @@ public:
     bool isTspan() const {return m_isTspan;}
     void setWhitespaceMode(QSvgText::WhitespaceMode mode) {m_mode = mode;}
     QSvgText::WhitespaceMode whitespaceMode() const {return m_mode;}
+
+    // Absolute x/y coordinates taken at face value from the tspan's attributes, in the
+    // current user coordinate system (same space as the enclosing <text> element's x/y).
+    // Unset axes are NaN and are filled in from the surrounding text flow at layout time.
+    // SVG allows a list of coordinates; only the first (the run's start) is kept.
+    void setX(qreal x) { m_x = x; }
+    void setY(qreal y) { m_y = y; }
+    bool hasX() const { return !qIsNaN(m_x); }
+    bool hasY() const { return !qIsNaN(m_y); }
+    bool hasPosition() const { return hasX() || hasY(); }
+    qreal x() const { return m_x; }
+    qreal y() const { return m_y; }
 private:
     QString m_text;
     QSvgText::WhitespaceMode m_mode;
     bool m_isTspan;
+    qreal m_x = qQNaN();
+    qreal m_y = qQNaN();
 };
 
 class QSvgUse : public QSvgNode

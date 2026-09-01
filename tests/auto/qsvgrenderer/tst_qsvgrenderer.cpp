@@ -81,6 +81,9 @@ private slots:
     void illegalAnimateTransform_data();
     void illegalAnimateTransform();
     void tSpanLineBreak();
+    void tSpanMultiline_data();
+    void tSpanMultiline();
+    void tSpanPosition();
     void animated();
     void notAnimated();
     void notAnimatedOption();
@@ -2142,6 +2145,113 @@ void tst_QSvgRenderer::tSpanLineBreak()
         QPainter p(&img);
         renderer.render(&p); // Don't crash
     }
+}
+
+void tst_QSvgRenderer::tSpanMultiline_data() // QTBUG-149803
+{
+    // A <tspan> takes its absolute x/y at face value, in the same user coordinate system
+    // as the enclosing <text> element. This is how tools such as Inkscape lay out text:
+    // one <tspan> per line, each with its own y. We render two spans and count the number
+    // of distinct vertical bands of ink: spans placed far apart stay on separate lines,
+    // while spans placed a pixel apart overlap onto (effectively) a single line.
+    QTest::addColumn<QByteArray>("svg");
+    QTest::addColumn<int>("expectedBands");
+
+    auto doc = [](const char *x1, const char *y1, const char *x2, const char *y2) {
+        return QByteArray("<svg viewBox=\"0 0 100 100\">"
+                          "<text x=\"10\" y=\"20\" font-size=\"10\" fill=\"black\">"
+                          "<tspan x=\"") + x1 + "\" y=\"" + y1 + "\">one</tspan>"
+               "<tspan x=\"" + x2 + "\" y=\"" + y2 + "\">two</tspan>"
+               "</text></svg>";
+    };
+
+    // A large y delta is a genuine line break: two separate bands.
+    QTest::newRow("line break") << doc("10", "20", "10", "50") << 2;
+    // A one-pixel y delta must not become a line break: the spans overlap into one band.
+    QTest::newRow("overlap") << doc("10", "20", "11", "21") << 1;
+    // Same baseline, different x: two spans side by side on one line.
+    QTest::newRow("same line") << doc("10", "20", "40", "20") << 1;
+}
+
+void tst_QSvgRenderer::tSpanMultiline()
+{
+    QFETCH(QByteArray, svg);
+    QFETCH(int, expectedBands);
+
+    QSvgRenderer renderer;
+    QVERIFY(renderer.load(svg));
+
+    QImage img(100, 100, QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::white);
+    {
+        QPainter p(&img);
+        renderer.render(&p);
+    }
+
+    // Collect the rows that contain any painted (non-white) pixel and count how many
+    // distinct vertical bands they form. Two lines of text separated by a gap yield two bands;
+    // spans on the same (or an overlapping) baseline collapse into one.
+    int bands = 0;
+    bool inBand = false;
+    for (int y = 0; y < img.height(); ++y) {
+        bool rowHasInk = false;
+        for (int x = 0; x < img.width(); ++x) {
+            if (qGray(img.pixel(x, y)) < 128) {
+                rowHasInk = true;
+                break;
+            }
+        }
+        if (rowHasInk && !inBand)
+            ++bands;
+        inBand = rowHasInk;
+    }
+
+    QCOMPARE(bands, expectedBands);
+}
+
+void tst_QSvgRenderer::tSpanPosition() // QTBUG-122294
+{
+    // The <text> element carries no x/y of its own; it is positioned entirely by the
+    // absolute x/y of its child <tspan> (as produced by Inkscape). Before tspan x/y was
+    // honored, the baseline collapsed to (0, 0) and the glyphs landed in the corner.
+    const char *const svg =
+            "<svg width=\"400\" height=\"200\" viewBox=\"0 0 400 200\">"
+            "<text id=\"t\" font-size=\"40\" fill=\"black\">"
+            "<tspan x=\"100\" y=\"150\">FOOBAR</tspan></text></svg>";
+
+    QSvgRenderer renderer;
+    QVERIFY(renderer.load(QByteArray(svg)));
+
+    // boundsOnElement must report the tspan's position, not the origin.
+    const QRectF bounds = renderer.boundsOnElement(QLatin1String("t"));
+    QVERIFY(!bounds.isEmpty());
+    QVERIFY2(qAbs(bounds.left() - 100.0) < 5.0, qPrintable(QString::number(bounds.left())));
+    QVERIFY2(bounds.top() > 90.0 && bounds.bottom() < 170.0,
+             qPrintable(QString("top=%1 bottom=%2").arg(bounds.top()).arg(bounds.bottom())));
+
+    // The image is the same size as the viewBox, so user units map 1:1 to pixels.
+    QImage img(400, 200, QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::white);
+    {
+        QPainter p(&img);
+        renderer.render(&p);
+    }
+
+    int minX = img.width(), minY = img.height(), maxX = -1, maxY = -1;
+    for (int y = 0; y < img.height(); ++y) {
+        for (int x = 0; x < img.width(); ++x) {
+            if (qGray(img.pixel(x, y)) < 128) {
+                minX = qMin(minX, x); maxX = qMax(maxX, x);
+                minY = qMin(minY, y); maxY = qMax(maxY, y);
+            }
+        }
+    }
+    QVERIFY2(maxX >= 0, "nothing was painted");
+    // Glyphs start at x ~= 100 and rest on the baseline at y ~= 150; crucially they are
+    // nowhere near the (0, 0) corner the bug collapsed them to.
+    QVERIFY2(minX >= 95 && minX <= 120, qPrintable(QString("minX=%1").arg(minX)));
+    QVERIFY2(minY > 100, qPrintable(QString("minY=%1").arg(minY)));
+    QVERIFY2(maxY >= 140 && maxY <= 158, qPrintable(QString("maxY=%1").arg(maxY)));
 }
 
 static const char *const animatedSvgContents = R"(<svg>
