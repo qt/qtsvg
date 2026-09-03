@@ -30,4 +30,24 @@
     \title Qt SVG Widgets C++ Classes
     \qtcmakepackage SvgWidgets
     \qtvariable svgwidgets
+    \brief These classes are part of the \l {Qt SVG} module and provide SVG
+    rendering features for applications that use widgets or graphics items.
+
+    \section1 Building with CMake
+
+    Use the \c find_package() and \c target_link_libraries() commands to locate
+    and link the component:
+
+    \badcode
+        find_package(Qt6 REQUIRED COMPONENTS SvgWidgets)
+        target_link_libraries(mytarget PRIVATE Qt6::SvgWidgets)
+    \endcode
+
+    \section1 Building with qmake
+
+    To configure for qmake, add  \c svgwidgets to the \c Qt variable:
+
+    \badcode
+         QT += svgwidgets
+    \endcode
 */
