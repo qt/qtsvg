@@ -563,10 +563,10 @@ static bool constructColor(QStringView colorStr, QStringView opacity,
     return true;
 }
 
-static inline qreal convertToNumber(QStringView str, bool *ok = NULL)
+static inline qreal convertToNumber(QStringView str, bool tiny12FeaturesOnly, bool *ok = NULL)
 {
     QGuiSvg::LengthType type;
-    qreal num = QGuiSvg::parseLength(str.toString(), &type, ok);
+    qreal num = QGuiSvg::parseLength(str.toString(), &type, ok, tiny12FeaturesOnly);
     if (type == QGuiSvg::LengthType::LT_PERCENT) {
         num = num/100.0;
     }
@@ -2097,14 +2097,15 @@ static QSvgPaintServerSharedPtr createLinearGradientNode(const QXmlStreamAttribu
     qreal nx2 = 1.0;
     qreal ny2 = 0.0;
 
+    const bool tiny12FeaturesOnly = handler->options().testFlag(QtSvg::Tiny12FeaturesOnly);
     if (!x1.isEmpty())
-        nx1 =  convertToNumber(x1);
+        nx1 = convertToNumber(x1, tiny12FeaturesOnly);
     if (!y1.isEmpty())
-        ny1 =  convertToNumber(y1);
+        ny1 = convertToNumber(y1, tiny12FeaturesOnly);
     if (!x2.isEmpty())
-        nx2 =  convertToNumber(x2);
+        nx2 = convertToNumber(x2, tiny12FeaturesOnly);
     if (!y2.isEmpty())
-        ny2 =  convertToNumber(y2);
+        ny2 = convertToNumber(y2, tiny12FeaturesOnly);
 
     auto grad = std::make_unique<QLinearGradient>(nx1, ny1, nx2, ny2);
     grad->setInterpolationMode(QGradient::ComponentInterpolation);
@@ -2874,23 +2875,24 @@ static QSvgPaintServerSharedPtr createRadialGradientNode(const QXmlStreamAttribu
 
     qreal ncx = 0.5;
     qreal ncy = 0.5;
+    const bool tiny12FeaturesOnly = handler->options().testFlag(QtSvg::Tiny12FeaturesOnly);
     if (!cx.isEmpty())
-        ncx = convertToNumber(cx);
+        ncx = convertToNumber(cx, tiny12FeaturesOnly);
     if (!cy.isEmpty())
-        ncy = convertToNumber(cy);
+        ncy = convertToNumber(cy, tiny12FeaturesOnly);
 
     qreal nr = 0.5;
     if (!r.isEmpty())
-        nr = convertToNumber(r);
+        nr = convertToNumber(r, tiny12FeaturesOnly);
     if (nr <= 0.0)
         return nullptr;
 
     qreal nfx = ncx;
     if (!fx.isEmpty())
-        nfx = convertToNumber(fx);
+        nfx = convertToNumber(fx, tiny12FeaturesOnly);
     qreal nfy = ncy;
     if (!fy.isEmpty())
-        nfy = convertToNumber(fy);
+        nfy = convertToNumber(fy, tiny12FeaturesOnly);
 
     auto grad = std::make_unique<QRadialGradient>(ncx, ncy, nr, nfx, nfy, 0);
     grad->setInterpolationMode(QGradient::ComponentInterpolation);
@@ -3024,7 +3026,8 @@ static bool parseStopNode(QSvgPaintServer *paintServer,
     QColor color;
 
     bool ok = true;
-    qreal offset = convertToNumber(attrs.offset, &ok);
+    qreal offset = convertToNumber(attrs.offset,
+                                   handler->options().testFlag(QtSvg::Tiny12FeaturesOnly), &ok);
     if (!ok)
         offset = 0.0;
 
