@@ -956,7 +956,7 @@ static std::optional<QFont::Style> parseFontStyle(QStringView s)
     return std::nullopt; // incl. empty and tokens::inherit
 }
 
-static std::optional<qreal> parseFontSize(QStringView s)
+static std::optional<qreal> parseFontSize(QStringView s, bool tiny12FeaturesOnly)
 {
     // https://www.w3.org/TR/2018/REC-css-fonts-3-20180920/#font-size-prop
     //   Value:           <absolute-size> | <relative-size> | <length-percentage>
@@ -975,7 +975,7 @@ static std::optional<qreal> parseFontSize(QStringView s)
     case FontSizeValue: {
         QGuiSvg::LengthType type;
         bool ok = false;
-        qreal fs = QGuiSvg::parseLength(s, &type, &ok);
+        qreal fs = QGuiSvg::parseLength(s, &type, &ok, tiny12FeaturesOnly);
         if (!ok)
             return std::nullopt;
         fs = QGuiSvg::convertToPixels(fs, true, type);
@@ -1073,9 +1073,10 @@ static std::optional<Qt::Alignment> parseTextAnchor(QStringView s)
 
 static void parseFont(QSvgNode *node,
                       const QSvgAttributes &attributes,
-                      QSvgHandler *)
+                      QSvgHandler *handler)
 {
-    auto parsedFontSize = parseFontSize(attributes.fontSize);
+    auto parsedFontSize = parseFontSize(attributes.fontSize,
+                                        handler->options().testFlag(QtSvg::Tiny12FeaturesOnly));
     auto parsedFontStyle = parseFontStyle(attributes.fontStyle);
     auto parsedFontWeight = parseFontWeight(attributes.fontWeight);
     auto parsedFontVariant = parseFontVariant(attributes);
