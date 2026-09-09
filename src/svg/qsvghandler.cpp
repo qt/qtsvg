@@ -3979,8 +3979,12 @@ bool QSvgHandler::startElement(const QStringView localName,
         }
     } else if (ParseMethod method = findUtilFactory(localName, options())) {
         Q_ASSERT(!m_nodes.isEmpty());
-        if (!method(m_nodes.top(), attributes, this))
+        if (method(m_nodes.top(), attributes, this)) {
+            if (method == parseStyleNode)
+                return true;
+        } else {
             qCWarning(lcSvgHandler, "%s", msgProblemParsing(localName, xml).constData());
+        }
     } else if (FontFactoryMethod method = findFontFactoryMethod(localName)) {
         QSvgFontPtr font = method(attributes, this);
         if (font) {
