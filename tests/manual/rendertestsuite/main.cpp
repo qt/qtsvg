@@ -9,13 +9,16 @@
 static QImage render(const QString &filePath)
 {
     fprintf(stdout, "Rendering %s\n", qPrintable(filePath));
-    QSvgRenderer renderer(filePath);
-    if (!renderer.isValid()) {
-        fprintf(stderr, "Could not load SVG file %s\n", qPrintable(filePath));
-        return QImage();
-    }
     QImage image(480, 360, QImage::Format_ARGB32);
     image.fill(Qt::transparent);
+    QSvgRenderer renderer(filePath);
+    // Some test suite files are meant to fail to load (struct-use-recursion-01-t.svg,
+    // for instance, is a deliberate cycle). Leave those blank and carry on, the way the
+    // baseline test does, rather than abandoning the rest of the run.
+    if (!renderer.isValid()) {
+        fprintf(stderr, "Could not load SVG file %s; rendering it blank\n", qPrintable(filePath));
+        return image;
+    }
     {
         QPainter p(&image);
         renderer.render(&p);
@@ -73,8 +76,9 @@ int main(int argc, char **argv)
             const QString referencePath = referenceFilePath(sourceFileIterator.fileInfo());
             QImage reference;
             if (!reference.load(referencePath)) {
-                fprintf(stderr, "Could not load reference file %s\n", qPrintable(referencePath));
-                return EXIT_FAILURE;
+                // A baseline from an older or partial run may not cover every file.
+                fprintf(stderr, "Could not load reference file %s; skipping\n", qPrintable(referencePath));
+                continue;
             }
 
             if (actual == reference)
