@@ -251,6 +251,10 @@ public:
     void revert(QPainter *p, QSvgExtraStates &states) override;
     Type type() const override;
 
+    // Round the parsed SVG font-size (a qreal in user units) to the nearest whole
+    // pixel, clamped to at least 1, ready for QFont::setPixelSize(); see setSize().
+    static int pixelSize(qreal size);
+
     void setSize(qreal size)
     {
         // Store the _pixel_ size in the font. Since QFont::setPixelSize() only takes an int, call

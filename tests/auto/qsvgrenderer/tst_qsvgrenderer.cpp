@@ -15,6 +15,7 @@
 #include <QPainter>
 #include <QPen>
 #include <QPicture>
+#include <QRegularExpression>
 #include <QRgb>
 #include <QRectF>
 #include <QTimer>
@@ -69,6 +70,9 @@ private slots:
     void testStopOffsetOpacity();
     void testUseElement();
     void smallFont();
+    void fractionalFontSize_data();
+    void fractionalFontSize();
+    void textAreaBlankLineHeight();
     void glyphWarnings_data();
     void glyphWarnings();
     void styleSheet();
@@ -1770,9 +1774,11 @@ void tst_QSvgRenderer::smallFont()
 
     for (int i = 0; i < COUNT; ++i) {
         QByteArray data(svgs[i]);
+        // font-size="0" is still rejected by QFont itself when the parsed size is stored.
+        // font-size="0.5" no longer warns: the size is rounded and clamped to one pixel
+        // on the way into QFont::setPixelSize(), rather than truncated to zero and dropped.
         if (i == 0)
             QTest::ignoreMessage(QtWarningMsg, "QFont::setPointSizeF: Point size <= 0 (0.000000), must be greater than 0");
-        QTest::ignoreMessage(QtWarningMsg, "QFont::setPixelSize: Pixel size <= 0 (0)");
         QSvgRenderer renderer(data);
         images[i] = QImage(50, 50, QImage::Format_ARGB32_Premultiplied);
         images[i].fill(-1);
@@ -1781,6 +1787,106 @@ void tst_QSvgRenderer::smallFont()
         p.end();
     }
     QVERIFY(images[0] != images[1]);
+}
+
+static QImage renderSvg(const QByteArray &svg, QSize size)
+{
+    QSvgRenderer renderer;
+    if (!renderer.load(svg))
+        return QImage();
+    QImage img(size, QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::white);
+    QPainter p(&img);
+    renderer.render(&p);
+    return img;
+}
+
+static bool hasInk(const QImage &img)
+{
+    for (int y = 0; y < img.height(); ++y) {
+        for (int x = 0; x < img.width(); ++x) {
+            if (qGray(img.pixel(x, y)) < 128)
+                return true;
+        }
+    }
+    return false;
+}
+
+void tst_QSvgRenderer::fractionalFontSize_data()
+{
+    QTest::addColumn<QByteArray>("svg");
+    QTest::addColumn<QByteArray>("reference");
+    QTest::addColumn<bool>("identical");
+
+    auto doc = [](const char *size) {
+        return QByteArray("<svg viewBox=\"0 0 200 100\"><text x=\"10\" y=\"60\" font-size=\"")
+                + size + "\" fill=\"black\">Hello</text></svg>";
+    };
+
+    // A fractional font-size is rounded to the nearest whole pixel, not truncated
+    // towards zero, so a size just below a whole pixel renders like that whole pixel...
+    QTest::newRow("round up") << doc("10.9") << doc("11") << true;
+    // ...and one just above renders like the pixel below it.
+    QTest::newRow("round down") << doc("10.1") << doc("10") << true;
+    // Which means the two must not collapse onto the same rendering, as they did while
+    // the size was truncated: both used to come out at 10px.
+    QTest::newRow("distinct") << doc("10.9") << doc("10.1") << false;
+}
+
+void tst_QSvgRenderer::fractionalFontSize()
+{
+    QFETCH(QByteArray, svg);
+    QFETCH(QByteArray, reference);
+    QFETCH(bool, identical);
+
+    const QImage rendered = renderSvg(svg, QSize(200, 100));
+    const QImage expected = renderSvg(reference, QSize(200, 100));
+    QVERIFY(!rendered.isNull());
+    QVERIFY(!expected.isNull());
+    QCOMPARE(rendered == expected, identical);
+}
+
+void tst_QSvgRenderer::textAreaBlankLineHeight()
+{
+    // A blank line in a <textArea>, i.e. two consecutive <tbreak/>s, is padded with a
+    // space whose font decides the line's height. That font is carried across loop
+    // iterations in QSvgText::draw_helper() and by this point already holds a _pixel_
+    // size, so QFont::pointSizeF() reports -1 rather than the SVG font size. Deriving
+    // the size from pointSizeF() again would collapse the blank line to the 1px minimum.
+    QTest::failOnWarning(QRegularExpression(QStringLiteral("QFont::setPixelSize")));
+
+    const int fontSize = 16;
+    const QByteArray svg =
+            "<svg viewBox=\"0 0 200 200\">"
+            "<textArea x=\"10\" y=\"10\" width=\"180\" height=\"180\" font-size=\"16\" fill=\"black\">"
+            "one<tbreak/><tbreak/>two"
+            "</textArea></svg>";
+
+    const QImage img = renderSvg(svg, QSize(200, 200));
+    QVERIFY(!img.isNull());
+
+    // Find the vertical bands of ink: one per rendered line of text.
+    QList<std::pair<int, int>> bands;
+    for (int y = 0; y < img.height(); ++y) {
+        bool rowHasInk = false;
+        for (int x = 0; x < img.width(); ++x) {
+            if (qGray(img.pixel(x, y)) < 128) {
+                rowHasInk = true;
+                break;
+            }
+        }
+        if (rowHasInk) {
+            if (bands.isEmpty() || bands.last().second != y - 1)
+                bands.append(std::make_pair(y, y));
+            else
+                bands.last().second = y;
+        }
+    }
+
+    QCOMPARE(bands.size(), 2);
+    // The blank line between them must be a full line tall, not collapsed to a pixel.
+    const int gap = bands.at(1).first - bands.at(0).second;
+    QVERIFY2(gap >= fontSize, qPrintable(QString("blank line is only %1px tall").arg(gap)));
 }
 
 void tst_QSvgRenderer::glyphWarnings_data()

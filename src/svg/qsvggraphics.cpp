@@ -29,6 +29,23 @@ Q_LOGGING_CATEGORY(lcSvgDraw, "qt.svg.draw")
 #define QT_SVG_MAX_LAYOUT_SIZE (qint64(QFIXED_MAX / 2))
 #endif
 
+/*
+    Convert a font whose size is still the parsed qreal, held in pointSizeF() because
+    QFont has no setPixelSizeF() (see QSvgFontStyle::setSize() and ::pixelSize()).
+
+    QFont::setPixelSize() clears the point size, so a font that has already been through
+    this conversion reports pointSizeF() == -1. Leave those alone: the pixel size they
+    carry is the right one, and re-converting would clamp it to the 1px minimum. This
+    happens in QSvgText::draw_helper(), where one QFont is carried across loop
+    iterations and a <tbreak/> can be reached after a tspan has already set a pixel size.
+*/
+static void applySvgFontPixelSize(QFont &font)
+{
+    const qreal size = font.pointSizeF();
+    if (size > 0)
+        font.setPixelSize(QSvgFontStyle::pixelSize(size));
+}
+
 QSvgDummyNode::~QSvgDummyNode()
     = default;
 
@@ -387,7 +404,7 @@ bool QSvgText::shouldDrawNode(QPainter *p, QSvgExtraStates &) const
     }
 
     QFont font = p->font();
-    font.setPixelSize(maxFontSize);
+    font.setPixelSize(QSvgFontStyle::pixelSize(maxFontSize));
     QFontMetricsF fm(font);
     if (m_tspans.size() * fm.height() >= QT_SVG_MAX_LAYOUT_SIZE) {
         qCWarning(lcSvgDraw) << "Text element too high to lay out, ignoring";
@@ -445,7 +462,7 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
                 // must be padded with a space so the blank line is preserved;
                 // plain text (e.g. multi-line tspans) just needs a fresh paragraph.
                 if (m_type == Textarea && paragraphs.back().isEmpty()) {
-                    font.setPixelSize(font.pointSizeF());
+                    applySvgFontPixelSize(font);
                     font.setHintingPreference(QFont::PreferNoHinting);
 
                     QTextLayout::FormatRange range;
@@ -478,7 +495,7 @@ void QSvgText::draw_helper(QPainter *p, QSvgExtraStates &states, QRectF *boundin
                 m_tspans[i]->applyStyle(p, states);
 
                 font = p->font();
-                font.setPixelSize(font.pointSizeF());
+                applySvgFontPixelSize(font);
                 font.setHintingPreference(QFont::PreferNoHinting);
 
                 QString newText(m_tspans[i]->text());

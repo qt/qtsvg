@@ -12,6 +12,8 @@
 #include "qpainter.h"
 #include "qcolor.h"
 
+#include <limits>
+
 QT_BEGIN_NAMESPACE
 
 QSvgExtraStates::QSvgExtraStates()
@@ -171,6 +173,22 @@ QSvgFontStyle::QSvgFontStyle()
 
 QSvgFontStyle::~QSvgFontStyle()
     = default;
+
+/*
+    The SVG font size is a qreal in user units, but it travels in QFont::pointSizeF()
+    as a _pixel_ size because QFont has no setPixelSizeF() (see setSize()). Converting
+    it back has to go through the int-only QFont::setPixelSize(), so round rather than
+    truncate: truncation biases every fractional size downwards, and the relative
+    error grows without bound as the size shrinks.
+
+    Clamp to 1 as well. QFont::setPixelSize() rejects a non-positive size with a
+    warning and leaves the font untouched, so rounding a sub-half-pixel size down to 0
+    would silently render the text at the inherited size instead of a small one.
+*/
+int QSvgFontStyle::pixelSize(qreal size)
+{
+    return qRound(qBound(qreal(1), size, qreal(std::numeric_limits<int>::max())));
+}
 
 void QSvgFontStyle::apply(QPainter *p, const QSvgNode *, QSvgExtraStates &states)
 {
