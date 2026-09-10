@@ -3765,7 +3765,8 @@ void QSvgHandler::parse()
             // namespaceUri is empty. The only possible strategy at
             // this point is to do what everyone else seems to do and
             // ignore the reported namespaceUri completely.
-            if (remainingUnfinishedElements && startElement(xml->name(), xml->attributes())) {
+            if (remainingUnfinishedElements && startElement(xml->name().toString(),
+                                                            xml->attributes())) {
                 --remainingUnfinishedElements;
             } else {
                 m_doc.reset();
@@ -3796,8 +3797,7 @@ void QSvgHandler::parse()
         m_doc.reset();
 }
 
-bool QSvgHandler::startElement(const QStringView localName,
-                               const QXmlStreamAttributes &attributes)
+bool QSvgHandler::startElement(const QString localName, const QXmlStreamAttributes &attributes)
 {
     QSvgNode *node = nullptr;
 
