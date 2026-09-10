@@ -110,10 +110,6 @@ public:
     void revertAnimatedStyle(QPainter *p, QSvgExtraStates &states) const;
     QSvgStyleProperty *styleProperty(QSvgStyleProperty::Type type) const;
 
-    // This is slow. Avoid use by all means.
-    // TODO: Remove when qtdeclarative stopped using it.
-    QSvgDocument *document() const;
-
     virtual Type type() const = 0;
     QLatin1StringView typeName() const;
     virtual QRectF internalFastBounds(QPainter *p, QSvgExtraStates &states) const;
