@@ -305,18 +305,6 @@ QRectF QSvgNode::bounds(const QSvgDocument *doc) const
     return m_cachedBounds;
 }
 
-QSvgDocument * QSvgNode::document() const
-{
-    QSvgDocument *doc = nullptr;
-    QSvgNode *node = const_cast<QSvgNode*>(this);
-    while (node && node->type() != QSvgNode::Doc) {
-        node = node->parent();
-    }
-    doc = static_cast<QSvgDocument*>(node);
-
-    return doc;
-}
-
 QLatin1StringView QSvgNode::typeName() const
 {
     switch (type()) {
