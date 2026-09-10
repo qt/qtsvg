@@ -96,7 +96,7 @@ public:
     bool trustedSourceMode() const;
 
 public:
-    bool startElement(const QStringView localName, const QXmlStreamAttributes &attributes);
+    bool startElement(const QString localName, const QXmlStreamAttributes &attributes);
     bool endElement(const QStringView localName);
     bool characters(const QStringView str);
     bool processingInstruction(const QStringView target, const QStringView data);
