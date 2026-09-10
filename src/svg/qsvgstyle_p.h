@@ -39,8 +39,6 @@ class QSvgDocument;
 
 struct Q_SVG_EXPORT QSvgExtraStates
 {
-    QSvgExtraStates();  // TODO: When qtdeclarative stopped using this, make it
-                        // private to make sure m_doc is initialized to non-null
     explicit QSvgExtraStates(const QSvgDocument *doc);
     const QSvgDocument *doc() const { return m_doc; }
 
@@ -60,6 +58,7 @@ struct Q_SVG_EXPORT QSvgExtraStates
     bool inUse = false; // true if currently in QSvgUseNode
 
 private:
+    QSvgExtraStates(); // private to make sure m_doc is initialized to non-null
     const QSvgDocument *m_doc = nullptr;
 };
 
