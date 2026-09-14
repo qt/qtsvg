@@ -2152,6 +2152,7 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
                           const QXmlStreamAttributes &attributes,
                           QSvgHandler *handler)
 {
+    constexpr bool tiny12FeaturesOnly = false;
     const QStringView x      = attributes.value(QLatin1String("x"));
     const QStringView y      = attributes.value(QLatin1String("y"));
     const QStringView width  = attributes.value(QLatin1String("width"));
@@ -2172,7 +2173,7 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
     QtSvg::UnitTypes nmUy = nmU;
     QtSvg::UnitTypes nmUw = nmU;
     QtSvg::UnitTypes nmUh = nmU;
-    qreal nx = QGuiSvg::parseLength(x, &type, &ok);
+    qreal nx = QGuiSvg::parseLength(x, &type, &ok, tiny12FeaturesOnly);
     nx = QGuiSvg::convertToPixels(nx, true, type);
     if (x.isEmpty() || !ok) {
         nx = -0.1;
@@ -2183,7 +2184,7 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
         nx = nx / 100.;
     }
 
-    qreal ny = QGuiSvg::parseLength(y, &type, &ok);
+    qreal ny = QGuiSvg::parseLength(y, &type, &ok, tiny12FeaturesOnly);
     ny = QGuiSvg::convertToPixels(ny, true, type);
     if (y.isEmpty() || !ok) {
         ny = -0.1;
@@ -2194,7 +2195,7 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
         ny = ny / 100.;
     }
 
-    qreal nwidth = QGuiSvg::parseLength(width, &type, &ok);
+    qreal nwidth = QGuiSvg::parseLength(width, &type, &ok, tiny12FeaturesOnly);
     nwidth = QGuiSvg::convertToPixels(nwidth, true, type);
     if (width.isEmpty() || !ok) {
         nwidth = 1.2;
@@ -2205,7 +2206,7 @@ static QSvgNode *createMaskNode(QSvgNode *parent,
         nwidth = nwidth / 100.;
     }
 
-    qreal nheight = QGuiSvg::parseLength(height, &type, &ok);
+    qreal nheight = QGuiSvg::parseLength(height, &type, &ok, tiny12FeaturesOnly);
     nheight = QGuiSvg::convertToPixels(nheight, true, type);
     if (height.isEmpty() || !ok) {
         nheight = 1.2;
