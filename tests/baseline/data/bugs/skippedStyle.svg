@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <defs><style/></defs>
+  <!-- Should show black triangle -->
+  <path d="M100 10 L10 190 H190 z" />
+</svg>
