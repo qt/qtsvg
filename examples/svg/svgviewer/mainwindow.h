@@ -23,6 +23,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow();
+    ~MainWindow();
 
     bool loadFile(const QString &path);
 
