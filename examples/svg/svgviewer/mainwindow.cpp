@@ -85,6 +85,11 @@ MainWindow::MainWindow()
     connect(&m_watcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::fileModified);
 }
 
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
 void MainWindow::openFile()
 {
     QFileDialog fileDialog(this);
