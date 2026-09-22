@@ -19,6 +19,7 @@
 #include <QRectF>
 #include <QTimer>
 #include <QXmlStreamReader>
+#include <QImageReader>
 
 using namespace Qt::Literals::StringLiterals;
 
@@ -97,6 +98,8 @@ private slots:
     void testFeMerge();
     void testFeComposite();
     void testFeGaussian();
+    void testFeGaussianBigDimensions_data();
+    void testFeGaussianBigDimensions();
     void testFeBlend();
 
     void testOption_data();
@@ -2479,6 +2482,50 @@ void tst_QSvgRenderer::testFeGaussian()
     QCOMPARE_GE(qGray(image.pixel(QPoint(10, 25))), 100);
     QCOMPARE_LE(qGray(image.pixel(QPoint(25, 25))), 10);
 
+}
+
+void tst_QSvgRenderer::testFeGaussianBigDimensions_data()
+{
+    QTest::addColumn<int>("allocationLimit");
+
+    QTest::newRow("1MB") << 1;
+    QTest::newRow("2MB") << 2;
+    QTest::newRow("4MB") << 4;
+    QTest::newRow("8MB") << 8;
+}
+
+void tst_QSvgRenderer::testFeGaussianBigDimensions()
+{
+    QFETCH(const int, allocationLimit);
+
+    // At 512 by 512, the buffer's size is 8MiB, because the buffer uses
+    // 32 bytes per pixel for intermediate calculations.
+    // The test is expected to log a warning when the allocation limit is below 8MB.
+    QByteArray svgDoc(R"-(<svg width="50" height="50">
+                         <defs>
+                         <filter id="f" filterUnits="userSpaceOnUse" x="0" y="0"
+                          width="512" height="512">
+                         <feGaussianBlur stdDeviation="1"/>
+                         </filter>
+                         </defs>
+                         <rect x="10" y="10" width="10" height="10" fill="blue" filter="url(#f)"/>
+                         </svg>)-");
+
+    QImageReader::setAllocationLimit(allocationLimit);
+    if (allocationLimit < 8) { // adjust limit when filter's actual memory consumption changes
+        QTest::ignoreMessage(QtWarningMsg,
+                             "\"The requested filter buffer is too big, ignoring\"");
+    }
+
+    QSvgRenderer renderer(svgDoc);
+    QVERIFY(renderer.isValid());
+    QImage image(50, 50, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::white);
+
+    QPainter p;
+    p.begin(&image);
+    renderer.render(&p);
+    p.end();
 }
 
 void tst_QSvgRenderer::testFeBlend()
