@@ -12,11 +12,14 @@
 
 #include <QLoggingCategory>
 #include <QtGui/qimageiohandler.h>
+#include <QtGui/qimagereader.h>
 #include <QVector4D>
 
 #include <memory>
 
 QT_BEGIN_NAMESPACE
+
+using namespace Qt::Literals::StringLiterals;
 
 QSvgFeFilterPrimitive::QSvgFeFilterPrimitive(QSvgNode *parent, const QString &input,
                                              const QString &result, const QSvgRectF &rect)
@@ -342,9 +345,10 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
     if (clipRectGlob.isEmpty())
         return QImage();
 
+    constexpr auto warningMessage = "The requested filter buffer is too big, ignoring"_L1;
     QImage tempSource;
     if (!QImageIOHandler::allocateImage(clipRectGlob.size(), QImage::Format_ARGB32_Premultiplied, &tempSource)) {
-        qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
+        qCWarning(lcSvgDraw) << warningMessage;
         return QImage();
     }
     tempSource.setOffset(clipRectGlob.topLeft());
@@ -355,67 +359,81 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
     copyPainter.drawImage(source.offset(), source);
     copyPainter.end();
 
-    const auto buffer = std::make_unique<ColorValues[]>(tempSource.width() * tempSource.height());
-
-    const int sourceHeight = tempSource.height();
-    const int sourceWidth = tempSource.width();
-    QRgb *rawImage = reinterpret_cast<QRgb *>(tempSource.bits());
-
-    // https://www.w3.org/TR/SVG11/filters.html#feGaussianBlurElement:
-    // Three successive box-blurs build a piece-wise quadratic convolution kernel,
-    // which approximates the Gaussian kernel
-    for (int m = 0; m < 3; m++) {
-        // https://www.w3.org/TR/SVG11/filters.html#feGaussianBlurElement:
-        // if d is odd, use three box-blurs of size 'd', centered on the output pixel.
-        // if d is even, two box-blurs of size 'd' (the first one centered on the pixel boundary
-        // between the output pixel and the one to the left, the second one centered on the pixel
-        // boundary between the output pixel and the one to the right) and one box blur of size
-        // 'd+1' centered on the output pixel.
-        auto adjustD = [](int d, int iteration) {
-            d = qMax(1, d);     // Treat d == 0 just like d == 1
-            std::pair<int, int> result;
-            if (d % 2 == 1)
-                result = {d / 2 + 1, d / 2};
-            else if (iteration == 0)
-                result = {d / 2 + 1, d / 2 - 1};
-            else if (iteration == 1)
-                result = {d / 2, d / 2};
-            else
-                result = {d / 2 + 1, d / 2};
-            Q_ASSERT(result.first + result.second > 0);
-            return result;
-        };
-
-        const auto [dxleft, dxright] = adjustD(dx, m);
-        const auto [dytop, dybottom] = adjustD(dy, m);
-
-        // Generating the partial sum of color values from the top left corner
-        // These sums can be combined to yield the partial sum of any rectangular subregion
-        for (int j = 0; j < sourceHeight; j++) {
-            for (int i = 0; i < sourceWidth; i++) {
-                ColorValues colorValues(rawImage[i + j * sourceWidth]);
-                if (i > 0)
-                    colorValues += buffer[(i - 1) + j * sourceWidth];
-                if (j > 0)
-                    colorValues += buffer[i + (j - 1) * sourceWidth];
-                if (i > 0 && j > 0)
-                    colorValues -= buffer[(i - 1) + (j - 1) * sourceWidth];
-                buffer[i + j * sourceWidth] = colorValues;
-            }
+    const qint64 bufferSize = qint64(tempSource.width()) * tempSource.height();
+    if (const int allocationLimitMb = QImageReader::allocationLimit()) {
+        // Allocation limit in bytes
+        const qint64 allocationLimit = qint64(allocationLimitMb) << 20;
+        // Buffer size in bytes including the size of ColorValues.
+        const qint64 bufferSizeBytes = qint64(bufferSize) * sizeof(ColorValues);
+        if (bufferSizeBytes > allocationLimit) {
+            qCWarning(lcSvgDraw) << warningMessage;
+            return QImage();
         }
+    }
 
-        for (int j = 0; j < sourceHeight; j++) {
-            const int j1 = qMax(0, j - dytop);
-            const int j2 = qMin(sourceHeight - 1, j + dybottom);
-            for (int i = 0; i < sourceWidth; i++) {
-                const int i1 = qMax(0, i - dxleft);
-                const int i2 = qMin(sourceWidth - 1, i + dxright);
-                ColorValues colorValues =   buffer[i2 + j2 * sourceWidth]
-                                          - buffer[i1 + j2 * sourceWidth]
-                                          - buffer[i2 + j1 * sourceWidth]
-                                          + buffer[i1 + j1 * sourceWidth];
-                colorValues /= uint64_t(dxleft + dxright) * uint64_t(dytop + dybottom);
-                rawImage[i + j * sourceWidth] = colorValues.toRgb();
+    { // start a scope to reduce the allocation's lifetime
+        const auto buffer = std::make_unique<ColorValues[]>(bufferSize);
+
+        const int sourceHeight = tempSource.height();
+        const int sourceWidth = tempSource.width();
+        QRgb *rawImage = reinterpret_cast<QRgb *>(tempSource.bits());
+
+        // https://www.w3.org/TR/SVG11/filters.html#feGaussianBlurElement:
+        // Three successive box-blurs build a piece-wise quadratic convolution kernel,
+        // which approximates the Gaussian kernel
+        for (int m = 0; m < 3; m++) {
+            // https://www.w3.org/TR/SVG11/filters.html#feGaussianBlurElement:
+            // if d is odd, use three box-blurs of size 'd', centered on the output pixel.
+            // if d is even, two box-blurs of size 'd' (the first one centered on the pixel boundary
+            // between the output pixel and the one to the left, the second one centered on the
+            // pixel boundary between the output pixel and the one to the right) and one box blur of
+            // size 'd+1' centered on the output pixel.
+            auto adjustD = [](int d, int iteration) {
+                d = qMax(1, d);     // Treat d == 0 just like d == 1
+                std::pair<int, int> result;
+                if (d % 2 == 1)
+                    result = {d / 2 + 1, d / 2};
+                else if (iteration == 0)
+                    result = {d / 2 + 1, d / 2 - 1};
+                else if (iteration == 1)
+                    result = {d / 2, d / 2};
+                else
+                    result = {d / 2 + 1, d / 2};
+                Q_ASSERT(result.first + result.second > 0);
+                return result;
+            };
+
+            const auto [dxleft, dxright] = adjustD(dx, m);
+            const auto [dytop, dybottom] = adjustD(dy, m);
+
+            // Generating the partial sum of color values from the top left corner
+            // These sums can be combined to yield the partial sum of any rectangular subregion
+            for (int j = 0; j < sourceHeight; j++) {
+                for (int i = 0; i < sourceWidth; i++) {
+                    ColorValues colorValues(rawImage[i + j * sourceWidth]);
+                    if (i > 0)
+                        colorValues += buffer[(i - 1) + j * sourceWidth];
+                    if (j > 0)
+                        colorValues += buffer[i + (j - 1) * sourceWidth];
+                    if (i > 0 && j > 0)
+                        colorValues -= buffer[(i - 1) + (j - 1) * sourceWidth];
+                    buffer[i + j * sourceWidth] = colorValues;
+                }
+            }
+
+            for (int j = 0; j < sourceHeight; j++) {
+                const int j1 = qMax(0, j - dytop);
+                const int j2 = qMin(sourceHeight - 1, j + dybottom);
+                for (int i = 0; i < sourceWidth; i++) {
+                    const int i1 = qMax(0, i - dxleft);
+                    const int i2 = qMin(sourceWidth - 1, i + dxright);
+                    ColorValues colorValues =   buffer[i2 + j2 * sourceWidth]
+                                              - buffer[i1 + j2 * sourceWidth]
+                                              - buffer[i2 + j1 * sourceWidth]
+                                              + buffer[i1 + j1 * sourceWidth];
+                    colorValues /= uint64_t(dxleft + dxright) * uint64_t(dytop + dybottom);
+                    rawImage[i + j * sourceWidth] = colorValues.toRgb();
+                }
             }
         }
     }
@@ -424,7 +442,7 @@ QImage QSvgFeGaussianBlur::apply(const QMap<QString, QImage> &sources, QPainter 
 
     QImage result;
     if (!QImageIOHandler::allocateImage(trueClipRectGlob.toRect().size(), QImage::Format_ARGB32_Premultiplied, &result)) {
-        qCWarning(lcSvgDraw) << "The requested filter buffer is too big, ignoring";
+        qCWarning(lcSvgDraw) << warningMessage;
         return QImage();
     }
     result.setOffset(trueClipRectGlob.toRect().topLeft());
