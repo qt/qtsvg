@@ -184,7 +184,12 @@ QSvgOffsetProperty QSvgCssProperties::offset() const
 {
     QSvgOffsetProperty offset;
 
-    offset.path = QGuiSvg::parsePath(m_offsetPath);
+    static const QRegularExpression rx(uR"-(^\s*path\((['"]{1})([\s\+\-,.\w]*)\1{1}\))-"_s);
+    QRegularExpressionMatch m = rx.matchView(m_offsetPath);
+    if (m.hasMatch()) {
+        QStringView offsetPath = m.capturedView(2);
+        offset.path = QGuiSvg::parsePath(offsetPath);
+    }
 
     qsizetype index;
     Qt::CaseSensitivity cs = Qt::CaseInsensitive;
