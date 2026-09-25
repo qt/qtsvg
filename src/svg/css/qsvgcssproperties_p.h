@@ -50,7 +50,7 @@ struct QSvgOffsetProperty
 class QSvgCssProperties
 {
 public:
-    QSvgCssProperties(const QXmlStreamAttributes &attributes);
+    explicit QSvgCssProperties(const QXmlStreamAttributes &attributes);
     QList<QSvgAnimationProperty> animations() const;
     QSvgOffsetProperty offset() const;
 
