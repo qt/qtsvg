@@ -3616,8 +3616,8 @@ static PaintServerParseMethod findPaintServerUtilFactoryMethod(const QStringView
 
 QSvgHandler::QSvgHandler(QIODevice *device, QtSvg::Options options,
                          QtSvg::AnimatorType type)
-    : xml(new QXmlStreamReader(device))
-    , m_ownsReader(true)
+    : m_reader{std::make_unique<QXmlStreamReader>(device)}
+    , xml{m_reader.get()}
     , m_options(options)
     , m_animatorType(type)
 {
@@ -3626,8 +3626,8 @@ QSvgHandler::QSvgHandler(QIODevice *device, QtSvg::Options options,
 
 QSvgHandler::QSvgHandler(const QByteArray &data, QtSvg::Options options,
                          QtSvg::AnimatorType type)
-    : xml(new QXmlStreamReader(data))
-    , m_ownsReader(true)
+    : m_reader{std::make_unique<QXmlStreamReader>(data)}
+    , xml{m_reader.get()}
     , m_options(options)
     , m_animatorType(type)
 {
@@ -3636,8 +3636,8 @@ QSvgHandler::QSvgHandler(const QByteArray &data, QtSvg::Options options,
 
 QSvgHandler::QSvgHandler(QXmlStreamReader *const reader, QtSvg::Options options,
                          QtSvg::AnimatorType type)
-    : xml(reader)
-    , m_ownsReader(false)
+    : m_reader(nullptr) // we don't own it
+    , xml(reader)
     , m_options(options)
     , m_animatorType(type)
 {
@@ -4288,9 +4288,6 @@ int QSvgHandler::animationDuration() const
 }
 
 QSvgHandler::~QSvgHandler()
-{
-    if(m_ownsReader)
-        delete xml;
-}
+    = default;
 
 QT_END_NAMESPACE

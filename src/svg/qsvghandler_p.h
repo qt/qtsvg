@@ -156,7 +156,8 @@ private:
 
     int m_animEnd;
 
-    QXmlStreamReader *const xml;
+    const std::unique_ptr<QXmlStreamReader> m_reader;
+    QXmlStreamReader *const xml; // either m_reader.get() or provided by user though ctor
 #ifndef QT_NO_CSSPARSER
     QSvgCssHandler m_cssHandler;
 #endif
@@ -165,12 +166,6 @@ private:
     void resolveNodes();
 
     QPen m_defaultPen;
-    /**
-     * Whether we own the variable xml, and hence whether
-     * we need to delete it.
-     */
-    const bool m_ownsReader;
-
     const QtSvg::Options m_options;
     const QtSvg::AnimatorType m_animatorType;
 };
