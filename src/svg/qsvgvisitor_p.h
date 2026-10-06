@@ -33,7 +33,6 @@ public:
     QSvgVisitor() = default;
     virtual ~QSvgVisitor();
 
-    virtual void traverse(const QSvgStructureNode *node);
     virtual void traverse(const QSvgNode *node);
 
 protected:
@@ -73,6 +72,11 @@ protected:
     virtual void visitFilterNodeEnd(const QSvgFilterContainer *node) { visitStructureNodeEnd(node); }
     virtual bool visitFeFilterPrimitiveNodeStart(const QSvgFeFilterPrimitive *node) { return visitStructureNodeStart(node); }
     virtual void visitFeFilterPrimitiveNodeEnd(const QSvgFeFilterPrimitive *node) { visitStructureNodeEnd(node); }
+
+private:
+    bool traverseStructureNodeStart(const QSvgStructureNode *node);
+    void traverseStructureNodeEnd(const QSvgStructureNode *node);
+    void traverseLeafNode(const QSvgNode *node);
 };
 
 QT_END_NAMESPACE

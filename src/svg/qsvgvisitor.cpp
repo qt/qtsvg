@@ -4,51 +4,23 @@
 
 
 #include "qsvgvisitor_p.h"
+#include <QStack>
+#include <utility>
 
 QT_BEGIN_NAMESPACE
 
-QSvgVisitor::~QSvgVisitor()
-    = default;
+namespace {
 
-void QSvgVisitor::traverse(const QSvgStructureNode *node)
+bool isStructure(const QSvgNode *node)
 {
     switch (node->type()) {
     case QSvgNode::Switch:
-        if (!visitSwitchNodeStart(static_cast<const QSvgSwitch *>(node)))
-            return;
-        break;
     case QSvgNode::Doc:
-        if (!visitDocumentNodeStart(static_cast<const QSvgDocument *>(node)))
-            return;
-        break;
     case QSvgNode::Defs:
-        if (!visitDefsNodeStart(static_cast<const QSvgDefs *>(node)))
-            return;
-        break;
     case QSvgNode::Group:
-        if (!visitGroupNodeStart(static_cast<const QSvgG *>(node)))
-            return;
-        break;
     case QSvgNode::Mask:
-        if (!visitMaskNodeStart(static_cast<const QSvgMask *>(node)))
-            return;
-        break;
     case QSvgNode::Symbol:
-        if (!visitSymbolNodeStart(static_cast<const QSvgSymbol *>(node)))
-            return;
-        break;
     case QSvgNode::Filter:
-        if (!visitFilterNodeStart(static_cast<const QSvgFilterContainer *>(node)))
-            return;
-        break;
-    case QSvgNode::Marker:
-        if (!visitMarkerNodeStart(static_cast<const QSvgMarker *>(node)))
-            return;
-        break;
-    case QSvgNode::Pattern:
-        if (!visitPatternNodeStart(static_cast<const QSvgPattern *>(node)))
-            return;
-        break;
     case QSvgNode::FeMerge:
     case QSvgNode::FeMergenode:
     case QSvgNode::FeColormatrix:
@@ -57,17 +29,110 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
     case QSvgNode::FeComposite:
     case QSvgNode::FeFlood:
     case QSvgNode::FeBlend:
-        if (!visitFeFilterPrimitiveNodeStart(static_cast<const QSvgFeFilterPrimitive *>(node)))
-            return;
+    case QSvgNode::FeUnsupported:
+    case QSvgNode::Marker:
+    case QSvgNode::Pattern:
+        return true;
+    case QSvgNode::AnimateColor:
+    case QSvgNode::AnimateTransform:
+    case QSvgNode::Circle:
+    case QSvgNode::Ellipse:
+    case QSvgNode::Image:
+    case QSvgNode::Line:
+    case QSvgNode::Path:
+    case QSvgNode::Polygon:
+    case QSvgNode::Polyline:
+    case QSvgNode::Rect:
+    case QSvgNode::Text:
+    case QSvgNode::Textarea:
+    case QSvgNode::Tspan:
+    case QSvgNode::Use:
+    case QSvgNode::Video:
+    case QSvgNode::Font:
+        return false;
+    }
+
+    Q_UNREACHABLE_RETURN(false);
+}
+
+} // namespace
+
+QSvgVisitor::~QSvgVisitor()
+    = default;
+
+void QSvgVisitor::traverse(const QSvgNode *node)
+{
+    // A pair that keeps track of a node and a visited flag.
+    using NodeState = std::pair<const QSvgNode *, bool>;
+    QStack<NodeState> nodes;
+    nodes.push({node, false});
+
+    do {
+        NodeState state = nodes.pop();
+        const QSvgNode *current = state.first;
+        const bool visited = state.second;
+        if (isStructure(current)) {
+            const QSvgStructureNode *structure = static_cast<const QSvgStructureNode *>(current);
+            if (!visited) {
+                if (!traverseStructureNodeStart(structure))
+                    continue;
+                nodes.push({structure, true});
+                for (auto it = structure->renderers().crbegin(); it != structure->renderers().crend(); it++)
+                    nodes.push({it->get(), false});
+            } else {
+                traverseStructureNodeEnd(structure);
+            }
+        } else {
+            traverseLeafNode(current);
+        }
+
+    } while (!nodes.isEmpty());
+}
+
+bool QSvgVisitor::traverseStructureNodeStart(const QSvgStructureNode *node)
+{
+    switch (node->type()) {
+    case QSvgNode::Switch:
+        return visitSwitchNodeStart(static_cast<const QSvgSwitch *>(node));
+    case QSvgNode::Doc:
+        return visitDocumentNodeStart(static_cast<const QSvgDocument *>(node));
+    case QSvgNode::Defs:
+        return visitDefsNodeStart(static_cast<const QSvgDefs *>(node));
+    case QSvgNode::Group:
+        return visitGroupNodeStart(static_cast<const QSvgG *>(node));
+    case QSvgNode::Mask:
+        return visitMaskNodeStart(static_cast<const QSvgMask *>(node));
+    case QSvgNode::Symbol:
+        return visitSymbolNodeStart(static_cast<const QSvgSymbol *>(node));
+    case QSvgNode::Filter:
+        return visitFilterNodeStart(static_cast<const QSvgFilterContainer *>(node));
+    case QSvgNode::Marker:
+        return visitMarkerNodeStart(static_cast<const QSvgMarker *>(node));
+    case QSvgNode::Pattern:
+        return visitPatternNodeStart(static_cast<const QSvgPattern *>(node));
+    case QSvgNode::FeMerge:
+    case QSvgNode::FeMergenode:
+    case QSvgNode::FeColormatrix:
+    case QSvgNode::FeGaussianblur:
+    case QSvgNode::FeOffset:
+    case QSvgNode::FeComposite:
+    case QSvgNode::FeFlood:
+    case QSvgNode::FeBlend:
+        return visitFeFilterPrimitiveNodeStart(static_cast<const QSvgFeFilterPrimitive *>(node));
+    // Enum values that are either not supported or should not be visited:
+    case QSvgNode::FeUnsupported:
+        qDebug() << "Unhandled type in switch" << node->type();
         break;
     default:
         Q_UNREACHABLE();
         break;
     }
 
-    for (auto &child : node->renderers())
-        traverse(child.get());
+    return true;
+}
 
+void QSvgVisitor::traverseStructureNodeEnd(const QSvgStructureNode *node)
+{
     switch (node->type()) {
     case QSvgNode::Switch:
         visitSwitchNodeEnd(static_cast<const QSvgSwitch *>(node));
@@ -106,34 +171,19 @@ void QSvgVisitor::traverse(const QSvgStructureNode *node)
     case QSvgNode::FeBlend:
         visitFeFilterPrimitiveNodeEnd(static_cast<const QSvgFeFilterPrimitive *>(node));
         break;
+    // Enum values that are either not supported or should not be visited:
+    case QSvgNode::FeUnsupported:
+        qDebug() << "Unhandled type in switch" << node->type();
+        break;
     default:
         Q_UNREACHABLE();
         break;
     }
 }
 
-void QSvgVisitor::traverse(const QSvgNode *node)
+void QSvgVisitor::traverseLeafNode(const QSvgNode *node)
 {
     switch (node->type()) {
-    case QSvgNode::Switch:
-    case QSvgNode::Doc:
-    case QSvgNode::Defs:
-    case QSvgNode::Group:
-    case QSvgNode::Mask:
-    case QSvgNode::Symbol:
-    case QSvgNode::Filter:
-    case QSvgNode::FeMerge:
-    case QSvgNode::FeMergenode:
-    case QSvgNode::FeColormatrix:
-    case QSvgNode::FeGaussianblur:
-    case QSvgNode::FeOffset:
-    case QSvgNode::FeComposite:
-    case QSvgNode::FeFlood:
-    case QSvgNode::FeBlend:
-    case QSvgNode::Marker:
-    case QSvgNode::Pattern:
-        traverse(static_cast<const QSvgStructureNode *>(node));
-        break;
     case QSvgNode::AnimateColor:
     case QSvgNode::AnimateTransform:
         visitAnimateNode(static_cast<const QSvgAnimateNode *>(node));
@@ -173,11 +223,12 @@ void QSvgVisitor::traverse(const QSvgNode *node)
     case QSvgNode::Video:
         visitVideoNode(static_cast<const QSvgVideo *>(node));
         break;
-
-        // Enum values that are either not supported or should not be visited:
-    case QSvgNode::FeUnsupported:
+    // Enum values that are either not supported or should not be visited:
     case QSvgNode::Font:
         qDebug() << "Unhandled type in switch" << node->type();
+        break;
+    default:
+        Q_UNREACHABLE();
         break;
     }
 }
