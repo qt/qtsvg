@@ -3627,8 +3627,6 @@ QSvgHandler::QSvgHandler(QXmlStreamReader *const reader, QtSvg::Options options,
 
 void QSvgHandler::init()
 {
-    m_animEnd = 0;
-    m_defaultCoords = QGuiSvg::LT_PX;
     m_defaultPen = QPen(Qt::black, 1, Qt::SolidLine, Qt::FlatCap, Qt::SvgMiterJoin);
     m_defaultPen.setMiterLimit(4);
     parse();

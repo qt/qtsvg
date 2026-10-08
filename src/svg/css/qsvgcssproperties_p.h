@@ -32,19 +32,19 @@ QT_BEGIN_NAMESPACE
 struct QSvgAnimationProperty
 {
     QStringView name;
-    int duration = 0;
-    int delay = 0;
-    int iteration = 1;
-    QSvgCssValues::EasingFunction easingFunction = QSvgCssValues::EasingFunction::Ease;
+    int duration{0};
+    int delay{0};
+    int iteration{1};
+    QSvgCssValues::EasingFunction easingFunction{QSvgCssValues::EasingFunction::Ease};
     QSvgCssValues::EasingValues easingValues;
 };
 
 struct QSvgOffsetProperty
 {
     std::optional<QPainterPath> path;
-    qreal distance = 0;
-    qreal angle = 0;
-    QtSvg::OffsetRotateType rotateType = QtSvg::OffsetRotateType::Auto;
+    qreal distance{0};
+    qreal angle{0};
+    QtSvg::OffsetRotateType rotateType{QtSvg::OffsetRotateType::Auto};
 };
 
 class QSvgCssProperties

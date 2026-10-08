@@ -15,15 +15,7 @@
 QT_BEGIN_NAMESPACE
 
 QSvgExtraStates::QSvgExtraStates()
-    : fillOpacity(1.0),
-      strokeOpacity(1.0),
-      svgFont(0),
-      textAnchor(Qt::AlignLeft),
-      fontWeight(QFont::Normal),
-      fillRule(Qt::WindingFill),
-      strokeDashOffset(0),
-      vectorEffect(false),
-      imageRendering(QSvgQualityStyle::ImageRenderingAuto)
+    : imageRendering(QSvgQualityStyle::ImageRenderingAuto)
 {
 }
 
@@ -449,7 +441,7 @@ QSvgStyleProperty::Type QSvgOffsetStyle::type() const
 }
 
 QSvgOpacityStyle::QSvgOpacityStyle(qreal opacity)
-    : m_opacity(opacity), m_oldOpacity(0)
+    : m_opacity(opacity)
 {
 
 }

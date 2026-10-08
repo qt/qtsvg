@@ -149,12 +149,12 @@ private:
     SvgFontData m_currentSvgFontData;
     QSvgPaintServerSharedPtr m_paintServer;
 
-    QGuiSvg::LengthType m_defaultCoords;
+    QGuiSvg::LengthType m_defaultCoords{QGuiSvg::LT_PX};
 
     QStack<QColor> m_colorStack;
     QStack<int>    m_colorTagCount;
 
-    int m_animEnd;
+    int m_animEnd{0};
 
     const std::unique_ptr<QXmlStreamReader> m_reader;
     QXmlStreamReader *const xml; // either m_reader.get() or provided by user though ctor

@@ -48,7 +48,7 @@ protected:
 
 protected:
     std::list<std::unique_ptr<QSvgNode>>          m_renderers;
-    mutable bool              m_recursing = false;
+    mutable bool              m_recursing{false};
 };
 
 class Q_SVG_EXPORT QSvgG : public QSvgStructureNode

@@ -59,33 +59,25 @@ public:
     explicit QSvgPaintEnginePrivate(QSvgGenerator::SvgVersion version)
         : svgVersion(version)
     {
-        size = QSize();
-        viewBox = QRectF();
-        outputDevice = nullptr;
-        resolution = 72;
-
         attributes.document_title = QLatin1String("Qt SVG Document");
         attributes.document_description = QLatin1String("Generated with Qt");
         attributes.font_families << QLatin1String("serif");
         attributes.font_size = QLatin1String("10pt");
         attributes.font_style = QLatin1String("normal");
         attributes.font_weight = QLatin1String("normal");
-
-        afterFirstUpdate = false;
-        numGradients = 0;
     }
 
     QSvgGenerator::SvgVersion svgVersion;
     QSize size;
     QRectF viewBox;
-    QIODevice *outputDevice;
+    QIODevice *outputDevice{nullptr};
     QTextStream *stream{nullptr};
-    int resolution;
+    int resolution{72};
 
     QString header;
     QString defs;
     QString body;
-    bool    afterFirstUpdate;
+    bool    afterFirstUpdate{false};
 
     QBrush brush;
     QPen pen;
@@ -99,7 +91,7 @@ public:
     }
 
     QString currentGradientName;
-    int numGradients;
+    int numGradients{0};
 
     QStringList savedPatternBrushes;
     QStringList savedPatternMasks;
@@ -123,13 +115,13 @@ public:
     }
 
     std::optional<QPainterPath> clipPath;
-    bool clipEnabled = false;
+    bool clipEnabled{false};
     bool isClippingEffective() const {
         return clipEnabled && clipPath.has_value();
     }
     QString currentClipPathName;
-    int numClipPaths = 0;
-    bool hasEmittedClipGroup = false;
+    int numClipPaths{0};
+    bool hasEmittedClipGroup{false};
 };
 
 static inline QPaintEngine::PaintEngineFeatures svgEngineFeatures()
@@ -552,7 +544,7 @@ public:
 class QSvgGeneratorPrivate
 {
 public:
-    QSvgPaintEngine *engine;
+    QSvgPaintEngine *engine{nullptr};
 
     uint owns_iodevice : 1;
     QString fileName;

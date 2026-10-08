@@ -126,7 +126,7 @@ public:
 
 private:
     QList<TransformComponent> m_components;
-    quint32 m_transformCount = 0;
+    quint32 m_transformCount{0};
 };
 
 QT_END_NAMESPACE

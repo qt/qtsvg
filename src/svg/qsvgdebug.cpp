@@ -35,9 +35,9 @@ private:
     const char *indent() { m_indent.fill(' ', m_indentLevel * 2);  return m_indent.constData();}
     void handleBaseNode(const QSvgNode *node);
     QDebug &debug;
-    int m_indentLevel = 0;
+    int m_indentLevel{0};
     QByteArray m_indent;
-    int nodeCounter = 0;
+    int nodeCounter{0};
 };
 
 void SvgDebugVisitor::handleBaseNode(const QSvgNode *node)

@@ -14,7 +14,7 @@ QT_BEGIN_NAMESPACE
 namespace {
 
 struct CssKeyFrameValue{
-    qreal keyFrame;
+    qreal keyFrame{0.0};
     QList<QCss::Value> values;
     QCss::Declaration timingFunction;
 };

@@ -21,10 +21,7 @@ class QGraphicsSvgItemPrivate : public QGraphicsItemPrivate
 public:
     Q_DECLARE_PUBLIC(QGraphicsSvgItem)
 
-    QGraphicsSvgItemPrivate()
-        : renderer(0), shared(false)
-    {
-    }
+    QGraphicsSvgItemPrivate() = default;
 
     void init(QGraphicsItem *parent)
     {
@@ -56,9 +53,9 @@ public:
         }
     }
 
-    QSvgRenderer *renderer;
+    QSvgRenderer *renderer{nullptr};
     QRectF boundingRect;
-    bool shared;
+    bool shared{false};
     QString elemId;
 };
 

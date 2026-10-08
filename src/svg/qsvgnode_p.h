@@ -206,8 +206,8 @@ private:
     QString m_markerEndId;
 
     mutable QRectF m_cachedBounds;
-    DisplayMode    m_displayMode;
-    bool           m_visible;
+    DisplayMode    m_displayMode{DisplayMode::BlockMode};
+    bool           m_visible{true};
 
     friend class QSvgDocument;
 

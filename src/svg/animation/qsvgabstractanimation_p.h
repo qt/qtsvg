@@ -34,7 +34,7 @@ public:
         SMIL,
     };
 
-    QSvgAbstractAnimation();
+    QSvgAbstractAnimation() = default;
     virtual ~QSvgAbstractAnimation();
 
     virtual AnimationType animationType() const = 0;
@@ -57,10 +57,10 @@ public:
     virtual bool isActive() const;
 
 protected:
-    int m_start;
-    int m_duration;
-    bool m_finished;
-    int m_iterationCount;
+    int m_start{0};
+    int m_duration{0};
+    bool m_finished{false};
+    int m_iterationCount{0};
     QSvgEasingInterfacePtr m_easing;
     QList<QSvgAbstractAnimatedProperty *> m_properties;
 };

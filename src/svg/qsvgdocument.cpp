@@ -24,10 +24,6 @@ using namespace Qt::StringLiterals;
 
 QSvgDocument::QSvgDocument(QtSvg::Options options, QtSvg::AnimatorType type)
     : QSvgStructureNode(0)
-    , m_widthPercent(false)
-    , m_heightPercent(false)
-    , m_animated(false)
-    , m_fps(30)
     , m_states(this)
     , m_options(options)
 {
