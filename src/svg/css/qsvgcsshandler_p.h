@@ -53,7 +53,7 @@ private:
 
 private:
     QHash<QString, QCss::AnimationRule> m_animations;
-    QSvgStyleSelector *m_selector = nullptr;
+    QSvgStyleSelector *m_selector{nullptr};
 };
 
 

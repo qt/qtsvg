@@ -30,7 +30,7 @@ class Q_SVG_EXPORT QSvgAbstractAnimator
 {
     Q_DISABLE_COPY_MOVE(QSvgAbstractAnimator)
 public:
-    QSvgAbstractAnimator();
+    QSvgAbstractAnimator() = default;
     virtual ~QSvgAbstractAnimator();
 
     void appendAnimation(const QSvgNode *node, QSvgAbstractAnimation *anim);
@@ -45,8 +45,8 @@ public:
     qint64 animationDuration() const;
 
 protected:
-    qint64 m_time;
-    qint64 m_animationDuration;
+    qint64 m_time{0};
+    qint64 m_animationDuration{0};
 
 private:
     QList<QSvgAbstractAnimation *> combinedAnimationsForNode(const QSvgNode *node) const;

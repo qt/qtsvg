@@ -7,14 +7,6 @@
 
 QT_BEGIN_NAMESPACE
 
-QSvgAbstractAnimation::QSvgAbstractAnimation()
-    : m_start(0)
-    , m_duration(0)
-    , m_finished(false)
-    , m_iterationCount(0)
-{
-}
-
 QSvgAbstractAnimation::~QSvgAbstractAnimation()
 {
     for (const QSvgAbstractAnimatedProperty *prop : std::as_const(m_properties))

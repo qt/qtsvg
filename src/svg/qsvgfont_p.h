@@ -32,11 +32,11 @@ class Q_SVG_EXPORT QSvgGlyph
 {
 public:
     QSvgGlyph(const QString &unicode, const QPainterPath &path, qreal horizAdvX);
-    QSvgGlyph() : m_horizAdvX(0) {}
+    QSvgGlyph() = default;
 
     QString m_unicode;
     QPainterPath m_path;
-    qreal m_horizAdvX;
+    qreal m_horizAdvX{0};
 };
 
 
@@ -62,7 +62,7 @@ public:
 
 public:
     qreal m_unitsPerEm{1000};
-    qreal m_horizAdvX;
+    qreal m_horizAdvX{0};
 
 private:
     // not about a missing <glyph> element, but the font's <missing-glyph> element:
@@ -75,7 +75,7 @@ private:
 
     // to speed up finding glyphs
     mutable QHash<char32_t, QList<qsizetype>> m_possibleGlyphIndicesForChar;
-    mutable qsizetype m_firstUnscannedGlyphIdx = 0;
+    mutable qsizetype m_firstUnscannedGlyphIdx{0};
 
     void draw_helper(QPainter *p, const QPointF &point,
                      const QList<const QSvgGlyph *> &glyphs, qreal pixelSize,

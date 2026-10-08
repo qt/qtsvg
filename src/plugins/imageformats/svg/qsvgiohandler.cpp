@@ -27,20 +27,20 @@ public:
 
     bool load(QIODevice *device);
 
-    QSvgIOHandler   *q = nullptr;
+    QSvgIOHandler   *q{nullptr};
     QSvgRenderer     r;
     QXmlStreamReader xmlReader;
     QSize            defaultSize;
     QRect            clipRect;
     QSize            scaledSize;
     QRect            scaledClipRect;
-    bool             loadAttempted = false;
-    bool             loadStatus = false;
-    bool             readDone = false;
-    int              currentFrame = 0;
-    int              frameCount = 0;
-    int              frameDelay = 0;
-    QColor           backColor = Qt::transparent;
+    bool             loadAttempted{false};
+    bool             loadStatus{false};
+    bool             readDone{false};
+    int              currentFrame{0};
+    int              frameCount{0};
+    int              frameDelay{0};
+    QColor           backColor{Qt::transparent};
 };
 
 

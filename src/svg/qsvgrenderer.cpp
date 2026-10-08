@@ -72,9 +72,7 @@ class QSvgRendererPrivate : public QObjectPrivate
     Q_DECLARE_PUBLIC(QSvgRenderer)
 public:
     explicit QSvgRendererPrivate()
-        : QObjectPrivate(),
-          timer(0),
-          fps(30)
+        : QObjectPrivate()
     {
         options = defaultOptions();
     }
@@ -109,11 +107,11 @@ public:
     }
 
     std::unique_ptr<QSvgDocument> render;
-    QTimer *timer;
-    int fps;
+    QTimer *timer{nullptr};
+    int fps{30};
     QtSvg::Options options;
     static QtSvg::Options appDefaultOptions;
-    bool animationEnabled = true;
+    bool animationEnabled{true};
 };
 
 QtSvg::Options QSvgRendererPrivate::appDefaultOptions;

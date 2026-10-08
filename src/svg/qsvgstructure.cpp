@@ -293,11 +293,11 @@ void QSvgMarker::drawCommand(QPainter *p, QSvgExtraStates &states)
 namespace {
 
 struct PositionMarkerPair {
-    qreal x;
-    qreal y;
-    qreal angle;
+    qreal x{0.0};
+    qreal y{0.0};
+    qreal angle{0.0};
     QString markerId;
-    bool isStartNode = false;
+    bool isStartNode{false};
 };
 
 QList<PositionMarkerPair> markersForNode(const QSvgNode *node)

@@ -9,12 +9,6 @@
 
 QT_BEGIN_NAMESPACE
 
-QSvgAbstractAnimator::QSvgAbstractAnimator()
-    : m_time(0)
-    , m_animationDuration(0)
-{
-}
-
 QSvgAbstractAnimator::~QSvgAbstractAnimator()
 {
     for (auto animationHash : {&m_animationsCSS, &m_animationsSMIL}) {

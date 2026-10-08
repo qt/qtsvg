@@ -104,20 +104,20 @@ private:
     void mapSourceToTarget(QPainter *p, const QRectF &targetRect, const QRectF &sourceRect = QRectF());
 private:
     QSize  m_size;
-    bool   m_widthPercent;
-    bool   m_heightPercent;
+    bool   m_widthPercent{false};
+    bool   m_heightPercent{false};
 
-    mutable bool m_calculatingImplicitViewBox = false;
-    mutable bool m_implicitViewBox = true;
+    mutable bool m_calculatingImplicitViewBox{false};
+    mutable bool m_implicitViewBox{true};
     mutable QRectF m_viewBox;
-    bool m_preserveAspectRatio = false;
+    bool m_preserveAspectRatio{false};
 
     std::unordered_map<QString, QSvgFontPtr> m_fonts;
     QHash<QString, QSvgNode *> m_namedNodes;
     std::unordered_map<QString, QSvgPaintServerSharedPtr> m_paintServers;
 
-    bool  m_animated;
-    int   m_fps;
+    bool  m_animated{false};
+    int   m_fps{30};
 
     QSvgExtraStates m_states;
 

@@ -57,7 +57,7 @@ public:
     QHash<int, QString> svgFiles;
     QHash<int, QByteArray> svgBuffers;
     QMultiHash<int, QPixmap> addedPixmaps;
-    int serialNum = 0;
+    int serialNum{0};
     static QAtomicInt lastSerialNum;
 };
 

@@ -42,24 +42,24 @@ struct Q_SVG_EXPORT QSvgExtraStates
     explicit QSvgExtraStates(const QSvgDocument *doc);
     const QSvgDocument *doc() const { return m_doc; }
 
-    qreal fillOpacity;
-    qreal strokeOpacity;
-    QSvgFont *svgFont;
-    Qt::Alignment textAnchor;
-    int fontWeight;
-    Qt::FillRule fillRule;
-    qreal strokeDashOffset;
-    int nestedUseLevel = 0;
-    int nestedUseCount = 0;
-    bool trustedSource = false;
-    quint8 remainingNestedNodes = QtSvg::renderingMaxNestedNodes;
-    bool vectorEffect; // true if pen is cosmetic
-    qint8 imageRendering; // QSvgQualityStyle::ImageRendering
-    bool inUse = false; // true if currently in QSvgUseNode
+    qreal fillOpacity{1.0};
+    qreal strokeOpacity{1.0};
+    QSvgFont *svgFont{nullptr};
+    Qt::Alignment textAnchor{Qt::AlignLeft};
+    int fontWeight{QFont::Normal};
+    Qt::FillRule fillRule{Qt::WindingFill};
+    qreal strokeDashOffset{0.0};
+    int nestedUseLevel{0};
+    int nestedUseCount{0};
+    bool trustedSource{false};
+    quint8 remainingNestedNodes{QtSvg::renderingMaxNestedNodes};
+    bool vectorEffect{false}; // true if pen is cosmetic
+    qint8 imageRendering{0}; // QSvgQualityStyle::ImageRendering
+    bool inUse{false}; // true if currently in QSvgUseNode
 
 private:
     QSvgExtraStates(); // private to make sure m_doc is initialized to non-null
-    const QSvgDocument *m_doc = nullptr;
+    const QSvgDocument *m_doc{nullptr};
 };
 
 class Q_SVG_EXPORT QSvgStyleProperty
@@ -148,8 +148,8 @@ public:
     }
 
 private:
-    qreal m_opacity;
-    qreal m_oldOpacity;
+    qreal m_opacity{1.0};
+    qreal m_oldOpacity{0.0};
 };
 
 class Q_SVG_EXPORT QSvgFillStyle : public QSvgStyleProperty
@@ -296,13 +296,13 @@ public:
 private:
     QFont m_qfont;
 
-    int m_weight = 0;
-    Qt::Alignment m_textAnchor;
+    int m_weight{0};
+    Qt::Alignment m_textAnchor{Qt::AlignLeft};
 
-    QSvgFont *m_oldSvgFont = nullptr;
+    QSvgFont *m_oldSvgFont{nullptr};
     QFont m_oldQFont;
-    Qt::Alignment m_oldTextAnchor;
-    int m_oldWeight = 0;
+    Qt::Alignment m_oldTextAnchor{Qt::AlignLeft};
+    int m_oldWeight{0};
 
     uint m_familySet : 1;
     uint m_sizeSet : 1;
@@ -590,14 +590,14 @@ struct QSvgStyleState
 {
     QBrush fill;
     QPen stroke;
-    qreal fillOpacity;
-    qreal strokeOpacity;
-    qreal opacity;
+    qreal fillOpacity{1.0};
+    qreal strokeOpacity{1.0};
+    qreal opacity{1.0};
     QTransform transform;
     std::optional<QPainterPath> offsetPath;
-    qreal offsetDistance;
-    qreal offsetRotate;
-    QtSvg::OffsetRotateType offsetRotateType;
+    qreal offsetDistance{0.0};
+    qreal offsetRotate{0.0};
+    QtSvg::OffsetRotateType offsetRotateType{QtSvg::OffsetRotateType::Auto};
 };
 
 class Q_SVG_EXPORT QSvgAnimatedStyle

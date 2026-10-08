@@ -270,8 +270,8 @@ private:
     QString m_text;
     QSvgText::WhitespaceMode m_mode;
     bool m_isTspan;
-    qreal m_x = qQNaN();
-    qreal m_y = qQNaN();
+    qreal m_x{qQNaN()};
+    qreal m_y{qQNaN()};
 };
 
 class QSvgUse : public QSvgNode

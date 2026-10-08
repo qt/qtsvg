@@ -47,7 +47,7 @@ class QSvgWidgetPrivate : public QWidgetPrivate
 {
     Q_DECLARE_PUBLIC(QSvgWidget)
 public:
-    QSvgRenderer *renderer;
+    QSvgRenderer *renderer{nullptr};
 };
 
 // Event listener for ShowEvent/HideEvent on QSvgWidget (which can't just
