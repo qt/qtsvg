@@ -31,6 +31,8 @@ private slots:
     void animationProperties();
     void animationFrameReading();
     void staticSvgNoAnimation();
+    void formatFromDevice_data();
+    void formatFromDevice();
 };
 
 
@@ -250,6 +252,48 @@ void tst_QSvgPlugin::staticSvgNoAnimation()
     // Jump operations should fail for static SVG
     QVERIFY(!handler.jumpToImage(0));
     QVERIFY(!handler.jumpToNextImage());
+}
+
+void tst_QSvgPlugin::formatFromDevice_data()
+{
+    QTest::addColumn<QString>("filename");
+    QTest::addColumn<QByteArray>("format");
+
+    QTest::newRow("svg") << QFINDTESTDATA("simple_Utf8.svg") << "svg"_ba;
+    QTest::newRow("svgz") << QFINDTESTDATA("simple_Utf8.svgz") << "svgz"_ba;
+}
+
+void tst_QSvgPlugin::formatFromDevice()
+{
+    QFETCH(QString, filename);
+    QFETCH(QByteArray, format);
+
+    QFile file(filename);
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const QByteArray data = file.readAll();
+
+    // The format must be detected from the contents, regardless of which getter
+    // triggers loading the document first.
+    auto withHandler = [&](auto callback) {
+        if (QTest::currentTestFailed())
+            return;
+        QBuffer buffer;
+        buffer.setData(data);
+        QVERIFY(buffer.open(QIODevice::ReadOnly));
+        QSvgIOHandler handler;
+        handler.setDevice(&buffer);
+        callback(handler);
+        QCOMPARE(handler.format(), format);
+    };
+
+    withHandler([](QSvgIOHandler &h) { QVERIFY(h.canRead()); });
+    withHandler([](QSvgIOHandler &h) { QVERIFY(h.option(QImageIOHandler::Size).toSize().isValid()); });
+    withHandler([](QSvgIOHandler &h) { QCOMPARE(h.imageCount(), 1); });
+    withHandler([](QSvgIOHandler &h) {
+        QImage image;
+        QVERIFY(h.read(&image));
+        QCOMPARE(image.size(), QSize(50, 50));
+    });
 }
 
 QTEST_MAIN(tst_QSvgPlugin)

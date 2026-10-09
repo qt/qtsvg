@@ -48,9 +48,10 @@ bool QSvgIOHandlerPrivate::load(QIODevice *device)
 {
     if (loadAttempted)
         return loadStatus;
-    loadAttempted = true;
+
     if (q->format().isEmpty())
         q->canRead();
+    loadAttempted = true;
 
     // # The SVG renderer doesn't handle trailing, unrelated data, so we must
     // assume that all available data in the device is to be read.
