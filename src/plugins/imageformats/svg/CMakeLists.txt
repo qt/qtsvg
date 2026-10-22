@@ -8,6 +8,7 @@
 qt_internal_add_plugin(QSvgPlugin
     OUTPUT_NAME qsvg
     PLUGIN_TYPE imageformats
+    PLUGIN_EXTENDS Svg
     SOURCES
         main.cpp
         qsvgiohandler.cpp qsvgiohandler.h
