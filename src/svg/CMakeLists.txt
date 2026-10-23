@@ -27,6 +27,7 @@ qt_internal_add_module(Svg
         qsvgdocument.cpp qsvgdocument_p.h
         qsvganimate.cpp qsvganimate_p.h
         qsvghelper_p.h
+        qsvgutils_p.h
         qsvgdebug.cpp
         qsvgvisitor.cpp qsvgvisitor_p.h
         qtsvgglobal.h qtsvgglobal_p.h

@@ -7,7 +7,7 @@
 #include "qsvgdocument_p.h"
 #include "qsvggraphics_p.h"
 #include <QtSvg/private/qsvgpaintserver_p.h>
-
+#include <QtSvg/private/qsvgutils_p.h>
 #include <QLoggingCategory>
 #include<QElapsedTimer>
 #include <QtGui/qimageiohandler.h>
@@ -90,13 +90,13 @@ void QSvgNode::draw(QPainter *p, QSvgExtraStates &states)
             QRectF localRect = decoratedInternalBounds(p, states);
             // adding safety border needed because of the antialiazing effects
             QRectF boundsRect = xf.mapRect(localRect);
-            const int deltaX = boundsRect.width() * 0.1;
-            const int deltaY = boundsRect.height() * 0.1;
+            const qreal deltaX = boundsRect.width() * 0.1;
+            const qreal deltaY = boundsRect.height() * 0.1;
             boundsRect = boundsRect.adjusted(-deltaX, -deltaY, deltaX, deltaY);
 
             p->setTransform(xf);
 
-            QImage proxy = drawIntoBuffer(p, states, boundsRect.toAlignedRect());
+            QImage proxy = drawIntoBuffer(p, states, QSvgUtils::toAlignedRect(boundsRect));
             applyBufferToCanvas(p, proxy);
         } else {
             if (separateFillStroke(p, states))
