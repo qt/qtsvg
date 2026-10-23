@@ -1891,6 +1891,16 @@ void tst_QSvgRenderer::ossFuzzRender_data()
                      </defs>
                      <rect width="2" height="2" mask="url(#mask)"/>
                    </svg>)-"_ba;
+    // Nodes that requires group opacity rendering hit int overflow in debug
+    // build and UB in release build when QRectF is converted to QRect
+    // a minimal test case from QTBUG-149633
+    QTest::newRow("group-opacity-huge-bounding-box")
+            << R"-(<svg viewBox="0 0 100 100")>
+                      <g opacity="0.5" transform="scale(1e9)">
+                       <rect width="10" height="10"/>
+                       <rect x="20" width="10" height="10"/>
+                      </g>
+                    </svg>)-"_ba;
 }
 
 void tst_QSvgRenderer::ossFuzzRender()
