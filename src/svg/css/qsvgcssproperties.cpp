@@ -188,7 +188,7 @@ QSvgOffsetProperty QSvgCssProperties::offset() const
     QRegularExpressionMatch m = rx.matchView(m_offsetPath);
     if (m.hasMatch()) {
         QStringView offsetPath = m.capturedView(2);
-        offset.path = QGuiSvg::parsePath(offsetPath);
+        offset.path = QGuiSvg::parsePath(offsetPath, true);
     }
 
     qsizetype index;

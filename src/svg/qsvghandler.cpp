@@ -574,14 +574,15 @@ static inline qreal convertToNumber(QStringView str, bool tiny12FeaturesOnly, bo
 }
 
 static bool createSvgGlyph(QSvgFont *font, const QXmlStreamAttributes &attributes,
-                           bool isMissingGlyph)
+                           bool isMissingGlyph, QSvgHandler *handler)
 {
     QStringView uncStr = attributes.value(QLatin1String("unicode"));
     QStringView havStr = attributes.value(QLatin1String("horiz-adv-x"));
     QStringView pathStr = attributes.value(QLatin1String("d"));
 
     qreal havx = (havStr.isEmpty()) ? -1 : QGuiSvg::toDouble(havStr);
-    QPainterPath path = QGuiSvg::parsePath(pathStr).value_or(QPainterPath());
+    QPainterPath path =
+            QGuiSvg::parsePath(pathStr, !handler->trustedSourceMode()).value_or(QPainterPath());
 
     path.setFillRule(Qt::WindingFill);
 
@@ -1876,16 +1877,16 @@ static bool parseFontFaceUriNode(QSvgFont *parent,
 
 static bool parseGlyphNode(QSvgFont *parent,
                            const QXmlStreamAttributes &attributes,
-                           QSvgHandler *)
+                           QSvgHandler *handler)
 {
-    return createSvgGlyph(parent, attributes, false);
+    return createSvgGlyph(parent, attributes, false, handler);
 }
 
 static bool parseMissingGlyphNode(QSvgFont *parent,
                                   const QXmlStreamAttributes &attributes,
-                                  QSvgHandler *)
+                                  QSvgHandler *handler)
 {
-    return createSvgGlyph(parent, attributes, true);
+    return createSvgGlyph(parent, attributes, true, handler);
 }
 
 static bool parseForeignObjectNode(QSvgNode *parent,
