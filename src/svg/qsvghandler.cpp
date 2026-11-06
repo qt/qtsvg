@@ -2907,8 +2907,9 @@ static QSvgPaintServerSharedPtr createRadialGradientNode(const QXmlStreamAttribu
 
 static QSvgNode *createRectNode(QSvgNode *parent,
                                 const QXmlStreamAttributes &attributes,
-                                QSvgHandler *)
+                                QSvgHandler *handler)
 {
+    const bool tiny12FeaturesOnly = handler->options().testFlag(QtSvg::Tiny12FeaturesOnly);
     const QStringView x      = attributes.value(QLatin1String("x"));
     const QStringView y      = attributes.value(QLatin1String("y"));
     const QStringView width  = attributes.value(QLatin1String("width"));
@@ -2918,11 +2919,11 @@ static QSvgNode *createRectNode(QSvgNode *parent,
 
     bool ok = true;
     QGuiSvg::LengthType type;
-    qreal nwidth = QGuiSvg::parseLength(width, &type, &ok);
+    qreal nwidth = QGuiSvg::parseLength(width, &type, &ok, tiny12FeaturesOnly);
     if (!ok)
         return nullptr;
     nwidth = QGuiSvg::convertToPixels(nwidth, true, type);
-    qreal nheight = QGuiSvg::parseLength(height, &type, &ok);
+    qreal nheight = QGuiSvg::parseLength(height, &type, &ok, tiny12FeaturesOnly);
     if (!ok)
         return nullptr;
     nheight = QGuiSvg::convertToPixels(nheight, true, type);
