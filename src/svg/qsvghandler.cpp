@@ -3132,6 +3132,7 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
                                    const QXmlStreamAttributes &attributes,
                                    QSvgHandler *handler)
 {
+    constexpr bool tiny12FeaturesOnly = false;
     const QStringView x      = attributes.value(QLatin1String("x"));
     const QStringView y      = attributes.value(QLatin1String("y"));
     const QStringView width  = attributes.value(QLatin1String("width"));
@@ -3151,7 +3152,7 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
     bool ok = false;
     QGuiSvg::LengthType type;
 
-    qreal nx = QGuiSvg::parseLength(x, &type, &ok);
+    qreal nx = QGuiSvg::parseLength(x, &type, &ok, tiny12FeaturesOnly);
     nx = QGuiSvg::convertToPixels(nx, true, type);
     if (!ok)
         nx = 0.0;
@@ -3160,7 +3161,7 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
     else if (type == QGuiSvg::LengthType::LT_PERCENT)
         nx = nx / 100.;
 
-    qreal ny = QGuiSvg::parseLength(y, &type, &ok);
+    qreal ny = QGuiSvg::parseLength(y, &type, &ok, tiny12FeaturesOnly);
     ny = QGuiSvg::convertToPixels(ny, true, type);
     if (!ok)
         ny = 0.0;
@@ -3169,7 +3170,7 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
     else if (type == QGuiSvg::LengthType::LT_PERCENT)
         ny = ny / 100.;
 
-    qreal nwidth = QGuiSvg::parseLength(width, &type, &ok);
+    qreal nwidth = QGuiSvg::parseLength(width, &type, &ok, tiny12FeaturesOnly);
     nwidth = QGuiSvg::convertToPixels(nwidth, true, type);
     if (!ok)
         nwidth = 0.0;
@@ -3178,7 +3179,7 @@ static QSvgNode *createPatternNode(QSvgNode *parent,
     else if (type == QGuiSvg::LengthType::LT_PERCENT)
         nwidth = nwidth / 100.;
 
-    qreal nheight = QGuiSvg::parseLength(height, &type, &ok);
+    qreal nheight = QGuiSvg::parseLength(height, &type, &ok, tiny12FeaturesOnly);
     nheight = QGuiSvg::convertToPixels(nheight, true, type);
     if (!ok)
         nheight = 0.0;
