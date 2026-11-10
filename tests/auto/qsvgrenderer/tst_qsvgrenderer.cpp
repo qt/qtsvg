@@ -1801,17 +1801,6 @@ static QImage renderSvg(const QByteArray &svg, QSize size)
     return img;
 }
 
-static bool hasInk(const QImage &img)
-{
-    for (int y = 0; y < img.height(); ++y) {
-        for (int x = 0; x < img.width(); ++x) {
-            if (qGray(img.pixel(x, y)) < 128)
-                return true;
-        }
-    }
-    return false;
-}
-
 void tst_QSvgRenderer::fractionalFontSize_data()
 {
     QTest::addColumn<QByteArray>("svg");
