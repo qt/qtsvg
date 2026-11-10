@@ -1945,11 +1945,11 @@ static QSvgNode *createImageNode(QSvgNode *parent,
     filename = filename.trimmed();
     if (filename.isEmpty()) {
         qCWarning(lcSvgHandler) << "QSvgHandler: Image filename is empty";
-        return 0;
+        return nullptr;
     }
     if (nwidth <= 0 || nheight <= 0) {
         qCWarning(lcSvgHandler) << "QSvgHandler: Width or height for" << filename << "image was not greater than 0";
-        return 0;
+        return nullptr;
     }
 
     QImage image;
@@ -1986,7 +1986,7 @@ static QSvgNode *createImageNode(QSvgNode *parent,
 
     if (image.isNull()) {
         qCWarning(lcSvgHandler) << "Could not create image from" << filename;
-        return 0;
+        return nullptr;
     }
 
     if (image.format() == QImage::Format_ARGB32)
