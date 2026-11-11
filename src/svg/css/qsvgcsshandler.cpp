@@ -404,11 +404,11 @@ QString QSvgCssHandler::parseDecltoString(const QCss::Declaration &decl)
             break;
         }
         case QCss::Value::KnownIdentifier:
-            switch (val.variant.toInt()) {
-            case QCss::Value_None:
+            switch (QCss::KnownValue(val.variant.toInt())) {
+            case QCss::KnownValue::None:
                 valueStr += QLatin1String("none");
                 break;
-            case QCss::Value_Auto:
+            case QCss::KnownValue::Auto:
                 valueStr += QLatin1String("auto");
                 break;
             default:
