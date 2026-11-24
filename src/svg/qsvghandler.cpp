@@ -3071,9 +3071,7 @@ static bool parseStyleNode(QSvgNode *parent,
 {
     Q_UNUSED(parent);
 
-    const QStringView type = attributes.value(QLatin1String("type"));
-    if (type.compare(QLatin1String("text/css"), Qt::CaseInsensitive) == 0 || type.isNull())
-        handler->readStyle();
+    handler->readStyle(attributes.value(QLatin1String("type")));
 
     return true;
 }
@@ -3755,6 +3753,10 @@ void QSvgHandler::parse()
     xml->setNamespaceProcessing(false);
     bool done = false;
     int remainingUnfinishedElements = unfinishedElementsLimit;
+    auto finishElement = [&] {
+        done = endElement(xml->name());
+        ++remainingUnfinishedElements;
+    };
     while (!xml->atEnd() && !done) {
         switch (xml->readNext()) {
         case QXmlStreamReader::StartElement:
@@ -3769,14 +3771,17 @@ void QSvgHandler::parse()
             if (remainingUnfinishedElements && startElement(xml->name().toString(),
                                                             xml->attributes())) {
                 --remainingUnfinishedElements;
+                // startElement() may consume the whole element (e.g. <style>); finish it
+                // here, since no EndElement token follows to unwind what it pushed.
+                if (xml->tokenType() == QXmlStreamReader::EndElement)
+                    finishElement();
             } else {
                 m_doc.reset();
                 return;
             }
             break;
         case QXmlStreamReader::EndElement:
-            done = endElement(xml->name());
-            ++remainingUnfinishedElements;
+            finishElement();
             break;
         case QXmlStreamReader::Characters:
             characters(xml->text());
@@ -3961,12 +3966,8 @@ bool QSvgHandler::startElement(const QString localName, const QXmlStreamAttribut
         }
     } else if (ParseMethod method = findUtilFactory(localName, options())) {
         Q_ASSERT(!m_nodes.isEmpty());
-        if (method(m_nodes.top(), attributes, this)) {
-            if (method == parseStyleNode)
-                return true;
-        } else {
+        if (!method(m_nodes.top(), attributes, this))
             qCWarning(lcSvgHandler, "%s", msgProblemParsing(localName, xml).constData());
-        }
     } else if (FontFactoryMethod method = findFontFactoryMethod(localName)) {
         QSvgFontPtr font = method(attributes, this);
         if (font) {
@@ -4248,14 +4249,17 @@ bool QSvgHandler::processingInstruction(const QStringView target, const QStringV
     return true;
 }
 
-void QSvgHandler::readStyle()
+void QSvgHandler::readStyle(QStringView type)
 {
 #ifndef QT_NO_CSSPARSER
-    QString css = xml->readElementText();
-    m_cssHandler.parseStyleSheet(css);
+    if (type.isNull() || type.compare(QLatin1String("text/css"), Qt::CaseInsensitive) == 0) {
+        m_cssHandler.parseStyleSheet(xml->readElementText());
+        return;
+    }
 #else
-    xml->skipCurrentElement();
+    Q_UNUSED(type);
 #endif
+    xml->skipCurrentElement();
 }
 
 void QSvgHandler::setAnimPeriod(int start, int end)
