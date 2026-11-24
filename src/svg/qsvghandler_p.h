@@ -100,7 +100,7 @@ public:
     bool endElement(const QStringView localName);
     bool characters(const QStringView str);
     bool processingInstruction(const QStringView target, const QStringView data);
-    void readStyle();
+    void readStyle(QStringView type);
 
 private:
     void init();

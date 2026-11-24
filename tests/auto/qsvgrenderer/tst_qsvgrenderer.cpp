@@ -76,6 +76,8 @@ private slots:
     void glyphWarnings_data();
     void glyphWarnings();
     void styleSheet();
+    void styleElementBalance_data();
+    void styleElementBalance();
     void duplicateStyleId();
     void ossFuzzRender_data();
     void ossFuzzRender();
@@ -1943,6 +1945,52 @@ void tst_QSvgRenderer::styleSheet()
         p.end();
     }
     QCOMPARE(images[0], images[1]);
+}
+
+void tst_QSvgRenderer::styleElementBalance_data()
+{
+    QTest::addColumn<QByteArray>("svg");
+    QTest::addColumn<QByteArray>("reference");
+
+    QTest::newRow("unknown-type")
+            << R"(<svg width="50" height="50"><g><style type="x"><g/></style></g><rect width="50" height="50" fill="red"/></svg>)"_ba
+            << R"(<svg width="50" height="50"><g/><rect width="50" height="50" fill="red"/></svg>)"_ba;
+    QTest::newRow("empty-type")
+            << R"(<svg width="50" height="50"><g><style type=""><g><rect/></g></style></g><rect width="50" height="50" fill="red"/></svg>)"_ba
+            << R"(<svg width="50" height="50"><g/><rect width="50" height="50" fill="red"/></svg>)"_ba;
+    QTest::newRow("unknown-type-content-ignored")
+            << R"(<svg width="50" height="50"><style type="x">rect {fill:blue}</style><rect width="50" height="50" fill="red"/></svg>)"_ba
+            << R"(<svg width="50" height="50"><rect width="50" height="50" fill="red"/></svg>)"_ba;
+    QTest::newRow("current-color")
+            << R"(<svg width="50" height="50"><g color="red"><style/></g><rect width="50" height="50" fill="currentColor"/></svg>)"_ba
+            << R"(<svg width="50" height="50"><g color="red"/><rect width="50" height="50" fill="currentColor"/></svg>)"_ba;
+    QTest::newRow("xml-space")
+            << R"(<svg width="100" height="50"><style xml:space="preserve"/><text x="0" y="30" font-size="20">a     b</text></svg>)"_ba
+            << R"(<svg width="100" height="50"><style/><text x="0" y="30" font-size="20">a     b</text></svg>)"_ba;
+    QTest::newRow("many-styles")
+            << R"(<svg width="50" height="50">)"_ba + QByteArray("<style/>").repeated(4096)
+                    + R"(<rect width="50" height="50" fill="red"/></svg>)"_ba
+            << R"(<svg width="50" height="50"><rect width="50" height="50" fill="red"/></svg>)"_ba;
+}
+
+void tst_QSvgRenderer::styleElementBalance()
+{
+    QFETCH(QByteArray, svg);
+    QFETCH(QByteArray, reference);
+
+    auto render = [](const QByteArray &data) {
+        QSvgRenderer renderer(data);
+        QImage image(renderer.defaultSize(), QImage::Format_ARGB32_Premultiplied);
+        image.fill(Qt::transparent);
+        QPainter p(&image);
+        renderer.render(&p);
+        p.end();
+        return image;
+    };
+
+    const QImage image = render(svg);
+    QVERIFY(!image.isNull());
+    QCOMPARE(image, render(reference));
 }
 
 void tst_QSvgRenderer::duplicateStyleId()
